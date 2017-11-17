@@ -15,16 +15,13 @@
 
 	TO DO:
 
-	 - basic datatype & precision standard should be a function of unit, i.e. annotated onto unit choice for this field.
 	 - disjunction tabbed interface has wrong required status?
-	 - FIX: for <select><option>, shopping cart add/block/drop not working
 	 - FIX: contact specification - physician inherits first name, last name etc from person, but cardinality not shown.
 	 - Must do a better job of identifying and grouping top-level ontology items
 	 - How to handle items that are not marked as datums?
 	 - possibly try: http://knockoutjs.com/index.html
      - FIX: problem with 'specimen category'; selections linked "member of" some standard with annotation for their label, causing item itself tor surface in standard.
 	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to be recognized. using "min 1" instead of "some" is the workaround.
-	 - FIX: Drug MIC has two units of measure, each with different basic data type - probably a dimensional analysis quality to annotate.
 
     Author: Damion Dooley
 	Project: genepio.org/geem
@@ -47,7 +44,7 @@ $( document ).ready(function() {
 		// GEEM focuses on entities by way of a URL with hash #[entityId]
 	    if (location.hash.length > 0)
 	    	// Better entity id detection?
-		   	if (location.hash.indexOf(':') != -1) { //.substr(0,5) =='#obo:'
+		   	if (location.hash.indexOf(':') != -1) { //.substr(0,5) =='#obolibrary:'
 				top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 				// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
 				// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
@@ -147,7 +144,7 @@ $( document ).ready(function() {
 	})
 
 	//Default load of GenEpiO
-	loadSpecification('data/ontology/genepio-edit.json')
+	loadSpecification($('#selectSpecification').val() ) // e.g. data/ontology/genepio-edit.json'
 
 
 });
@@ -170,7 +167,7 @@ function loadSpecification(specification_file) {
 	$.ajax({
 		type: 'GET',
 		url: specification_file,
-		timeout: 10000, //10 sec timeout
+		timeout: 30000, //30 sec timeout
 		success: function( specification ) {
 
 			// Setup Zurb Foundation user interface and form validation
@@ -193,8 +190,8 @@ function loadSpecification(specification_file) {
 			*/
 
 			//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-			$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="false"></ul>')
-			$("ul#entityMenu").html(renderMenu('obo:OBI_0000658') + '<hr/>') // + html
+			$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+			$("ul#entityMenu").html(renderMenu('obolibrary:OBI_0000658') + '<hr/>') // + html
 
 			// On Browse tab, enables eye icon click to show form without opening/closing the accordion.
 			$('ul#entityMenu *').on('click', function(event) { 
@@ -205,7 +202,7 @@ function loadSpecification(specification_file) {
 			});
 
 			// If browser URL indicates a particular entity, render it:
-			if (location.hash.indexOf(':') != -1) { // ? also .substr(0,5) =='#obo:'
+			if (location.hash.indexOf(':') != -1) { // ? also .substr(0,5) =='#obolibrary:'
 				top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 				// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
 				// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
@@ -759,7 +756,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 			if (inherited == true) {
 				// Entity inherits primary ancestors' parts (the ones that led from start of rendering to here). 
 				var parentId = entity['parent']
-				if (parentId != 'obo:OBI_0000658') //Top level OBI "data representation model"
+				if (parentId != 'obolibrary:OBI_0000658') //Top level OBI "data representation model"
 					getEntitySpec(spec, parentId, true)
 			}
 

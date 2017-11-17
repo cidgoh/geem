@@ -43,7 +43,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			
 			//top.bag = {} // For catching entity in a loop.
 			form_html = render(self.entityId)
-			form_html += renderButton('View Mockup Form Data Submission', 'getEntityData()') 
+			form_html += renderButton('View Form Submission', 'getEntityData()') 
 
 			// Place new form html into page and activate its foundation interactivity
 			self.formDomId.html(form_html) //.foundation()
@@ -462,7 +462,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		/* Inheritance of parent attributes & data structures.
 		if ('parent' in entity) { // aka member_of or subclass of
 			var parentId = entity['parent']
-			if (parentId != 'obo:OBI_0000658') {//Top level spec.
+			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
 				//console.log('' + depth + ": Specification "+entityId+" inheriting: " + parentId)
 				this.getEntitySpecForm(parentId, specification, [], depth-1, true)
 				// Do we want parent's stuff APPENDED to spec, or inserted as part of this spec?
@@ -505,7 +505,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 	getEntitySpecFormChoices = function(entity) {
 		/* Select, radio, checkbox all get the same data structure. Here we
-		know that all subordinate "hasSubClass" ~ parts are picklist choice
+		know that all subordinate "subClassOf" parts are picklist choice
 		items, which at most have feature annotations.
 		OUTPUT
 			entity.lookup if appropriate
@@ -762,7 +762,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		// Here we go up the hierarchy to render all inherited superclass 'has value specification' components.
 		if ('parent' in entity) { // aka member_of or subclass of
 			var parentId = entity['parent']
-			if (parentId != 'obo:OBI_0000658') {//Top level spec.
+			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
 				//console.log('' + depth + ": Specification "+entityId+" inheriting: " + parentId)
 				html += this.render(parentId, [], depth-1, true)
 			}
@@ -1032,7 +1032,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			entity: 
 		OUTPUT
 		For a given input the id of the "units" selection list component is 
-		returned with a DOM id of "[entity domId path]-obo:IAO_0000039" (unit)
+		returned with a DOM id of "[entity domId path]-obolibrary:IAO_0000039" (unit)
 		*/
 		if ('units' in entity) {
 			var units = entity['units']
@@ -1040,7 +1040,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			if (units.length == 1) 
 				return '<span class="input-group-label small">'+ label + '</span>\n'
 
-			var html ='<div class="input-group-button" style="font-weight:700;" ><select class="units" id="'+entity['domId']+'-obo:IAO_0000039">'
+			var html ='<div class="input-group-button" style="font-weight:700;" ><select class="units" id="'+entity['domId']+'-obolibrary:IAO_0000039">'
 			for (var ptr in units) { //.slice(1)
 				var unit = self.specification[units[ptr]]
 				var unitLabel = unit['uiLabel'] ? unit['uiLabel'] : unit['label']
@@ -1106,7 +1106,8 @@ function OntologyForm(domId, specification, settings, callback) {
 
 	getModelWrapper = function(entity, html) {
 		return [
-			'<div class="field-wrapper model children depth' + entity['depth'] + '" '
+			'<a name="' + entity['domId'] + '"/>'
+			,	'<div class="field-wrapper model children depth' + entity['depth'] + '" '
 			,	getIdHTMLAttribute(entity['domId'])
 			,	getHTMLAttribute(entity, 'min-cardinality')
 			,	getHTMLAttribute(entity, 'max-cardinality')

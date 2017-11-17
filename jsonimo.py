@@ -7,21 +7,29 @@
  Author: Damion Dooley
 
  
- RDFLib sparql ISSUE: Doing a binding x on a (?x as ?y) expression bug leads to no such field being output.
+ python jsonimo.py [owl ontology file path]
+
+ Ontology() class __main__() reads in given ontology file and processes 
+ selected axioms into a json data structure that represents standards contained
+ within the ontology. This works for relatively flat (tabular or 
+ tree-structured standards.)
+
+ RDFLib: This script requires python module RDFLib.
+
+ RDFLib sparql ISSUE: Doing a "BINDING (?x as ?y)" expression prevents ?x from 
+ being output in a SELECT bug leads to no such field being output.
 
 **************************************************** 
 """ 
-	
 
 import re
 import json
-from pprint import pprint
-import optparse
 import sys
 import os
+from pprint import pprint
+import optparse
 
 import rdflib
-#import rdflib.plugins.sparql as sparql
 import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
 
 # Do this, otherwise a warning appears on stdout: No handlers could be found for logger "rdflib.term"
@@ -73,7 +81,7 @@ class Ontology(object):
 		self.struct['@context'] = {		#JSON-LD markup
 			'ifm':'http://purl.obolibrary.org/obo/GENEPIO/IFM#',  
 			'NCBITaxon' : 'http://purl.obolibrary.org/obo/NCBITaxon#',
-			'obo':'http://purl.obolibrary.org/obo/', # Must be ordered AFTER all obo ontologies
+			'obolibrary':'http://purl.obolibrary.org/obo/', # Must be ordered AFTER all obo ontologies
 			'owl':'http://www.w3.org/2002/07/owl/',
 			'evs':'http://ncicb.nci.nih.gov/xml/owl/EVS/',
 			'sio':'http://semanticscience.org/resource/',
@@ -122,10 +130,10 @@ class Ontology(object):
 		# Load main ontology file into RDF graph
 		self.graph.parse(main_ontology_file)
 		# Add each ontology include file (must be in OWL RDF format)
-		self.ontologyIncludes()
+		self.ontologyIncludes(os.path.dirname(main_ontology_file) + '/imports')
 
 		# Retrieve all subclasses of data_representational_model
-		specBinding = {'root': rdflib.URIRef(self.expandId('obo:OBI_0000658'))} 
+		specBinding = {'root': rdflib.URIRef(self.expandId('obolibrary:OBI_0000658'))} 
 		self.doSpecifications(self.doQueryTable('tree', specBinding ))
 		
 		# ALSO GET OTHER TOP-LEVEL TERMS?
@@ -138,7 +146,7 @@ class Ontology(object):
 		self.doUnits(self.doQueryTable('units') )
 
 		# GENEPIO_0001655 = Class:Categorical tree specification
-		picklistBinding = {'root': rdflib.URIRef(self.expandId('obo:GENEPIO_0001655'))}
+		picklistBinding = {'root': rdflib.URIRef(self.expandId('obolibrary:GENEPIO_0001655'))}
 		self.doPickLists(self.doQueryTable('tree', picklistBinding ))
 		self.doPickLists(self.doQueryTable('individuals') )
 
@@ -175,13 +183,13 @@ class Ontology(object):
 			all of the entity's own 'has_value_specification' attributes, it inherits those
 			of its parent(s).  WHERE TO PLACE THEM?
 
-			In example below, a "contact specification - patient" (obo:GENEPIO_0001677) inherits 
-			attributes from "contact specification - person" (obo:GENEPIO_0001606)
+			In example below, a "contact specification - patient" (obolibrary:GENEPIO_0001677) inherits 
+			attributes from "contact specification - person" (obolibrary:GENEPIO_0001606)
 
 			Example:
-				"obo:GENEPIO_0001677": {
-		            "id": "obo:GENEPIO_0001677",
-		            "parent": "obo:GENEPIO_0001606",
+				"obolibrary:GENEPIO_0001677": {
+		            "id": "obolibrary:GENEPIO_0001677",
+		            "parent": "obolibrary:GENEPIO_0001606",
 		            "prefLabel": "contact specification - patient"
 		            }
 		        }
@@ -278,9 +286,8 @@ class Ontology(object):
 
 					# BNodes have no name but have expression stuff.
 					if 'expression' in myDict: 
-						# E.g. HAS LOGIC EXPRESSION:  {'expression': {'datatype': 'disjunction', 'data': [u'sio:SIO_000661', u'sio:SIO_000662', u'sio:SIO_000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent': u'obo:GENEPIO_0001623'}
-						print "HAS LOGIC EXPRESSION: ", myDict
-						print
+						# E.g. HAS LOGIC EXPRESSION:  {'expression': {'datatype': 'disjunction', 'data': [u'sio:SIO_000661', u'sio:SIO_000662', u'sio:SIO_000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent': u'obolibrary:GENEPIO_0001623'}
+						print "HAS EXPRESSION: ", myDict['expression']
 						expression = myDict['expression']
 						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction or ???
 						self.struct[struct][id]['uiLabel'] = '' #
@@ -420,7 +427,7 @@ class Ontology(object):
 				This is signaled in table record when no referrer id value exists.  
 				These features get put in entity['features'], e.g.
 
-				"obo:NCIT_C87194": {
+				"obolibrary:NCIT_C87194": {
 					"uiLabel": "State"
             		"definition": "A constituent administrative district of a nation.",
 		            "features": [
@@ -464,13 +471,15 @@ class Ontology(object):
 			parent_id = myDict['referrer'] # Id of parent if applicable
 			featureType = myDict['feature']
 
-			# FEATURE MAY HAVE DATATYPE AND VALUE
-			#
-			#"feature": {
-            #        "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
-            #        "value": "dateFormat=ISO 8601"
-            #    },
-			#
+			"""
+			 FEATURE MAY HAVE DATATYPE AND VALUE
+			
+			"feature": {
+                    "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                    "value": "dateFormat=ISO 8601"
+                },
+			
+			"""
 
 			valueObj = myDict['value']
 			featureDict = {}
@@ -483,7 +492,7 @@ class Ontology(object):
 				value = valueObj 
 
 			# User interface feature, of form [keyword] or [key:value]
-			if featureType == 'obo:GENEPIO_0001763': 
+			if featureType == 'obolibrary:GENEPIO_0001763': 
 				if ':' in value: #  [key:value] 
 					binding = value.split(":",1)
 					feature = binding[0]
@@ -507,9 +516,9 @@ class Ontology(object):
 					# Issue is that entity['parent'] is not showing up
 					#print feature, value, parentId
 
-				elif featureType == 'obo:IAO_0000115':
+				elif featureType == 'obolibrary:IAO_0000115':
 					feature = 'definition'
-				elif featureType == 'obo:hasAlternativeId':
+				elif featureType == 'obolibrary:hasAlternativeId':
 					feature = 'field_label'
 				else:
 					feature = featureType
@@ -553,6 +562,7 @@ class Ontology(object):
 			if orderedKeys:
 				entity[part] = OrderedDict(sorted(entity[part].items(), key=lambda item: orderedKeys.index(item[0]) if item[0] in orderedKeys else False))
 			else:
+				print "ordering", entity[part].items()
 				entity[part] = OrderedDict(sorted(entity[part].items(), key=attrgetter('uiLabel')) )
 
 
@@ -708,7 +718,7 @@ class Ontology(object):
 		return URI 
 
 
-	def ontologyIncludes(self):
+	def ontologyIncludes(self, ontology_file_path='./imports/'):
 		"""
 		Detects all the import files in a loaded OWL ontology graph and adds them to the graph.
 		Currently assumes imports are sitting in a folder called "imports" in parent folder of this script. 
@@ -723,14 +733,15 @@ class Ontology(object):
 
 		for result_row in imports: # a rdflib.query.ResultRow
 			file = result_row.import_file.rsplit('/',1)[1]
+			file_path = ontology_file_path + '/' + file
 			try:
-				if os.path.isfile( "../imports/" + file):
-					self.graph.parse("../imports/" + file)	
+				if os.path.isfile( file_path):
+					self.graph.parse(file_path)	
 				else:
-					print ('WARNING:' + "../imports/" + file + " could not be loaded!  Does its ontology include purl have a corresponding local file? \n")
+					print ('WARNING:' + file_path + " could not be loaded!  Does its ontology include purl have a corresponding local file? \n")
 
 			except rdflib.exceptions.ParserError as e:
-				print (file + " needs to be in RDF OWL format!")			
+				print (file_path + " needs to be in RDF OWL format!")			
 
 
 	def doQueryTable(self, query_name, initBinds = {}):
@@ -853,13 +864,13 @@ class Ontology(object):
 	Add these PREFIXES to Protege Sparql query window if you want to test a query there:
 
 	PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#>
-	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX obo: <http://purl.obolibrary.org/obo/>
+	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX obolibrary: <http://purl.obolibrary.org/obo/>
 	PREFIX xmls: <http://www.w3.org/2001/XMLSchema#>
 	""" 
 	namespace = { 
 		'owl': rdflib.URIRef('http://www.w3.org/2002/07/owl#'),
 		'rdfs': rdflib.URIRef('http://www.w3.org/2000/01/rdf-schema#'),
-		'obo': rdflib.URIRef('http://purl.obolibrary.org/obo/'),
+		'obolibrary': rdflib.URIRef('http://purl.obolibrary.org/obo/'),
 		'rdf': rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
 		'xmls': rdflib.URIRef('http://www.w3.org/2001/XMLSchema#'),
 		'oboInOwl': rdflib.URIRef('http://www.geneontology.org/formats/oboInOwl#')
@@ -876,9 +887,9 @@ class Ontology(object):
 				?parent rdfs:subClassOf* ?root.
 				?id rdfs:subClassOf ?parent.
 				OPTIONAL {?id rdfs:label ?label}.
-				OPTIONAL {?id obo:GENEPIO_0000006 ?uiLabel}.
+				OPTIONAL {?id obolibrary:GENEPIO_0000006 ?uiLabel}.
 			}
-			ORDER BY ?parent ?label ?uiLabel
+			ORDER BY ?parent ?uiLabel ?label 
 		""", initNs = namespace),
 
 		# SECOND VERSION FOR ''
@@ -889,7 +900,7 @@ class Ontology(object):
 
 			SELECT DISTINCT ?parent (?datum as ?id) ?cardinality ?limit
 			WHERE { 	
-				?restriction owl:onProperty obo:RO_0002180. # has component
+				?restriction owl:onProperty obolibrary:RO_0002180. # has component
 				?parent rdfs:subClassOf ?restriction. 
 
 				{?restriction owl:onClass ?datum.
@@ -921,8 +932,8 @@ class Ontology(object):
 
 		SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
 			WHERE { 	
-				BIND (obo:GENEPIO_0001605 as ?hasPvaluespec).
-				BIND (obo:GENEPIO_0001655 as ?categorical).
+				BIND (obolibrary:GENEPIO_0001605 as ?hasPvaluespec).
+				BIND (obolibrary:GENEPIO_0001655 as ?categorical).
 				?restriction owl:onProperty ?hasPvaluespec. 
 				?datum rdfs:subClassOf ?restriction.
 				
@@ -961,7 +972,7 @@ class Ontology(object):
 
 		SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
 			WHERE { 	
-				BIND (obo:GENEPIO_0001605 as ?hasPvaluespec).
+				BIND (obolibrary:GENEPIO_0001605 as ?hasPvaluespec).
 				?restriction owl:onProperty ?hasPvaluespec. 
 				?datum rdfs:subClassOf/rdfs:subClassOf+ ?restriction.
 
@@ -997,7 +1008,7 @@ class Ontology(object):
 		'categoricals': rdflib.plugins.sparql.prepareQuery("""
 			SELECT DISTINCT ?id ?datatype
 			WHERE { 
-				BIND (obo:GENEPIO_0001655 as ?categorical).
+				BIND (obolibrary:GENEPIO_0001655 as ?categorical).
 				BIND (xmls:anyURI as ?datatype).
 				?id rdfs:subClassOf ?categorical.
 			 } 
@@ -1009,20 +1020,24 @@ class Ontology(object):
 		# entities represented by proper names - like "British Columbia", 
 		# "Vancouver (BC)", "Washington (DC)", etc. - may have "individual" nodes, 
 		# i.e. are represented by owl:NamedIndividual.
+		#
+		# Multilingual selection of items in sorted order is done client side.
 		# 
 		'individuals': rdflib.plugins.sparql.prepareQuery("""
 			
 			SELECT DISTINCT ?id ?parent ?datatype
 			WHERE {
-				BIND (obo:GENEPIO_0001655 as ?categorical_root).
+				BIND (obolibrary:GENEPIO_0001655 as ?categorical_root).
 				BIND (xmls:anyURI as ?datatype).
 				?id rdf:type owl:NamedIndividual.
 				?id rdf:type ?parent.
 				?parent rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
 
-				#OPTIONAL {?id rdfs:subClassOfTLR ?GEO}.
+				OPTIONAL {?id obolibrary:GENEPIO_0000006 ?uiLabel}.
+				OPTIONAL {?id rdfs:label ?label}.
 
 			}
+			ORDER BY ?parent ?uiLabel ?label
 		""", initNs = namespace),
 
 		##################################################################
@@ -1032,8 +1047,8 @@ class Ontology(object):
 
 			SELECT DISTINCT (?datum as ?id)	?unit	?label ?uiLabel
 			WHERE { 
-				BIND (obo:GENEPIO_0001605 as ?has_primitive_value_spec). 
-				BIND (obo:IAO_0000039 as ?has_measurement_unit_label).
+				BIND (obolibrary:GENEPIO_0001605 as ?has_primitive_value_spec). 
+				BIND (obolibrary:IAO_0000039 as ?has_measurement_unit_label).
 				?datum rdfs:subClassOf* ?restriction3.
 				FILTER (isIRI(?datum)).
 				?restriction3 owl:onProperty ?has_measurement_unit_label.
@@ -1057,12 +1072,12 @@ class Ontology(object):
 		#    <owl:Class rdf:about="http://purl.obolibrary.org/obo/GENEPIO_0001742">
 		#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GENEPIO_0001655"/>
 		#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GEO_000000005"/>
-		#        <obo:GENEPIO_0000006 xml:lang="en">region</obo:GENEPIO_0000006>
-		#        <obo:GENEPIO_0001763>lookup</obo:GENEPIO_0001763>
+		#        <obolibrary:GENEPIO_0000006 xml:lang="en">region</obolibrary:GENEPIO_0000006>
+		#        <obolibrary:GENEPIO_0001763>lookup</obolibrary:GENEPIO_0001763>
 		#		...
 		#
 	    #	<owl:Axiom>
-	    #	    <obo:GENEPIO_0001763>lookup</obo:GENEPIO_0001763>
+	    #	    <obolibrary:GENEPIO_0001763>lookup</obolibrary:GENEPIO_0001763>
 	    #	    <owl:annotatedSource rdf:resource="&obo;GENEPIO_0001740"/>
 	    #	    <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
 	    #	    <owl:annotatedTarget>
@@ -1080,7 +1095,7 @@ class Ontology(object):
 			WHERE { 
 				{# Get direct (Class annotated) features
 					?id rdf:type owl:Class.  
-					?id obo:GENEPIO_0001763 ?value.  # UI_preferred feature
+					?id obolibrary:GENEPIO_0001763 ?value.  # UI_preferred feature
 					?id ?feature ?value. #
 					BIND ('' as ?referrer).
 				}
@@ -1090,7 +1105,7 @@ class Ontology(object):
 					?axiom owl:annotatedSource ?id.
 					?axiom owl:annotatedTarget ?referrer. 
 					FILTER(isURI(?referrer))
-					?axiom obo:GENEPIO_0001763 ?value.  # UI_preferred feature
+					?axiom obolibrary:GENEPIO_0001763 ?value.  # UI_preferred feature
 					?axiom ?feature ?value.
 				}
 			}
@@ -1109,7 +1124,7 @@ class Ontology(object):
 		# 
 	    # OLD
 	    #    <owl:Axiom>
-		#        <obo:GENEPIO_0001763>lookup</obo:GENEPIO_0001763>
+		#        <obolibrary:GENEPIO_0001763>lookup</obolibrary:GENEPIO_0001763>
 		#        <owl:annotatedSource rdf:resource="&obo;OBI_0000938"/>
 		#        <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
 		#        <owl:annotatedTarget>
@@ -1127,10 +1142,10 @@ class Ontology(object):
 				?axiom rdf:type owl:Axiom.
 				?axiom owl:annotatedSource ?referrer.
 				?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
-				?restriction owl:onProperty obo:RO_0002180. # has component
+				?restriction owl:onProperty obolibrary:RO_0002180. # has component
 				?restriction (owl:onClass|owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality | owl:someValuesFrom) ?id
 				FILTER(isURI(?id))
-				?axiom obo:GENEPIO_0001763 ?value.  # user interface feature
+				?axiom obolibrary:GENEPIO_0001763 ?value.  # user interface feature
 			}
 		""", initNs = namespace),
 
@@ -1144,7 +1159,7 @@ class Ontology(object):
 		#                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/GENEPIO_0002085"/>
 		#            </owl:Restriction>
 		#        </owl:annotatedTarget>
-		#        <obo:GENEPIO_0001763>lookup</obo:GENEPIO_0001763>
+		#        <obolibrary:GENEPIO_0001763>lookup</obolibrary:GENEPIO_0001763>
 		#    </owl:Axiom>
 
 		# LIST all annotations that should be treated as features below, including ""
@@ -1154,11 +1169,11 @@ class Ontology(object):
 				?axiom rdf:type owl:Axiom.
 				?axiom owl:annotatedSource ?id.
 				?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
-				?restriction owl:onProperty obo:RO_0002350. # member of
+				?restriction owl:onProperty obolibrary:RO_0002350. # member of
 				?restriction owl:someValuesFrom ?referrer.
 				FILTER(isURI(?id)).
 				#user interface feature | label | definition | alternative identifier (database field)
-				?axiom (obo:GENEPIO_0001763|rdfs:label|obo:IAO_0000115|obo:hasAlternativeId) ?value.  
+				?axiom (obolibrary:GENEPIO_0001763|rdfs:label|obolibrary:IAO_0000115|obolibrary:hasAlternativeId) ?value.  
 				?axiom ?feature ?value.
 			}
 		""", initNs = namespace),
@@ -1175,9 +1190,9 @@ class Ontology(object):
 				UNION {?datum rdf:type owl:NamedIndividual} 
 				UNION {?datum rdf:type rdf:Description}.
 				OPTIONAL {?datum rdfs:label ?label.} 
-				OPTIONAL {?datum obo:IAO_0000115 ?definition.}
-				OPTIONAL {?datum obo:GENEPIO_0000006 ?uiLabel.} 
-				OPTIONAL {?datum obo:GENEPIO_0001745 ?uiDefinition.}
+				OPTIONAL {?datum obolibrary:IAO_0000115 ?definition.}
+				OPTIONAL {?datum obolibrary:GENEPIO_0000006 ?uiLabel.} 
+				OPTIONAL {?datum obolibrary:GENEPIO_0001745 ?uiDefinition.}
 			}
 		""", initNs = namespace),
 
@@ -1194,11 +1209,11 @@ class Ontology(object):
 				?axiom rdf:type owl:Axiom.
 				?axiom owl:annotatedSource ?id.
 				?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
-				?restriction owl:onProperty obo:RO_0002350. # member of
+				?restriction owl:onProperty obolibrary:RO_0002350. # member of
 				?restriction owl:someValuesFrom ?referrer.
 				FILTER(isURI(?id)).
 				#Get feature as label, definition, UI label, UI definition, UI_preferred,  feature
-				?axiom (rdfs:label|obo:IAO_0000115|obo:GENEPIO_0000006|obo:GENEPIO_0001745) ?value.  
+				?axiom (rdfs:label|obolibrary:IAO_0000115|obolibrary:GENEPIO_0000006|obolibrary:GENEPIO_0001745) ?value.  
 				?axiom ?feature ?value.
 			}
 		""", initNs = namespace),

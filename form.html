@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genomic Epidemiology Entity Mart Form Builder Prototype</title>
+    <title>Genomic Epidemiology Entity Mart Form Viewer</title>
     <link rel="stylesheet" href="css/foundation.min.css">
     <link rel="stylesheet" href="css/foundation-icons/foundation-icons.css">
     <link rel="stylesheet" href="css/foundation-datepicker.min.css">
@@ -19,13 +19,43 @@
       <!-- ************************ ONTOLOGY MENU AND SEARCH ********************* -->
       <div class="large-3 medium-3 columns" id="sidebar">
         <br/>
-        <h3>Ontology Entity Mart Form Builder Prototype</h3>
+
+        <hr size="2"/>
+
+        <ul class="vertical menu" id="entityMenu">
+          <li>
+            <a href="index.html">GEEM Introduction</a>
+          </li>
+          <li>
+            <a href="portal.html">GEEM Portal</a>
+          </li>
+          <li class="active">
+            <a href="#">GEEM Form Viewer</a>
+          </li>
+        </ul>
+        <hr size="2"/>
+
+        <h5>Form Sections</h5>
+        <ul class="vertical menu" id="formMenu">
+
+        </ul>
+
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
-      <div class="large-6 medium-6 columns" style="position:relative;border:2px solid black">
+      <div class="large-6 medium-6 columns" style="margin-top:25px;position:relative;border:2px solid black;max-height: 620px;overflow:scroll">
+        <form id="mainForm" data-abide="ajax" style="margin-top:35px;">
+          <div class="infoBox" style="margin-top:80px">
+            The GEEM form viewer can render the html form for a given ontology id specification (assuming it has been annotated for GEEM use). Simply provide the identifier of the desired form, e.g. a URL like "form.html#obolibrary:GENEPIO_0001624"
+          </div>
+        </form>
 
-        <div style="float:right; width:250px; margin-top:15px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:10px">
+      </div>
+
+      <div class="large-3 medium-3 columns" id="rightbar">
+        <br/>
+
+        <div style=" margin-top:5px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:10px">
           <div class="switch tiny float-left" style="margin-right:15px;margin-bottom:0  ">
             <input class="switch-input" id="toggleMinimalForm" type="checkbox" name="toggleMinimalForm">
             <label class="switch-paddle" for="toggleMinimalForm">
@@ -34,27 +64,13 @@
           </div>
           <span>Minimize form view</span>
         </div>
+          <p>When minimize form is activated, only required fields or fields with selections will be expanded. All other fields will be minimized. Mousing over a minimized field will open it to its full size for data entry.</p>
 
-        <form id="mainForm" data-abide="ajax" style="margin-top:35px;">
+        <div style="margin-top:15px;margin-right:10px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:13px">
+            <button id="viewSpecification">View JSON Specification</button>
+        </div>
+        <p>This provides a view of the JSON specification file used to construct this form.</p>
 
-          <div class="infoBox" style="margin-top:80px">
-            Form will be presented here.
-          </div>
-          
-        </form>
-
-      </div>
-
-      <div class="large-3 medium-3 columns" id="rightbar">
-        <br/>
-        <p>Provide an ontology identifier, especially a "Data representation model" entity, to see it presented as a web form.</p>
-
-        <p>Example forms:
-          <ul><li><a href="#obo:GENEPIO_0001740">line list fields</a></li>
-          <li> <a href="#obo:GENEPIO_0001624">numeric data with units</a></li>
-          </ul>
-        </p>
-      </div>
 
       <div class="reveal small" id="modalEntity" data-reveal>
         <button class="close-button" data-close aria-label="Close reveal" type="button">
@@ -64,6 +80,7 @@
       </div>
 
     </div>
+    <br clear="all"/>
 
     <div class="row footer">
       <div class="large-12 columns text-center">
@@ -77,6 +94,7 @@
     <script src="js/vendor/foundation-datepicker.js"></script>
     <script src="js/OntologyForm.js"></script>
     <script src="js/chosen/chosen.jquery.min.js" type="text/javascript"></script>
+    <script src="js/vendor/js-yaml.min.js"></script> <!-- http://adilapapaya.com/docs/js-yaml/ -->
     <script>
 
       $( document ).ready(function() {
@@ -84,8 +102,25 @@
         OntologyForm.initFoundation()
         $('#modalEntity').foundation()
 
+
+        $('button#viewSpecification').on('click', function() {
+
+          // This displays the entity json object as an indented hierarchy of text inside html <pre> tag.
+          var html = [
+              '<p><strong>'
+              ,   "Simple YAML Specification"
+              , '</strong></p>\n'
+              , '<pre style="white-space: pre-wrap;">'
+              ,   jsyaml.dump(getEntitySpecForm(focusEntityId), 4)
+              , '</pre>\n'
+            ].join('')
+          $("#modalEntity > div.row").html(html )
+          $("#modalEntity").foundation('open')
+        })
+
+
         //Default load of GenEpiO
-        loadSpecification('data/ontology/genepio-edit.json')
+        loadSpecification('data/ontology/genepio-merged.json')
 
       });
 
@@ -103,7 +138,11 @@
 
         // PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
         var focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-        myForm.renderEntity(focusEntityId)
+        top.focusEntityId = focusEntityId
+        if (focusEntityId && focusEntityId.indexOf(':')) {
+          myForm.renderEntity(focusEntityId)
+          doSectionMenu()
+        }
       
         // Toggle to hide all optional empty input content for concise display.
         $('input#toggleMinimalForm').on('change', function() {
@@ -118,13 +157,30 @@
         // GEEM focuses on entities by way of a URL with hash #[entityId]
           if (location.hash.length > 0)
             // Better entity id detection?
-            if (location.hash.indexOf(':') != -1) { //.substr(0,5) =='#obo:'
+            if (location.hash.indexOf(':') != -1) { //.substr(0,5) =='#obolibrary:'
               focusEntityId = document.location.hash.substr(1)
               // PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
               myForm.renderEntity(focusEntityId)
+              doSectionMenu()
             }
       });
 
+      function doSectionMenu() {
+        // Provide form menu to two levels down.
+        $('#formMenu').empty()
+        $('#mainForm .field-wrapper.model').each(function(index){
+          var classes = $(this).attr('class')
+          var depth = classes.substr(classes.indexOf('depth')+5)
+          if (parseInt(depth) < 2) {
+            var id = $(this).attr('data-ontology-id')
+            var label = $(this).children('label').text()
+            $('#formMenu').append('<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>')
+          }
+        });
+
+
+
+      }
 
     </script>
   </body>

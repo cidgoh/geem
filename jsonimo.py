@@ -132,12 +132,12 @@ class Ontology(object):
 		# Add each ontology include file (must be in OWL RDF format)
 		self.ontologyIncludes(os.path.dirname(main_ontology_file) + '/imports')
 
-		# Retrieve all subclasses of data_representational_model
+		# Retrieve all subclasses of 'data representational model'
 		specBinding = {'root': rdflib.URIRef(self.expandId('obolibrary:OBI_0000658'))} 
 		self.doSpecifications(self.doQueryTable('tree', specBinding ))
 		
 		# ALSO GET OTHER TOP-LEVEL TERMS?
-		# ...
+		# ... 
 
 		self.doSpecComponents(self.doQueryTable('specification_components' ) )	
 		self.doPrimitives(self.doQueryTable('inherited') )		
@@ -271,7 +271,7 @@ class Ontology(object):
 				if parentId == id:
 					print 'ERROR: an entity mistakenly is "parent" of itself: %s ' % id
 				else:
-
+					# Ensure parent exists and with default data type of 'model' since it has components.
 					self.setDefault(self.struct, struct, parentId, {'id': parentId, 'datatype': 'model'} )
 					self.struct[struct][id]['otherParent'].append(parentId)
 
@@ -284,23 +284,25 @@ class Ontology(object):
 					self.setDefault(self.struct, struct, parentId, 'components', id, [])
 					self.getStruct(self.struct, struct, parentId, 'components', id).append(obj)
 
-					# BNodes have no name but have expression stuff.
+					# BNodes have no name but have expression.
 					if 'expression' in myDict: 
-						# E.g. HAS LOGIC EXPRESSION:  {'expression': {'datatype': 'disjunction', 'data': [u'sio:SIO_000661', u'sio:SIO_000662', u'sio:SIO_000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent': u'obolibrary:GENEPIO_0001623'}
+
+						# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'sio:SIO_000661', u'sio:SIO_000662', u'sio:SIO_000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent': u'obolibrary:GENEPIO_0001623'}
 						print "HAS EXPRESSION: ", myDict['expression']
+
 						expression = myDict['expression']
 						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction or ???
 						self.struct[struct][id]['uiLabel'] = '' #
 						self.struct[struct][id]['components'] = {}
 						# List off each of the disjunction items, all with a 'some'
 						for ptr, partId in enumerate(expression['data']):
-							self.struct[struct][id]['components'][partId] = [] # So far logical expression parts have no further info.
-			else:
-				# Entity without a datatype has no parents so was only a 'component of' some 
-				# other component. TESTING: make it a simple stand-alone complex entity.
-				#if not 'datatype' in myDict:
-				#	self.struct[struct][id]['datatype'] = 'model'
-				self.setDefault(self.struct, struct, id, 'datatype', 'model')
+							# So far logical expression parts have no further info.
+							self.struct[struct][id]['components'][partId] = [] 
+
+#			else:
+				# If entity has no parent , case can't happen?!?!?!
+				# was only a 'component of' some other component.
+#				self.setDefault(self.struct, struct, id, 'datatype', 'model')
 
 	def doPrimitives(self, table):
 		""" ####################################################################
@@ -895,6 +897,7 @@ class Ontology(object):
 		# SECOND VERSION FOR ''
 		##################################################################
 		# RETRIEVE DATUM CARDINALITY, LIMIT FOR SPECIFICATION RELATIVE TO PARENT
+		# X 'has component' [some|exactly N|min n| max n] Y 
 		#
 		'specification_components': rdflib.plugins.sparql.prepareQuery("""
 
@@ -908,7 +911,7 @@ class Ontology(object):
 				?restriction ?cardinality ?limit.}
 				UNION 
 				{?restriction owl:someValuesFrom ?datum.
-				?restriction ?cardinality ?datum} # Returns "owl:someValuesFrom" 
+				?restriction ?cardinality ?datum} # Sets ?cardinality to "owl:someValuesFrom" 
 
 				OPTIONAL {?datum rdfs:label ?label}.
 			 } ORDER BY ?label

@@ -33,21 +33,23 @@
             <a href="#">GEEM Form Viewer</a>
           </li>
         </ul>
+
         <hr size="2"/>
 
-        <h5>Form Sections</h5>
-        <ul class="vertical menu" id="formMenu">
-
-        </ul>
+        <div id="formSections"></div>
 
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
       <div class="large-6 medium-6 columns" style="margin-top:25px;position:relative;border:2px solid black;max-height: 620px;overflow:scroll">
         <form id="mainForm" data-abide="ajax" style="margin-top:35px;">
-          <div class="infoBox" style="margin-top:80px">
-            The GEEM form viewer can render the html form for a given ontology id specification (assuming it has been annotated for GEEM use). Simply provide the identifier of the desired form, e.g. a URL like "form.html#obolibrary:GENEPIO_0001624"
-          </div>
+            This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
+
+            <a href="http://genepio.org/geem/form.html#obolibrary:GENEPIO_0001624">
+              http://genepio.org/geem/form.html#obolibrary:GENEPIO_0001624
+            </a>
+            <br/>
+            <br/>
         </form>
 
       </div>
@@ -64,7 +66,7 @@
           </div>
           <span>Minimize form view</span>
         </div>
-          <p>When minimize form is activated, only required fields or fields with selections will be expanded. All other fields will be minimized. Mousing over a minimized field will open it to its full size for data entry.</p>
+          <p>When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry.</p>
 
         <div style="margin-top:15px;margin-right:10px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:13px">
             <button id="viewSpecification">View JSON Specification</button>
@@ -72,7 +74,7 @@
         <p>This provides a view of the JSON specification file used to construct this form.</p>
 
 
-      <div class="reveal small" id="modalEntity" data-reveal>
+      <div class="reveal small" id="modalEntity" data-reveal style="max-height:500px;overflow:scroll">
         <button class="close-button" data-close aria-label="Close reveal" type="button">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -167,19 +169,23 @@
 
       function doSectionMenu() {
         // Provide form menu to two levels down.
-        $('#formMenu').empty()
+        $('#formSections').empty()
+        var sections = 0
+        var sectionHTML = ''
         $('#mainForm .field-wrapper.model').each(function(index){
+          sections += 1;
           var classes = $(this).attr('class')
           var depth = classes.substr(classes.indexOf('depth')+5)
           if (parseInt(depth) < 2) {
             var id = $(this).attr('data-ontology-id')
             var label = $(this).children('label').text()
-            $('#formMenu').append('<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>')
+            sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
           }
         });
 
-
-
+        if (sections > 1) {
+          $('#formSections').html('<h5>Form Sections</h5>\n' + '<ul class="vertical menu" id="formMenu">' + sectionHTML + '</ul>')
+        }
       }
 
     </script>

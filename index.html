@@ -13,8 +13,7 @@
     <div class="row" style="background-color:#2199e8;color:white">
       <div class="large-12 columns text-center">
         <div class="field-group" style="float:right">
-          <button class="disabled" onclick="alert('Coming soon!')">Login</button>
-          <i class="fi-widget large"></i>
+            <a class="button" onclick="alert('Coming soon!');return false">Login</a>
         </div>
         <!-- LOGIN / LOGOUT GOES HERE -->
 
@@ -28,11 +27,16 @@
       <div class="large-4 medium-4 columns" id="sidebar">
         <ul class="vertical menu" id="entityMenu">
 
-          <li>
+          <li class="active">
             <a href="#introduction">GEEM Introduction</a>
+
           </li>
           <li>
-            <a href="#resources">GEEM Resources</a>
+          <ul class="menu vertical nested">
+              <li>
+                <a href="#resources">GEEM Resources</a>
+              </li>
+            </ul>
           </li>
           <li>
             <a href="portal.html" target="_blank">GEEM Portal (new tab)</a>
@@ -41,7 +45,7 @@
             <a href="form.html" target="_blank">GEEM Form Viewer (new tab)</a>
           </li>
           <li>
-            <ul class="menu vertical nested">GEEM-adapted Application Ontologies
+            <ul class="menu vertical nested">GEEM-extended Application Ontologies
               <li>
                   <a href="http://genepio.org">GenEpiO</a>
               </li>
@@ -55,7 +59,7 @@
       <!-- ************************ CONTENT AREA ********************* -->
       <div class="large-6 medium-6 columns" id="tabsContent">
         <a name="#introduction"></a>
-        
+
         <p>The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downloading ontology-driven specifications for standardized data components. The portal aims to provide term reviewers and software developers with ways to utilize application ontology contents (a collection of terms and relations from other ontologies that combine to model the operation of some domain) without the need to be trained in ontology curation or querying.</p>
         
         <img src="docs/images/GEEM_interface.png"/>
@@ -74,9 +78,15 @@
 
         <p>The <strong><a href="portal.html">GEEM portal</a></strong> enables users to browse and download GEEM enabled ontology-driven data specifications, and (soon) make customized packages of specifications and standards for reuse in content management and data conversion applications.</p> 
 
+        <p><i>Note that ontology identifiers given in examples may change if terms are relocated to more appropriate ontologies. GenEpiO documents each change of use from a deprecated term to a newer preferred term - a best practice for all ontologies.</i></p>
+
         <div class='text-center'><button class="button" onclick="javascript:document.location.href='portal.html'">Proceed to GEEM Portal</button></div>
 
-        <p>A GEEM <a href="form.html" target="_blank">form viewer</a> script can render a given ontology id specification as indicated in links below. Simply provide the identifier of the desired item, e.g. a URL like "form.html#obolibrary:GENEPIO_0001624"
+        <p>A GEEM <a href="form.html" target="_blank">form viewer</a> script can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
+
+            <a href="http://genepio.org/geem/form.html#obolibrary:GENEPIO_0001624">
+              http://genepio.org/geem/form.html#obolibrary:GENEPIO_0001624
+            </a>
 
         <p>Example forms:</p>
         <ul>

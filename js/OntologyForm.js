@@ -290,7 +290,9 @@ function OntologyForm(domId, specification, settings, callback) {
 			entity['path'] : path style indication of how far down in hierarchy
 				the given entity is.
 		*/
-		if (entityId === false) return specification // Nothing selected yet.
+		if (entityId === false) {
+			return specification // Nothing selected yet.
+		}
 
 		console.log("Render Form Spec ", path, entityId, depth, inherited)
 
@@ -328,12 +330,22 @@ function OntologyForm(domId, specification, settings, callback) {
 		if ('label' in entity['features']) {
 			entity['uiLabel'] = entity['features']['label']['value']
 		}
-		// Same for definition; also option for 3rd party database field name for form storage
+		if ('definition' in entity['features']) {
+			entity['uiDefinition'] = entity['features']['definition']['value']
+		}
+
+		// TESTING: Trim all definitions to first sentence
+		if ('definition' in entity && entity['definition'].indexOf('.') > 0) {
+			entity['definition'] = entity['definition'].split('.',1)[0] + '.'
+		}
+
+		// Certain features like label and definition ovveride component label, defn.Same for definition; also option for 3rd party database field name for form storage
 
 
 		if (entity['depth'] > 0) {
 			// When this entity is displayed within context of parent entity, that entity will 
 			// indicate how many of this part are allowed.
+			// ISSUE: Multihoming parent id?
 			getCardinality(entity)
 			// Currently showing "hidden" feature fields as disabled.??????????????
 			entity['disabled'] = ('hidden' in entity['features']);
@@ -355,7 +367,13 @@ function OntologyForm(domId, specification, settings, callback) {
 					break;
 
 				case 'model':
-					getEntitySpecFormParts(entity, specification, inherited, depth)
+					// If X is_a+ (subclass of) 'data representational model' it is a model.
+					// If this model has parent_id, 
+
+					// Catch is situation where M has component N, where N is a model that 
+					// inherits components from an is_a ancestor. Travel up the tree,
+					// incorporating ALL 'has component' Z items.
+					entity['components'] = getEntitySpecFormParts(entity, inherited, depth)
 					break;
 
 				/* PRIMITIVE data types 
@@ -420,11 +438,12 @@ function OntologyForm(domId, specification, settings, callback) {
 					break;
 			}
 
+
+		}
+
 		// Various fields that flat ontology has that trimmed-down JSON or YAML form view don't need.
 		entity = getEntitySimplification(entity)
 		specification.push(entity)
-
-		}
 
 		return specification
 	}
@@ -435,8 +454,9 @@ function OntologyForm(domId, specification, settings, callback) {
 		*/
 		delete (entity['parent'])
 		delete (entity['otherParent'])
-		//delete (entity['components'])
+		//delete (entity['components']) // these form the hierarchy
 		delete (entity['models'])
+		delete (entity['path'])
 		delete (entity['member_of'])
 		delete (entity['constraints'])
 		//if ($.isEmptyObject(entity['features']))
@@ -449,42 +469,54 @@ function OntologyForm(domId, specification, settings, callback) {
 		return $.extend(true, freshEntity, entity) 
 	}
 
-	getEntitySpecFormParts = function(entity, topdownspecification, inherited, depth) {
+	getEntitySpecFormParts = function(entity, inherited, depth) {
 		/*
-		Convert given "specification" entitie's "parts" list into a list of
+		Convert given "specification" entity's "parts" list into a list of 
 		processed entities.
 		*/
-		specification = []
+		var specification = []
 
-		// Here we go up the hierarchy to render all inherited superclass 'has value specification' components.
-
-		// PROBLEM 
-		/* Inheritance of parent attributes & data structures.
-		if ('parent' in entity) { // aka member_of or subclass of
+		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
+		// Will venture upward as long as each ancestor 'has component' X.
+		// ISSUE: Do we want parent's stuff APPENDED to spec, or inserted as part of this spec?
+		if ('parent' in entity) {
 			var parentId = entity['parent']
 			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
-				//console.log('' + depth + ": Specification "+entityId+" inheriting: " + parentId)
-				this.getEntitySpecForm(parentId, specification, [], depth-1, true)
-				// Do we want parent's stuff APPENDED to spec, or inserted as part of this spec?
+				var parent = self.specification[parentId]
+				// console.log('found parent', parent['id'], parent['uiLabel'])
+				if (parent && 'components' in parent) {
+					// "true" prevents a parent's other is_a subclass models from being pursued.
+					//this.getEntitySpecForm(parentId, specification, entity['path'], depth + 1, true)
+					var specification = this.getEntitySpecFormParts(parent, true, depth + 1)
+					// console.log('did parent', specification.length, 'items')
+					//call to parent clears specification out.
+				}
 			}
-		}	
-		*/
-
-		for (var entityId in entity['components'] ) { 
-			// Sort so fields within a group are consistenty orderd:
-			this.getEntitySpecForm(entityId, specification, entity['path'], depth+1)
 		}
 
-		// When a categorical variable is referenced on its own:
-		if (inherited == false) {
+
+		// Whether we're going up or down, we add on ALL 'has component' items 
+		for (var entityId2 in entity['components'] ) { 
 			// cardinality "x has member some/one/etc y"
-			for (var entityId in entity['models']) { 
-				// Cardinality lookup doesn't apply to categorical pick-lists so no need to supply path.
-				this.getEntitySpecForm(entityId, specification, [], depth + 1) 
-			}
-
-		entity['components'] = specification
+			// Sorting ???
+			console.log(entity['uiLabel'], "has component", entityId2, self.specification[entityId2]['uiLabel'])
+			this.getEntitySpecForm(entityId2, specification, entity['path'], depth + 1)
 		}
+
+		// Simple specifications don't include models via 'is_a'.  They focus on forms via 'has component'
+
+		// Only if we're descending downward do we add all subclass models to specification
+/*		if (inherited == false) {
+			// Cardinality doesn't apply to models so far.
+			for (var entityId in entity['models']) { 
+				console.log(entity['uiLabel'], "has model", entityId)
+				this.getEntitySpecForm(entityId, specification, entity['path'], depth + 1) 
+			}
+		}
+*/
+
+
+		return specification
 	}
 
 	getEntitySpecFormNumber = function(entity, minInclusive=undefined, maxInclusive=undefined) {
@@ -534,13 +566,20 @@ function OntologyForm(domId, specification, settings, callback) {
 			var newChoices = [] // Array to preserve order
 			for (var memberId in entity['choices']) {
 				var part = $.extend(true, {}, self.specification[memberId]) //deepcopy
-				delete part['datatype'] // Unnecessary
 				if (!part) // Should never happen.
 					console.log("Error: picklist choice not available: ", memberId, " for list ", entity['id'])
 				else {
+					delete part['datatype'] // Unnecessary
+
+					// TESTING: Trim all definitions to first sentence
+					if ('definition' in part && part['definition'].indexOf('.') > 0) {
+						part['definition'] = part['definition'].split('.',1)[0] + '.'
+					}
+
 					// Currently showing "hidden" feature as disabled.
 					if (getFeature(part, 'hidden', entity['id']) )
 						part['disabled'] = true;
+
 					newChoices.push(getEntitySpecFormChoice(part , depth+1))
 				}
 			}
@@ -716,6 +755,48 @@ function OntologyForm(domId, specification, settings, callback) {
 		return html
 	}
 
+
+	renderSpecification = function(entity, inherited, depth) {
+		html = ''
+		// Here we go up the hierarchy to render all inherited superclass 'has value specification' components.
+		if ('parent' in entity) { // aka member_of or subclass of
+			var parentId = entity['parent']
+			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
+				//console.log('' + depth + ": Specification "+entityId+" inheriting: " + parentId)
+				html += this.render(parentId, [], depth+1, true)
+			}
+		}	
+
+		// Render an item's subclasses only if traversing downwards
+		if (inherited == false) {
+			for (var entityId in entity['models']) { 
+				html += this.render(entityId, entity['path'], depth+1)
+			}
+		}
+
+		// DISABLE INHERITANCE?
+		for (var entityId in entity['components']) { 
+			html += this.render(entityId, entity['path'], depth+1)
+		}
+
+		if (inherited == false && 'choices' in entity) { //no inheritance on choices
+			for (var entityId in entity['choices']) { 
+				html += this.render(entityId, [], depth + 1) 
+				// cardinality doesn't apply to categorical pick-lists so no need to supply path.
+			}
+		}
+		return html	
+	}
+
+	renderSection = function(entity, label, text) {
+		html = [label
+		,	'	<div class="input-group">\n'
+		,			text
+		,			renderHelp(entity)
+		,	'	</div>\n'].join('')
+		return getFieldWrapper(entity, html)
+	}
+
 	renderDateTime = function(entity, label) {
 		/*
 		Provide datepicker with ISO 8601 date/time format which can be
@@ -754,46 +835,6 @@ function OntologyForm(domId, specification, settings, callback) {
 			,	renderHelp(entity)
 			,'	</div>\n'].join('')
 
-		return getFieldWrapper(entity, html)
-	}
-
-	renderSpecification = function(entity, inherited, depth) {
-		html = ''
-		// Here we go up the hierarchy to render all inherited superclass 'has value specification' components.
-		if ('parent' in entity) { // aka member_of or subclass of
-			var parentId = entity['parent']
-			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
-				//console.log('' + depth + ": Specification "+entityId+" inheriting: " + parentId)
-				html += this.render(parentId, [], depth-1, true)
-			}
-		}	
-
-		if (inherited == false) {
-			for (var entityId in entity['models']) { 
-				html += this.render(entityId, entity['path'], depth+1)
-			}
-		}
-
-		// DISABLE INHERITANCE?
- 		// [model|component] 'has component' [cardinality] [component|input variable]:
-		for (var entityId in entity['components']) { 
-			html += this.render(entityId, entity['path'], depth+1)
-		}
-
-		if (inherited == false && 'choices' in entity) { //no inheritance on choices
-			for (var entityId in entity['choices']) { 
-				html += this.render(entityId, [], depth + 1) // cardinality lookup doesn't apply to categorical pick-lists so no need to supply path.
-			}
-		}
-		return html	
-	}
-
-	renderSection = function(entity, label, text) {
-		html = [label
-		,	'	<div class="input-group">\n'
-		,			text
-		,			renderHelp(entity)
-		,	'	</div>\n'].join('')
 		return getFieldWrapper(entity, html)
 	}
 

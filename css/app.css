@@ -62,10 +62,10 @@ i.fi-marker.large {font-size: 1.1rem;}
 }
 @keyframes blinker { to { opacity: 0; } }
 
-
 .small {font-size:.5em;}
 
-#tabsContent, #tabsNavigation {height:520px; overflow:scroll}
+#tabsNavigation {height:435px; overflow:scroll}
+#tabsContent {height:500px; overflow:scroll}
 
 #dataSpecification {clear:both;overflow:scroll;}
 
@@ -99,6 +99,13 @@ select.units {width:auto;cursor:pointer}
 div.model.depth1 {margin-top:20px;border-top:3px solid grey; padding-top:10px; border-left:0px !important;}
 div.model.depth1 > label {font-size:1.2em; font-style:bold;}
 
+
+div#modalEntity {}
+div#modalEntityHeader {color:white;background-color:gray;padding:10px;margin:0;}
+div#modalEntityContentContainer {max-height:500px;overflow:scroll}
+div#modalEntityContent {white-space: pre-wrap}
+
+
 div.input-group {margin-bottom:.3rem !important;} 
 /* div.input-group-field {min-height:2.2rem !important;} */
 div.input-group-field {height:auto} 
@@ -124,5 +131,10 @@ a.input-group-label {font-size:.9em;}
 #displayContext {position:absolute;z-index:1500;color:black;}
 
 i.fi-shopping-cart.option {position:absolute;right:10px;margin-top:-30px;} 
+i.fi-info {cursor:pointer;}r
 
 li.group-result {display:none;}
+
+.tooltip {
+    max-width: 300px !important;
+}

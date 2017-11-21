@@ -38,9 +38,15 @@ function OntologyForm(domId, specification, settings, callback) {
 			self.entityId = entityId
 		}
 		formDelete()
+		// Deselect any other form menu item that might be open.
+		$('li.active[role="menuitem"]').removeClass('active')
 
 		if (self.entityId) {
-			
+
+			// Highlight any menu item that is this entity
+			// Ideally open menu to this item if it isn't already open.
+			$('li[role="menuitem"][data-ontology-id="'+self.entityId+'"]').addClass('active')
+
 			//top.bag = {} // For catching entity in a loop.
 			form_html = render(self.entityId)
 			form_html += renderButton('View Form Submission', 'getEntityData()') 
@@ -243,8 +249,10 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 	getEntityData = function() {
-		// The hierarchic form data must be converted into minimal JSON data packet for transmission back to server.
-		// ISSUE: fields like temperature that have a unit field with selections. Has to be broken up. 
+		/* The hierarchic form data must be converted into minimal JSON data 
+		   packet for transmission back to server.
+		   ISSUE: fields like temperature that have a unit field with selections. Has to be broken up. 
+		*/
 		var obj = {}
 
 		$.each(self.formDomId.find("input:not(.button), select"), function(i,item) {
@@ -263,16 +271,16 @@ function OntologyForm(domId, specification, settings, callback) {
 			}
 		})
 
-		setModalCode(obj, "Form data is converted into a simplified JSON data packet for submission.")
+		setModalCode(obj, "Example of form data conversion into a JSON data packet for submission.")
 
 	}
 
 
 	setModalCode = function (obj, header) {
 		// This displays the entity json object as an indented hierarchy of text inside html <pre> tag.
-		$("#modalEntity > div.row").html('<p><strong>' + header + '</strong></p>\n<pre style="white-space: pre-wrap;">' + JSON.stringify(obj, null, 2) +'</pre>\n' )
-		$("#modalEntity").foundation('open') //.foundation()
-
+		$("#modalEntityHeader").html(header)
+		$("#modalEntityContent").html(JSON.stringify(obj, null, 2) )
+		$("#modalEntity").foundation('open')
 	}
 
 
@@ -339,7 +347,9 @@ function OntologyForm(domId, specification, settings, callback) {
 			entity['definition'] = entity['definition'].split('.',1)[0] + '.'
 		}
 
-		// Certain features like label and definition ovveride component label, defn.Same for definition; also option for 3rd party database field name for form storage
+		// Certain features like label and definition ovveride component label,
+		// defn.Same for definition; also option for 3rd party database field 
+		// name for form storage
 
 
 		if (entity['depth'] > 0) {
@@ -362,9 +372,9 @@ function OntologyForm(domId, specification, settings, callback) {
 			switch (entity['datatype']) {
 
 				case 'disjunction':
-					// TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-					//getEntitySpecDisjunction(entity, label, depth)
-					break;
+					// CURRENTLY WE JUST LUMP 'disjunction' IN WITH 'model'
+					// Assumption is that each disjunction element is not itself marked required.
+					// ISSUE: having a required status on a group of items is tricky.
 
 				case 'model':
 					// If X is_a+ (subclass of) 'data representational model' it is a model.
@@ -758,7 +768,8 @@ function OntologyForm(domId, specification, settings, callback) {
 
 	renderSpecification = function(entity, inherited, depth) {
 		html = ''
-		// Here we go up the hierarchy to render all inherited superclass 'has value specification' components.
+		// Here we go up the hierarchy to render all (and only) components of 
+		// superclass models, if any.
 		if ('parent' in entity) { // aka member_of or subclass of
 			var parentId = entity['parent']
 			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
@@ -767,22 +778,26 @@ function OntologyForm(domId, specification, settings, callback) {
 			}
 		}	
 
-		// Render an item's subclasses only if traversing downwards
+		// Render an item's models only if traversing downwards.  In other
+		// words, if renderer asked to detail a model itself, then show
+		// subclass models.
 		if (inherited == false) {
 			for (var entityId in entity['models']) { 
 				html += this.render(entityId, entity['path'], depth+1)
 			}
 		}
 
-		// DISABLE INHERITANCE?
+		// Render each component
 		for (var entityId in entity['components']) { 
 			html += this.render(entityId, entity['path'], depth+1)
 		}
 
 		if (inherited == false && 'choices' in entity) { //no inheritance on choices
 			for (var entityId in entity['choices']) { 
+				// Cardinality doesn't apply to categorical pick-lists so no need to supply path.
+				// Depth however is paid attention to for picklist depth cutoff option.
 				html += this.render(entityId, [], depth + 1) 
-				// cardinality doesn't apply to categorical pick-lists so no need to supply path.
+				
 			}
 		}
 		return html	
@@ -861,18 +876,19 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 	renderButton = function(text, buttonFunction) {
+		// Future, could add ' type="select" '
 		html = '<div>\n'
-		html +=	'	<input type="submit" class="button float-center" value="' + text + '" onclick="'+buttonFunction+'">\n'
+		html +=	'	<input class="button float-center" value="' + text + '" onclick="'+buttonFunction+'">\n'
 		html +=	'</div>\n'
 
 		return html
 	}
 
 	renderDisjunction = function(entity, label, depth) {
-		/* EXPERIMENTAL: This entity was made up of 'has value specification some X or Y or Z ... 
-		Means at least one of the disjunction parts need to be included (more are allowed at moment). 
-		*/
-		// "has value specification" parts. 
+		/* This entity was made up of 'has component some (X or Y or Z ...) 
+		At least one of the disjunction parts needs to be filled in.  More are
+		allowed at moment. A tabbed interface is used for each component.
+		*/ 
 		var domId = entity['domId']
 		var htmlTabs = '<ul class="tabs" data-tabs id="' + domId + '">'
 		var htmlTabContent = '<div class="input-group tabs-content" data-tabs-content="' + domId + '">'
@@ -1095,13 +1111,10 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 	renderHelp = function(entity) {
-		// Currently help consists of displaying a field's user interface definition, or original ontology definition.
-		var definition = ''
-		if ('uiDefinition' in entity) definition = entity['uiDefinition'] 
-		else if (definition in entity) definition = entity['definition']
-		if (definition > '')
-			return '	<p class="helper-text ' + entity['id'] + '">'+ definition+'</p>\n'
-	  	return ''
+		// Currently help consists of displaying a field's user interface 
+		// definition, or original ontology definition.
+		var help = getFeature(entity, 'help', entity['parent_id']) 
+		return help ? '	<p class="helper-text">' + help + '</p>\n' : ''
 	 }
 
 	renderLabel = function(entity) {
@@ -1110,17 +1123,32 @@ function OntologyForm(domId, specification, settings, callback) {
 		// This links directly to form for only this entity.  Not in context of larger form.
 		// Problem is that recursion to fetch parts from parent runs into parents that 
 		// have no further path.
+
+		var definition = ''
+		if ('uiDefinition' in entity) definition = entity['uiDefinition'] 
+		else if ('definition' in entity) definition = entity['definition']
+		definition = definition.replace('"','\'\'')
+
 		if (self.settings.ontologyDetails && entity['depth'] > 0)
 			var labelURL = '<a href="#' + entity['id'] + '">' + entity['uiLabel'] + '</a>' 
 		else
 			var labelURL = entity['uiLabel']
 
 		// Enable mouseover display of above.
-		html = 	['<label data-ontology-id="'+ entity['id'] +'">', 
-			self.settings.ontologyDetails ? '<i class="fi-magnifying-glass"]></i>' : '',
-			labelURL, 
-			'</label>'
-		].join('')
+		html = '<label data-ontology-id="'+ entity['id'] +'">'
+		if (self.settings.ontologyDetails)
+			html += '<i class="fi-magnifying-glass"]></i> ' + labelURL
+		else 
+			if (definition.length) {
+				var deflen = definition.indexOf('. ')
+				if (deflen>-1)
+					definition = definition.substr(0,deflen)
+				html += '<span data-tooltip class="has-tip right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
+			}
+			else
+				html += labelURL + '</span>'
+
+		html +=  '</label>\n'
 
 		return html
 	}

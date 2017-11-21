@@ -91,7 +91,7 @@ $( document ).ready(function() {
 
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', displayContext)
 
-	$("#content").on('mouseenter','i.fi-magnifying-glass', displayContext)
+	$("#content").on('mouseenter','i.fi-magnifying-glass,i.fi-info', displayContext)
 
 	$("#content").on('click', "i.fi-shopping-cart", function(event){
 		// Check and update shopping cart include/exclude status of this item
@@ -377,7 +377,6 @@ function displayContext(event) {
 
 	var content = '<div id="displayContext" class="dropdown-pane"><ul>'
 	if ($(this).is('.fi-magnifying-glass')) {
-		console.log('looking up label')
 		content += getOntologyDetailHTML(ontologyId) 
 	}
 	else //'.fi-arrow-up'

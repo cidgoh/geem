@@ -17,7 +17,7 @@
     <div class="row">
 
       <!-- ************************ ONTOLOGY MENU AND SEARCH ********************* -->
-      <div class="large-3 medium-3 columns" id="sidebar">
+      <div class="large-3 medium-3 columns" id="sidebar" style="max-height: 620px;overflow:scroll">
         <br/>
 
         <hr size="2"/>
@@ -74,11 +74,12 @@
         <p>This provides a view of the JSON specification file used to construct this form.</p>
 
 
-      <div class="reveal small" id="modalEntity" data-reveal style="max-height:500px;overflow:scroll">
-        <button class="close-button" data-close aria-label="Close reveal" type="button">
+      <div id="modalEntity" class="reveal" data-reveal>
+        <button class="close-button medium" data-close aria-label="Close reveal" type="button" style="position:absolute;right:20px;top:20px;background-color:silver">
           <span aria-hidden="true">&times;</span>
         </button>
-        <div class="row"></div>
+        <div id="modalEntityHeader"></div> 
+        <div id="modalEntityContentContainer" class="small"><pre id="modalEntityContent"></pre></div>
       </div>
 
     </div>
@@ -104,7 +105,6 @@
         OntologyForm.initFoundation()
         $('#modalEntity').foundation()
 
-
         $('button#viewSpecification').on('click', function() {
 
           // This displays the entity json object as an indented hierarchy of text inside html <pre> tag.
@@ -119,7 +119,6 @@
           $("#modalEntity > div.row").html(html )
           $("#modalEntity").foundation('open')
         })
-
 
         //Default load of GenEpiO
         loadSpecification('data/ontology/genepio-merged.json')
@@ -186,7 +185,10 @@
         if (sections > 1) {
           $('#formSections').html('<h5>Form Sections</h5>\n' + '<ul class="vertical menu" id="formMenu">' + sectionHTML + '</ul>')
         }
+
       }
+
+
 
     </script>
   </body>

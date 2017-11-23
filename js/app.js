@@ -75,7 +75,7 @@ $( document ).ready(function() {
 	})
 
 	// Trigger JSON / EXCELL / YAML view of specification
-	$('#specification-tabs').on('change.zf.tabs', getdataSpecification)
+	$('#specificationType').on('change', getdataSpecification)
 
 	$('#view_spec_download').on('click', downloadDataSpecification)
 
@@ -648,7 +648,12 @@ function renderMenu(entityId, depth = 0 ) {
 				// Top level menu items
 				if (depth == 0) html += renderMenu(memberId, depth + 1)
 				// Deeper menu items
-				else html += '<ul class="menu vertical nested">' + renderMenu(memberId, depth + 1) + '</ul>'	//id="'+memberId+'"
+				else {
+					// Only list item if it has components or models
+					var child = top.specification[memberId]
+					if ('models' in child || 'components' in child)
+						html += '<ul class="menu vertical nested">' + renderMenu(memberId, depth + 1) + '</ul>'	//id="'+memberId+'"
+				}
 			}
 		}
 
@@ -672,7 +677,8 @@ function getdataSpecification() {
     - download button activated
 	*/
 
-	var selected_tab = $('#specification-tabs > li.is-active > a[aria-selected="true"]').attr('aria-controls')
+	//var selected_tab = $('#specificationType > li.is-active > a[aria-selected="true"]').attr('aria-controls')
+	var selected_tab = $('#specificationType').val()
 
 	if (selected_tab) {
 		var content = ''
@@ -695,12 +701,21 @@ function getdataSpecification() {
 				//content = YAML.stringify(getEntitySpecForm(top.focusEntityId))
 				content = jsyaml.dump(getEntitySpecForm(top.focusEntityId), 4) //indent of 4
 				break; 
+			
+			case 'tsv_form_node_specification':
+				content = getTabularNodeSpecification(getEntitySpec(null, top.focusEntityId)) //indent of 4
+				break; 
+
+			case 'tsv_form_edge_specification':
+				content = getTabularEdgeSpecification(getEntitySpec(null, top.focusEntityId)) //indent of 4
+				break; 
+
 			case 'xlsm_specification':
 				alert('Coming soon!')
 				break; 
 		}
 
-		$("#dataSpecification").html(content)
+		$("#dataSpecification").html(content).removeClass('hide')
 
 		if (content.length > 0) // If something to download, activate download button
 			$("#spec_download").removeClass('disabled').removeAttr('disabled')
@@ -711,6 +726,90 @@ function getdataSpecification() {
 
 }
 
+
+function getTabularNodeSpecification(userSpecification) {
+	/*
+	Converts given flat table object of ontology entities, including each
+	item's links to components, models, and choices.
+
+	// ISSUE: NEED TO DISTINGUISH ITEMS BY PATH
+
+	*/
+	var dataHeader = ['id', 'datatype', 'uiLabel', 'definition', 'minCardinality', 'maxCardinality', 'minValue', 'maxValue']
+	var constraintHeader = ['xmls:minLength', 'xmls:maxLength', 'xmls:pattern']
+
+	var data = []
+	for (var ptr in userSpecification) {
+		var entity = userSpecification[ptr]
+		getEntitySpecFormConstraints(entity) // Numeric constraints
+		//getCardinality(entity) // entity['path'] needs parent for getCardinality to work.
+
+		if (entity['id'] == 'obolibrary:GENEPIO_0001684')
+			console.log(entity)
+
+		var record = []
+		for (var field in dataHeader)
+			record.push(getTextField(entity, dataHeader[field]))
+
+		// Handle constraints, which are in entity['constraints']
+ 		for (var column in constraintHeader ) {
+ 			var xmlField = constraintHeader[column]
+ 			var value = ''
+ 			for (var ptr2 in entity['constraints']) {
+ 				if (entity['constraints'][ptr2]['constraint'] == xmlField)
+ 					value = '' + entity['constraints'][ptr2]['value'] // converts to text.
+ 			}
+ 			record.push(value)
+		}
+
+		data.push(record)
+	}
+
+	dataHeader.push('minLength', 'maxLength', 'pattern')
+	// Sort all items by datatype, then label
+	data.sort(function (a, b) {return a['datatype'] > b['datatype'] || a['label'] > b['label'] })
+	data.splice(0, 0, dataHeader);
+	return getTabularTable(data)
+}
+
+
+function getTabularEdgeSpecification(userSpecification) {
+	var dataHeader = ['id', 'relation', 'child_id', 'minCardinality', 'maxCardinality']
+	
+	var data = []
+	for (var ptr in userSpecification) {
+		var spec = userSpecification[ptr]
+		var record = []
+		record.push(getTextField(spec, 'id') )
+
+		data.push(record)
+	}
+
+	data.splice(0, 0, dataHeader);
+	return getTabularTable(dataHeader)
+}
+
+
+function getTextField (obj, field) {
+	text = obj[field]
+	if (text)
+		// convert numbers to text, and clean up carriage returns and tabs.
+		text = ('' + text).replace('\n',' ').replace('\t',' ') 
+	else 
+		text = ''
+	return text
+}
+
+
+function getTabularTable(dataArray) {
+	// Convert given array to tabular text.
+	var data = ''
+	for (ptr in dataArray) {
+		data +=	dataArray[ptr].join('\t') + '\n'
+	}
+
+	return data
+}
 
 function downloadDataSpecification() {
 	/* This creates dynamic file download link for a given ontology entity. 
@@ -728,8 +827,9 @@ function downloadDataSpecification() {
 	*/
 	if ($("#dataSpecification").html().length) {
 		var entity = top.specification[top.focusEntityId]
-		var selected_tab = $('#specification-tabs > li.is-active > a[aria-selected="true"]').attr('aria-controls')
-		
+		//var selected_tab = $('#specificationType > li.is-active > a[aria-selected="true"]').attr('aria-controls')
+		var selected_tab = $('#specificationType').val()
+
 		// File name is main ontology id component + file suffix.
 		var file_name = entity['id'].split(':')[1] + '.' + selected_tab.split('_')[0]  
 		var content = window.btoa($("#dataSpecification").text()) // Convert to base 64.
@@ -755,21 +855,21 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 			if (inherited == true) {
 				// Entity inherits primary ancestors' parts (the ones that led from start of rendering to here). 
 				var parentId = entity['parent']
-				if (parentId != 'obolibrary:OBI_0000658') //Top level OBI "data representation model"
+				if (parentId && parentId != 'obolibrary:OBI_0000658') //Top level OBI "data representation model"
 					getEntitySpec(spec, parentId, true)
 			}
 
 			getEntitySpecItems(spec, entity, 'components')
 			getEntitySpecItems(spec, entity, 'models') 
 			getEntitySpecItems(spec, entity, 'units')
-
+			getEntitySpecItems(spec, entity, 'choices')
 		}
 	}
 
 	return spec
 }
 
-function getEntitySpecItems(spec, entity, type, inherited = false) {
+function getEntitySpecItems(spec, entity, type) {
 	/*
 	FUTURE: units array will be ordered so that favoured unit is first.
 	*/

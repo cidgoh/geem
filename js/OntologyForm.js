@@ -66,7 +66,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			if (entity) {
 				var uiLabel = entity['uiLabel']
 				title += ':' + uiLabel
-				$('#panelDiscussTerm').empty().append('<h5>Term: ' + uiLabel + ' ('+self.entityId+')</h5>')
+				$('#formEntityLabel').html('Entity: ' + uiLabel + ' <span class="small">(' + self.entityId + ')</span>')
 				// SET DISCUSSION FORUM IFRAME HERE
 			}
 			window.document.title = title
@@ -145,8 +145,8 @@ function OntologyForm(domId, specification, settings, callback) {
 	configureSelect = function() {
 		// Applies jQuery chosen()
  		var fieldWrapper = $(this).parents("div.field-wrapper").first()
- 		var min = fieldWrapper.attr("min-cardinality")
-		var max = fieldWrapper.attr("max-cardinality")
+ 		var min = fieldWrapper.attr("minCardinality")
+		var max = fieldWrapper.attr("maxCardinality")
 		var required = fieldWrapper.is('.required')
 		if (required) $(this).prop('required',true); //Should do this in setCardinality() instead?
  		singleDeselect = (!min || min == 0) ? true : false
@@ -177,15 +177,15 @@ function OntologyForm(domId, specification, settings, callback) {
 
 	setCardinality = function() {
 		/* This renders each form element's HTML required attribute via 
-		javascript.	It also adds attributes for min-cardinality and 
-		max-cardinality.  These are used dynamically by the form 
+		javascript.	It also adds attributes for minCardinality and 
+		maxCardinality.  These are used dynamically by the form 
 		processor to show user controls for adding or removing input elements.
 		*/
 		var cardinalityLabel = ''
 
 		self.formDomId.find('div.field-wrapper').each(function(index) {
-			var min = $(this).attr("min-cardinality") // || false
-			var max = $(this).attr("max-cardinality") // || false
+			var min = $(this).attr("minCardinality") // || false
+			var max = $(this).attr("maxCardinality") // || false
 			var required = false
 
 			if (min || max) {
@@ -290,6 +290,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		Modelled closely on OntologyForm.render(), this returns just the form 
 		specification object as it is "unwound" from pure JSON specification.
 		FUTURE: Have form driven from output of this function.
+
 		INPUT
 			entityId : initial or current id to build hierarchic specification from
 			specification : initially empty array containing ordered form elements.
@@ -535,14 +536,14 @@ function OntologyForm(domId, specification, settings, callback) {
 	}
 
 	getEntitySpecFormConstraints = function(entity, minInclusive=undefined, maxInclusive=undefined) {
-		// This function boils down a numeric xmls min/max to 'min-value' and 'max-value' params.
+		// This function boils down a numeric xmls min/max to 'minValue' and 'maxValue' params.
 		var constraints = getConstraints(entity), min, max, pattern
 		if (maxInclusive === undefined || maxInclusive > constraints['xmls:maxInclusive']) 
 			maxInclusive = constraints['xmls:maxInclusive']
 		if (minInclusive === undefined || minInclusive < constraints['xmls:minInclusive']) 
 			minInclusive = constraints['xmls:minInclusive']
-		entity['min-value'] = (minInclusive === undefined) ? '' : minInclusive
-		entity['max-value'] = (maxInclusive === undefined) ? '' : maxInclusive
+		entity['minValue'] = (minInclusive === undefined) ? '' : minInclusive
+		entity['maxValue'] = (maxInclusive === undefined) ? '' : maxInclusive
 	}
 
 	getEntitySpecFormChoices = function(entity) {
@@ -556,7 +557,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		if ('lookup' in entity['features']) 
 			entity['lookup'] = true
 		
-		if (entity['min-cardinality'] > 1 || (entity['max-cardinality'] != 1))
+		if (entity['minCardinality'] > 1 || (entity['maxCardinality'] != 1))
 			entity['multiple'] = true
 
 		getEntitySpecFormChoice(entity)
@@ -781,11 +782,13 @@ function OntologyForm(domId, specification, settings, callback) {
 		// Render an item's models only if traversing downwards.  In other
 		// words, if renderer asked to detail a model itself, then show
 		// subclass models.
+		/*
 		if (inherited == false) {
 			for (var entityId in entity['models']) { 
 				html += this.render(entityId, entity['path'], depth+1)
 			}
 		}
+		*/
 
 		// Render each component
 		for (var entityId in entity['components']) { 
@@ -1002,7 +1005,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 		*/
 		picklistId = entity['id']
-		var multiple = entity['min-cardinality'] > 1 || (entity['max-cardinality'] != 1) ? ' multiple' : ''
+		var multiple = entity['minCardinality'] > 1 || (entity['maxCardinality'] != 1) ? ' multiple' : ''
 		var html = label
 		html +=	'	<div class="input-group">\n'
 		html +=	'		<select class="input-group-field '+ entity['id'] + ' regular" id="'+entity['domId']+'"' + entity['disabled'] + multiple + '>\n'
@@ -1166,8 +1169,8 @@ function OntologyForm(domId, specification, settings, callback) {
 			,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 			,		'" '
 			,		getIdHTMLAttribute(entity['domId'])
-			,		getHTMLAttribute(entity, 'min-cardinality')
-			,		getHTMLAttribute(entity, 'max-cardinality')
+			,		getHTMLAttribute(entity, 'minCardinality')
+			,		getHTMLAttribute(entity, 'maxCardinality')
 			,		'>\n'
 			,		html
 			,	'</div>\n'].join('')
@@ -1178,8 +1181,8 @@ function OntologyForm(domId, specification, settings, callback) {
 			'<a name="' + entity['domId'] + '"/>'
 			,	'<div class="field-wrapper model children depth' + entity['depth'] + '" '
 			,	getIdHTMLAttribute(entity['domId'])
-			,	getHTMLAttribute(entity, 'min-cardinality')
-			,	getHTMLAttribute(entity, 'max-cardinality')
+			,	getHTMLAttribute(entity, 'minCardinality')
+			,	getHTMLAttribute(entity, 'maxCardinality')
 			,	'>\n'
 			,	html
 			,	'</div>\n'].join('')
@@ -1385,8 +1388,8 @@ function OntologyForm(domId, specification, settings, callback) {
 			referrerId: id of parent of entity (an entity may have more than one parent)
 		
 		OUTPUT
-			entity['min-cardinality']
-			entity['max-cardinality']
+			entity['minCardinality']
+			entity['maxCardinality']
 			//entity['required']
 		*/
 		var referrerId = entity['path'].slice(-2)[0]
@@ -1405,17 +1408,17 @@ function OntologyForm(domId, specification, settings, callback) {
 				var limit = 'value' in condition ? parseInt(condition['value']) : 1
 				switch (condition['cardinality']) {
 					case 'owl:someValuesFrom': // >= 1 of ...
-						entity['min-cardinality'] = 1
+						entity['minCardinality'] = 1
 						break 
 					case 'owl:qualifiedCardinality': // exactly N ...
-						entity['min-cardinality'] = limit
-						entity['max-cardinality'] = limit
+						entity['minCardinality'] = limit
+						entity['maxCardinality'] = limit
 						break 
 					case 'owl:minQualifiedCardinality': // max N ...
-						entity['min-cardinality'] = limit
+						entity['minCardinality'] = limit
 						break
 					case 'owl:maxQualifiedCardinality': // min N ...
-						entity['max-cardinality'] = limit
+						entity['maxCardinality'] = limit
 						break 
 					default:
 				}

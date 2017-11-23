@@ -138,3 +138,5 @@ li.group-result {display:none;}
 .tooltip {
     max-width: 300px !important;
 }
+
+#mainForm > div > label {display:none;}

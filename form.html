@@ -107,17 +107,9 @@
 
         $('button#viewSpecification').on('click', function() {
 
+          setModalCode(getEntitySpecForm(focusEntityId), "Simple YAML Specification")
           // This displays the entity json object as an indented hierarchy of text inside html <pre> tag.
-          var html = [
-              '<p><strong>'
-              ,   "Simple YAML Specification"
-              , '</strong></p>\n'
-              , '<pre style="white-space: pre-wrap;">'
-              ,   jsyaml.dump(getEntitySpecForm(focusEntityId), 4)
-              , '</pre>\n'
-            ].join('')
-          $("#modalEntity > div.row").html(html )
-          $("#modalEntity").foundation('open')
+
         })
 
         //Default load of GenEpiO

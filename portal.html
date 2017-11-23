@@ -37,7 +37,7 @@
           <li class="tabs-title"><a href="#panelSearch">Search</a></li>
         </ul>
         <div id="selectSpecificationWrapper">
-            <select id="selectSpecification">
+            <select id="selectSpecification" style="margin:0">
 
               <optgroup label="Ontologies">
                 <option value="data/ontology/genepio-merged.json" selected="selected">Genomic Epidemiology Ontology (GenEpiO)</option>
@@ -128,18 +128,23 @@
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
-      <div class="large-6 medium-6 columns">
-        <ul class="tabs" data-tabs id="content-tabs" >
+      <div class="large-6 medium-6 columns" style="padding:0;margin:0">
+        <ul class="tabs" data-tabs id="content-tabs">
           <li class="tabs-title is-active"><a href="#content" aria-selected="true">Form View</a></li>
           <li class="tabs-title"><a href="#panelDataSpecification">Specification</a></li>
           <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li>
           <li class="tabs-title"><a href="#panelCart">Cart<i class="fi-shopping-cart" id="shoppingCartIcon"></i> &nbsp; </a></li>
         </ul>
 
+        <div style="border-left:1px solid #e6e6e6;border-right:1px solid #e6e6e6;border-bottom:1px solid #e6e6e6;margin:0;padding:10px;">
+          <div id="formEntityLabel" style="padding:.5rem;margin:0;font-size:1.1rem;height:2.4375rem;background-color:#2199e8; color:white"></div>
+        </div>
+
+
         <div id="tabsContent" class="tabs-content" data-tabs-content="content-tabs"> 
           <!-- ************************* FORM VIEW ******************* -->
-          <div class="tabs-panel is-active" id="content">
-            <form id="mainForm" data-abide="ajax" style="border:2px solid black;padding:5px">
+          <div class="tabs-panel is-active" id="content" style="padding-top:0">
+            <form id="mainForm" data-abide="ajax">
               <div class="infoBox">
                 Select an ontology or package in the Library tab, and then use the Browse or Search menu to see how an entity or part would be presented as a form.
               </div>
@@ -182,26 +187,37 @@
 
           <!-- ******************* DATA SPECIFICATION **************** -->
           <div class="tabs-panel" id="panelDataSpecification">
-            <ul class="tabs" data-tabs id="specification-tabs" >
-              <li class="tabs-title"><a href="#json_specification">JSON</a></li>
-              <li class="tabs-title"><a href="#yml_specification">YAML</a></li>
+            <div class="input-group">
+            <select id="specificationType" class="input-group-field">
+              <option value="">Select a specification format to view or download</option>
 
-              <li class="tabs-title"><a href="#json_form_specification">JSON-simple</a></li>
-              <li class="tabs-title"><a href="#yml_form_specification">YAML-simple</a></li>
+              <option value="tsv_form_node_specification">GEEM nodes - Tabular</option>
+              <option value="tsv_form_edge_specification">GEEM edges - Tabular</option>
 
-              <li class="tabs-title"><a href="#xlsm_specification">MS Excel</a></li>
+              <option value="json_specification">GEEM - JSON</option>
+              <option value="yml_specification">GEEM - YAML</option>
+
+              <option value="json_form_specification">GEEM - JSON-simple</option>
+              <option value="yml_form_specification">GEEM - YAML-simple</option>
+
+              <optiongroup>
+                <option value="" disabled="disabled">Coming soon</option>
+                <option value="xlsm_specification"> ... MS Excel</option>
+
+              </optiongroup>
+            </select>
 
               <!--<li class="tabs-title"><a href="#excel_specification">MS Excel</a></li>-->
-              <a id="view_spec_download" download="specification.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==">
-                <button class="button icon fi-download float-right disabled" title="download" id="spec_download" style="margin-bottom:0;border:0"> Download</button>
+              <a id="view_spec_download"  class="input-group-label small" download="specification.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="padding:0">
+                <button class="button icon fi-download  disabled" title="download" id="spec_download" style="margin:0;border:0"> Download</button>
               </a>
-            </ul>
 
+          </div>
 
-            <pre id="dataSpecification" class="callout"></pre>
+            <pre id="dataSpecification" class="callout hide"></pre>
 
             <div id="helpDataSpecification" class="infoBox">
-              Here a selected ontology or package specfication can be viewed and downloaded as a full list of entities, their fields, picklists and unit components.  This is available in JSON format, or as a Microsoft Excel template (coming soon), or in YAML format.
+              Here a selected ontology or package specfication can be viewed and downloaded as a full list of entities, their fields, picklists and unit components.  This is available in tabular, JSON, and YAM formats, or (soon) as a Microsoft Excel template.
             </div>
             <!-- The YAML view is provided as a flat format in which many items have links to others; while the YAML-tree view is more like the HTML form view, in which hierarchic items are built out. -->
 
@@ -210,8 +226,6 @@
           <!-- ******************* DISCUSSION **************** -->
           <div class="tabs-panel" id="panelDiscuss">
             
-            <div id="panelDiscussTerm"></div>
-
             <div class="infoBox">
               <p>Discussion about a selected ontology term (the top-level one
               shown in the Form View) occurs here.  One can select a term by
@@ -266,18 +280,19 @@
       </div>
     </div>
 
-    <div class="reveal small" id="modalEntity" data-reveal>
-      <button class="close-button" data-close aria-label="Close reveal" type="button">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <div class="row"></div>
-    </div>
+      <div id="modalEntity" class="reveal" data-reveal>
+        <button class="close-button medium" data-close aria-label="Close reveal" type="button" style="position:absolute;right:20px;top:20px;background-color:silver">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div id="modalEntityHeader"></div> 
+        <div id="modalEntityContentContainer" class="small"><pre id="modalEntityContent"></pre></div>
+      </div>
 
     <script src="js/vendor/jquery.js"></script>
     <script src="js/vendor/what-input.js"></script>
     <script src="js/vendor/foundation.min.js"></script>
     <script src="js/vendor/foundation-datepicker.js"></script>
-    <script src="js/vendor/yaml.js"></script> <!-- https://github.com/jeremyfa/yaml.js -->
+    <!-- script src="js/vendor/yaml.js"></script --> <!-- https://github.com/jeremyfa/yaml.js -->
     <script src="js/vendor/js-yaml.min.js"></script> <!-- http://adilapapaya.com/docs/js-yaml/readme_2.0.5.html#bundledyamllibraryforbrowsers -->
     <script src="js/OntologyForm.js"></script>
     <script src="js/chosen/chosen.jquery.min.js" type="text/javascript"></script>

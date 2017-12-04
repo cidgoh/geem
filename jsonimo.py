@@ -290,13 +290,18 @@ class Ontology(object):
 						print "HAS EXPRESSION: ", myDict['expression']
 
 						expression = myDict['expression']
-						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction or ???
+						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction usually
+						self.struct[struct][id]['parent'] = parentId
 						self.struct[struct][id]['uiLabel'] = '' #
 						self.struct[struct][id]['components'] = {}
 						# List off each of the disjunction items, all with a 'some'
 						for ptr, partId in enumerate(expression['data']):
-							# So far logical expression parts have no further info.
-							self.struct[struct][id]['components'][partId] = [] 
+							# So far logical expression parts have no further info. (like cardinality)
+							self.struct[struct][id]['components'][partId] = [{
+		                        "datatype": "xmls:nonNegativeInteger",
+		                        "cardinality": "owl:qualifiedCardinality",
+		                        "value": "1"
+		                    }] 
 
 #			else:
 				# If entity has no parent , case can't happen?!?!?!
@@ -561,6 +566,7 @@ class Ontology(object):
 		"""
 		if part in entity:
 			if orderedKeys:
+				# Each entity[part] item is given a rank by the index location of its id in given orderedKeys list
 				entity[part] = OrderedDict(sorted(entity[part].items(), key=lambda item: orderedKeys.index(item[0]) if item[0] in orderedKeys else False))
 			else:
 				print "ordering", entity[part].items()
@@ -576,9 +582,10 @@ class Ontology(object):
 				rdfs:DbXRefs = reference
 
 			FUTURE: handle multi-lingual content
+			ISSUE: Not Multilingual yet.  Some synonym entries have {language: french} or {language: Scottish Gaelic} etc. at end. 
 
 			INPUTS
-				?label ?definition ?uiLabel ?uiDefinition
+				 ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 		"""
 
 		# Add preferred label and definition for items in each table
@@ -594,12 +601,14 @@ class Ontology(object):
 
 				synonyms = self.graph.query(self.queries['synonyms'], initBindings={'datum': uriID })
 				if len(synonyms):	
-					for row in synonyms: #(datum, synonym, exactSynonym, narrowSynonym) 
-						for field in ['Synonym','ExactSynonym','NarrowSynonym']:
-							# ISSUE: Not Multilingual yet.  Can have {language: french} or {language: Scottish Gaelic} etc. at end. 
+					for row in synonyms:
+
+						for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
+	
 							if row[field]: 
 								synonymTypeList = self.setDefault(self.struct, table, id, 'has' + field, [])
-								phrases = str(row[field]).strip().replace(',','\n').split('\n')
+								# Clean up synonym phrases
+								phrases = str(row[field]).strip().replace(',','\n').replace('"','').split('\n')
 								for phrase in phrases:
 									synonymTypeList.append( phrase.strip())
 
@@ -1235,10 +1244,8 @@ class Ontology(object):
 
 		# ################################################################
 		# oboInOwl:hasSynonym
-		# Picklist items could be augmented with synonyms in order for 
+		# Picklist items are augmented with synonyms in order for 
 		# type-as-you-go inputs to return appropriately filtered phrases
-		#
-		# FUTURE: add oboInOwl:hasBroadSynonym ?
 		#
 		# INPUT
 		# 	?datum : id of term to get labels for
@@ -1247,12 +1254,13 @@ class Ontology(object):
 		#
 		'synonyms': rdflib.plugins.sparql.prepareQuery("""
 
-			SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym
+			SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 			WHERE {  
 				{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
 				{?datum oboInOwl:hasSynonym ?Synonym.} 
 				UNION {?datum oboInOwl:hasExactSynonym ?ExactSynonym.}
 				UNION {?datum oboInOwl:hasNarrowSynonym ?NarrowSynonym.}
+				UNION {?datum obolibrary:IAO_0000118 ?AlternativeTerm.}
 			}
 		""", initNs = namespace)
 

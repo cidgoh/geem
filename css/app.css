@@ -36,15 +36,14 @@ a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#219
 #mainForm div.field-wrapper.exclude input {display:none;}
 #mainForm div.field-wrapper.exclude .chosen-container {display:none;}
 
-#mainForm > div.field-wrapper.children > label {font-weight:bold;font-size:1.2rem;}
+/* #mainForm > div.field-wrapper.children > label {font-weight:bold;font-size:1.2rem;} */
 /* #mainForm > div.field-wrapper.children > div.field-wrapper.children > label {font-size:1.1rem;} */
 
+#mainForm > div.field-wrapper div.field-wrapper  {border-left:3px solid transparent !important}
+#mainForm > div.field-wrapper div.field-wrapper:hover  {border-left:3px solid #00FF00 !important}
 
-#mainForm div.field-wrapper:hover > div.input-group {border-left:1px solid #F0FFF0}
-#mainForm div.field-wrapper:hover > label {background-color:#F0FFF0}
-
-#mainForm > div.field-wrapper div.field-wrapper {border-left:1px dotted silver; padding-left:10px;}
-#mainForm > div.field-wrapper div.field-wrapper.field {border-left:1px solid transparent;}
+#mainForm > div.field-wrapper > div.field-wrapper div.field-wrapper {border-left:1px dotted silver; padding-left:10px;}
+#mainForm > div.field-wrapper > div.field-wrapper div.field-wrapper.field {border-left:1px solid transparent;}
 
 
 div.package {border-top:1px dotted silver; padding-top:.5rem;}
@@ -96,8 +95,8 @@ li.depth10 {padding-left:150px !important;}
 
 select.units {width:auto;cursor:pointer} 
 
-div.model.depth1 {margin-top:20px;border-top:3px solid grey; padding-top:10px; border-left:0px !important;}
-div.model.depth1 > label {font-size:1.2em; font-style:bold;}
+div.model.depth1 {margin-top:10px; margin-bottom:20px; border-top:2px solid grey; padding-top:10px; border-left:0px !important;}
+div.model.depth1 > label {}
 
 
 div#modalEntity {}
@@ -124,7 +123,10 @@ a.input-group-label {font-size:.9em;}
 
 #package-tabs .tabs-title > a {padding:.5rem;font-size:.9rem;}
 
-#selectSpecificationWrapper {padding:10px 10px 0 10px;border-left:1px solid #e6e6e6;border-right:1px solid #e6e6e6}
+#selectSpecificationWrapper {
+	padding:10px 10px 0 10px;
+	border-left:1px solid #e6e6e6;
+	border-right:1px solid #e6e6e6}
 
 .tabs-title>a { padding: .75rem 1.5rem; font-size:.9rem; } /* Foundation tabs are big for tablet/mobile touch but this is only a PC app for now so made them smaller padding. */
 
@@ -139,4 +141,37 @@ li.group-result {display:none;}
     max-width: 300px !important;
 }
 
-#mainForm > div > label {display:none;}
+#formEntityLabelWrapper { 
+	border-left:1px solid #e6e6e6;
+	border-right:1px solid #e6e6e6;
+	margin:0;
+	padding: 10px 10px 10px 10px;
+}
+#formEntityLabel {
+ 	padding:.5rem;
+ 	margin:0px 0 0 0;
+ 	font-size:1.1rem;
+ 	height:2.4375rem;
+ 	background-color:#2199e8; 
+ 	color:white;
+	text-transform: capitalize;
+}
+
+#selectSpecification { 	
+	background-color:#2199e8; 
+ 	color:white;
+ 	background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="16" height="16" viewBox="0 0 32 24"><polygon points="0,0 32,0 16,24" style="fill: rgb(255,255,255)"></polygon></svg>')  no-repeat right #2199e8;
+ }
+span.medium {font-size:0.8rem}
+label {text-transform: capitalize;}
+
+/* hack to put definition into first field label area */
+#mainForm > div.field-wrapper > i {} 
+#mainForm > div.field-wrapper > label {
+	padding-top:5px; 
+	padding-bottom:10px;
+	margin-bottom:10px;
+	/* border-bottom:1px solid silver; */
+	min-height:2rem;
+	text-transform:inherit !important;}
+

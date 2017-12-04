@@ -1,0 +1,2663 @@
+{
+    "@context": {
+        "typon": "http://purl.phyloviz.net/ontology/typon#",
+        "obo": "http://purl.obolibrary.org/obo/",
+        "eo": "http://epidemiology_ontology.owl#",
+        "bibo": "http://purl.org/ontology/bibo/",
+        "vcf": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#",
+        "owl": "http://www.w3.org/2002/07/owl/",
+        "ndf-rt": "http://evs.nci.nih.gov/ftp1/NDF-RT/NDF-RT.owl#",
+        "oboInOwl": "http://www.geneontology.org/formats/oboInOwl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "NCBITaxon": "http://purl.obolibrary.org/obo/NCBITaxon#",
+        "mesh": "http://purl.bioontology.org/ontology/MESH/",
+        "efo": "http://www.ebi.ac.uk/efo/",
+        "ifm": "http://purl.obolibrary.org/obo/GENEPIO/IFM#",
+        "evs": "http://ncicb.nci.nih.gov/xml/owl/EVS/",
+        "sio": "http://semanticscience.org/resource/",
+        "vcard": "http://www.w3.org/2006/vcard/ns#",
+        "xmls": "http://www.w3.org/2001/XMLSchema#",
+        "ancestro": "http://www.ebi.ac.uk/ancestro/"
+    },
+    "specifications": {
+        "obo:GENEPIO_0001655": {
+            "datatype": "xmls:anyURI",
+            "definition": "A categorical tree specification datum is a categorical value specification which takes its value from the ontology URI identifier of any one of its subclass items; these may be organized in a hierarchy.",
+            "uiLabel": "categorical tree specification",
+            "id": "obo:GENEPIO_0001655",
+            "choices": {
+                "obo:HP_0000118": [],
+                "ancestro:ancestro_0004": [],
+                "obo:DOID_4": [],
+                "obo:ENVO_00002297": [],
+                "obo:ENVO_00010483": [],
+                "obo:CHMO_0002743": [],
+                "obo:PATO_0001894": [],
+                "obo:ENVO_00000062": [],
+                "obo:FOODON_03490100": [],
+                "obo:FOODON_03450002": [],
+                "obo:GENEPIO_0001297": [],
+                "obo:GENEPIO_0001048": [],
+                "obo:FOODON_03500010": [],
+                "sio:SIO_000415": [],
+                "obo:GENEPIO_0002019": [],
+                "obo:OBI_0100026": [],
+                "obo:GENEPIO_0001640": [],
+                "obo:FOODON_03470107": [],
+                "obo:GENEPIO_0000044": [],
+                "obo:FOODON_03400361": [],
+                "obo:GENEPIO_0000047": [],
+                "obo:GENEPIO_0000113": [],
+                "obo:GENEPIO_0000028": [],
+                "obo:GENEPIO_0001617": [],
+                "obo:GENEPIO_0000031": [],
+                "obo:GENEPIO_0001567": [],
+                "obo:GENEPIO_0001064": []
+            }
+        },
+        "obo:GENEPIO_0001126": {
+            "datatype": "xmls:dateTime",
+            "definition": "A livespan history item is a date-associated event pertaining to the life of a subject.",
+            "id": "obo:GENEPIO_0001126",
+            "uiLabel": "lifespan history item"
+        },
+        "obo:GENEPIO_0001659": {
+            "definition": "A case ID is a unique identifier associated with a particular episode of care for an individual or animal.",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "case identifier",
+            "id": "obo:GENEPIO_0001659",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001797": {
+            "definition": "The specimen extraction by datum is the name of persons or institute who collected a given specimen.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "specimen extraction by",
+            "id": "obo:GENEPIO_0001797",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000142": {
+            "definition": "An epi network contact is a person who may have recieved or transmitted an infectious disease related to an outbreak investigation.",
+            "parent": "obo:GENEPIO_0001606",
+            "components": {
+                "obo:GENEPIO_0001679": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "contact specification - epi network contact",
+            "id": "obo:GENEPIO_0000142",
+            "otherParent": [
+                "obo:GENEPIO_0000129"
+            ]
+        },
+        "obo:GENEPIO_0000143": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000124": []
+            },
+            "uiLabel": "DRAFT Public Health Lab Epi model",
+            "id": "obo:GENEPIO_0000143",
+            "definition": "This model contains data type specifications for whole genome sequencing and epidemiology investigation contextual data.  It will be used as a test case in data exchange with the IRIDA.ca project."
+        },
+        "obo:GENEPIO_0000140": {
+            "definition": "",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "obo:GENEPIO_0001783": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0001064": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0000122": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000121": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000140",
+            "uiLabel": "DRAFT epi case travel model"
+        },
+        "obo:ENVO_01000658": {
+            "definition": "A settlement with a high density of buildings and inhabitants.",
+            "member_of": [
+                "obo:ENVO_00000062"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "dense settlement",
+            "id": "obo:ENVO_01000658",
+            "choices": {
+                "obo:ENVO_00000856": []
+            }
+        },
+        "obo:GENEPIO_0000027": {
+            "definition": "Describes the physical, environmental and/or local geographical source of the biological sample from which the sample was derived.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "components": {
+                "obo:GENEPIO_0000028": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:ENVO_00010483": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001297": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "xmls:string",
+            "uiLabel": "specimen source context",
+            "id": "obo:GENEPIO_0000027",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "vcard:streetAddress": {
+            "datatype": "xmls:string",
+            "uiLabel": "street address",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ],
+            "id": "vcard:streetAddress",
+            "otherParent": [
+                "obo:GENEPIO_0001679"
+            ]
+        },
+        "obo:GENEPIO_0001925": {
+            "uiLabel": "earth area boundary census",
+            "id": "obo:GENEPIO_0001925",
+            "components": {
+                "obo:GENEPIO_0002017": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0001886"
+            ]
+        },
+        "http://snomed.info/sct/260820006": {
+            "datatype": "xmls:string",
+            "uiLabel": "serotype part",
+            "id": "http://snomed.info/sct/260820006",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001719": {
+            "definition": "An integer and character referring to a pattern of opaque or confluent lysis caused by a panel of bacteriophage infections e.g. 14a.",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ],
+            "parent": "obo:GENEPIO_0001688",
+            "datatype": "xmls:string",
+            "uiLabel": "phage type specification",
+            "hasDbXref": [
+                "SNOMED: http://www.snomedbrowser.com/Codes/Details/272405002"
+            ],
+            "id": "obo:GENEPIO_0001719",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001499": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "lab test result date",
+            "id": "obo:GENEPIO_0001499",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ]
+        },
+        "obo:GENEPIO_0000031": {
+            "definition": "A subject sex is the phenotypic sex of given subject (human or animal) related to a given investigation, study, and/or specimen.",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "subject sex",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "components": {
+                "obo:PATO_0001894": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "id": "obo:GENEPIO_0000031",
+            "constraints": []
+        },
+        "obo:APOLLO_SV_00000153": {
+            "definition": "The outcome of a population survey.",
+            "uiLabel": "population census",
+            "id": "obo:APOLLO_SV_00000153",
+            "otherParent": [
+                "obo:GENEPIO_0001886"
+            ]
+        },
+        "obo:OBI_0100026": {
+            "definition": "A material entity that is an individual living system, such as animal, plant, bacteria or virus, that is capable of replicating or reproducing, growth and maintenance in the right environment. An organism may be unicellular or made up, like humans, of many billions of cells divided into specialized tissues and organs.",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "organism",
+            "id": "obo:OBI_0100026",
+            "choices": {
+                "obo:IDO_0000531": []
+            }
+        },
+        "obo:IAO_0000429": {
+            "definition": "An email address is a textual entity which is a local or internet network-resolvable identifier used for sending messages to a personal or organizational email account or message handler on an email server. It may be used appropriately or illegitimately as an identification token in authentication or messaging processes.",
+            "otherParent": [
+                "obo:GENEPIO_0001606"
+            ],
+            "uiDefinition": "email addresses are kept confidential and are only used in conjunction with epidemiology investigations.",
+            "datatype": "xmls:string",
+            "uiLabel": "email address",
+            "id": "obo:IAO_0000429",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                },
+                {
+                    "value": "email",
+                    "constraint": "xmls:pattern"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001864": {
+            "datatype": "model",
+            "uiLabel": "1D coordinate system",
+            "id": "obo:GENEPIO_0001864",
+            "components": {
+                "obo:UO_0000000": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0001860",
+                "obo:GENEPIO_0001866",
+                "obo:GENEPIO_0001865"
+            ]
+        },
+        "obo:GENEPIO_0001640": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "organism (species)",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "id": "obo:GENEPIO_0001640",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ]
+        },
+        "obo:ENVO_00002297": {
+            "definition": "A material entity which determines an environmental system.",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "environmental feature",
+            "id": "obo:ENVO_00002297",
+            "choices": {
+                "obo:ENVO_00000000": []
+            }
+        },
+        "obo:GENEPIO_0000137": {
+            "definition": "An epidemiology case test is a laboratory test performed on a specimen from a patient with regard to potential pathogenic disease.",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "obo:GENEPIO_0000048": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000046": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000136": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001719": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001639": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:OMP_0000207": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001499": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000138": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000137",
+            "uiLabel": "DRAFT epi case tests"
+        },
+        "obo:GENEPIO_0000136": {
+            "definition": "A cluster identifier is an identifier that locates a genomic variant of an organism within a community of past or present genetically related organisms.",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "cluster identifier",
+            "id": "obo:GENEPIO_0000136",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000135": {
+            "definition": "An isolate sequence filename is the file name (http://edamontology.org/data_1050) of the contig assembly file created by a bioinformatics assembly process.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "isolate sequence filename",
+            "id": "obo:GENEPIO_0000135",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000134": {
+            "definition": "A specimen source substance is an organism substance or food product or environmental substance from which the specimen was extracted.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "components": {
+                "obo:GENEPIO_0000028": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:FOODON_03400361": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:ENVO_00010483": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000134",
+            "uiLabel": "specimen source substance"
+        },
+        "obo:GENEPIO_0000133": {
+            "definition": "DRAFT epi case isolate details are the details around how, when, and from what an isolate was extracted.",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "obo:OBI_0001619": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:CHMO_0002743": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001617": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "obo:GENEPIO_0001797": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000135": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000134": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001567": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "obo:GENEPIO_0000113": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:OBI_0001621": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:OBI_0001620": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000027": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000133",
+            "uiLabel": "DRAFT epi case isolate details"
+        },
+        "obo:GENEPIO_0000132": {
+            "definition": "An epi case general info model contains datum specifications about an epidemiology investigation case including the person involved, contact information and their demographics.",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "vcf:C68615": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001286": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001775": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001640": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001659": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000031": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "sio:SIO_000182": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "sio:SIO_000181": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001427": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001429": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:ENVO_00000062": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:OBI_0001628": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000132",
+            "uiLabel": "DRAFT epi case general info model"
+        },
+        "obo:GENEPIO_0000131": {
+            "definition": "A note is text that provides human-readable information on one or more subjects.",
+            "otherParent": [
+                "obo:GENEPIO_0000126",
+                "obo:GENEPIO_0000130",
+                "obo:GENEPIO_0000129"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "note",
+            "id": "obo:GENEPIO_0000131",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000130": {
+            "definition": "An epi contact network model - animal provides location and transportation information about an animal that may be involved in transmitting a pathogen.",
+            "parent": "obo:GENEPIO_0000128",
+            "components": {
+                "obo:GENEPIO_0001269": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001567": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000131": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "epi contact network model - animal",
+            "id": "obo:GENEPIO_0000130",
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ]
+        },
+        "obo:IAO_0000300": {
+            "datatype": "xmls:string",
+            "definition": "A textual entity is a part of a manifestation (FRBR sense), a generically dependent continuant whose concretizations are patterns of glyphs intended to be interpreted as words, formulas, etc.",
+            "uiLabel": "textual entity",
+            "id": "obo:IAO_0000300",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:HP_0000118": {
+            "definition": "A phenotypic abnormality.",
+            "hasExactSynonym": [
+                "Organ abnormality"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "symptom",
+            "hasDbXref": [
+                "http://purl.oboInOwllibrary.org/oboInOwl/SYMP_0000462"
+            ],
+            "id": "obo:HP_0000118",
+            "label": "Phenotypic abnormality"
+        },
+        "obo:GENEPIO_0000139": {
+            "definition": "A food cultural origin datum indicates the cultural orign of a food product.",
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ],
+            "components": {
+                "ancestro:ancestro_0004": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000139",
+            "uiLabel": "food cultural origin"
+        },
+        "obo:GENEPIO_0000138": {
+            "definition": "A lab test requestor is the individual or agency requesting that one or more tests be performed on a specimen.",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ],
+            "parent": "obo:GENEPIO_0001606",
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000138",
+            "uiLabel": "contact specification - lab test requester"
+        },
+        "obo:OBI_0001508": {
+            "datatype": "xmls:dateTime",
+            "definition": "A time measurement datum when an observation is made or a sample is taken from a material as measured from some reference point.",
+            "uiLabel": "sampling time measurement datum",
+            "id": "obo:OBI_0001508",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000028": {
+            "definition": "substance produced by the body, e.g. stool, mucus, where the sample was obtained from.",
+            "otherParent": [
+                "obo:GENEPIO_0000134",
+                "obo:GENEPIO_0000027"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0000028",
+            "uiLabel": "subject body product"
+        },
+        "obo:GEO_000000788": {
+            "definition": "A coordinate system, and a set of reference points, used to locate places on the Earth (or similar objects).",
+            "uiLabel": "geodetic datum",
+            "id": "obo:GEO_000000788",
+            "components": {
+                "obo:GENEPIO_0001907": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0001338"
+            ]
+        },
+        "obo:OBI_0001628": {
+            "definition": "A CRID symbol used to identify an investigation.",
+            "hasExactSynonym": [
+                "http://purl.oboInOwllibrary.org/oboInOwl/OMIABIS_0000006"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "investigation identifier",
+            "id": "obo:OBI_0001628",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001487": {
+            "datatype": "xmls:dateTime",
+            "definition": "A date-time datum that marks the end of possible human or animal exposure to a pathogen agent, directly or indirectly.",
+            "uiLabel": "exposure event end",
+            "id": "obo:GENEPIO_0001487",
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ]
+        },
+        "obo:GENEPIO_0001488": {
+            "datatype": "xmls:dateTime",
+            "definition": "A date-time datum that marks the start of a human or animal exposure event to a suspected pathogen agent, directly or indirectly.",
+            "uiLabel": "exposure event start",
+            "id": "obo:GENEPIO_0001488",
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ]
+        },
+        "obo:ENVO_00000070": {
+            "definition": "A feature that has been constructed by deliberate human effort.",
+            "member_of": [
+                "obo:ENVO_00000002"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "constructed feature",
+            "id": "obo:ENVO_00000070",
+            "choices": {
+                "obo:ENVO_00000062": []
+            }
+        },
+        "obo:OBI_0001621": {
+            "definition": "A measurement datum that is the measure of the longitude coordinate of a site.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "datatype": "xmls:decimal",
+            "uiLabel": "longitude coordinate measurement datum",
+            "id": "obo:OBI_0001621",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:OBI_0001620": {
+            "definition": "A measurement datum that is the measure of the latitude coordinate of a site.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "datatype": "xmls:decimal",
+            "uiLabel": "latitude coordinate measurement datum",
+            "id": "obo:OBI_0001620",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000048": {
+            "definition": "Second PFGE pattern from given diagnostic restriction enzyme",
+            "parent": "obo:GENEPIO_0000045",
+            "components": {
+                "obo:GENEPIO_0000047": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001289": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "PFGE secondary test",
+            "id": "obo:GENEPIO_0000048",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ]
+        },
+        "obo:GENEPIO_0000047": {
+            "definition": "Restriction enzyme for second characterization",
+            "otherParent": [
+                "obo:GENEPIO_0000048"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0000047",
+            "uiLabel": "secondary enzyme (LMACI)"
+        },
+        "obo:GENEPIO_0000046": {
+            "definition": "First PFGE pattern from given diagnostic restriction enzyme",
+            "parent": "obo:GENEPIO_0000045",
+            "components": {
+                "obo:GENEPIO_0000044": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001289": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "PFGE primary test",
+            "id": "obo:GENEPIO_0000046",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ]
+        },
+        "obo:GENEPIO_0000045": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000046": [],
+                "obo:GENEPIO_0000048": []
+            },
+            "id": "obo:GENEPIO_0000045",
+            "uiLabel": "PFGE test"
+        },
+        "obo:GENEPIO_0000044": {
+            "definition": "Restriction enzyme for first characterization",
+            "otherParent": [
+                "obo:GENEPIO_0000046"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0000044",
+            "uiLabel": "primary enzyme (LMAAI)"
+        },
+        "obo:GENEPIO_0000124": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000125": [],
+                "obo:GENEPIO_0000126": [],
+                "obo:GENEPIO_0000132": [],
+                "obo:GENEPIO_0000133": [],
+                "obo:GENEPIO_0000137": [],
+                "obo:GENEPIO_0000140": []
+            },
+            "uiLabel": "DRAFT pathogen epidemiology investigation model",
+            "id": "obo:GENEPIO_0000124",
+            "definition": "This is a model of the datums involved in an epidemiology investigation, with respect to data exchange with the IRIDA.ca project."
+        },
+        "obo:GENEPIO_0000125": {
+            "definition": "The BCCDC epi case exposure model describes datums related to the possible transmission of a pathogen between a case person and other people, places, animals etc.",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "obo:GENEPIO_0000130": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:HP_0000118": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "obo:FLU_0000976": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "obo:GENEPIO_0001487": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001488": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000129": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000125",
+            "uiLabel": "DRAFT epi case exposure model"
+        },
+        "obo:GENEPIO_0000126": {
+            "definition": "The epi case food model describes datums - like food product type, preservation and cooking characteristics - that are related to one or more foods that a case patient has come in contact with.",
+            "parent": "obo:GENEPIO_0000124",
+            "components": {
+                "obo:FOODON_03400361": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:FOODON_03470107": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:FOODON_03450002": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0000127": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0000131": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:FOODON_03500010": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:FOODON_03490100": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0000139": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000126",
+            "uiLabel": "DRAFT epi case food model"
+        },
+        "obo:GENEPIO_0000127": {
+            "uiLabel": "food brought back from travel",
+            "id": "obo:GENEPIO_0000127",
+            "components": {
+                "obo:FOODON_03400361": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ]
+        },
+        "obo:GENEPIO_0000120": {
+            "datatype": "xmls:dateTime",
+            "id": "obo:GENEPIO_0000120",
+            "uiLabel": "travel history item"
+        },
+        "obo:GENEPIO_0000121": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "travel start date",
+            "id": "obo:GENEPIO_0000121",
+            "otherParent": [
+                "obo:GENEPIO_0000140"
+            ]
+        },
+        "obo:GENEPIO_0001338": {
+            "datatype": "model",
+            "definition": "Earth surface is the entire surface of planet Earth, including water.",
+            "id": "obo:GENEPIO_0001338",
+            "components": {
+                "obo:GEO_000000788": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "earth surface"
+        },
+        "obo:FOODON_03490100": {
+            "definition": "Type of container or wrapping defined by the main container material, the container form, and the material of the liner lids or ends. Also type of container or wrapping by form; prefer description by material first, then by form.  [FDA CFSAN 1995]",
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:M0100"
+            ],
+            "id": "obo:FOODON_03490100",
+            "uiLabel": "container or wrapping"
+        },
+        "obo:GENEPIO_0000128": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000130": [],
+                "obo:GENEPIO_0000129": []
+            },
+            "uiLabel": "epidemiology contact network model",
+            "id": "obo:GENEPIO_0000128",
+            "definition": "An epidemiology contact network model is a definition of the information necessary to connect pathogen transmission patterns between individuals or animals in connection with an outbreak investigation."
+        },
+        "obo:GENEPIO_0000129": {
+            "definition": "An epi contact network - human is contact information about a person who may be involved in transmitting a pathogen.",
+            "parent": "obo:GENEPIO_0000128",
+            "components": {
+                "obo:GENEPIO_0000142": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0000131": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001275": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "epi contact network model - human",
+            "id": "obo:GENEPIO_0000129",
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ]
+        },
+        "obo:GENEPIO_0001908": {
+            "definition": "Wikipedia: \"In mathematics, a plane is a flat, two-dimensional surface. A plane is the two-dimensional analogue of a point (zero dimensions), a line (one dimension) and three-dimensional space. Planes can arise as subspaces of some higher-dimensional space, as with the walls of a room, or they may enjoy an independent existence in their own right, as in the setting of Euclidean geometry.\"\n\n\"When working exclusively in two-dimensional Euclidean space, the definite article is used, so, the plane refers to the whole space.\"",
+            "uiLabel": "plane",
+            "id": "obo:GENEPIO_0001908",
+            "otherParent": [
+                "obo:GENEPIO_0001870"
+            ]
+        },
+        "obo:GENEPIO_0002020": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "admitted to hospital",
+            "id": "obo:GENEPIO_0002020",
+            "member_of": [
+                "obo:GENEPIO_0002019"
+            ]
+        },
+        "obo:GENEPIO_0001907": {
+            "definition": "Wikipedia:  A spheroid, or ellipsoid of revolution, is a quadric surface obtained by rotating an ellipse about one of its principal axes; in other words, an ellipsoid with two equal semi-diameters.",
+            "uiLabel": "spheroid",
+            "id": "obo:GENEPIO_0001907",
+            "otherParent": [
+                "obo:GEO_000000788"
+            ]
+        },
+        "obo:GENEPIO_0001639": {
+            "definition": "An antigenic formula is a string composed of codes representing categorized results of tests performed on various viral, bacterial or immune cell surface antigens.",
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "antigenic formula",
+            "id": "obo:GENEPIO_0001639",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:ENVO_00000062": {
+            "definition": "Place or area with clustered or scattered buildings and a permanent human population.",
+            "hasExactSynonym": [
+                "populated place",
+                "settlement",
+                "populated places",
+                "inhabited place"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "member_of": [
+                "obo:ENVO_00000070",
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "populated place",
+            "hasDbXref": [
+                "https://en.wikipedia.org/wiki/Populated_place",
+                "FTT:1097",
+                "Geonames:P.PPL",
+                "FTT:33",
+                "TGN:83002",
+                "Geonames:P.PPLS",
+                "TGN:22201"
+            ],
+            "id": "obo:ENVO_00000062",
+            "choices": {
+                "obo:ENVO_01000658": []
+            }
+        },
+        "obo:GENEPIO_0001050": {
+            "member_of": [
+                "obo:GENEPIO_0001048"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "animal related exposure",
+            "id": "obo:GENEPIO_0001050",
+            "choices": {
+                "obo:GENEPIO_0001269": []
+            }
+        },
+        "obo:ENVO_00010483": {
+            "definition": "A portion of environmental material is a fiat object which forms the medium or part of the medium of an environmental system.",
+            "otherParent": [
+                "obo:GENEPIO_0000027",
+                "obo:GENEPIO_0000134"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasExactSynonym": [
+                "portion of environmental material"
+            ],
+            "id": "obo:ENVO_00010483",
+            "uiLabel": "environmental material"
+        },
+        "obo:PATO_0002390": {
+            "definition": "A length quality which is equal to the length of any straight line segment that passes from the center of a circle to any endpoint on the circular boundary. The radius is half of the diameter.",
+            "uiLabel": "radius",
+            "id": "obo:PATO_0002390",
+            "otherParent": [
+                "obo:GENEPIO_0001867"
+            ]
+        },
+        "obo:GENEPIO_0001224": {
+            "datatype": "xmls:dateTime",
+            "id": "obo:GENEPIO_0001224",
+            "uiLabel": "pregnancy history item"
+        },
+        "obo:GENEPIO_0001225": {
+            "datatype": "xmls:dateTime",
+            "id": "obo:GENEPIO_0001225",
+            "uiLabel": "date of conception"
+        },
+        "obo:GENEPIO_0001427": {
+            "datatype": "xmls:string",
+            "uiLabel": "health care personal identifier",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ],
+            "id": "obo:GENEPIO_0001427",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ]
+        },
+        "sio:SIO_000767": {
+            "definition": "A postal code is a geographic coordinate composed of a series of letters and/or digits appended to a postal address for the purpose of sorting mail.",
+            "otherParent": [
+                "obo:GENEPIO_0001679"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "postal code",
+            "id": "sio:SIO_000767",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000113": {
+            "definition": "Specimen category is a categorical variable that broadly indicates the source of a specimen in order for data processing systems like NCBI's biosample submission portal to anticipate other fields related to the source. Currently this distinguishes between \"clinical or host associated\" specimens and \"environmental/food or other pathogen\" specimens.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0000113",
+            "uiLabel": "specimen category"
+        },
+        "obo:GENEPIO_0001429": {
+            "definition": "The strain identifier is the microbial or eukaryotic strain name from a reference database that a sample has been matched to.",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "strain identifier",
+            "id": "obo:GENEPIO_0001429",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000115": {
+            "models": {
+                "obo:GENEPIO_0001835": []
+            },
+            "parent": "vcf:C103180",
+            "definition": "The National Center for Biotechnology Information offers standards for submitting genomic project data to their BioProject and BioSample databases.",
+            "datatype": "model",
+            "id": "obo:GENEPIO_0000115",
+            "uiLabel": "NCBI standard"
+        },
+        "ancestro:ancestro_0004": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "ancestral group",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "id": "ancestro:ancestro_0004",
+            "otherParent": [
+                "obo:GENEPIO_0000139"
+            ]
+        },
+        "obo:ENVO_00000123": {
+            "definition": "A geographical region whose affairs and population are administered by an authority.",
+            "member_of": [
+                "obo:ENVO_00000004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "political entity",
+            "hasDbXref": [
+                "FTT:1093",
+                "Geonames:A.PCL",
+                "TGN:80002"
+            ],
+            "id": "obo:ENVO_00000123",
+            "choices": {
+                "obo:ENVO_00000009": []
+            }
+        },
+        "obo:GENEPIO_0001835": {
+            "datatype": "model",
+            "definition": "A National Center for Biotechnology Information BioSample specification defines fields and terms that provide \"descriptions of biological source materials used in experimental assays\".",
+            "id": "obo:GENEPIO_0001835",
+            "parent": "obo:GENEPIO_0000115",
+            "uiLabel": "NCBI BioSample standard"
+        },
+        "obo:UO_0000001": {
+            "definition": "A unit which is a standard measure of the distance between two points.",
+            "uiLabel": "length unit",
+            "id": "obo:UO_0000001",
+            "otherParent": [
+                "obo:GENEPIO_0001869"
+            ]
+        },
+        "obo:UO_0000000": {
+            "definition": "A unit of measurement is a standardized quantity of a physical quality.",
+            "uiLabel": "unit",
+            "id": "obo:UO_0000000",
+            "otherParent": [
+                "obo:GENEPIO_0001864"
+            ]
+        },
+        "obo:ENVO_00000856": {
+            "definition": "Incorporated populated place.",
+            "otherParent": [
+                "obo:GENEPIO_0001679"
+            ],
+            "member_of": [
+                "obo:ENVO_01000658",
+                "sio:SIO_000415"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "FTT:485",
+                "TGN:83043",
+                "TGN:83040",
+                "SWEETRealm:City",
+                "TGN:83020",
+                "EcoLexicon:city",
+                "https://en.wikipedia.org/wiki/City",
+                "FTT:484",
+                "FTT:483",
+                "FTT:430"
+            ],
+            "id": "obo:ENVO_00000856",
+            "uiLabel": "city"
+        },
+        "obo:GENEPIO_0001743": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000143": [],
+                "obo:GENEPIO_0001741": []
+            },
+            "id": "obo:GENEPIO_0001743",
+            "uiLabel": "public health data model"
+        },
+        "obo:GENEPIO_0001741": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0001688": []
+            },
+            "uiLabel": "GenEpiO model",
+            "id": "obo:GENEPIO_0001741",
+            "definition": "The GenEpiO model is a collection of generic data models relevant to epidemiological, laboratory, clinical and environmental pathogen sample data collection and analysis."
+        },
+        "obo:GENEPIO_0001041": {
+            "datatype": "xmls:dateTime",
+            "definition": "A time measurement datum that pertains to an organism's physical location.",
+            "id": "obo:GENEPIO_0001041",
+            "uiLabel": "personal location history datum"
+        },
+        "obo:FOODON_03400361": {
+            "otherParent": [
+                "obo:GENEPIO_0000126",
+                "obo:GENEPIO_0000134",
+                "obo:GENEPIO_0000127"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "food product type",
+            "hasDbXref": [
+                "LANGUAL:A0361"
+            ],
+            "id": "obo:FOODON_03400361",
+            "label": "product type"
+        },
+        "obo:FOODON_03470107": {
+            "definition": "The methods contributing to the prevention or retardation of microbial, enzymatic or oxidative spoilage and thus to the extension of shelf life. Index all methods for which information is available, even if a corresponding descriptor has already been used in *H. TREATMENT APPLIED*. Preservation descriptors refer to the finished food as a whole with these exceptions: (1) if the components of a multi-component food, such as cream pie, are preserved by different methods, index all methods; (2)  if chemical preservatives are declared on the label, always index them even if it is known that the preservative was introduced through or is only present in a component or ingredient of the food; and (3) if the preservation method for an ingredient is declared on the label (such as brie cheese made from pasteurized milk) index it. Also use *INGREDIENT PRESERVED BY THERMAL PROCESSING* or *INGREDIENT PRESERVED BY IRRADIATION* when ingredients have been pasteurized, ultrapasteurized, sterilized or irradiated.",
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:J0107"
+            ],
+            "id": "obo:FOODON_03470107",
+            "uiLabel": "preservation method"
+        },
+        "obo:GENEPIO_0001297": {
+            "definition": "An epi case physical location type is a type of built structure that is suspected to be related to an outbreak investigation.",
+            "otherParent": [
+                "obo:GENEPIO_0000027"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0001297",
+            "uiLabel": "epi case physical location type"
+        },
+        "obo:GENEPIO_0001048": {
+            "definition": "Ingestion from contact with ...",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "exposure source",
+            "id": "obo:GENEPIO_0001048",
+            "choices": {
+                "obo:GENEPIO_0001050": [],
+                "obo:GENEPIO_0001049": []
+            }
+        },
+        "obo:GENEPIO_0001049": {
+            "member_of": [
+                "obo:GENEPIO_0001048"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "human related exposure",
+            "id": "obo:GENEPIO_0001049",
+            "choices": {
+                "obo:GENEPIO_0001275": []
+            }
+        },
+        "obo:OBI_0000658": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0001755": [],
+                "vcf:C103180": [],
+                "obo:GENEPIO_0000128": [],
+                "obo:GENEPIO_0001743": []
+            },
+            "uiLabel": "data representational model",
+            "id": "obo:OBI_0000658",
+            "definition": "Data representational model is an information content entity of the  relationships between data items. A data representational model is encoded in a data format specification such as for cytoscape or biopax."
+        },
+        "obo:GENEPIO_0001356": {
+            "datatype": "xmls:dateTime",
+            "definition": "A specimen history item is a time-related datum about a particular specimen",
+            "uiLabel": "specimen history item",
+            "id": "obo:GENEPIO_0001356",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GEO_000000005": {
+            "definition": "A subnational entity that is the primary organizational member of a nation, is subject to the full set of laws of the nation, enjoys all the privileges established under the laws of the nation, is not a member of any other geopolitical entity, and itself governs a part of the geographical region governed by the nation.",
+            "otherParent": [
+                "obo:GENEPIO_0001679"
+            ],
+            "member_of": [
+                "sio:SIO_000415"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "state / province / territory / region",
+            "id": "obo:GEO_000000005",
+            "label": "major administrative subdivision"
+        },
+        "obo:OMP_0000207": {
+            "definition": "A microbial phenotype that is distinguished by the presence a specific surface antigen.",
+            "hasExactSynonym": [
+                "serovar"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0000137"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "serotype phenotype",
+            "id": "obo:OMP_0000207",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:ENVO_00000009": {
+            "hasNarrowSynonym": [
+                "independent nation",
+                "independent sovereign nation",
+                "independent political entity"
+            ],
+            "definition": "A political association with effective dominion over a geographic area.",
+            "hasExactSynonym": [
+                "nation"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0001679"
+            ],
+            "member_of": [
+                "obo:ENVO_00000123",
+                "sio:SIO_000415"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "country",
+            "hasDbXref": [
+                "TGN:81010",
+                "SWEETRealm:Country",
+                "FTT:424",
+                "FTT:571",
+                "TGN:80006",
+                "FTT:566",
+                "FTT:567",
+                "SWEETRealm:State",
+                "https://en.wikipedia.org/wiki/Nation",
+                "TGN:81011",
+                "TGN:81102"
+            ],
+            "id": "obo:ENVO_00000009",
+            "label": "national geopolitical entity"
+        },
+        "obo:ENVO_00000002": {
+            "member_of": [
+                "obo:ENVO_00000000"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "anthropogenic geographic feature",
+            "hasDbXref": [
+                "TGN:50001",
+                "FTT:78"
+            ],
+            "id": "obo:ENVO_00000002",
+            "choices": {
+                "obo:ENVO_00000004": [],
+                "obo:ENVO_00000070": []
+            }
+        },
+        "obo:ENVO_00000000": {
+            "hasExactSynonym": [
+                "macroscopic spatial feature"
+            ],
+            "member_of": [
+                "obo:ENVO_00002297"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "https://en.wikipedia.org/wiki/Geographic_feature"
+            ],
+            "uiLabel": "geographic feature",
+            "choices": {
+                "obo:ENVO_00000002": []
+            },
+            "id": "obo:ENVO_00000000"
+        },
+        "obo:ENVO_00000004": {
+            "hasExactSynonym": [
+                "administrative area"
+            ],
+            "member_of": [
+                "obo:ENVO_00000002"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "administrative region",
+            "hasDbXref": [
+                "FTT:1252",
+                "FTT:1242",
+                "SWEETRealm:AdministrativeRegion",
+                "https://en.wikipedia.org/wiki/Administrative_region",
+                "FTT:18",
+                "TGN:80001",
+                "FTT:22",
+                "FTT:19",
+                "FTT:24",
+                "FTT:23",
+                "TGN:81123",
+                "FTT:16",
+                "FTT:37",
+                "TGN:81099",
+                "FTT:15",
+                "FTT:25",
+                "FTT:27",
+                "FTT:29",
+                "FTT:26",
+                "FTT:21",
+                "FTT:28"
+            ],
+            "id": "obo:ENVO_00000004",
+            "choices": {
+                "obo:ENVO_00000123": []
+            }
+        },
+        "obo:GENEPIO_0001881": {
+            "datatype": "xmls:dateTime",
+            "definition": "A datetime set item is a datetime that has been grouped semantically under a given type of process",
+            "uiLabel": "datetime set item",
+            "id": "obo:GENEPIO_0001881",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001617": {
+            "definition": "Name of disease in a subject that is related to a given investigation, study and/or specimen.",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "subject disease",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "components": {
+                "obo:DOID_4": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ]
+            },
+            "id": "obo:GENEPIO_0001617",
+            "constraints": []
+        },
+        "obo:GENEPIO_0001610": {
+            "units": [
+                "obo:UO_0000036"
+            ],
+            "definition": "A subject age is the age since birth of a given organism that is involved in an investigation or study at a given time.",
+            "datatype": "xmls:nonNegativeInteger",
+            "uiLabel": "subject age",
+            "id": "obo:GENEPIO_0001610",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                },
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": 129,
+                    "constraint": "xmls:maxInclusive"
+                }
+            ]
+        },
+        "obo:STATO_0000047": {
+            "datatype": "xmls:nonNegativeInteger",
+            "definition": "a count is a data item denoted by an integer and represented the number of instances or occurences of an entity",
+            "uiLabel": "count",
+            "id": "obo:STATO_0000047",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001755": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0001679": [],
+                "obo:GENEPIO_0001606": []
+            },
+            "id": "obo:GENEPIO_0001755",
+            "uiLabel": "contact specification"
+        },
+        "obo:DOID_4": {
+            "definition": "A disease is a disposition (i) to undergo pathological processes that (ii) exists in an organism because of one or more disorders in that organism.",
+            "otherParent": [
+                "obo:GENEPIO_0001617"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "http://purl.oboInOwllibrary.org/oboInOwl/OGMS_0000031"
+            ],
+            "id": "obo:DOID_4",
+            "uiLabel": "disease"
+        },
+        "vcf:C68615": {
+            "definition": "The calendar date on which a person was born.",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "datatype": "xmls:dateTime",
+            "uiLabel": "date of birth",
+            "id": "vcf:C68615",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001289": {
+            "datatype": "xmls:string",
+            "uiLabel": "PFGE pattern",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ],
+            "id": "obo:GENEPIO_0001289",
+            "otherParent": [
+                "obo:GENEPIO_0000046",
+                "obo:GENEPIO_0000048"
+            ]
+        },
+        "sio:SIO_000182": {
+            "definition": "A last name (surname) is a name added to a given name and is part of a personal name and is often the family name.",
+            "otherParent": [
+                "obo:GENEPIO_0000132",
+                "obo:GENEPIO_0001606"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "last name",
+            "id": "sio:SIO_000182",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:UO_0000036": {
+            "definition": "A time unit which is equal to 12 months which is science is taken to be equal to 365.25 days.",
+            "uiLabel": "year",
+            "id": "obo:UO_0000036",
+            "label": "year"
+        },
+        "sio:SIO_000181": {
+            "definition": "A first name is a name that denotes a specific individual between members of a group of individuals, whose members usually share the same surname.",
+            "otherParent": [
+                "obo:GENEPIO_0001606",
+                "obo:GENEPIO_0000132"
+            ],
+            "datatype": "xmls:string",
+            "uiLabel": "first name",
+            "id": "sio:SIO_000181",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001064": {
+            "definition": "A travel mode is a type of transportation which a given human has used while travelling on a particular trip.",
+            "otherParent": [
+                "obo:GENEPIO_0000140"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0001064",
+            "uiLabel": "travel mode"
+        },
+        "obo:GENEPIO_0001688": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000045": [],
+                "obo:GENEPIO_0001719": []
+            },
+            "uiLabel": "test specification",
+            "id": "obo:GENEPIO_0001688",
+            "definition": "A lab test specification indicates the inputs and outputs (results / conclusions) of a test."
+        },
+        "obo:PATO_0001894": {
+            "definition": "Phenotypic sex refers to an individual's sex as determined by their internal and external genitalia, expression of secondary sex characteristics, and behavior.",
+            "otherParent": [
+                "obo:GENEPIO_0000031"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:PATO_0001894",
+            "uiLabel": "phenotypic sex"
+        },
+        "obo:GENEPIO_0001879": {
+            "definition": "Wikipedia: \"The significant figures of a number are digits that carry meaning contributing to its measurement resolution.\"",
+            "otherParent": [
+                "obo:GENEPIO_0001919"
+            ],
+            "datatype": "xmls:int",
+            "uiLabel": "significant digits",
+            "id": "obo:GENEPIO_0001879",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001878": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "datetime range start",
+            "id": "obo:GENEPIO_0001878",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0002019": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "host medical service status",
+            "choices": {
+                "obo:GENEPIO_0002020": []
+            },
+            "id": "obo:GENEPIO_0002019",
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ]
+        },
+        "obo:GENEPIO_0002017": {
+            "datatype": "xmls:string",
+            "uiLabel": "geospatial name",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ],
+            "id": "obo:GENEPIO_0002017",
+            "otherParent": [
+                "obo:GENEPIO_0001925",
+                "obo:GENEPIO_0001886"
+            ]
+        },
+        "obo:GENEPIO_0001877": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "datetime range end",
+            "id": "obo:GENEPIO_0001877",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001876": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "datetime range item",
+            "id": "obo:GENEPIO_0001876",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001870": {
+            "definition": "An area calculation datum is a functional mapping of a two dimensional surface area (can be anything from an abstract polygon, to a postal code or country) to a 1 dimensional scalar.  The original surface area may be curved, e.g. spheroid.  The surface area can also be described using only one input - for example the radius scalar of a polar coordinate plane described by pi*r^2.",
+            "uiLabel": "area calculation",
+            "id": "obo:GENEPIO_0001870",
+            "components": {
+                "obo:GENEPIO_0001908": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0001885"
+            ]
+        },
+        "obo:GENEPIO_0001567": {
+            "definition": "The natural (as opposed to laboratory) host to the organism from which the sample was obtained. Use the full taxonomic name, eg, \"Homo sapiens\".",
+            "otherParent": [
+                "obo:GENEPIO_0000130",
+                "obo:GENEPIO_0000133"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:GENEPIO_0001567",
+            "uiLabel": "subject taxonomy (species)"
+        },
+        "obo:FOODON_03500010": {
+            "definition": "The specific container or coating materials in direct contact with the food. Multiple values can be assigned. [FDA CFSAN 1995]",
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:N0010"
+            ],
+            "id": "obo:FOODON_03500010",
+            "uiLabel": "food contact surface"
+        },
+        "obo:GENEPIO_0001606": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000142": [],
+                "obo:GENEPIO_0000138": []
+            },
+            "id": "obo:GENEPIO_0001606",
+            "components": {
+                "sio:SIO_000182": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "sio:SIO_001319": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "sio:SIO_000181": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:IAO_0000429": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "contact specification - person"
+        },
+        "vcf:C103180": {
+            "datatype": "model",
+            "models": {
+                "obo:GENEPIO_0000003": [],
+                "obo:GENEPIO_0000115": []
+            },
+            "uiLabel": "data standard",
+            "id": "vcf:C103180",
+            "definition": "A statement that defines conventions, guidelines, characteristics or methods for consistent data handling to facilitate exchange or processing of the data. This set of criteria are reviewed by and agreed upon by the user community or a governing body before they are released and adopted for use."
+        },
+        "obo:GENEPIO_0001286": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "health authority",
+            "member_of": [
+                "sio:SIO_000415"
+            ],
+            "id": "obo:GENEPIO_0001286",
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ]
+        },
+        "obo:GENEPIO_0001775": {
+            "units": [
+                "obo:UO_0000036"
+            ],
+            "otherParent": [
+                "obo:GENEPIO_0000132"
+            ],
+            "definition": "A subject age at time of specimen extraction is the age (since birth) of the organism at the time a given specimen was extracted.",
+            "datatype": "xmls:nonNegativeInteger",
+            "uiLabel": "subject age at time of specimen collection",
+            "id": "obo:GENEPIO_0001775",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                },
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": 129,
+                    "constraint": "xmls:maxInclusive"
+                }
+            ]
+        },
+        "obo:GENEPIO_0000122": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "travel end date",
+            "id": "obo:GENEPIO_0000122",
+            "otherParent": [
+                "obo:GENEPIO_0000140"
+            ]
+        },
+        "obo:GENEPIO_0001275": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "human exposure contact type",
+            "member_of": [
+                "obo:GENEPIO_0001049"
+            ],
+            "id": "obo:GENEPIO_0001275",
+            "otherParent": [
+                "obo:GENEPIO_0000129"
+            ]
+        },
+        "obo:GENEPIO_0000003": {
+            "datatype": "model",
+            "definition": "MixS is a unified standard for describing sequence data provided by the Genomic Standards Consortium",
+            "id": "obo:GENEPIO_0000003",
+            "parent": "vcf:C103180",
+            "uiLabel": "MIxS standard"
+        },
+        "obo:IAO_0000577": {
+            "datatype": "xmls:string",
+            "definition": "A symbol that is part of a CRID and that is sufficient to look up a record from the CRID's registry.",
+            "uiLabel": "centrally registered identifier symbol",
+            "id": "obo:IAO_0000577",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001473": {
+            "datatype": "xmls:dateTime",
+            "id": "obo:GENEPIO_0001473",
+            "uiLabel": "exposure history item"
+        },
+        "obo:GENEPIO_0001890": {
+            "datatype": "xmls:string",
+            "definition": "A \"USA zip code\" is a five digit (Zone Improvement Plan) or 9 digit postal code pertaining to a region of the United States of America. The optional trailing 4 digits of a 9 digit zip code provide greater granularity of delivery target.",
+            "uiLabel": "USA zip code",
+            "id": "obo:GENEPIO_0001890",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:IDO_0000531": {
+            "definition": "An organism bearing a host role.",
+            "member_of": [
+                "obo:OBI_0100026"
+            ],
+            "datatype": "xmls:anyURI",
+            "id": "obo:IDO_0000531",
+            "uiLabel": "host"
+        },
+        "sio:SIO_000415": {
+            "definition": "A geopolitical region is a geographic region recognized by social or legal convention.",
+            "otherParent": [
+                "obo:GENEPIO_0001783"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "geopolitical region",
+            "id": "sio:SIO_000415",
+            "choices": {
+                "obo:ENVO_00000856": [],
+                "obo:ENVO_00000009": [],
+                "obo:GENEPIO_0001286": [],
+                "obo:GEO_000000005": []
+            }
+        },
+        "obo:GENEPIO_0001860": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001860",
+            "components": {
+                "obo:GENEPIO_0001919": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001864": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "1D coordinate"
+        },
+        "obo:OBI_0001169": {
+            "units": [
+                "obo:UO_0000036"
+            ],
+            "definition": "An age measurement datum that is the result of the measurement of the age of an organism since birth, the process of emergence and separation of offspring from the mother.",
+            "datatype": "xmls:nonNegativeInteger",
+            "uiLabel": "age since birth measurement datum",
+            "id": "obo:OBI_0001169",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001866": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001866",
+            "components": {
+                "obo:GENEPIO_0001864": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "3"
+                    }
+                ]
+            },
+            "uiLabel": "3D coordinate system"
+        },
+        "obo:GENEPIO_0001867": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001867",
+            "components": {
+                "obo:PATO_0002390": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GENEPIO_0001868": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "radial coordinate system"
+        },
+        "obo:GENEPIO_0001679": {
+            "parent": "obo:GENEPIO_0001755",
+            "components": {
+                "obo:ENVO_00000009": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "vcard:streetAddress": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:ENVO_00000856": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "obo:GEO_000000005": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ],
+                "sio:SIO_000767": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:maxQualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "uiLabel": "contact specification - address",
+            "id": "obo:GENEPIO_0001679",
+            "otherParent": [
+                "obo:GENEPIO_0000142"
+            ]
+        },
+        "obo:GENEPIO_0001865": {
+            "datatype": "model",
+            "definition": "A 2D coordinate system is a coordinate system in 2 dimensional space.  Each coordinate is composed of an offset from the origin of each dimension",
+            "id": "obo:GENEPIO_0001865",
+            "components": {
+                "obo:GENEPIO_0001864": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "2"
+                    }
+                ]
+            },
+            "uiLabel": "2D coordinate system"
+        },
+        "obo:GENEPIO_0001868": {
+            "uiLabel": "angular coordinate",
+            "id": "obo:GENEPIO_0001868",
+            "otherParent": [
+                "obo:GENEPIO_0001867"
+            ]
+        },
+        "obo:GENEPIO_0001869": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001869",
+            "components": {
+                "obo:UO_0000001": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "linear coordinate"
+        },
+        "obo:GENEPIO_0001269": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "animal exposure - location type",
+            "member_of": [
+                "obo:GENEPIO_0001050"
+            ],
+            "id": "obo:GENEPIO_0001269",
+            "otherParent": [
+                "obo:GENEPIO_0000130"
+            ]
+        },
+        "obo:GENEPIO_0001783": {
+            "definition": "A travel destination is a destination city (or populated place of some scale) which a given human has travelled to on a particular trip.",
+            "otherParent": [
+                "obo:GENEPIO_0000140"
+            ],
+            "components": {
+                "sio:SIO_000415": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001783",
+            "uiLabel": "travel destination"
+        },
+        "obo:OBI_0001619": {
+            "definition": "A time measurement datum that is the measure of the time when the specimens are collected.",
+            "uiLabel": "specimen extraction date",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "datatype": "xmls:dateTime",
+            "label": "specimen collection time measurement datum",
+            "id": "obo:OBI_0001619",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:CHMO_0002743": {
+            "definition": "Those components of a sample that are not measured by an experiment.",
+            "otherParent": [
+                "obo:GENEPIO_0000133"
+            ],
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "specimen collection matrix",
+            "id": "obo:CHMO_0002743",
+            "label": "matrix"
+        },
+        "vcard:Address": {
+            "datatype": "xmls:string",
+            "uiLabel": "address",
+            "id": "vcard:Address",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001888": {
+            "datatype": "xmls:string",
+            "definition": "A Canadian postal code is a postal code that pertains to a geographic region of Canada.",
+            "uiLabel": "Canada postal code",
+            "id": "obo:GENEPIO_0001888",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001889": {
+            "datatype": "xmls:string",
+            "definition": "The \"Canadia postal code FSA\" is the leading FSA (Forward Sortation Area) 3 character portion of a full 6 character Canadian postal code.  It can be used to reduce the geographic granularity of a postal code for data generalization or obfuscation.",
+            "uiLabel": "Canada postal code FSA",
+            "id": "obo:GENEPIO_0001889",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001885": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001885",
+            "components": {
+                "obo:GENEPIO_0001870": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "uiLabel": "surface area"
+        },
+        "obo:GENEPIO_0001886": {
+            "datatype": "model",
+            "id": "obo:GENEPIO_0001886",
+            "components": {
+                "obo:GENEPIO_0002017": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:APOLLO_SV_00000153": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ],
+                "obo:GENEPIO_0001925": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:minQualifiedCardinality",
+                        "value": "0"
+                    }
+                ]
+            },
+            "uiLabel": "designated area on Earth"
+        },
+        "obo:GENEPIO_0001880": {
+            "datatype": "xmls:dateTime",
+            "uiLabel": "datetime",
+            "id": "obo:GENEPIO_0001880",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:maxQualifiedCardinality"
+                }
+            ]
+        },
+        "obo:FOODON_03450002": {
+            "member_of": [
+                "obo:GENEPIO_0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:G0002"
+            ],
+            "uiLabel": "cooking method",
+            "otherParent": [
+                "obo:GENEPIO_0000126"
+            ],
+            "id": "obo:FOODON_03450002"
+        },
+        "obo:GENEPIO_0001919": {
+            "uiLabel": "number",
+            "id": "obo:GENEPIO_0001919",
+            "components": {
+                "obo:GENEPIO_0001879": [
+                    {
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }
+                ]
+            },
+            "otherParent": [
+                "obo:GENEPIO_0001860"
+            ]
+        },
+        "obo:APOLLO_SV_00000240": {
+            "datatype": "xmls:dateTime",
+            "definition": "A information content entity that specifies the date of a census.",
+            "uiLabel": "census reference date",
+            "id": "obo:APOLLO_SV_00000240",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "sio:SIO_001319": {
+            "definition": "a telephone number is an identifier used to connect to a physical device capable of transfering voice or data over a network.",
+            "uiLabel": "phone",
+            "otherParent": [
+                "obo:GENEPIO_0001606"
+            ],
+            "datatype": "xmls:string",
+            "label": "telephone number",
+            "id": "sio:SIO_001319",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:FLU_0000976": {
+            "definition": "A symptom onset date is a date-time entity that marks the start of one or more reported symptoms pertaining to an episode of human or animal illness",
+            "otherParent": [
+                "obo:GENEPIO_0000125"
+            ],
+            "datatype": "xmls:dateTime",
+            "uiLabel": "symptom onset date",
+            "id": "obo:FLU_0000976",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:GENEPIO_0001704": {
+            "datatype": "xmls:string",
+            "uiLabel": "textual test result",
+            "id": "obo:GENEPIO_0001704",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "obo:OBI_0001167": {
+            "units": [
+                "obo:UO_0000036"
+            ],
+            "definition": "A time measurement datum that is the result of measurement of age of an organism",
+            "datatype": "xmls:nonNegativeInteger",
+            "uiLabel": "age measurement datum",
+            "id": "obo:OBI_0001167",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        },
+        "sio:SIO_000116": {
+            "datatype": "xmls:string",
+            "definition": "A name is a label used to identify an entity.",
+            "uiLabel": "name",
+            "id": "sio:SIO_000116",
+            "constraints": [
+                {
+                    "datatype": "xmls:nonNegativeInteger",
+                    "value": "1",
+                    "constraint": "owl:qualifiedCardinality"
+                }
+            ]
+        }
+    }
+}

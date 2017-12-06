@@ -77,7 +77,7 @@ $( document ).ready(function() {
 	// Trigger JSON / EXCELL / YAML view of specification
 	$('#specificationType').on('change', getdataSpecification)
 
-	$('#view_spec_download').on('click', downloadDataSpecification)
+	$('#spec_download').on('click', downloadDataSpecification) // the button, not the surrounding link.
 
 	// Provide type-as-you-go searching
 	$("#searchField").on('keyup', function() {
@@ -173,6 +173,7 @@ function loadSpecification(specification_file) {
 			// Setup Zurb Foundation user interface and form validation
 
 			top.specification = specification['specifications'];
+			top.context = specification['@context'];
 
 			// Provide context of form to populate.
 			myForm = new OntologyForm("#mainForm", top.specification, top.formSettings, formCallback) 

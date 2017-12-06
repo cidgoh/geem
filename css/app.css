@@ -92,6 +92,7 @@ li.depth7 {padding-left:105px !important;}
 li.depth8 {padding-left:120px !important;}
 li.depth9 {padding-left:135px !important;}
 li.depth10 {padding-left:150px !important;}
+li.depthReset {padding-left:0px !important;}
 
 select.units {width:auto;cursor:pointer} 
 

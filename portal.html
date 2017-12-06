@@ -211,10 +211,11 @@
               </optiongroup>
             </select>
 
-              <!--<li class="tabs-title"><a href="#excel_specification">MS Excel</a></li>-->
-              <a id="view_spec_download"  class="input-group-label small" download="specification.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="padding:0">
-                <button class="button icon fi-download  disabled" title="download" id="spec_download" style="margin:0;border:0"> Download</button>
-              </a>
+            <div class="input-group-label" style="padding:0">
+              <button class="button icon fi-download disabled" title="download" id="spec_download" style="margin:0;border:0;cursor:pointer"> Download</button>
+              <a id="view_spec_download" download="this_will_be_renamed.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="visibility:hidden"></a>
+            </div>
+
 
           </div>
 

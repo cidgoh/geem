@@ -301,14 +301,36 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 	/*********************** FORM SPECIFICATION BUILD **********************/
-	getEntitySpecForm = function(entityId, specification = [], path = [], depth = 0, inherited = false) {
+
+	getEntitySpecForm = function(entityId) {
 		/*
-		Modelled closely on OntologyForm.render(), this returns just the form 
-		specification object as it is "unwound" from pure JSON specification.
+		This is a simplified JSON-LD structure much like OntologyForm.render(),
+		this returns just the form specification object as it is "unwound" 
+		from pure JSON specification. At the top level it is an array of form
+		elements. The first element is the form item itself, and it contains 
+		a components [] array.  The complexity occurs in that some form elements
+		may inherit components from their superclass entities.  These are inserted
+		onto beginning of "components" array.
+		
 		FUTURE: Have form driven from output of this function.
 
 		INPUT
-			entityId : initial or current id to build hierarchic specification from
+			entityId : entity id to build out hierarchic specification from
+		OUTPUT
+			specification: javascript object containing all form elements and JSON-LD @context
+		*/
+		var rootSpecification = {'@context': top.context }
+		$.extend(rootSpecification, getEntitySpecFormComponent(entityId))
+		return rootSpecification
+	}
+
+	getEntitySpecFormComponent = function(entityId, path = [], depth = 0, inherited = false) {
+		/*
+		Modelled closely on OntologyForm.render(), this returns just the form 
+		specification object as it is "unwound" from pure JSON specification.
+
+		INPUT
+			entityId : entity id to build out hierarchic specification from
 			specification : initially empty array containing ordered form elements.
 		OUTPUT
 			specification: javascript object containing all form elements.
@@ -316,19 +338,19 @@ function OntologyForm(domId, specification, settings, callback) {
 				the given entity is.
 		*/
 		if (entityId === false) {
-			return specification // Nothing selected yet.
+			return {} //specification // Nothing selected yet.
 		}
 
 		console.log("Render Form Spec ", path, entityId, depth, inherited)
 
 		if (depth > 20) {
 			console.log ("Node: ", entityId, " loop went AWOL while rendering path", path )
-			return specification
+			return {} //specification
 		}
 
 		if (! (entityId in self.specification)) {
 			console.log("Node: " + entityId + " has no specification entry.")
-			return specification
+			return {} //specification
 		}
 
 		// deepcopy specification entity so we can change it.
@@ -336,7 +358,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		
 		if ('parent' in entity && parent['id'] == entityId) {
 			console.log("Node: " + entityId + " is a parent of itself and so cannot be re-rendered.")
-			return specification
+			return {}
 		}
 
 		if (!inherited) inherited = false // NECESSARY?
@@ -476,11 +498,8 @@ function OntologyForm(domId, specification, settings, callback) {
 
 		}
 
-		// Various fields that flat ontology has that trimmed-down JSON or YAML form view don't need.
-		entity = getEntitySimplification(entity)
-		specification.push(entity)
-
-		return specification
+		// Various fields that flat ontology has that simplified JSON or YAML form view don't need.
+		return getEntitySimplification(entity)
 	}
 
 	getEntitySimplification = function(entity) {
@@ -504,25 +523,25 @@ function OntologyForm(domId, specification, settings, callback) {
 		return $.extend(true, freshEntity, entity) 
 	}
 
-	getEntitySpecFormParts = function(entity, inherited, depth) {
+	getEntitySpecFormParts = function(entity, inherited, depth, ignoreEntity = null) {
 		/*
 		Convert given "specification" entity's "parts" list into a list of 
 		processed entities.
 		*/
-		var specification = []
+		var components = []
 
 		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
 		// Will venture upward as long as each ancestor 'has component' X.
-		// ISSUE: Do we want parent's stuff APPENDED to spec, or inserted as part of this spec?
+
+		// ISSUE: DO WE LOOP UP superclass hierarchy????
 		if ('parent' in entity) {
 			var parentId = entity['parent']
 			if (parentId != 'obolibrary:OBI_0000658') {//Top level spec.
 				var parent = self.specification[parentId]
-				// console.log('found parent', parent['id'], parent['uiLabel'])
 				if (parent && 'components' in parent) {
 					// "true" prevents a parent's other is_a subclass models from being pursued.
 					//this.getEntitySpecForm(parentId, specification, entity['path'], depth + 1, true)
-					var specification = this.getEntitySpecFormParts(parent, true, depth + 1)
+					components.push ( this.getEntitySpecFormParts(parent, true, depth + 1, entity ) )
 					// console.log('did parent', specification.length, 'items')
 					//call to parent clears specification out.
 				}
@@ -530,28 +549,26 @@ function OntologyForm(domId, specification, settings, callback) {
 		}
 
 
-		// Whether we're going up or down, we add on ALL 'has component' items 
+		// Whether we're going up or down, we add on ALL 'has component' items EXCEPT FOR VISITED ones.
 		for (var entityId2 in entity['components'] ) { 
 			// cardinality "x has member some/one/etc y"
-			// Sorting ???
-			console.log(entity['uiLabel'], "has component", entityId2, self.specification[entityId2]['uiLabel'])
-			this.getEntitySpecForm(entityId2, specification, entity['path'], depth + 1)
+			if (!ignoreEntity || entity !== ignoreEntity) {
+				//console.log(entity['uiLabel'], "has component", entityId2, self.specification[entityId2]['uiLabel'])
+				components.push( this.getEntitySpecFormComponent(entityId2, entity['path'], depth + 1) )
+			}
 		}
-
-		// Simple specifications don't include models via 'is_a'.  They focus on forms via 'has component'
 
 		// Only if we're descending downward do we add all subclass models to specification
 /*		if (inherited == false) {
 			// Cardinality doesn't apply to models so far.
 			for (var entityId in entity['models']) { 
 				console.log(entity['uiLabel'], "has model", entityId)
-				this.getEntitySpecForm(entityId, specification, entity['path'], depth + 1) 
+				this.getEntitySpecFormComponent(entityId, specification, entity['path'], depth + 1) 
 			}
 		}
 */
 
-
-		return specification
+		return components
 	}
 
 	getEntitySpecFormNumber = function(entity, minInclusive=undefined, maxInclusive=undefined) {
@@ -646,7 +663,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 		if (depth > 20) {
 			console.log ("AWOL Loop? While rendering", path )
-			return html
+			return ''
 		}
 		// Prevents an item from being rendered in loop.
 		// PROBLEM: Prevents >0 of an entity even when desired.e.g. phone/cell
@@ -658,12 +675,11 @@ function OntologyForm(domId, specification, settings, callback) {
 			var entity = $.extend(true, {}, self.specification[entityId]) 
 		else {
 			console.log("Node: " + entityId + " has no specification entry.")
-			return html
+			return ''
 		}
 
 		// Initialize entity
 		entity['depth'] = depth
-
 
 		entity['path'] = path.concat([entityId])
 		// Create a unique domId out of all the levels 
@@ -699,7 +715,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 			case 'disjunction':
 				html += renderDisjunction(entity, label, depth)
-				console.log('disjunction '  + label)
+				//console.log('disjunction '  + label)
 				break;
 
 			case 'model':
@@ -912,7 +928,8 @@ function OntologyForm(domId, specification, settings, callback) {
 	renderDisjunction = function(entity, label, depth) {
 		/* This entity was made up of 'has component some (X or Y or Z ...) 
 		At least one of the disjunction parts needs to be filled in.  More are
-		allowed at moment. A tabbed interface is used for each component.
+		allowed at moment. A tabbed interface is used for each component to 
+		emphasize that only one option needs to be filled in.
 		*/ 
 		var domId = entity['domId']
 		var htmlTabs = '<ul class="tabs" data-tabs id="' + domId + '">'

@@ -22,12 +22,12 @@ function getdataSpecification() {
 
 		switch (selected_tab) {
 			case 'json_specification':
-				content = JSON.stringify(getEntitySpec(null, top.focusEntityId), null, 2)
+				content = JSON.stringify(getEntitySpecRoot(top.focusEntityId), null, 2)
 				break; 
 
 			case 'yml_specification':
 				//content = YAML.stringify(getEntitySpec(null, top.focusEntityId), 4)  characters
-				content = jsyaml.dump(getEntitySpec(null, top.focusEntityId), 4)  //indent of 4
+				content = jsyaml.dump(getEntitySpecRoot(top.focusEntityId), 4)  //indent of 4
 				break;
 
 			case 'json_form_specification':
@@ -57,14 +57,14 @@ function getdataSpecification() {
 
 			case 'xlsm_specification':
 			case 'redcap_specification':
+				// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
 			case 'ontofox_specification':
 				alert('Coming soon!')
 				break; 
 
 			// Future formats:
 			// https://github.com/geneontology/obographs/
-			// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
-			// https://www.ebi.ac.uk/ols/docs/api#resources-terms
+			// https://www.ebi.ac.uk/ols/docs/api#resources-terms ???
 		}
 
 		$("#dataSpecification").text(content).removeClass('hide')
@@ -104,7 +104,7 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 	else
 		var parts = ['component', 'unit']
 
-	var stack = [userSpecification[0]] // Start with reference to root node.
+	var stack = [userSpecification] // Starts with reference to root node.
 	var done = []
 
 	while (stack.length) {
@@ -200,19 +200,26 @@ function downloadDataSpecification() {
 		href = base 64 encoding of #dataSpecification field.
 	*/
 	if ($("#dataSpecification").html().length) {
-		var entity = top.specification[top.focusEntityId]
-		//var selected_tab = $('#specificationType > li.is-active > a[aria-selected="true"]').attr('aria-controls')
-		var selected_tab = $('#specificationType').val()
+		var content = new Blob([ $("#dataSpecification").text() ], { type: 'text/csv' });
+		var entity = top.specification[top.focusEntityId] // get name of entity.
+		var selected_tab = $('#specificationType').val() // 'tsv_....' etc. file suffix.
 
 		// File name is main ontology id component + file suffix.
 		var file_name = entity['id'].split(':')[1] + '.' + selected_tab.split('_')[0]  
-		var content = window.btoa($("#dataSpecification").text()) // Convert to base 64.
+
 		$("#view_spec_download")
 			.attr('download', file_name)
-			.attr('href', 'data:text/csv;base64,' + content)
+			.attr('href', URL.createObjectURL(content) )
+			
+		$("#view_spec_download")[0].click() // trigger download
 	}
 }
 
+function getEntitySpecRoot(entityId = null) {
+	// Adds context to given entityId specification
+	var rootSpecification = {'@context': top.context }
+	return getEntitySpec(rootSpecification, entityId) 
+}
 
 function getEntitySpec(spec, entityId = null, inherited = false) {
 	// Recursively copy the entityId specification element and all its
@@ -223,12 +230,14 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 	if (entityId in top.specification) {
 		var entity = top.specification[entityId]
 		if (entity) {
-			spec[entityId] = entity
+			spec[entityId] = entity // reference entity directly.
 			
 			if (inherited == true) {
-				// Entity inherits primary ancestors' parts (the ones that led from start of rendering to here). 
+				// Entity inherits primary ancestors' parts (the ones that led
+				// from start of rendering to here). 
 				var parentId = entity['parent']
-				if (parentId && parentId != 'obolibrary:OBI_0000658') //Top level OBI "data representation model"
+				// Reach up to top level OBI "data representation model"
+				if (parentId && parentId != 'obolibrary:OBI_0000658') 
 					getEntitySpec(spec, parentId, true)
 			}
 

@@ -1,40 +1,43 @@
 /********************** Ontology Entity Mart Prototype ************************
 
 	This script provides the engine for displaying OBOFoundry.org compatible 
-	ontologies, allowing one to search and browse any data representation model 
-	items therein, as well
-	as root terms and their branches, mainly renders a menu of ontology entities, and a form viewer
-	that focuses on a selected entity.
+	ontology .owl files that have been marked up according to the Genomic
+	Epidemiology Entity Mart (GEEM) coding system (annotations and a few 
+	relations), allowing one to search and browse any data representation model
+	items therein, and all related numeric, categorical and textual datums.
+	
+	This code supports a portal.html page for selecting a given ontology, 
+	navigating through its various GEEM annotated specs, enabling the user to
+	view html forms and tabular/json etc. specifications, and create their own 
+	downloadable packages
 
-	Author: Damion Dooley
-	Project: GenEpiO.org Genomic Epidemiology Ontology
-	Updated: May 28, 2017
+	As well a form.html page is available for focusing on a particular spec.
+
+    Author: Damion Dooley
+	Project: genepio.org/geem
+	Updated: Dec 11, 2017
 
 	Note: we can get a dynamic list of OBOFoundry ontologies via: 
 	http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json   //&timeout=0&debug=on
 
 	TO DO:
 
-	 - disjunction tabbed interface has wrong required status?
+	 - Disjunction tabbed interface has wrong required status shown when
+	 ontology detail switch is on?
 	 - FIX: contact specification - physician inherits first name, last name etc from person, but cardinality not shown.
-	 - Must do a better job of identifying and grouping top-level ontology items
 	 - How to handle items that are not marked as datums?
 	 - possibly try: http://knockoutjs.com/index.html
-     - FIX: problem with 'specimen category'; selections linked "member of" some standard with annotation for their label, causing item itself tor surface in standard.
 	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to be recognized. using "min 1" instead of "some" is the workaround.
-
-    Author: Damion Dooley
-	Project: genepio.org/geem
 
 */
 
 /*********** ALL THE SETUP ***************************************************/
 
-specification = {}
+specification = {} // Current specification database being browsed and searched
+context = {} // JSON-LD context for loaded form
 focusEntityId = null
 formSettings = {}
-//ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
-ontologyLookupService = 'http://purl.obolibrary.org/obo/'
+ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
 
 $( document ).ready(function() {
 
@@ -44,7 +47,7 @@ $( document ).ready(function() {
 		// GEEM focuses on entities by way of a URL with hash #[entityId]
 	    if (location.hash.length > 0)
 	    	// Better entity id detection?
-		   	if (location.hash.indexOf(':') != -1) { //.substr(0,5) =='#obolibrary:'
+		   	if (location.hash.indexOf(':') != -1) { 
 				top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 				// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
 				// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
@@ -91,7 +94,7 @@ $( document ).ready(function() {
 
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', displayContext)
 
-	$("#content").on('mouseenter','i.fi-magnifying-glass,i.fi-info', displayContext)
+	$("#content").on('mouseenter','i.fi-magnifying-glass', displayContext)
 
 	$("#content").on('click', "i.fi-shopping-cart", function(event){
 		// Check and update shopping cart include/exclude status of this item
@@ -184,7 +187,7 @@ function loadSpecification(specification_file) {
 			//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
 			$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
 
-			$("ul#entityMenu").html(renderMenu('obolibrary:OBI_0000658') + '<hr/>')
+			$("ul#entityMenu").html(renderMenu('OBI:0000658') + '<hr/>')
 
 			// On Browse tab, enables eye icon click to show form without opening/closing the accordion.
 			$('ul#entityMenu *').on('click', function(event) { 
@@ -195,7 +198,7 @@ function loadSpecification(specification_file) {
 			});
 
 			// If browser URL indicates a particular entity, render it:
-			if (location.hash.indexOf(':') != -1) { // ? also .substr(0,5) =='#obolibrary:'
+			if (location.hash.indexOf(':') != -1) { 
 				top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 				// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
 				// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
@@ -446,9 +449,16 @@ function getOntologyDetailHTML(ontologyId) {
 	// Problem is that recursion to fetch parts from parent runs into parents that 
 	// have no further path.
 	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
-	entity = getEntity(ontologyId)
-	entityId = entity['id'].split(':')[1]
-	var labelURL = '<a href="' + top.ontologyLookupService + entityId + '" target="_blank">' + entity['uiLabel'] + '</a>' 
+	var entity = getEntity(ontologyId)
+	var entityIdParts = entity['id'].split(':')
+	var idPrefix = entityIdParts[0]
+	if (idPrefix in top.context) {
+		entityId = top.context[idPrefix] + entityIdParts[1]
+	}
+	else
+		entityId = top.ontologyLookupService + entity['id']
+
+	var labelURL = '<a href="' + entityId + '" target="_blank">' + entity['uiLabel'] + '</a>' 
 
 	/* Provide a label mouseover display of underlying ontology details
 	like original ontology definition, term id, synonyms, etc.
@@ -456,8 +466,10 @@ function getOntologyDetailHTML(ontologyId) {
 	var itemHTML = '<li><span class="infoLabel">ontology id:</span> ' + entity['id'] + '</li>\n'
 
 	// Label is original ontology's label, not the user interface oriented one.
+	// Show if there is a difference.
 	if ('label' in entity && entity['label'] != entity['uiLabel'])
 		itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity['label'] + '</li>\n'
+	
 	// Add original definition if different.
 	if ('definition' in entity && entity['uiDefinition'] != entity['definition'])
 		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity['definition'] + '</i></li>\n'
@@ -627,6 +639,7 @@ function renderMenu(entityId, depth = 0 ) {
 		}
 
 		var hasChildren = ('models' in entity)
+
 		if (depth > 0) {
 
 			html = ['<li class="cart-item" data-ontology-id="',	entityId,'">',

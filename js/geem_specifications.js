@@ -86,7 +86,8 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 	Converts given flat table object of ontology entities, including each
 	item's links to components, models, and choices.
 
-	// ISSUE: NEED TO DISTINGUISH ITEMS BY PATH BECAUSE EACH NODE HAS 
+	ISSUE: NEED TO DISTINGUISH ITEMS BY PATH BECAUSE EACH NODE MAY DIFFER
+	BECAUSE OF PATH FEATURES
 	minCardinality and maxCardinality
 
 	FUTURE: 3rd table for language lookup?
@@ -94,69 +95,93 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 
 	*/
 
-	var nodeHeader = ['id', 'datatype', 'uiLabel', 'definition', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern']
-	var edgeHeader = ['id', 'relation', 'child_id', 'minCardinality', 'maxCardinality']
+	var nodeHeader = ['datatype', 'path', 'id', 'uiLabel', 'uiDefinition', 'help', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern', 'format', 'preferred_unit']
+	var edgeHeader = ['relation', 'path', 'child_id', 'minCardinality', 'maxCardinality']
 
 	var nodes = []
 	var edges = []
-	if (choices == true)
-		var parts = ['component', 'choice', 'unit']
+
+	if (choices == true) // Add search of choices table.
+		var parts = ['component', 'unit', 'choice']
 	else
 		var parts = ['component', 'unit']
 
-	var stack = [userSpecification] // Starts with reference to root node.
-	var done = []
+	for (var ontology_id in userSpecification.specifications) { //So far just 1
+		// specification should be
+		var stack = [userSpecification.specifications[ontology_id]] // Starts with reference to root node.
+		var done = {}
 
-	while (stack.length) {
-		var entity = stack.shift()
-		var path = ('path' in entity && entity['path'].join() ) || entity['id']
-		//console.log("following", path)
+		while (stack.length) {
+			var entity = stack.shift()
+			if ('path' in entity)  {
+				var pathString = entity['path'].join('')
+				if (! (pathString in done) ) {
+					done[pathString] = true
 
-		if (done.indexOf(path) == -1) { 
-			done.push(path)
-			//console.log('processing', '' + entity['path'])
-			var record = []
-			for (var fieldptr in nodeHeader) {
-				var value = getTextField(entity, nodeHeader[fieldptr])
-				// ADD datatype for choice
-				if (value == '' && nodeHeader[fieldptr] == 'datatype')
-					value = 'xmls:anyURI'
-				record.push(value)
-			}
+					var full_path = '/' + entity['path'].slice(1,-1).join('/')
 
-			nodes.push(record)
+					if (entity.datatype == 'disjunction') {
+						// We skip the disjunction (anonymous) nodes for now.  
+						// No logic at moment to enforce cardinality restrictions
 
-			// Add to parts table 
-			for (var ptr in parts) { //'component', 'choice', 'unit'
-				var table = parts[ptr] + 's'
-				if (table in entity) {
+					}
+					else {
 
-					for (var ptr2 in entity[table]) {
-						var item = entity[table][ptr2]
-						if (table == 'units') {
+						var parent_path = '/' + entity['path'].slice(1,-1).join('/') // conveys hierarchy
 
-							edges.push([entity['id'], parts[ptr], item['id'], '', ''])
-							stack.push(item)
+						var record = []
+						for (var fieldptr in nodeHeader) {
+							var field = nodeHeader[fieldptr]
+
+							var value = getTextField(entity, field)
+							// ADD datatype for choice
+							if (field == 'datatype' && value == '') //obsolete?
+								value = 'xmls:anyURI'
+							else if (field == 'path') {
+								// How else to tell if parent is NOT anonymous node?
+								if ('parent' in entity && entity['parent'].indexOf(':') > 0 ) 
+									value = '/' + entity['path'].slice(1,-2).join('/') 
+								else
+									value = parent_path
+							}
+							record.push(value)
 						}
-						else {
-							var minCardinality = ('minCardinality' in item) ? item['minCardinality'] : ''
-							var maxCardinality = ('maxCardinality' in item) ? item['maxCardinality'] : ''
-							edges.push([entity['id'], parts[ptr], item['id'], minCardinality, maxCardinality])
-							stack.push(item)
+						delete (record['path']) 
+						nodes.push(record)
+						
+
+					}
+
+					var pointer = 0
+					// Add to parts table 
+					// 'component', 'choice', 'unit' are displayed as link type (rather than plural)
+					for (var ptr in parts) { 
+						var table = parts[ptr] + 's'
+						if (table in entity) {
+
+							for (var ptr2 in entity[table]) { // ARRAY OF OBJECT
+								var item = entity[table][ptr2] // This should always be an object 
+								var minCardinality = ('minCardinality' in item) ? item['minCardinality'] : ''
+								var maxCardinality = ('maxCardinality' in item) ? item['maxCardinality'] : ''
+								edges.push([parts[ptr], full_path, item['id'], minCardinality, maxCardinality])
+
+								// Maintains visual order like form rendering:
+								stack.splice(pointer, 0, item)
+								pointer ++
+							}
 						}
 					}
 				}
 			}
 		}
-		
 	}
 
 	// Sort all items by datatype, then label
-	nodes.sort(function (a, b) {return a[1].localeCompare(b[1]) || a[2].localeCompare(b[2]) }) // datatype, label
+	//nodes.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[2].localeCompare(b[2]) }) // datatype, label
 	// Then make header to 1st line
 	nodes.splice(0, 0, nodeHeader); 
 
-	edges.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) }) // 0=id, 1=relation
+	//edges.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) }) // 0=id, 1=relation
 	// Then make header to 1st line
 	edges.splice(0, 0, edgeHeader); 
 
@@ -217,13 +242,20 @@ function downloadDataSpecification() {
 
 function getEntitySpecRoot(entityId = null) {
 	// Adds context to given entityId specification
-	var rootSpecification = {'@context': top.context }
-	return getEntitySpec(rootSpecification, entityId) 
+	var rootSpecification = {
+		'@context': top.context,
+		'specifications': getEntitySpec(null, entityId)
+	 }
+	return rootSpecification
 }
 
 function getEntitySpec(spec, entityId = null, inherited = false) {
-	// Recursively copy the entityId specification element and all its
-	// underlings into a a single javascript object.
+	/* Recursively copy the entityId specification element and all its
+	   underlings into a a single javascript object. This differs from
+	   getEntitySpecForm() in that entities are copied verbatim from
+	   top.specification, and via reference, so no branch-specific
+	   processing goes on.
+	*/
 	if (spec == null)
 		spec = {}
 
@@ -237,7 +269,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 				// from start of rendering to here). 
 				var parentId = entity['parent']
 				// Reach up to top level OBI "data representation model"
-				if (parentId && parentId != 'obolibrary:OBI_0000658') 
+				if (parentId && parentId != 'OBI:0000658') 
 					getEntitySpec(spec, parentId, true)
 			}
 
@@ -264,7 +296,7 @@ function getEntitySpecItems(spec, entity, type) {
 				getEntitySpec(spec, partId) // and we make sure 
 			}
 		else
-			// models, components, which are dictionaries
+			// models, components, choices, which are dictionaries
 			for (var partId in entity[type]) { 
 				spec[partId] = top.specification[partId] // load object
 				getEntitySpec(spec, partId)

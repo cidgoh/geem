@@ -174,5 +174,8 @@ label {text-transform: capitalize;}
 	margin-bottom:10px;
 	/* border-bottom:1px solid silver; */
 	min-height:2rem;
-	text-transform:inherit !important;}
+	text-transform:inherit !important;
+}
 
+i.fi-info.blue {color:#2199e8;font-size: 1.2rem}
+i.fi-calendar  {color:#2199e8;font-size: 1.5rem;cursor:pointer;}

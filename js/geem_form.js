@@ -3,9 +3,7 @@
 The OntologyForm class provides all functions needed (using jquery, Zurb 
 Foundation and app.css) to render and populate an ontology-driven form.
 
-FUTURE: MAKE USE OF BETTER TEMPLATING
 WISHLIST:
-	- Allow fields to take on date or dateTime formatting by providing choice
 	- Allow xml datatype formats for date&time to be inherited from parent model
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
 	- Also option for 3rd party database field name for form storage
@@ -17,7 +15,8 @@ Project: genepio.org/geem
 Created: Sept 4, 2017
 
 */
-//
+
+// These fields are merged into select options synonyms="..." for searching.
 synonymFields = ['hasSynonym', 'hasExactSynonym', 'hasNarrowSynonym', 'hasAlternativeTerm']
 
 function OntologyForm(domId, specification, settings, callback) {
@@ -55,7 +54,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 			//top.bag = {} // For catching entity in a loop.
 			form_html = render(self.entityId)
-			form_html += renderButton('View Form Submission', 'getEntityData()') 
+			form_html += renderButton('View Form Submission', 'buttonFormSubmit') 
 
 			// Place new form html into page and activate its foundation interactivity
 			self.formDomId.html(form_html) //.foundation()
@@ -66,8 +65,6 @@ function OntologyForm(domId, specification, settings, callback) {
 
 			var title = 'GEEM: ' + self.entityId
 
-			// MOVE THIS UP TO app.js ???
-
 			var entity = self.specification[entityId]
 			if (entity) {
 				var uiLabel = entity['uiLabel']
@@ -76,18 +73,20 @@ function OntologyForm(domId, specification, settings, callback) {
 				// understand that a #anchor and page title are different.
 				title += ':' + uiLabel
 		
-				// A hack that provides more styled info in portal.html
+				// A hack that provides more styled info about form in portal.html
 				if ($('#formEntityLabel').length) {
 
-					$('#formEntityLabel').html(uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
-					$('#mainForm > div.field-wrapper > label').html(entity['definition'] || '<span class="small float-right">(select all)</span>')
+					$('#formEntityLabel')
+						.html(uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
+					$('#mainForm > div.field-wrapper > label')
+						.html(entity['definition'] || '<span class="small float-right">(select all)</span>')
 				}
 				else {
-					$('#mainForm > div.field-wrapper > label').attr('id','formEntityLabel').after('<p>' + (entity['definition']  || '') + '</p>') 
+					$('#mainForm > div.field-wrapper > label')
+						.attr('id','formEntityLabel')
+						.after('<p>' + (entity['definition']  || '') + '</p>') 
 				}
 			}
-			// SET DISCUSSION FORUM IFRAME HERE
-
 
 			window.document.title = title
 
@@ -100,8 +99,10 @@ function OntologyForm(domId, specification, settings, callback) {
 			// Clear out specification tab.  THIS SHOULD BE DONE via form hook ON SHOW OF SPEC TAB INSTEAD.
 		 	if (window.getdataSpecification) {
 		 		$('#dataSpecification').empty()
-		 		$("#spec_download").attr('disabled','disabled')
-		 		$('#specification-tabs li.is-active').removeClass('is-active').find('a').removeAttr('aria-selected'); // how else?
+		 		//$("#spec_download").attr('disabled','disabled')
+		 		$('#specification-tabs li.is-active')
+		 			.removeClass('is-active')
+		 			.find('a').removeAttr('aria-selected'); // how else?
 		 	}
 
 		 	if (self.settings.minimalForm) setMinimalForm() // Hides empty optional field content.
@@ -272,41 +273,6 @@ function OntologyForm(domId, specification, settings, callback) {
 				
 		})
 
-	}
-
-
-	getEntityData = function() {
-		/* The hierarchic form data must be converted into minimal JSON data 
-		   packet for transmission back to server.
-		*/
-		var obj = {}
-
-		$.each(self.formDomId.find("input:not(.button), select"), function(i,item) {
-			var focus = obj
-			var id = $(item).attr('id')
-			if (id) {
-				var path = id.split('/')
-				for (var ptr in path) {
-					var item2 = path[ptr]
-					if (!(item2 in focus) ) focus[item2] = {}
-					if (ptr == path.length-1) //If at end of path, make assignment
-						focus[item2] = $(item).val()
-					else
-						focus = focus[item2]
-				}
-			}
-		})
-
-		setModalCode(obj, "Example of form data conversion into a JSON data packet for submission.")
-
-	}
-
-
-	setModalCode = function (obj, header) {
-		// This displays the entity json object as an indented hierarchy of text inside html <pre> tag.
-		$("#modalEntityHeader").html(header)
-		$("#modalEntityContentContainer").empty().html('<pre id="modalEntityContent">' + JSON.stringify(obj, null, 2) + '</pre>' )
-		$("#modalEntity").foundation('open')
 	}
 
 
@@ -569,7 +535,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			entity.lookup if appropriate
 			entity.multiple if appropriate
 		*/
-		if ('lookup' in entity['features']) 
+		if (entity.features.lookup) 
 			entity['lookup'] = true
 		
 		if (entity['minCardinality'] > 1 || (entity['maxCardinality'] != 1))
@@ -626,9 +592,8 @@ function OntologyForm(domId, specification, settings, callback) {
 					// Currently showing "hidden" feature as disabled.
 					if (getFeature(part, 'hidden', entity['id']) )
 						part['disabled'] = true;
-					var subChoices = getEntitySpecFormChoice(part , depth+1)
-					delete (subChoices['path']) // only an issue in choices.
-					newChoices.push(subChoices)
+
+					newChoices.push(getEntitySpecFormChoice(part , depth+1))
 				}
 			}
 			// Convert entity['choices']{} to array.
@@ -925,13 +890,12 @@ function OntologyForm(domId, specification, settings, callback) {
 		return getFieldWrapper(entity, html)
 	}
 
-	renderButton = function(text, buttonFunction) {
-		// Future, could add ' type="select" '
-		html = '<div>\n'
-		html +=	'	<input class="button float-center" value="' + text + '" onclick="'+buttonFunction+'">\n'
-		html +=	'</div>\n'
-
-		return html
+	renderButton = function(text, buttonID) {
+		return [
+			'<div>\n'
+		,	'	<input id="' + buttonID + '" class="button float-center" value="' + text + '">\n'
+		,	'</div>\n'
+		].join('')
 	}
 
 	renderDisjunction = function(entity, labelHTML, depth) {
@@ -1243,6 +1207,8 @@ function OntologyForm(domId, specification, settings, callback) {
 	renderLabel = function(entity) {
 		/* 
 		
+		Note definition is normalized to put into tooltip string.
+
 		Issue is that this sometimes is called on entities that haven't
 		been initialized yet, meaning they don't have a label relative
 		to some parent node. At moment the only two cases are tab display
@@ -1253,6 +1219,9 @@ function OntologyForm(domId, specification, settings, callback) {
 
 		var label = entity['uiLabel']
 		var definition = entity['uiDefinition']
+		// Beginning, ending, and stand-alone quotes have to be replaced.
+		if (definition)
+			definition = definition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
 
 		if (self.settings.ontologyDetails && entity.depth > 0)
 			var labelURL = '<a href="#' + entity['id'] + '">' + label + '</a>' 
@@ -1298,26 +1267,26 @@ function OntologyForm(domId, specification, settings, callback) {
 	}
 
 	getDefinition = function(entity) {
+		/*
+		 NOTE: Definition currently cropped to tweet-size below
+
+		*/
 		var definition = ''
 
 		// Definition listed in link between parent and this entity overrides all.
-		if ('features' in entity && 'definition' in entity['features'])
-			definition = entity['features']['definition']['value']
-		//var definition = getFeature(entity, 'definition', entity['parent_id']) 
-		//if (definition)
-		//	definition = definition['value']
-		else if ('uiDefinition' in entity) // Rare, but an ontology can offer this directly.
-			definition = entity['uiDefinition'] 
-		else if ('definition' in entity) 
-			definition = entity['definition']
+		if (entity.features.definition)
+			definition = entity.features.definition.value
+
+		else if (entity.uiDefinition) // Rare, but an ontology can offer this directly.
+			definition = entity.uiDefinition 
+		else if (entity.definition) 
+			definition = entity.definition
 
 		// Snip after first sentence found after 140 characters. A "tweet-sized" sentence.
 		if (definition.length) {
 			var deflen = definition.substr(140).indexOf('. ')
 			if (deflen >= 1) 
-				definition = definition.substr(0,140 + deflen)+'.'
-			// beginning, ending, and stand-alone quotes have to be replaced.
-			definition = definition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
+				definition = definition.substr(0,140 + deflen) + '.'
 		}
 		return definition
 	}
@@ -1713,6 +1682,7 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 }
+
 
 // Implementing a static method for default zurb Foundation settings:
 OntologyForm.initFoundation = function() {

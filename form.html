@@ -1,7 +1,7 @@
 <!doctype html>
 <html class="no-js" lang="en" dir="ltr">
   <head profile="http://www.w3.org/2005/10/profile">
-  <link rel="icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/ico" href="favicon.ico">
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,13 +43,13 @@
         <p class="medium"><i>This form viewer is tested with Google Chrome v. 62; other browsers will be supported in the future. It may take time to load.</i></p>
 
         <form id="mainForm" data-abide="ajax">
-            This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
+          This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
 
-            <a href="http://genepio.org/geem/form.html#GENEPIO:0001624">
-              http://genepio.org/geem/form.html#GENEPIO:0001624
-            </a>
-            <br/>
-            <br/>
+          <a href="http://genepio.org/geem/form.html#GENEPIO:0001624">
+            http://genepio.org/geem/form.html#GENEPIO:0001624
+          </a>
+          <br/>
+          <br/>
         </form>
 
       </div>
@@ -57,7 +57,7 @@
       <div class="large-3 medium-3 columns" id="rightbar">
         <br/>
 
-        <div style=" margin-top:5px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:10px">
+        <div style="margin-top:3px;border-radius:2px;background-color:lightblue;padding:7px">
           <div class="switch tiny float-left" style="margin-right:15px;margin-bottom:0  ">
             <input class="switch-input" id="toggleMinimalForm" type="checkbox" name="toggleMinimalForm">
             <label class="switch-paddle" for="toggleMinimalForm">
@@ -66,47 +66,63 @@
           </div>
           <span>Minimize form view</span>
         </div>
-          <p>When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry.</p>
+          
+        <p>When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry.</p>
 
-        <div style="margin-top:15px;margin-right:10px;border:1px solid silver;border-radius:4px;background-color:lightblue;padding:13px">
+        <div style="margin-top:15px;margin-right:10px;border-radius:2px;background-color:lightblue;padding:7px">
 
-             <select id="specificationType" class="input-group-field">
-              <option value="">View Specification ...</option>
+          <select id="specificationType" class="input-group-field">
+            <option value="">View Specification ...</option>
 
-              <option value="tsv_form_core_node_specification">GEEM core nodes (.tsv)</option>
-              <option value="tsv_form_core_edge_specification">GEEM core edges (.tsv)</option>
+            <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
+            <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
 
-              <option value="tsv_form_node_specification">GEEM all nodes (.tsv)</option>
-              <option value="tsv_form_edge_specification">GEEM all edges (.tsv)</option>
+            <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
+            <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
 
-              <option value="json_specification">GEEM (.json)</option>
-              <option value="yml_specification">GEEM (.yaml)</option>
+            <option value="raw.json">GEEM raw.json</option>
+            <option value="raw.yml">GEEM raw.yaml</option>
 
-              <option value="json_form_specification">GEEM simple (.json)</option>
-              <option value="yml_form_specification">GEEM simple (.yaml)</option>
+            <option value="form.json">GEEM form.json</option>
+            <option value="form.yml">GEEM form.yaml</option>
 
-              <optiongroup>
-                <option value="" disabled="disabled">Coming soon</option>
-                <option value="xlsm_specification"> ... Microsoft Excel</option>
-              </optiongroup>
-            </select>
-            <!-- holds same input like portal.html <pre> field -->
-            <div id="dataSpecification" style="display:none"></div>
+            <!-- option value="form.html">GEEM form.html</option -->
+            <option value="form_submission.json">GEEM form submission</option>
+
+            <optiongroup>
+              <option value="" disabled="disabled">Coming in 2018!</option>
+              <option value="spreadsheet.xlsm"> ... Microsoft Excel</option>
+              <option value="redcap.tsv"> ... RedCap</option>
+              <option value="ontofox.txt"> ... OntoFox</option>
+            </optiongroup>
+
+          </select>
+
         </div>
 
         <p>The specification used to make this form is available in a variety of formats.</p>
 
+        <div id="modalEntity" class="reveal" data-reveal>
 
-      <div id="modalEntity" class="reveal" data-reveal>
-        <button class="close-button medium" data-close aria-label="Close reveal" type="button" style="position:absolute;right:20px;top:20px;background-color:silver">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <div id="modalEntityHeader"></div> 
-        <div id="modalEntityContentContainer"></div>
+          <div id="modalEntityHeader">
+        
+            <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal"></button>
+
+            <button id="spec_download" class="button icon fi-download disabled" title="download" style="margin:0;border:0;cursor:pointer"> Download</button>
+          
+          </div> 
+
+          <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
+
+        </div>
+
+        <a id="view_spec_download" download="this_will_be_renamed.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="visibility:hidden"></a>
+
       </div>
 
+      <br clear="all"/>
+    
     </div>
-    <br clear="all"/>
 
     <div class="row footer">
       <div class="large-12 columns text-center">
@@ -122,101 +138,8 @@
     <script src="js/vendor/js-yaml.min.js"></script> <!-- http://adilapapaya.com/docs/js-yaml/ -->
     <script src="js/geem_form.js"></script>
     <script src="js/geem_specifications.js"></script>
+    <script src="js/geem_form_standalone.js"></script>
 
-    <script>
-
-      specification = {}
-      focusEntityId = null
-      formSettings = {}
-      //ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
-      ontologyLookupService = 'http://purl.obolibrary.org/obo/'
-
-      $( document ).ready(function() {
-
-        OntologyForm.initFoundation()
-        $('#modalEntity').foundation()
-
-        $('#specificationType').on('change', 
-            function () {
-            $("#modalEntityHeader").html('This is a downloadable specification')
-            $("#modalEntityContentContainer").empty().html('<pre id="modalEntityContent">' + getdataSpecification() + '</pre>' )
-            $("#modalEntity").foundation('open')
-          })
-
-
-        //Default load of GenEpiO
-        loadSpecification('data/ontology/genepio-merged.json')
-
-      });
-
-
-      function loadSpecification(specification_file) {
-        $.getJSON(specification_file, function(specification) {
-          // Setup Zurb Foundation user interface and form validation
-          loadForm(specification)
-        });
-      }
-
-      function loadForm(specification) {
-
-        top.specification = specification['specifications'];
-
-        myForm = new OntologyForm("#mainForm", specification['specifications'], top.formSettings)
-
-        // PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
-        var focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-        top.focusEntityId = focusEntityId
-        if (focusEntityId && focusEntityId.indexOf(':')) {
-          myForm.renderEntity(focusEntityId)
-          doSectionMenu()
-        }
-      
-        // Toggle to hide all optional empty input content for concise display.
-        $('input#toggleMinimalForm').on('change', function() {
-          myForm.settings.minimalForm = $(this).is(':checked')
-          myForm.renderEntity()
-        })
-
-      }
-
-      // FOR DEMO PURPOSES ONLY, NORMALLY NO HASH CHANGE NEEDS TO BE DETECTED
-      $(window).on('hashchange', function(){ 
-        // GEEM focuses on entities by way of a URL with hash #[entityId]
-          if (location.hash.length > 0)
-            // Better entity id detection?
-            if (location.hash.indexOf(':') != -1) { 
-              focusEntityId = document.location.hash.substr(1)
-              // PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
-              myForm.renderEntity(focusEntityId)
-              doSectionMenu()
-            }
-      });
-
-      function doSectionMenu() {
-        // Provide form menu to two levels down.
-        $('#formSections').empty()
-        var sections = 0
-        var sectionHTML = ''
-        $('#mainForm .field-wrapper.model').each(function(index){
-          sections += 1;
-          var classes = $(this).attr('class')
-          var depth = classes.substr(classes.indexOf('depth')+5)
-          if (parseInt(depth) < 2) {
-            var id = $(this).attr('data-ontology-id')
-            var label = $(this).children('label').text()
-            sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
-          }
-        });
-
-        if (sections > 1) {
-          $('#formSections').html('<h5>Form Sections</h5>\n' + '<ul class="vertical menu" id="formMenu">' + sectionHTML + '</ul>')
-        }
-
-      }
-
-
-
-    </script>
   </body>
 
 </html>

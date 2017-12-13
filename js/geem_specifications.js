@@ -1,81 +1,92 @@
 
-function getdataSpecification() {
+function getdataSpecification(report_type) {
 	/* 
-	This is called each time a dataSpecification is loaded, and also when a
-	new specificationType is selected.
+	In portal.html this is called each time a dataSpecification is loaded, 
+	and also when a	new specificationType is selected.
 
 	INPUT
-	#specificationType <select ...>: tab user just clicked on, or one active when form loaded
+	report_type: 	Desired report type, see below; also supplied by 
+					#specificationType select
 	top.focusEntityId: The current entity being focused on, looked up in
                        top.specification components: specification, picklists and units 
     OUTPUT
-    - #dataSpecification div loaded with textual representation.
-    - #spec_download button activated if present.
+    content:		textual representation.
+    report_type:	As above
+    id:				top.focusEntityId
+
+    #spec_download button activated if present.
 	*/
 
-	//var selected_tab = $('#specificationType > li.is-active > a[aria-selected="true"]').attr('aria-controls')
-	var selected_tab = $('#specificationType').val()
-
-	if (selected_tab) {
+	if (report_type) {
 		var content = ''
+		var entityId = top.focusEntityId
 		$("#helpDataSpecification").remove()
 
-		switch (selected_tab) {
-			case 'json_specification':
-				content = JSON.stringify(getEntitySpecRoot(top.focusEntityId), null, 2)
+		switch (report_type) {
+			case 'raw.json':
+				content = JSON.stringify(getEntitySpecRoot(entityId), null, 2)
 				break; 
-
-			case 'yml_specification':
-				//content = YAML.stringify(getEntitySpec(null, top.focusEntityId), 4)  characters
-				content = jsyaml.dump(getEntitySpecRoot(top.focusEntityId), 4)  //indent of 4
+			case 'raw.yml':
+				content = jsyaml.dump(getEntitySpecRoot(entityId), 4)  //indent of 4
 				break;
 
-			case 'json_form_specification':
-				content = JSON.stringify(getEntitySpecForm(top.focusEntityId), null, 2)
+			// FEATURE: These two could have all entity.path removed, as all info
+			// is already in entity.domID
+			case 'form.json':
+				content = JSON.stringify(getEntitySpecForm(entityId), null, 2)
 				break; 
-				
-			case 'yml_form_specification':
-				//content = YAML.stringify(getEntitySpecForm(top.focusEntityId))
-				content = jsyaml.dump(getEntitySpecForm(top.focusEntityId), 4) //indent of 4
+			case 'form.yml':
+				content = jsyaml.dump(getEntitySpecForm(entityId), 4) //indent of 4
 				break; 
 			
-			case 'tsv_form_node_specification':
-				content = getTabularSpecification(getEntitySpecForm(top.focusEntityId), true) // for all nodes
+			case 'form_all_nodes.tsv': // for all nodes
+				content = getTabularSpecification(getEntitySpecForm(entityId), true, true)
 				break; 
-
-			case 'tsv_form_edge_specification':
-				content = getTabularSpecification(getEntitySpecForm(top.focusEntityId), false) //for all edges
+			case 'form_all_edges.tsv': //for all edges
+				content = getTabularSpecification(getEntitySpecForm(entityId), false, true) 
 				break; 
-
 			// "Core" version strips off all choice nodes & edges
-			case 'tsv_form_core_node_specification':
-				content = getTabularSpecification(getEntitySpecForm(top.focusEntityId), true, false) // for core nodes
+			case 'form_core_nodes.tsv': // for core nodes
+				content = getTabularSpecification(getEntitySpecForm(entityId), true, false)
 				break; 
-			case 'tsv_form_core_edge_specification':
-				content = getTabularSpecification(getEntitySpecForm(top.focusEntityId), false, false) //for core edges
+			case 'form_core_edges.tsv': //for core edges
+				content = getTabularSpecification(getEntitySpecForm(entityId), false, false)
 				break;
 
-			case 'xlsm_specification':
-			case 'redcap_specification':
-				// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
-			case 'ontofox_specification':
-				alert('Coming soon!')
-				break; 
+			case 'form.html':
+				content = $('form#mainForm')[0].outerHTML
+				break
+			case 'form_submission.json':
+				content = getFormData('form#mainForm')
+				break
 
+			case 'spreadsheet.xlsm':
+			case 'redcap.tsv':
+				// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
+			case 'ontofox.txt':
+			case 'sql.txt':
 			// Future formats:
 			// https://github.com/geneontology/obographs/
 			// https://www.ebi.ac.uk/ols/docs/api#resources-terms ???
-		}
+				alert('Coming soon!')
+				break; 
 
-		$("#dataSpecification").text(content).removeClass('hide')
+
+		}
 
 		if (content.length > 0) // If something to download, activate download button
 			$("#spec_download").removeClass('disabled').removeAttr('disabled')
 		else 
 			$("#spec_download").addClass('disabled').attr('disabled','disabled')
 
-		return content 
+		return {
+			'id': top.focusEntityId,
+			'report_type': report_type,
+			'content': content
+		} 
 	}
+
+	return null
 
 }
 
@@ -146,9 +157,7 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 							}
 							record.push(value)
 						}
-						delete (record['path']) 
-						nodes.push(record)
-						
+						nodes.push(record)		
 
 					}
 
@@ -210,35 +219,6 @@ function getTabularTable(dataArray) {
 	return data
 }
 
-function downloadDataSpecification() {
-	/* This creates dynamic file download link for a given ontology entity. 
-	File generated from #dataSpecification field contents directly.
-	It fires when user clicks download button of specification, immediately 
-	before file is downloaded.
-
-	INPUT
-		Quick and dirty file suffix detection based on dom id: yml_ | json_ | tsv_ | xlsx_ ...
-
-	OUTPUT
-	Download file link has attributes:
-		download = [ontology_id].[file type corresponding to first word of selected tab]
-		href = base 64 encoding of #dataSpecification field.
-	*/
-	if ($("#dataSpecification").html().length) {
-		var content = new Blob([ $("#dataSpecification").text() ], { type: 'text/csv' });
-		var entity = top.specification[top.focusEntityId] // get name of entity.
-		var selected_tab = $('#specificationType').val() // 'tsv_....' etc. file suffix.
-
-		// File name is main ontology id component + file suffix.
-		var file_name = entity['id'].split(':')[1] + '.' + selected_tab.split('_')[0]  
-
-		$("#view_spec_download")
-			.attr('download', file_name)
-			.attr('href', URL.createObjectURL(content) )
-			
-		$("#view_spec_download")[0].click() // trigger download
-	}
-}
 
 function getEntitySpecRoot(entityId = null) {
 	// Adds context to given entityId specification
@@ -286,6 +266,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 function getEntitySpecItems(spec, entity, type) {
 	/*
 	FUTURE: units array will be ordered so that favoured unit is first.
+	Currently entity's preferred_unit field indicates preference.
 	*/
 	if (type in entity) {
 		if (type == 'units')
@@ -293,7 +274,7 @@ function getEntitySpecItems(spec, entity, type) {
 			for (var ptr in entity['units']) { 
 				var partId = entity[type][ptr]
 				spec[partId] = top.specification[partId] // load object
-				getEntitySpec(spec, partId) // and we make sure 
+				getEntitySpec(spec, partId) // sub-units?
 			}
 		else
 			// models, components, choices, which are dictionaries
@@ -303,4 +284,88 @@ function getEntitySpecItems(spec, entity, type) {
 			} 
 	}
 }
+
+
+
+function getFormData(domId) {
+	/* The hierarchic form data is converted into minimal JSON data 
+	   packet for transmission back to server.
+	*/
+	var obj = {}
+
+	$.each($(domId).find("input:not(.button), select"), function(i,item) {
+		var focus = obj
+		var id = $(item).attr('id')
+		if (id) {
+			var path = id.split('/')
+			for (var ptr in path) {
+				var item2 = path[ptr]
+				if (!(item2 in focus) ) focus[item2] = {}
+				if (ptr == path.length-1) //If at end of path, make assignment
+					focus[item2] = $(item).val()
+				else
+					focus = focus[item2]
+			}
+		}
+	})
+
+	return JSON.stringify(obj, null, 2)
+
+}
+
+
+function setModalCode(contentObj) {
+	/* This displays given string content as an indented hierarchy of text 
+	inside html <pre> tag.
+	*/
+	var contentPre = '<pre id="modalEntityContent">' + contentObj.content + '</pre>'
+	$("#modalEntityContentContainer").empty().html(contentPre)
+	$("#modalEntity").foundation('open')
+	$("#spec_download")
+		//.removeAttr('disabled').removeClass('disabled')
+    	.off()
+    	.on('click', function() { downloadDataSpecification(contentObj) })
+}
+
+function setDataSpecification(contentObj) {
+	$('#dataSpecification').removeClass('hide').show().html(contentObj.content) 
+	$("#spec_download")
+		.removeAttr('disabled').removeClass('disabled')
+    	.off()
+    	.on('click', function() { downloadDataSpecification(contentObj) })
+
+}
+
+
+function downloadDataSpecification(contentObj) {
+	/* This creates dynamic file download link for a given ontology entity. 
+	File generated from #dataSpecification field contents directly.
+	It fires when user clicks download button of specification, immediately 
+	before file is downloaded.
+
+	INPUT
+		contentObj
+			.content 		Textual content to download	 
+			.report_type	a file name suffix string including "[file suffix].[file type]"" 
+			.id				ontology term/form identifier.
+
+	OUTPUT
+	Download file link has attributes:
+		download = [ontology_id]_[report_type]
+		href = base 64 encoding of #dataSpecification field.
+	*/
+	if (contentObj.content.length) {
+
+		// File name is main ontology id component + file suffix.
+		var file_name = (contentObj.id).replace(':','_') + '_' + contentObj.report_type  
+		var content = new Blob([ contentObj.content ], { type: 'text/csv' });
+
+		$("#view_spec_download")
+			.attr('download', file_name)
+			.attr('href', URL.createObjectURL(content) )
+			
+		$("#view_spec_download")[0].click() // trigger download
+	}
+}
+
 

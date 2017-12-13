@@ -55,6 +55,11 @@ $( document ).ready(function() {
 
 				// When renderEntity is called, activate its tab
 				$('#content-tabs').foundation('selectTab', '#content'); 
+
+				// FUTURE: Resolve repeated code below.
+				$('#buttonFormSubmit').on('click', function () {  
+    				setModalCode(getdataSpecification('form_submission.json'))
+  				})
 			}
 	});
 
@@ -74,11 +79,13 @@ $( document ).ready(function() {
 
 	// When a new ontology is selected:
 	$('#selectSpecification').on('change', function() {
-		loadSpecification($(this).val())
+		//setDataSpecification(getdataSpecification($(this).val()) )
 	})
 
-	// Trigger JSON / EXCELL / YAML view of specification
-	$('#specificationType').on('change', getdataSpecification)
+	// Trigger popup JSON / EXCELL / YAML view of specification
+	$('#specificationType').on('change', function() {
+		setDataSpecification(getdataSpecification( $(this).val() )) 
+	}) 
 
 	$('#spec_download').on('click', downloadDataSpecification) // the button, not the surrounding link.
 
@@ -153,7 +160,6 @@ $( document ).ready(function() {
 });
 
 
-
 getIdHTMLAttribute = function(id) {
 	return 'data-ontology-id="' + id + '" '
 }
@@ -206,6 +212,10 @@ function loadSpecification(specification_file) {
 			}
 
 			$(document).foundation()
+
+			$('#buttonFormSubmit').on('click', function () {  
+				setModalCode(getdataSpecification('form_submission.json'))
+			})
 
 		},
 		error:function(XMLHttpRequest, textStatus, errorThrown) {

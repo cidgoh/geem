@@ -7,11 +7,15 @@ ontologyLookupService = 'http://purl.obolibrary.org/obo/'
 
 $( document ).ready(function() {
 
-  OntologyForm.initFoundation()
+  //OntologyForm.initFoundation()
+
+  // Bring in shared templates
+  $.ajax('modal_lookup.html').done(function(response){$('body').append(response)});
+
   $('#modalEntity').foundation()
 
   $('#specificationType').on('change', function() {
-    setModalCode(getdataSpecification( $(this).val() )) 
+    setModalDownload(getdataSpecification( $(this).val() )) 
   }) 
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
@@ -62,7 +66,7 @@ function loadForm(specification) {
   })
 
   $('#buttonFormSubmit').on('click', function () {      
-    setModalCode(getdataSpecification('form_submission.json'))
+    setModalDownload(getdataSpecification('form_submission.json'))
   })
 
 }

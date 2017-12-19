@@ -68,10 +68,8 @@ function getdataSpecification(report_type) {
 			// Future formats:
 			// https://github.com/geneontology/obographs/
 			// https://www.ebi.ac.uk/ols/docs/api#resources-terms ???
-				alert('Coming soon!')
+				content = '<strong>This feature is coming soon!</strong>'
 				break; 
-
-
 		}
 
 		if (content.length > 0) // If something to download, activate download button
@@ -313,21 +311,33 @@ function getFormData(domId) {
 
 }
 
-
-function setModalCode(contentObj) {
-	/* This displays given string content as an indented hierarchy of text 
-	inside html <pre> tag.
+function openModal(header, content) {
+	/* This displays given string content and header in popup. 
+	Usually called by getChoices()
 	*/
+	$("#modalEntityHeaderContent").html(header).show()
+	$("#modalEntityContentContainer").html(content)
+	$("#spec_download").hide() // hide download button.
+	$("#modalEntity").foundation('open')
+}
+
+
+
+function setModalDownload(contentObj) {
+	/* Used on form.html to download stuff.
+	*/
+	$("#modalEntityHeaderContent").hide()
 	var contentPre = '<pre id="modalEntityContent">' + contentObj.content + '</pre>'
 	$("#modalEntityContentContainer").empty().html(contentPre)
 	$("#modalEntity").foundation('open')
 	$("#spec_download")
-		//.removeAttr('disabled').removeClass('disabled')
+		.show()
     	.off()
     	.on('click', function() { downloadDataSpecification(contentObj) })
 }
 
 function setDataSpecification(contentObj) {
+	// Used on portal.html page, not as popup.
 	$('#dataSpecification').removeClass('hide').show().html(contentObj.content) 
 	$("#spec_download")
 		.removeAttr('disabled').removeClass('disabled')

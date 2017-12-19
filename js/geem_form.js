@@ -1591,95 +1591,168 @@ function OntologyForm(domId, specification, settings, callback) {
 		a "More choices" button next to the picklist.  When this button is 
 		clicked, a dynamic fetch of subordinate items to the one the user has 
 		selected is performed.  A user can then select one of the given items, if
-		any.  
+		any, and it will be inserted into existing selection list below parent.
+
+		If select is a multi-select, just do last term.
 
 		The picklist's selection list tree can be dynamically extended/fetched?
 		INPUT 
-			entityId
+			selectId: ontology Id
 
-		ISSUE: CURRENTLY ONLY DOING LOOKUP ON FIRST TERM OF MULTI-SELECT
 		*/
-		var select = $(helper).parent('div[class="input-group"]').find("select")
-		var value = select.val()
-		message = ''
+		// Houses both <select> and <div.chosen-container>
+		var select = $(helper).parent('div[class="input-group"]').find("select");
+		var value = select.val();
+		var selectIndex = select.prop('selectedIndex')
+		var selectDom = select[0];
+
+		var message = ''
 
 		if (value.length == 0) {
-			title = 'Selections for "' + top.specification[selectId]['uiLabel'] + '"'
+			var title = 'Selections for "' + top.specification[selectId]['uiLabel'] + '"'
 
 			message = 'Select a "' + top.specification[selectId]['uiLabel'] + '" item, then use "more choices..." to see if there are more fine-grained choices for it.'
+			openModal(title, message)
+			return
 		}
 
 		if (value.length > 0) {
 			// select.val() is either a string, for a single-select, or an array
 			// for multi-select
 			var entity_id = Array.isArray(value) ? value[0] : value
-			var term = entity_id.replace(':','_')
 			var entity =  top.specification[entity_id]
 
-			title = 'Selections for "' + top.specification[entity_id]['uiLabel'] + '"'
-			$("#modalEntityHeader").html(title)
-
+			var term = entity_id.replace(':','_')
 			var ontology = term.split("_")[0]
+
+			var title = 'Selections for "' + entity.uiLabel + '"'
+
 
 			// https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_0050589/children
 			// http://www.ebi.ac.uk/ols/api/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_77
 
+			// https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_77/descendants
 			fetchURL = ['https://www.ebi.ac.uk/ols/api/ontologies/'
 				, ontology.toLowerCase()
 				, '/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F'
 				, term
-				, '/children'].join('')
+				, '/children'
+				].join('')
 
 			$.ajax({
 				type: 'GET',
 				url: fetchURL,
 				timeout: 10000, //10 sec timeout
 				success: function( data ) {
-					var msg = ''
 					if ('_embedded' in data) {
 						var content = data._embedded.terms
-						labels = []
+						options = []
 						for (ptr in content) {
 							item = content[ptr]
-							labels.push([
-								item.label, 
-								item.iri, 
-								'<input type="checkbox" value="'+ term +'"/> <a href="' + item.iri + '" target="_words">' + item.label + '<\a><br/>'
-							])
+							options.push({
+								'label': item.label, 
+								'iri': item.iri, 
+								'definition': item.description, // array
+								'synonyms': item.synonyms, // array
+								'deprecated': item.is_obsolete,
+								'has_children': item.has_children
+							})
 						}
-						labels.sort(function(a,b) { return a[0].localeCompare(b[0]) })
+						options.sort(function(a,b) { return a.label.localeCompare(b.label) })
 
-						for (var ptr in labels) {
-							msg += labels[ptr][2];
+						var selections = ''
+						for (var ptr in options) {
+							option = options[ptr]
+							// Children signalled by asterisk.
+							if (option.deprecated == false) {
+								selections += '<option value="'+ option.iri +'">' + option.label + (option.has_children ? ' *' : '') + '</option>\n' 
+
+							 //<a href="' + item.iri + '" target="_words">' + item.label + '<\a><br/>
+							}
 						}
 
-						message = '<div style="margin:0 40px 20px 40px"><div style="border-bottom:2px solid silver"><input type="checkbox"> Select all</div>\n' + msg + '\n<button class="button" id="ChoiceExtensions">Select</button></div><div class="text-center">Lookup service: <a href="https://www.ebi.ac.uk/ols/">https://www.ebi.ac.uk/ols/</a></div>'
+						openModalLookup(title, selections)
+
+						$("#modalLookupSelect").off('click').on('click',function(){
+
+							var selection_row = $("#modalLookupSelections").prop('selectedIndex')
+							// IF ARRAY, loop:
+							if (selection_row >= 0) {
+								var option = options[selection_row]
+								var selection_id = option.iri.split("/").pop().replace('_',':')
+								var existing_id = select.find('option[value="' + selection_id + '"]')
+								if (existing_id.length>0) {
+									existing_id.prop('selected', true)
+									$(select).trigger("chosen:updated"); // to select above.
+								}
+								else {
+									var newOption = document.createElement("option");
+									newOption.text = option.label;
+									newOption.value = selection_id;
+									var parentOption = select.find('option').eq(selectIndex)
+									var parentClass = $(parentOption).attr('class')
+									if (parentClass) {
+										var depth = parentClass.match(/\d+$/)[0];
+										$(newOption).addClass('depth' + (parseInt(depth)+1))
+									}
+									selectDom.add(newOption, selectDom[selectIndex+1]);
+									select.find('option').eq(selectIndex+1).prop('selected', true)
+									$(select).trigger("chosen:updated");
+									
+									top.specification[selection_id] = {
+										'datatype': "xmls:anyURI",
+										'uiLabel': option.label,
+										'id': selection_id,
+										'definition': option.description,
+										'parent': entity_id
+									}
+									if (!entity.choices)
+										entity.choices = {}
+									//parentSpec = top.specification[parentOption.val()]
+									entity.choices[selection_id] = []
+
+								}
+								$("#modalLookup").foundation('close')
+
+							}
+
+						})
+
+						return false
+						// Activate chosen on #modalChoicesSelections ?
 
 					}
 					else 
 						message = 'Your choice [' + term + '] has no underlying selections.'
-
-	        		$("#modalEntityContentContainer").html(message) //Note: wrapper accepts HTML!
-	        		$("#modalEntity").foundation('open')
+						openModal(title, message)
+						return false
+						// Activate chosen on #modalChoicesSelections ?
 
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 					message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-	    		    $("#modalEntityContentContainer").html(message) //Note: wrapper accepts HTML!
-	     			$("#modalEntity").foundation('open')
-
+					openModal(title, message)
 				}
 			})
 
 			return false
 		}
+		openModal(title, message)
 
-		$("#modalEntityHeader").html(title)
-        $("#modalEntityContentContainer").html(message) //Note: wrapper accepts HTML!
-        $("#modalEntity").foundation('open')
-		
 	}
 
+	function openModalLookup(header, content) {
+		/* This displays given string content and header in popup. 
+		Usually called by getChoices()
+		*/
+		$('#modalChoiceSelectAll').on('click', function(){
+			$(this).parent().find('option').attr('selected','selected')
+		})
+		$("#modalLookupHeaderContent").html(header)
+		$("#modalLookupSelections").html(content)
+		$("#modalLookup").foundation().foundation('open') // not sure why doubled.
+
+	}
 
 }
 

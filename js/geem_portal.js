@@ -43,6 +43,9 @@ $( document ).ready(function() {
 
 	OntologyForm.initFoundation()
 
+	// Bring in shared templates
+	$.ajax('modal_lookup.html').done(function(response){$('body').append(response)});
+
 	$(window).on('hashchange',function(){ 
 		// GEEM focuses on entities by way of a URL with hash #[entityId]
 	    if (location.hash.length > 0)
@@ -58,7 +61,7 @@ $( document ).ready(function() {
 
 				// FUTURE: Resolve repeated code below.
 				$('#buttonFormSubmit').on('click', function () {  
-    				setModalCode(getdataSpecification('form_submission.json'))
+    				setModalDownload(getdataSpecification('form_submission.json'))
   				})
 			}
 	});
@@ -214,7 +217,7 @@ function loadSpecification(specification_file) {
 			$(document).foundation()
 
 			$('#buttonFormSubmit').on('click', function () {  
-				setModalCode(getdataSpecification('form_submission.json'))
+				setModalDownload(getdataSpecification('form_submission.json'))
 			})
 
 		},

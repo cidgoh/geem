@@ -969,13 +969,19 @@ function OntologyForm(domId, specification, settings, callback) {
 			var typeAttr = ' type="number"' // foundation zurb does css on this.
 		}
 		else {
-			if ('minValue' in entity) 
-				var stepAttr = ' step="' + (entity['minValue'] % 1) + '"'
+			if ('minValue' in entity) {
+				var step = entity['minValue'] % 1
+				if (step == 0) 
+					var stepAttr = ''
+				else
+					var stepAttr = ' step="' + step + '"'
+			}
 			else // kludgy default
 				var stepAttr = ' step="0.0001"'
 
 			var typeAttr = ' type="number"'
 		}
+
 		html = [labelHTML,
 			,'<div class="input-group">\n'
 	 		,'		<input class="input-group-field ' + entity['id'] + '"'
@@ -986,6 +992,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			,			getNumericConstraintHTML(entity, minInclusive, maxInclusive)
 			,			' placeholder="' + type + '"'
 			,			' pattern="' + type + '"'
+			,			' data-validator="min_max"'
 			,			' />\n'
     		,	renderUnits(entity)
 			//,	renderHelp(entity)
@@ -1588,14 +1595,16 @@ function OntologyForm(domId, specification, settings, callback) {
 	getChoices = function(helper, selectId) {
 		/*
 		We can set some picklists to have a dynamic lookup feature, indicated by
-		a "More choices" button next to the picklist.  When this button is 
+		a "lookup choices" button next to the picklist.  When this button is 
 		clicked, a dynamic fetch of subordinate items to the one the user has 
 		selected is performed.  A user can then select one of the given items, if
 		any, and it will be inserted into existing selection list below parent.
 
 		If select is a multi-select, just do last term.
 
-		The picklist's selection list tree can be dynamically extended/fetched?
+		ISSUE: Search for children of a term, if parent is top-level root borrowed
+		from another ontology, won't return the GenEpiO coded-children. EG. NCIT Province.
+
 		INPUT 
 			selectId: ontology Id
 
@@ -1603,151 +1612,332 @@ function OntologyForm(domId, specification, settings, callback) {
 		// Houses both <select> and <div.chosen-container>
 		var select = $(helper).parent('div[class="input-group"]').find("select");
 		var value = select.val();
-		var selectIndex = select.prop('selectedIndex')
-		var selectDom = select[0];
-
-		var message = ''
 
 		if (value.length == 0) {
-			var title = 'Selections for "' + top.specification[selectId]['uiLabel'] + '"'
+			//var title = 'Selections for "' + top.specification[selectId]['uiLabel'] + '"'
+			// Grabbing displayed label rather than top.specification uiLabel since that doesn't reflect all customization.
 
-			message = 'Select a "' + top.specification[selectId]['uiLabel'] + '" item, then use "more choices..." to see if there are more fine-grained choices for it.'
-			openModal(title, message)
+			var label = select.parents('div.field-wrapper').first().find(' > label')
+			var title = label.text()
+			// Grab top-level selection(s) from input itself
+			var selections = ''
+			select.find('option.depth0').each(function(){
+				// Asterisk signals its something that can be explored
+				selections += '<option value="'+ $(this).attr('value') +'">' + $(this).text() + '* </option>\n' 
+
+			}) 
+
+			openModalLookup(title, selections)
+			// openModalLookup creates options to add dblclick to
+			$("#modalLookupSelections option").off('dblclick')
+				.on('dblclick', function(){ //
+				// reusing given helper reference
+				select.find('option[value="' + $(this).attr('value') + '"]').prop('selected', true)
+				$(select).trigger("chosen:updated");
+				getChoices(helper, $(this).attr('value'))
+			})
+
+			$("#modalChoiceSearchButton").off('click')
+			.on('click', function(){
+				var parent_id = select.attr('id').split('/').pop()
+				getOLSSearch(helper, parent_id, $('#modalChoiceSearchText').val() )
+			})
+
 			return
 		}
 
-		if (value.length > 0) {
-			// select.val() is either a string, for a single-select, or an array
-			// for multi-select
-			var entity_id = Array.isArray(value) ? value[0] : value
-			var entity =  top.specification[entity_id]
 
-			var term = entity_id.replace(':','_')
-			var ontology = term.split("_")[0]
+		// select.val() is either a string, for a single-select, or an array
+		// for multi-select
+		var parent_id = Array.isArray(value) ? value[0] : value
+		var parent =  top.specification[parent_id]
+		var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
 
-			var title = 'Selections for "' + entity.uiLabel + '"'
+		var lookupURL = getLookupURL(parent_id)
 
+		$.ajax({
+			type: 'GET',
+			url: lookupURL,
+			timeout: 10000, //10 sec timeout
+			success: function( response ) {
+				// We have an OLS data packet in data._embedded
+				if (response._embedded)
+					setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
+				else
+					openModal(parent_label, "No subordinate choices found!")
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
+				openModal(parent_label, message)
+			}
+		})
 
-			// https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_0050589/children
-			// http://www.ebi.ac.uk/ols/api/ontologies/doid/terms?iri=http://purl.obolibrary.org/obo/DOID_77
-
-			// https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_77/descendants
-			fetchURL = ['https://www.ebi.ac.uk/ols/api/ontologies/'
-				, ontology.toLowerCase()
-				, '/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F'
-				, term
-				, '/children'
-				].join('')
-
-			$.ajax({
-				type: 'GET',
-				url: fetchURL,
-				timeout: 10000, //10 sec timeout
-				success: function( data ) {
-					if ('_embedded' in data) {
-						var content = data._embedded.terms
-						options = []
-						for (ptr in content) {
-							item = content[ptr]
-							options.push({
-								'label': item.label, 
-								'iri': item.iri, 
-								'definition': item.description, // array
-								'synonyms': item.synonyms, // array
-								'deprecated': item.is_obsolete,
-								'has_children': item.has_children
-							})
-						}
-						options.sort(function(a,b) { return a.label.localeCompare(b.label) })
-
-						var selections = ''
-						for (var ptr in options) {
-							option = options[ptr]
-							// Children signalled by asterisk.
-							if (option.deprecated == false) {
-								selections += '<option value="'+ option.iri +'">' + option.label + (option.has_children ? ' *' : '') + '</option>\n' 
-
-							 //<a href="' + item.iri + '" target="_words">' + item.label + '<\a><br/>
-							}
-						}
-
-						openModalLookup(title, selections)
-
-						$("#modalLookupSelect").off('click').on('click',function(){
-
-							var selection_row = $("#modalLookupSelections").prop('selectedIndex')
-							// IF ARRAY, loop:
-							if (selection_row >= 0) {
-								var option = options[selection_row]
-								var selection_id = option.iri.split("/").pop().replace('_',':')
-								var existing_id = select.find('option[value="' + selection_id + '"]')
-								if (existing_id.length>0) {
-									existing_id.prop('selected', true)
-									$(select).trigger("chosen:updated"); // to select above.
-								}
-								else {
-									var newOption = document.createElement("option");
-									newOption.text = option.label;
-									newOption.value = selection_id;
-									var parentOption = select.find('option').eq(selectIndex)
-									var parentClass = $(parentOption).attr('class')
-									if (parentClass) {
-										var depth = parentClass.match(/\d+$/)[0];
-										$(newOption).addClass('depth' + (parseInt(depth)+1))
-									}
-									selectDom.add(newOption, selectDom[selectIndex+1]);
-									select.find('option').eq(selectIndex+1).prop('selected', true)
-									$(select).trigger("chosen:updated");
-									
-									top.specification[selection_id] = {
-										'datatype': "xmls:anyURI",
-										'uiLabel': option.label,
-										'id': selection_id,
-										'definition': option.description,
-										'parent': entity_id
-									}
-									if (!entity.choices)
-										entity.choices = {}
-									//parentSpec = top.specification[parentOption.val()]
-									entity.choices[selection_id] = []
-
-								}
-								$("#modalLookup").foundation('close')
-
-							}
-
-						})
-
-						return false
-						// Activate chosen on #modalChoicesSelections ?
-
-					}
-					else 
-						message = 'Your choice [' + term + '] has no underlying selections.'
-						openModal(title, message)
-						return false
-						// Activate chosen on #modalChoicesSelections ?
-
-				},
-				error: function(XMLHttpRequest, textStatus, errorThrown) {
-					message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-					openModal(title, message)
-				}
-			})
-
-			return false
-		}
-		openModal(title, message)
+		return false
 
 	}
+
+
+	getOLSChoices = function(helper, parent_id, parent_label) {
+		/* Like above getChoices(), but parent_id may not be in top.specification
+		since user is browsing down via external OLS ontology.
+		*/
+
+		var parent_label = 'Selections for "' + parent_label + '"[' + parent_id + ']'
+		var lookupURL = getLookupURL(parent_id)
+
+		$.ajax({
+			type: 'GET',
+			url: lookupURL,
+			timeout: 10000, //10 sec timeout
+			success: function( response ) {
+				// We have an OLS data packet in data._embedded
+				if (response._embedded && response._embedded.terms)
+					setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
+				else
+					openModal(parent_label, "No subordinate choices found!")
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
+				openModal(parent_label, message)
+			}
+		})
+
+		return false
+
+	}
+	
+	function getSelectId(select) {
+		return select.attr('id').split('/').pop()
+	}
+	function getOLSSearch(helper, parent_id, text) {
+		/* Free text search for given items.  If selected, they will be placed
+		under existing parent_id.
+		Constrained by ontologies mentioned in top-level helper select.
+
+		*/
+		var select = $(helper).parent('div[class="input-group"]').find("select");
+		// kludge to get feature value if exists; it will have an ontology id
+		// to search within.
+		var entity_id = getSelectId(select) 
+		var selectEntity = top.specification[entity_id]
+		if (selectEntity.features && selectEntity.features.lookup.value)
+			var root_ids = '&allChildrenOf=' + [selectEntity.features.lookup.value].join(',')
+		else
+			var root_ids = ''
+
+		var parent_label = 'Search for "' + text + '"'//' in [' + ontology + ']'
+
+		// Defaults
+		// fields: {iri,label,short_form,obo_id,ontology_name,ontology_prefix,description,type}
+		//queryFields {label, synonym, description, short_form, obo_id, annotations, logical_description, iri}
+		// ISSUE: synonym vs SYNONYMS, EBI uses both in different circumstances; both are array.
+
+		var lookupURL = ['https://www.ebi.ac.uk/ols/api/select?q='
+			, text
+			//, 'ontology='
+			//, ontologies
+			, '&local=true'
+			, root_ids 
+			, '&rows=50'
+			, '&fieldList=iri,label,description,synonym,deprecated,has_children,type'
+		].join('')
+
+		$.ajax({
+			type: 'GET',
+			url: lookupURL,
+			timeout: 10000, //10 sec timeout
+			success: function( response ) {
+
+				// We have an OLS data packet in data._embedded
+				if (response.response && response.response.numFound > 0) {
+					setModalLookup(helper, response.response.docs, parent_id, parent_label)
+				}
+				else
+					openModal(parent_label, 'No results for "' + text + '"')
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
+				openModal(parent_label, message)
+			}
+		})
+
+		return false
+
+
+	}
+
+
+	function setModalLookup(helper, content, parent_id, parent_label) {
+
+		var select = $(helper).parent('div[class="input-group"]').find("select");
+
+		options = []
+		for (ptr in content) {
+			item = content[ptr]
+			// Fields: {iri,label,short_form,obo_id,ontology_name,ontology_prefix,description,type}
+			var lookupId = item.iri.split("/").pop().replace('_',':')
+
+			options.push({
+				'iri': item.iri, 
+				'id': lookupId,
+				'label': item.label, 
+				'parent': parent_id,
+				'definition': item.description, // array
+				'synonyms': item.synonyms || item.synonym, // array
+				'deprecated': ('is_obsolete' in item && item.is_obsolete) || ('deprecated' in item && item.deprecated),
+				'has_children': item.has_children
+			})
+		}
+		options.sort(function(a,b) { return a.label.localeCompare(b.label) })
+
+		var selections = ''
+		for (var ptr in options) {
+			var option = options[ptr]
+			// Children signalled by asterisk.
+			if (option.deprecated == false) {
+				selections += '<option value="'+ option.id +'">' + option.label + (option.has_children ? ' *' : '') + '</option>\n' 
+			}
+		}
+
+		openModalLookup(parent_label, selections)
+		
+		// "Select" button ensures calling select list has given item
+		$("#modalLookupSelect").off('click')
+			.on('click',function(){
+				if ($("#modalLookupSelections").prop('selectedIndex') > -1)
+					doSelections(select, options, parent_id)						
+		})
+
+		// Provide definition when user clicks on given item.
+		$("#modalLookupSelections option").off('click')
+			.on('click', function(){
+				var option = options[$("#modalLookupSelections").prop('selectedIndex')]
+				$('#modalLookupDefinition').html('<strong>' + option.id +'</strong><br/>' + option.definition)
+				$('#modalChoiceSearchText').val( $(this).text().replace('*','').trim() )
+		})
+
+		$("#modalChoiceSearchButton").off('click')
+			.on('click', function(){
+				getOLSSearch(helper, parent_id, $('#modalChoiceSearchText').val() )
+			})
+
+		// Double click triggers either "Select" button response, or
+		// if item has children, loads form with those children.
+		// NOTE: Currently no intermediate parents are included. User must
+		// Manually load them.
+		$("#modalLookupSelections option").off('dblclick')
+			.on('dblclick', function(){
+				var label = $(this).text()
+				var parent_label = $(this).text()
+				// Explore
+				if (label.indexOf('*') > 0) {
+					// Issue is selected item on helper was used as identifier
+					// to search for; parent_id exists only as insertion point
+					getOLSChoices(helper, $(this).attr('value'), parent_label)
+				}
+				// Select
+				else 
+					doSelections(select, options, parent_id)
+		})
+
+		return false
+
+	}
+
+	function doSelections(select, options, parent_id) {
+		/*
+		INPUT
+			select: existing <select> list
+			parent_id: ontology identifier
+			options: array of fetched children for given parent_id
+		*/
+		var selectDom = select[0]
+		var selectIndex = select.prop('selectedIndex')
+		if (!selectIndex)  //User might not have selected anyting in
+			selectIndex = 1
+
+		// Possible multi-select array if modal popup is in edit mode
+		var selections = $("#modalLookupSelections").prop('selectedIndex')
+		if (!Array.isArray(selections))
+			selections = [selections]
+
+		for (ptr in selections) {
+			var selection_row = selections[ptr]
+			var option = options[selection_row]
+			//console.log(ptr, selections, selection_row, options, option)
+			var existingOption = select.find('option[value="' + option.id + '"]')
+			if (existingOption.length > 0) {
+				existingOption.prop('selected', true)
+			}
+
+			// User asking for new option to be added 
+			else {
+				var newOption = document.createElement("option");
+				newOption.text = option.label;
+				newOption.value = option.id;
+				var parentOption = select.find('option').eq(selectIndex)
+				var parentClass = $(parentOption).attr('class')
+				if (parentClass) {
+					var depth = parentClass.match(/\d+$/)[0]; // Find numeric depth[0-20]
+					$(newOption).addClass('depth' + (parseInt(depth)+1))
+				}
+
+				selectDom.add(newOption, selectDom[selectIndex+1]);
+				select.find('option').eq(selectIndex+1).prop('selected', true)
+				
+				// Adjust GEEM specification itself, so this lookup can be
+				// propagated to user packages.
+				// New entry in top specification.
+				// ADD SYNONYMS????
+				// POSSIBLY ALREADY THERE?
+				top.specification[option.id] = {
+					'datatype': "xmls:anyURI",
+					'uiLabel': option.label,
+					'id': option.id,
+					'definition': option.description,
+					'parent': parent_id
+				}
+
+				var parent = top.specification[parent_id]
+				// ISSUE: parent may not be in top.specification if user has
+				// browsed down a few levels on OLS
+				if (!parent) parent = top.specification[ getSelectId(select) ]
+				if (!parent.choices) parent.choices = {}
+				parent.choices[option.id] = []
+
+			}
+		}
+		if (selections.length>0) {
+			select.trigger("chosen:updated"); // to select above.
+			$("#modalLookup").foundation('close')
+		}
+	}
+
+	function getLookupURL(entity_id) {
+		/* See https://www.ebi.ac.uk/ols/docs/api for URL commands
+
+		e.g. https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_0050589/children
+		*/
+		var term = entity_id.replace(':','_')
+		var ontology = term.split("_")[0].toLowerCase()
+
+		return ['https://www.ebi.ac.uk/ols/api/ontologies/'
+			, ontology
+			, '/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F'
+			, term
+			, '/hierarchicalChildren'
+		].join('')
+	}
+
 
 	function openModalLookup(header, content) {
 		/* This displays given string content and header in popup. 
 		Usually called by getChoices()
 		*/
-		$('#modalChoiceSelectAll').on('click', function(){
+		$('#modalChoiceSelectAll').off('click').on('click', function(){
 			$(this).parent().find('option').attr('selected','selected')
 		})
+		$('#modalLookupDefinition').text('')
 		$("#modalLookupHeaderContent").html(header)
 		$("#modalLookupSelections").html(content)
 		$("#modalLookup").foundation().foundation('open') // not sure why doubled.
@@ -1770,10 +1960,10 @@ OntologyForm.initFoundation = function() {
 	Foundation.Abide.defaults.patterns = {
 		alpha: /^[a-zA-Z]+$/,
 		alpha_numeric : /^[a-zA-Z0-9]+$/,
-		integer: /^[-+]?\d+$/,
-		number:  /^[-+]?[1-9]\d*$/,
-		decimal: /^[-+]?(\d+\.?\d*|\.\d+)$/,
-		float:   /^[-+]?(\d+\.?\d*|\.\d+)$/,
+		integer: /^[-+]?(0|[1-9]\d*)$/,
+		number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+		decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+		float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
 		//latitudeD:
 		//longitudeD:
 		 
@@ -1792,6 +1982,16 @@ OntologyForm.initFoundation = function() {
 		dateISO: /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/,
 	      // MM/DD/YYYY
 	    month_day_year : /(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/,
+	}
+	Foundation.Abide.defaults.validators['min_max'] = function($el,required,parent) {
+		var test = true
+		if ($el.attr('min'))
+			test = test && (parseFloat($el.val()) >= parseFloat($el.attr('min')) )
+		if ($el.attr('max'))
+			test = test && (parseFloat($el.val()) <= parseFloat($el.attr('max')) )
+
+		return test
+
 	}
 }
 

@@ -8,14 +8,17 @@
 
   <div style="background-color:gray;padding:10px 10px 0px 15px;color:white">
 
-    <div class="input-group">
-      <div id="modalLookupContentContainer">
-        <select id="modalLookupSelections" size="7" style="height:auto;margin:0"></select>
+    <div class="input-group" style="background-color:#f0f0f0">
+      <div id="modalLookupContentContainer"class="input-group-field">
+        <select id="modalLookupSelections" size="7" style="height:auto;margin:0;border:0;width:350px;cursor:pointer"></select>
+      </div>
+      <div class="input-group-field" style="color: black;padding: 10px;font-size: .7rem;vertical-align: top;overflow-y: scroll;height:100px;width:200px;line-height: 1rem"><!-- width and height ignored except as calculation for overflow, positioning -->
+         <div id="modalLookupDefinition" style="height:inherit" ></div>
       </div>
     </div>
     
     <button class="button" id="modalLookupSelect" class="button medium" style="float:right;">Select</button>
-    <i><strong>*</strong> indicates further choices are available. Double-click to view.<br/>
+    <i>Double-click item to select or expore. (<sup>*</sup>item has further choices.)</i>
     <!-- These options only shown when in edit mode -->
     <div id="modalChoiceBuilder" class="input-group hide">
       <input type="checkbox" id="modalLookupSelectAll"> Select all<br/>
@@ -26,9 +29,9 @@
 
   <div style="background-color:gray;padding:10px;margin-top:10px;color:white">
     <div class="input-group">
-      <input type="text" placeholder="Search Ontology Lookup Service directly" style="margin:0">
+      <input id="modalChoiceSearchText" type="text" placeholder="Search Ontology Lookup Service directly" style="margin:0">
       <div class="input-group-label" style="padding:0;border:0;background-color:transparent">
-        <input type="button" class="button" id="modalChoiceSearch" value="Search" style="margin:0;border-right:0" onclick="javascript:alert('This feature is coming soon!')">
+        <input id="modalChoiceSearchButton" type="button" class="button" value="Search" style="margin:0;border-right:0">
       </div>
     </div>
   </div>

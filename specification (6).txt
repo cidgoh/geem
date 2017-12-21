@@ -1,0 +1,17 @@
+EBI Taxonomy or Organism.  Requires “OTHER” plain text.
+
+Lat_lon or country: 
+- country GAZ or ISO Country field annex B? 
+- lat/long +/- in DECIMAL so that numeric fields are supported.  Conversion can go in NCBI N/S format.
+
+Date formats, esp. permitting year only.
+
+FIX has_component FEATURE not getting DESCRIPTION override.
+
+
+NIAID: Need "N/A" or "Unknown" as accepted value
+Example Values:	+15.871732; +37.2556; unknown; censored
+with unknown, not applicable and censored as an allowed values
+
+
+

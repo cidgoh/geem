@@ -490,11 +490,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		// Whether we're going up or down, we add on ALL 'has component' items EXCEPT FOR VISITED ones.
 		if (inherited == false)
 			for (var entityId2 in entity['components'] ) { 
-				// cardinality "x has member some/one/etc y"
-		//		if (!ignoreEntity || entity !== ignoreEntity) {
-					//console.log(entity['uiLabel'], "has component", entityId2, self.specification[entityId2]['uiLabel'])
-					components.push( this.getEntitySpecFormComponent(entityId2, entity['path'], depth + 1) )
-		//		}
+				components.push( this.getEntitySpecFormComponent(entityId2, entity['path'], depth + 1) )
 			}
 
 		return components
@@ -549,16 +545,13 @@ function OntologyForm(domId, specification, settings, callback) {
 			if ('choices' in entity) {} 
 			else entity['choices'] = []
 
-			// the datatype of entity is xmls:anyURI, but if it has components, they will still
+			// The datatype of entity is xmls:anyURI, but if it has components, they will still
 			// be as key-value of ontology_id-entity
-			for (var ontoID in entity['components']) { // IS component an ontoID??????? OR OBJECT?
-				console.log("Trying choices component " , ontoID)
+			for (var ontoID in entity['components']) {
 				// In path we silently skip name of component.
 				var part = $.extend(true, {path:entity['path']}, self.specification[ontoID]) //deepcopy
 				 
-				entity['choices'].push( getEntitySpecFormChoice(part) )
-				 // = entity['choices'].concat([part]) //.push(part)
-				
+				entity['choices'].push( getEntitySpecFormChoice(part) )				
 			}
 		}
 		
@@ -582,7 +575,6 @@ function OntologyForm(domId, specification, settings, callback) {
 				if (!part) // Should never happen.
 					console.log("Error: picklist choice not available: ", choiceId, " for list ", entity['id'])
 				else {
-					//delete part['datatype'] // Not really necessary if its default datatype
 
 					// TESTING: Trim all definitions to first sentence
 					if ('definition' in part && part['definition'].indexOf('.') > 0) {
@@ -812,7 +804,6 @@ function OntologyForm(domId, specification, settings, callback) {
 		labelHTML
 		,	'	<div class="input-group">\n'
 		,			text
-		//,			renderHelp(entity)
 		,	'	</div>\n'
 		].join('')
 		return getFieldWrapper(entity, html)
@@ -862,7 +853,6 @@ function OntologyForm(domId, specification, settings, callback) {
 			,		entity['disabled']
 			,		'/>\n'
 	    	,		renderUnits(entity)
-			//,		renderHelp(entity)
 			,'	</div></div>\n'
 		].join('')
 
@@ -885,7 +875,6 @@ function OntologyForm(domId, specification, settings, callback) {
 		,			 getPlaceholder(entity)
 		,			 '/>\n'
     	, 			renderUnits(entity)
-		//,			renderHelp(entity)
 		,	'	</div>\n'].join('')
 		return getFieldWrapper(entity, html)
 	}
@@ -944,7 +933,6 @@ function OntologyForm(domId, specification, settings, callback) {
 			,	'</div>\n'
 			,	'<br/>\n'
 		].join('')
-		// + renderHelp(entity)
 
 	}
 
@@ -1064,7 +1052,6 @@ function OntologyForm(domId, specification, settings, callback) {
 		if ('features' in entity && 'lookup' in entity['features']) 
 			html += '		<a class="input-group-label" onclick="getChoices(this,\''+entity['id']+'\')">lookup choices</a>\n'
 	
-		//html += renderHelp(entity)
 		html +=	'	</div>\n'
 
 

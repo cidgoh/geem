@@ -633,7 +633,8 @@ class Ontology(object):
 							if row[field]: 
 								synonymTypeList = self.setDefault(self.struct, table, id, 'has' + field, [])
 								# Clean up synonym phrases
-								phrases = str(row[field]).strip().replace(',','\n').replace('"','').split('\n')
+								# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
+								phrases = str(row[field]).strip().replace(', ','\n').replace('"','').split('\n')
 								for phrase in phrases:
 									synonymTypeList.append( phrase.strip())
 

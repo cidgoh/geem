@@ -19,7 +19,15 @@ function getdataSpecification(report_type) {
 
 	if (report_type) {
 		var content = ''
+
 		var entityId = top.focusEntityId
+
+		// For now, specification only pays attention to last item
+		if (entityId.indexOf('/') > 0) {
+			var path = entityId.split('/')
+			entityId = path[0] // last item: path.length-1
+		}
+
 		$("#helpDataSpecification").remove()
 
 		switch (report_type) {

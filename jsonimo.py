@@ -70,15 +70,18 @@ class Ontology(object):
 		self.struct = OrderedDict()
 		# JSON-LD @context markup, also used by jsonimo.py to make compact URI's.
 		# This enables output .json file to have shorter URI's using prefixes.
+
+		# SHOULD AUTO-GENERATE THIS BASED ON MERGED ONTOLOGY'S ENTITY PREFIXES
 		self.struct['@context'] = {
 			'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
 			'owl': 'http://www.w3.org/2002/07/owl/',
 			'xmls': 'http://www.w3.org/2001/XMLSchema#',
 			'vcard': 'http://www.w3.org/2006/vcard/ns#',
 			'vcf': 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#',
-
+			'dc': 'http://purl.org/dc/elements/1.1/',
 			'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
-			'ancestro': 'http://purl.obolibrary.org/obo/ancestro_',
+			#'ancestro': 'http://purl.obolibrary.org/obo/ancestro_',    # SOON
+			'ancestro': 'http://www.ebi.ac.uk/ancestro/ancestro_',
 			'MESH': 'http://purl.bioontology.org/ontology/MESH/',
 			'SIO': 'http://semanticscience.org/resource/SIO_',
 			'typon': 'http://purl.phyloviz.net/ontology/typon#',
@@ -105,6 +108,7 @@ class Ontology(object):
 			"NCIT": "http://purl.obolibrary.org/obo/NCIT_",
 			"OBI": "http://purl.obolibrary.org/obo/OBI_",
 			'OMIABIS': 'http://purl.obolibrary.org/obo/OMIABIS_',
+			"OMP": "http://purl.obolibrary.org/obo/OMP_",
 			'PATO': "http://purl.obolibrary.org/obo/PATO_",
      		"PO": "http://purl.obolibrary.org/obo/PO_",
         	"RO": "http://purl.obolibrary.org/obo/RO_",
@@ -115,8 +119,10 @@ class Ontology(object):
 			"UBERON": "http://purl.obolibrary.org/obo/UBERON_",
 			"UO": "http://purl.obolibrary.org/obo/UO_"
 
+			# metadata needs its field/URI mapping too. 
 		}
 		self.struct['specifications'] = {}
+		self.struct['metadata'] = {}
 
 
 	def __main__(self): #, main_ontology_file
@@ -147,8 +153,12 @@ class Ontology(object):
 
 		# Load main ontology file into RDF graph
 		self.graph.parse(main_ontology_file)
+
 		# Add each ontology include file (must be in OWL RDF format)
 		self.ontologyIncludes(os.path.dirname(main_ontology_file) + '/imports')
+
+		# load self.struct with ontology metadata
+		self.ontologyMetadata(self.doQueryTable('metadata'))
 
 		# Retrieve all subclasses of 'data representational model'
 		specBinding = {'root': rdflib.URIRef(self.expandId('OBI:0000658'))} 
@@ -183,6 +193,13 @@ class Ontology(object):
 
 		with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
 			output_handle.write(json.dumps(self.struct,  sort_keys=False, indent=4, separators=(',', ': ')))
+
+	def ontologyMetadata(self, table):
+		# Should only be 1 row.
+		print "doing metadata"
+		print table
+		for myDict in table: 
+			self.struct['metadata'] = myDict
 
 
 	def doSpecifications(self, table):
@@ -927,6 +944,7 @@ class Ontology(object):
 		'rdfs': rdflib.URIRef('http://www.w3.org/2000/01/rdf-schema#'),
 		'rdf':	rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
 		'xmls': rdflib.URIRef('http://www.w3.org/2001/XMLSchema#'),
+		'dc': rdflib.URIRef('http://purl.org/dc/elements/1.1/'),
 		'oboInOwl': rdflib.URIRef('http://www.geneontology.org/formats/oboInOwl#'),
 		'OBO': rdflib.URIRef('http://purl.obolibrary.org/obo/'), # shortcut for all OBOFoundry purls
 		'IAO':	rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_'),
@@ -1288,8 +1306,33 @@ class Ontology(object):
 				UNION {?datum oboInOwl:hasNarrowSynonym ?NarrowSynonym.}
 				UNION {?datum IAO:0000118 ?AlternativeTerm.}
 			}
-		""", initNs = namespace)
+		""", initNs = namespace),
 
+
+		#Get ontology metadata. Currently the listed annotations are included.
+	    #<owl:Ontology rdf:about="http://purl.obolibrary.org/obo/genepio.owl">
+	    #
+	    #    <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/genepio/releases/2018-02-28/genepio.owl"/>
+	    #   <oboInOwl:default-namespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GENEPIO</oboInOwl:default-namespace>
+	    #    <dc:title xml:lang="en">Genomic Epidemiology Ontology</dc:title>
+	    #    <dc:description xml:lang="en">The Ontology for Biomedical Investigations (OBI) is build in a ...</dc:description>
+	    #    <dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
+	    #    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
+
+	    #owl:Ontology rdf:about ?resource.
+        'metadata': rdflib.plugins.sparql.prepareQuery("""
+			SELECT distinct ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
+			WHERE {
+				
+				OPTIONAL {?resource dc:title ?title.}
+				OPTIONAL {?resource dc:description ?description.}
+				OPTIONAL {?resource owl:versionIRI ?versionIRI.}
+				OPTIONAL {?resource oboInOwl:default-namespace ?prefix.}
+				OPTIONAL {?resource dc:license ?license.}
+				OPTIONAL {?resource dc:date ?date.}
+			}
+
+        """, initNs = namespace)
 
 }
 

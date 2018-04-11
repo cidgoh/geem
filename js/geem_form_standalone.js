@@ -7,10 +7,10 @@ ontologyLookupService = 'http://purl.obolibrary.org/obo/'
 
 $( document ).ready(function() {
 
-  //OntologyForm.initFoundation()
-
   // Bring in shared templates
-  $.ajax('modal_lookup.html').done(function(response){$('body').append(response)});
+  $.ajax('parts/modal_lookup.html').done(function(response) {
+    $('body').append(response)
+  });
 
   $('#modalEntity').foundation()
 

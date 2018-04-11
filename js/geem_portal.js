@@ -4,7 +4,7 @@
 	ontology .owl files that have been marked up according to the Genomic
 	Epidemiology Entity Mart (GEEM) coding system (annotations and a few 
 	relations), allowing one to search and browse any data representation model
-	items therein, and all related numeric, categorical and textual datums.
+	items therein, and related numeric, categorical and textual datums.
 	
 	This code supports a portal.html page for selecting a given ontology, 
 	navigating through its various GEEM annotated specs, enabling the user to
@@ -15,7 +15,7 @@
 
     Author: Damion Dooley
 	Project: genepio.org/geem
-	Updated: Dec 11, 2017
+	Updated: Apr 10, 2018
 
 	Note: we can get a dynamic list of OBOFoundry ontologies via: 
 	http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json   //&timeout=0&debug=on
@@ -28,6 +28,9 @@
 	 - How to handle items that are not marked as datums?
 	 - possibly try: http://knockoutjs.com/index.html
 	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to be recognized. using "min 1" instead of "some" is the workaround.
+	 - API: should provide content type of resource being requested: 
+		GEEM ontology, shared or private package.
+	 - Ontology ID provided in URL: CHECK FOR VALID ENTITY REFERENCE IN SOME (PREFERRED?) ONTOLOGY. PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
 
 */
 
@@ -41,131 +44,92 @@ ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
 
 $( document ).ready(function() {
 
-	OntologyForm.initFoundation()
-
-	// Bring in shared templates
-	$.ajax('modal_lookup.html').done(function(response){$('body').append(response)});
-
-	$(window).on('hashchange',function(){ 
-		// GEEM focuses on entities by way of a URL with hash #[entityId]
-	    if (location.hash.length > 0)
-	    	// Better entity id detection?
-		   	if (location.hash.indexOf(':') != -1) { 
-				top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-				// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
-				// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
-				myForm.renderEntity(top.focusEntityId)
-
-				// When renderEntity is called, activate its tab
-				$('#content-tabs').foundation('selectTab', '#content'); 
-
-				// FUTURE: Resolve repeated code below.
-				$('#buttonFormSubmit').on('click', function () {  
-    				setModalDownload(getdataSpecification('form_submission.json'))
-  				})
-			}
+	// ************* LOAD SHARED TEMPLATES ****************
+	$.ajax('parts/modal_lookup.html').done(function(response){
+		$('body').append(response)
 	});
 
+	// Initializes Zurb Foundation settings (but not foundation itself)
+	OntologyForm.initFoundation()
 
-	// This control toggles the visibility of ontology ID's in the given 
-	// form content (for reference during content review)
-	$('input#toggleIdVisibility').on('change', function() {
-		top.formSettings.ontologyDetails = $(this).is(':checked')
-		myForm.renderEntity()
-	})
+	// GEEM focuses on entities by way of a URL with hash #[entityId]
+	$(window).on('hashchange', doNewHash);
 
-	// Display all optional elements as label [+] for concise display.
-	$('input#toggleMinimalForm').on('change', function() {
-		top.formSettings.minimalForm = $(this).is(':checked')
-		myForm.renderEntity()
-	})
+	/********* Specification resource selection area ********/
 
 	// When a new ontology is selected:
-	$('#selectSpecification').on('change', function() {
-		//setDataSpecification(getdataSpecification($(this).val()) )
-	})
+	$('#selectResource').on('change', doResourceSelection)
 
-	// Trigger popup JSON / EXCELL / YAML view of specification
-	$('#specificationType').on('change', function() {
-		setDataSpecification(getdataSpecification( $(this).val() )) 
-	}) 
+	initSummaryTab()
+	initSearchTab()
 
-	$('#spec_download').on('click', downloadDataSpecification) // the button, not the surrounding link.
+	/********* Specification focus area *********************/
 
-	// Provide type-as-you-go searching
-	$("#searchField").on('keyup', function() {
-		var text = $(this).val().toLowerCase()
-		searchAsYouType(top.specification, text)
-	})
+	$("#tabsContent").on('mouseenter','i.fi-magnifying-glass', displayContext)
 
-	$('#toggleSearchDefinition').on('change', function() {
-		searchAsYouType(top.specification, $("#searchField").val().toLowerCase())
-	})
-
-	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', displayContext)
-
-	$("#content").on('mouseenter','i.fi-magnifying-glass', displayContext)
-
-	$("#content").on('click', "i.fi-shopping-cart", function(event){
-		// Check and update shopping cart include/exclude status of this item
-		event.stopPropagation(); // otherwise parent cart items catch same click
-		cartCheck(getEntityId(this))
-		return false
-	})
-
-	//Setup in form code because #mainForm events overwritten: $("#mainForm").on('mouseenter','i.fi-magnifying-glass', displayContext)
-			
-	$("#makePackageForm").on('submit', function() {
-		/* A package consists of 
-		{
-			name: string
-			description: string
-			version: int //auto-increment per update function.
-			ontologies:	[
-				{prefix: string // "genepio"; OBOFoundry ontology lower case name.
-				version: string // identifier or if none, GEEM download date.
-				}
-			] 
-			specifications:
-				{}
-
-		}
-
-
-		*/
-	})
-
-
-	$("#shoppingCart")
-		.on("click", 'div.cart-item', function(event) {
-			event.stopPropagation(); // otherwise parent cart items catch same click
-
-			if ($(event.target).is('i.fi-shopping-cart'))
-				// Change state of shopping cart item as indicated by div.cart-item.data-ontology-Id
-				cartCheck(this.dataset.ontologyId)
-			else
-				// Follow link if user didn't click
-				return navigateToForm(this.dataset.ontologyId)
-
-			return false
-		})
-
-
-	$("#shoppingCartTrash").on('click', function() {
-		$('form#mainForm div[data-ontology-id]').removeClass('include exclude')
-		$('#shoppingCart').empty()
-	})
-
-	//Default load of GenEpiO
-	loadSpecification($('#selectSpecification').val() ) // e.g. data/ontology/genepio-edit.json'
-
+	initFormTab()
+	initSpecificationTab()
+	// initDiscussTab()
+	initCartTab()
 
 });
 
 
-getIdHTMLAttribute = function(id) {
+/******************** UTILITY FUNCTIONS ********************/
+// FUTURE: convert into class
+
+
+function getIdHTMLAttribute(id) {
 	return 'data-ontology-id="' + id + '" '
 }
+
+
+function navigateToForm(ontologyId) {
+	console.log('looking for: '+ontologyId)
+	// PROBLEM SELECTING CART ITEM, NOT FINDING IT AGAIN IN 
+	// URL AND INSTEAD RELOADING FORM?
+
+
+
+
+
+
+	if (window.location.href.indexOf(ontologyId) == -1) {
+		// not found
+		window.location.replace('#' + ontologyId);
+		//window.location.href = '#' + ontologyId
+		console.log('reloaded')
+		// ISSUE: SEEMS TO BE RELOADING WITHOUT REASON
+	}
+	else
+		// form already displayed, ensure tab is activated
+		$('#content-tabs').foundation('selectTab', '#panelContent'); 
+
+
+	return false
+}
+
+
+function getEntity(ontologyId) {
+	var entity = top.specification[ontologyId]
+	//if (!entity)
+	//	entity = top.specification['units'][ontologyId]
+	return entity
+}
+
+function getEntityId(item) {
+	// Determine relevant ontology ID for given entity
+	if ($(item).is('i.fi-shopping-cart.option')) 
+		return $(item).prev().attr('data-ontology-id')
+	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
+}
+
+function itemAnimate(item, effectClass) {
+	// Apply given css effectClass to given DOM item for 1 second
+	$(item).addClass(effectClass)
+	setTimeout('$("'+item+'").removeClass("'+effectClass+'")', 1000)
+}
+
 
 /*********** ACTION *****************************************************
 	This loads the json user interface oriented version of an ontology
@@ -175,7 +139,38 @@ getIdHTMLAttribute = function(id) {
 		specifications
 	}
 */
-function loadSpecification(specification_file) {
+
+
+function doResourceSelection() {
+
+		spec_URL = $('#selectResource').val()
+
+		// This wasn't URL triggered, so clear out existing form
+		location.hash = ''
+
+		if (spec_URL.length == 0) {
+			$('#specificationSourceTabs,#content').addClass('disabled')
+			$('#specificationSourceInfoBox').show()
+			$('#tabsSpecification').hide()
+			$('#formEntityLabel').html('')
+			$('#specificationSourceTabs').foundation('_collapseTab', $('#panelLibrary'));
+
+		}
+		else {
+			// Future: API provides spec_type 
+			var spec_type = $('#selectResource option:selected').parents('optgroup').first().attr('type')
+			loadSpecification(spec_URL, spec_type)
+			$('#specificationSourceTabs').removeClass('disabled')
+
+			$('#tabsSpecification').show()
+			// Issue: foundation re-applied to menus after load?
+			setTimeout("$('#specificationSummaryTabLink').click()",500 )
+
+		}
+
+	}
+
+function loadSpecification(specification_file, spec_type) {
 	$.ajax({
 		type: 'GET',
 		url: specification_file,
@@ -187,24 +182,15 @@ function loadSpecification(specification_file) {
 			top.specification = specification['specifications'];
 			top.context = specification['@context'];
 
-			// Provide context of form to populate.
+			doSpecificationMetadata(specification, spec_type)
+
+			// Prepare browsable top-level list of ontology items
+			doResourceBrowseMenu()
+
+			// Provide context of form to populate. Passes formCallback, name of function in this module for 
+			// OntologyForm to return to when complete.
 			myForm = new OntologyForm("#mainForm", top.specification, top.formSettings, formCallback) 
 
-			// Show Data Representation Model item menu on "Browse" tab.
-			// Prepare browsable top-level list of ontology items
-
-			//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-			$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
-
-			$("ul#entityMenu").html(renderMenu('OBI:0000658') + '<hr/>')
-
-			// On Browse tab, enables eye icon click to show form without opening/closing the accordion.
-			$('ul#entityMenu *').on('click', function(event) { 
-	  			event.stopPropagation();
-	  			if ($(event.target).is('i.fi-magnifying-glass') ) {
-	  				myForm.renderEntity(getEntityId(event.target))
-	  			}
-			});
 
 			// If browser URL indicates a particular entity, render it:
 			if (location.hash.indexOf(':') != -1) { 
@@ -227,145 +213,179 @@ function loadSpecification(specification_file) {
 	});
 }
 
+
+function doNewHash() {
+	// GEEM focuses on entities by way of a URL with hash #[entityId]
+    if (location.hash.length > 0)
+    	// Better entity id detection?
+	   	if (location.hash.indexOf(':') != -1) { 
+			top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
+			// CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
+			// PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
+			myForm.renderEntity(top.focusEntityId)
+
+			// When renderEntity is called, activate its tab
+			$('#content-tabs').foundation('selectTab', '#panelContent'); 
+
+			// FUTURE: Resolve repeated code below.
+			$('#buttonFormSubmit').on('click', function () {  
+				setModalDownload(getdataSpecification('form_submission.json'))
+				})
+		}
+}
+
 function formCallback(formObj) {
 	//This is executed whenever a new form is rendered.
 	if (window.setShoppingCart) {
 		setShoppingCart(formObj) 
 		setFormSelectOptionsCart(formObj)
 	}
-}
+	$('#specificationSourceInfoBox').hide()
 
 
-setShoppingCart = function (formObj) {
-	// UPDATE SHOPPING CART STATUS in renderEntity()
-	// ISSUE is foundation zurb selection lists redrawn each time, so need statuses added in that code.
-	$('#content div.field-wrapper')
-		.addClass('cart-item')
-		.prepend('<i class="fi-shopping-cart"></i>')
-
-	$('#shoppingCart div.cart-item').each(function(index){
-		var status = ''
-		if ($(this).is('.include') ) status = 'include'
-		if ($(this).is('.exclude') ) status = 'exclude'
-
-		$('#content div.field-wrapper[' + getIdHTMLAttribute($(this)[0].dataset.ontologyId) + ']').addClass(status)
-	})
-}
-
-
-function setFormSelectOptionsCart(formObj) {
-	// Adds shopping cart and magnifying glass to individual <select><option> item if it doesn't have one...
-	// This has to be done runtime (via mouseover) because only then does foundation render it.
-	// FUTURE: FORM Hides/DROPS HIDDEN <option> in renderChoice().
-	$('#content select.regular').on('chosen:showing_dropdown', function(event) {
-
-		var control = $(this).next().find('ul.chosen-results')
-		var select = $(this) //.parent('div').prev('select')
-		var selectId = select.attr('id') // FUTURE: generalize to data-ontology-id
-		var selectOptions = select.children('option')
-
-		$(control).children('li').each(function (index) {
-			if ($(this).is('.active-result')) {
-
-				// We need to copy the value from the existing <select><option>
-				// into the data-ontology-id for this <li>.
-				// Chosen.js options have extra item at beginning?
-				var id = selectOptions.eq(index+1).attr('value') //Get corresponding option value.
-				var pathId = selectId + '/' + id
-				$(this).attr('data-ontology-id',pathId)
-				$(this).addClass('cart-item')
-				var cartItem = $('#shoppingCart [data-ontology-id="' + pathId +'"]')
-				var cart = $('<i class="fi-shopping-cart option"></i>')
-				if (cartItem.length>0)
-					if (cartItem.is('.include') ) $(this).add(cart).addClass('include')
-					else if (cartItem.is('.exclude') ) $(this).add(cart).addClass('exclude')
-
-				// Couldn't figure out how to keep selection window open
-				$(this).after(cart) //awkward, cart requires margin-top:-30px in stylesheet.
-				if (formObj.settings.ontologyDetails)
-					$(this).prepend('<i class="fi-magnifying-glass"></i> &nbsp;')
-			}
-		})
-
-	})
+	// Content area functionality is blocked until form loaded
+	$('#content').removeClass('disabled')
 
 }
 
-function navigateToForm(ontologyId) {
-	
-	if (window.location.href.indexOf(ontologyId) == -1) {// not found
-		window.location.replace('#' + ontologyId);
-		//window.location.href = '#' + ontologyId
 
+function doSpecificationMetadata(specification, spec_type) {
+	// Currently spec_type is provided as parameter but it
+	// should be within specification itself. Determines which
+	// fields are editable/visible.
+	top.metadata = specification['metadata'];
+	top.metadata.type = spec_type;
+
+	// Temporary correction until SPARQL query can be revised.
+	if ('value' in top.metadata.date)
+		top.metadata.date = top.metadata.date.value
+
+	// Render display form appropriate to spec type:
+	doResourceForm(top.metadata, 'parts/resource_summary_form.html', spec_type)
+}
+
+
+
+function doResourceForm(data, form_URL, spec_type) {
+	// Feeds specification.metadata variables to copy of template
+
+	$.ajax(form_URL).done(function(response) {
+
+		Object.keys(data).forEach(function(key) {
+			value = data[key]
+			var re = new RegExp('@' + key ,"g");
+			response = response.replace(re, value)
+		}) 
+
+		$('#specificationSourceForm').html(response)
+
+		// If loaded data is direct from ontology, hide certain buttons. 
+		var onto_fields = $('#summary_title,#summary_resource,#summary_description,#summary_prefix')
+
+		if (spec_type == 'private') {
+			$('#summary_delete,#summary_update').show()
+			
+		}
+		else {
+			$('#summary_delete,#summary_update').hide()
+
+		 	if (spec_type == 'ontology') {
+		 		onto_fields.attr('readonly','readonly')
+		 	}
+		 	else {
+				onto_fields.removeAttr('readonly')
+		 	}
+
+		}
+
+
+	});
+
+}
+
+
+
+function doResourceBrowseMenu() {
+	/* Prepare browsable top-level list of ontology items
+	Provide context of form to populate. Passes formCallback, name of function in this module for OntologyForm to return to when complete.
+	*/
+	myForm = new OntologyForm("#mainForm", top.specification, top.formSettings, formCallback) 
+
+	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
+	$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+
+
+	// If it is an ontology, render its data representation model tree:
+	$("ul#entityMenu").html(renderMenu('OBI:0000658') + '<hr/>')
+
+	// If it is a package ... 
+
+
+	// On Browse Specifications tab, enables eye icon click to show form without opening/closing the accordion.
+	$('ul#entityMenu *').on('click', function(event) { 
+		event.stopPropagation();
+		if ($(event.target).is('i.fi-magnifying-glass') ) {
+			myForm.renderEntity(getEntityId(event.target))
+		}
+	});
+}
+
+
+
+
+
+function getOntologyDetailHTML(ontologyId) {
+
+	// This links directly to form for this entity.  Not in context of larger form.
+	// Problem is that recursion to fetch parts from parent runs into parents that 
+	// have no further path.
+	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
+	var entity = getEntity(ontologyId)
+	var entityIdParts = entity['id'].split(':')
+	var idPrefix = entityIdParts[0]
+	if (idPrefix in top.context) {
+		entityId = top.context[idPrefix] + entityIdParts[1]
 	}
 	else
-		// form already displayed, ensure tab is activated
-		$('#content-tabs').foundation('selectTab', '#content'); 
+		entityId = top.ontologyLookupService + entity['id']
 
-	return false
-}
+	var labelURL = '<a href="' + entityId + '" target="_blank">' + entity['uiLabel'] + '</a>' 
 
-
-function getEntity(ontologyId) {
-	var entity = top.specification[ontologyId]
-	//if (!entity)
-	//	entity = top.specification['units'][ontologyId]
-	return entity
-}
-
-function getEntityId(item) {
-	// Determine relevant ontology ID for given entity
-	if ($(item).is('i.fi-shopping-cart.option')) 
-		return $(item).prev().attr('data-ontology-id')
-	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
-}
-
-/*********** SEARCH AND RESULTS *************************/
-function searchAsYouType(collection, text) {
-	/* As user types text (more than 2 characters) into searchField, exact
-	 substring search is conducted through top.specification entities (all
-	 of their numeric or textual attributes)
+	/* Provide a label mouseover display of underlying ontology details
+	like original ontology definition, term id, synonyms, etc.
 	*/
-	text = text.toLowerCase()
-	$("#searchResults").empty()
-	var results = []
-	if (text.length > 2) {
-		var ontology_ids = filterIt(collection, text)
-		for (id in ontology_ids) {
-			results.push(renderCartObj(ontology_ids[id]))
+	var itemHTML = '<li><span class="infoLabel">ontology id:</span> ' + entity['id'] + '</li>\n'
+
+	// Label is original ontology's label, not the user interface oriented one.
+	// Show if there is a difference.
+	if ('label' in entity && entity['label'] != entity['uiLabel'])
+		itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity['label'] + '</li>\n'
+	
+	// Add original definition if different.
+	if ('definition' in entity && entity['uiDefinition'] != entity['definition'])
+		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity['definition'] + '</i></li>\n'
+	
+	// Hardcode properties that you want to show from specification here:
+	var properties = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
+	for (ptr in properties) {
+		var item = properties[ptr]
+		if (item in entity) {
+			for (var ptr2 in entity[item]) {
+				var val = entity[item][ptr2]
+				if (val.substr(0,4) == 'http') // covers https:// too.
+					val = '<a href="' + val + '" target ="_blank">'+val+'</a>'
+				itemHTML += '<li><span class="infoLabel">' + item + ':</span> ' + val + '</li>\n'
+			}
 		}
-		// Sort results alphabetically.  
-		// Consider other sort metrics?
-		results.sort(function(a,b){return a[0].localeCompare(b[0]) })
-		resultsHTML = results.map(function(obj) {return obj[1]})
-		$("#searchResults").append(resultsHTML.join('\n'))
 	}
 
+
+	// Enable mouseover display of above.
+	itemHTML = 	[labelURL, itemHTML].join('\n')
+
+	return itemHTML
 }
 
-function filterIt(collection, searchKey) {
-	/* Text Search of ontology contents via JSON specification.
-	This looks at each "specification" entry's main fields, e.g.: label, 
-	uiLabel, definition, uiDefinition, hasSynonym, hasNarrowSynonym, 
-	hasExactSynonym.
-	 */
-	 var details = $('#toggleSearchDefinition:checked').length
-
-    return Object.keys(collection).filter(function(key) { // key is ontology term id.
-      return Object.keys(collection[key]).some(function(key2) { 
-      	// key2 is name of object property like label, definition, component
-
-      	if (typeof collection[key][key2] === "object") 
-      		//i.e. skip entity components, models, features.
-      		return false
-      	else
-      		if (!details && (key2 == 'definition' || key2 == 'uiDefinition'))
-      			return false
-      		// FUTURE: add wildcard searching?
-      		return collection[key][key2].toLowerCase().includes(searchKey);
-      })
-    })
-}
 
 function displayContext(event) {
 	/* Provide mouseover function to see dropdown menu that shows given item
@@ -426,6 +446,7 @@ function displayContext(event) {
 
 }
 
+
 function getRelationsHTML(ontologyId) {
 	// Finds and draws relations as li links for given entity
 	var entity = getEntity(ontologyId) 
@@ -456,187 +477,6 @@ function getRelationLink(relation, entity) {
 		'</li>'].join('')
 }
 
-function getOntologyDetailHTML(ontologyId) {
-
-	// This links directly to form for this entity.  Not in context of larger form.
-	// Problem is that recursion to fetch parts from parent runs into parents that 
-	// have no further path.
-	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
-	var entity = getEntity(ontologyId)
-	var entityIdParts = entity['id'].split(':')
-	var idPrefix = entityIdParts[0]
-	if (idPrefix in top.context) {
-		entityId = top.context[idPrefix] + entityIdParts[1]
-	}
-	else
-		entityId = top.ontologyLookupService + entity['id']
-
-	var labelURL = '<a href="' + entityId + '" target="_blank">' + entity['uiLabel'] + '</a>' 
-
-	/* Provide a label mouseover display of underlying ontology details
-	like original ontology definition, term id, synonyms, etc.
-	*/
-	var itemHTML = '<li><span class="infoLabel">ontology id:</span> ' + entity['id'] + '</li>\n'
-
-	// Label is original ontology's label, not the user interface oriented one.
-	// Show if there is a difference.
-	if ('label' in entity && entity['label'] != entity['uiLabel'])
-		itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity['label'] + '</li>\n'
-	
-	// Add original definition if different.
-	if ('definition' in entity && entity['uiDefinition'] != entity['definition'])
-		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity['definition'] + '</i></li>\n'
-	
-	// Hardcode properties that you want to show from specification here:
-	var properties = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
-	for (ptr in properties) {
-		var item = properties[ptr]
-		if (item in entity) {
-			for (var ptr2 in entity[item]) {
-				var val = entity[item][ptr2]
-				if (val.substr(0,4) == 'http') // covers https:// too.
-					val = '<a href="' + val + '" target ="_blank">'+val+'</a>'
-				itemHTML += '<li><span class="infoLabel">' + item + ':</span> ' + val + '</li>\n'
-			}
-		}
-	}
-
-
-	// Enable mouseover display of above.
-	itemHTML = 	[labelURL, itemHTML].join('\n')
-
-	return itemHTML
-}
-
-
-
-/*********** ENTITY SHOPPING CART *************************/
-function cartCheck(ontologyId) {
-	/* A user can select as many entities as they like, but may find that 
-	some components of some entities are undesirable.  This script enables
-	the shopping list to be maintained with the ability to select entities,
-	and also select underlying entities or fields to omit.
-	*/
-	// Clear out initial help message:	
-	if ($('#shoppingCart div.cart-item').length == 0)
-		$("#panelCart > div.infoBox").remove()
-
-	var dataId = '[' + getIdHTMLAttribute(ontologyId) +']'
-	var items = $('.cart-item' + dataId)
-	var formItem = $('#mainForm .cart-item' + dataId) // CONGLOMERATE?
-	var cartItem = $('#shoppingCart .cart-item' + dataId)
-
-	if (cartItem.length == 0) {
-		// ADD item to shopping list; couldn't possibly have clicked on it there.
-
-		// Place this new item under parent in cart if it exists
-		var path = ontologyId.substr(0, ontologyId.lastIndexOf('/'))
-		while (path.length) {
-			var item = $('#shoppingCart div.cart-item[data-ontology-id="' + path+ '"]')
-			if (item.length) {
-				$(item).append(renderCartItem(ontologyId))
-				break;
-			}
-			path = path.substr(0, path.lastIndexOf('/'))
-		}
-
-		if (path == '') {// item parent wasn't found
-			$("#shoppingCart").prepend(renderCartItem(ontologyId))
-			// Issue is that some of remaining items might be positioned under top-level
-		}
-		var cartItem = $('#shoppingCart div.cart-item' + dataId)
-		items = items.add(cartItem)  // x.add() is immutable.
-
-		// See if any existing items (longer ids) fit UNDER  new item
-		$('#shoppingCart div.cart-item').each(function(index) {
-			var id = $(this).attr('data-ontology-id')
-			if (id != ontologyId) {
-				if (id.substr(0, ontologyId.length) == ontologyId) 
-					$(cartItem).append(this)
-			}
-		})
-
-	}
-
-	if (formItem.length == 0) {//User has displayed a different form than shoppingList selection pertains to.
-		if (cartItem.is('.include'))
-			cartItem.removeClass('include').addClass('exclude')
-		else if (cartItem.is('.exclude'))
-			cartItem.remove()
-		return
-	}
-
-	// AN ITEM has a state or INHERITS STATE OF ITS FIRST STATED ANCESTOR.
-	if (! formItem.is('.exclude, .include')) {
-		formItem = formItem.parents('.exclude, .include').first()
-		if (formItem.length == 0) {// then this is truly unselected.
-			items.addClass('include')
-			itemAnimate('#shoppingCartIcon', 'attention')
-			return
-		}
-	}
-	
-	if (formItem.is('.include')) {
-		// ITEM already in shopping list, so downgrade to "exclude" list.
-		items.removeClass('include').addClass('exclude')
-
-		// If item is NOT top-level in form, we're done.
-		if (formItem.parent('form').length == 0 ) {
-		// otherwise 
-			itemAnimate('#shoppingCartIcon', 'attention')
-			return
-		}
-		// Otherwise, for top-level items, drop it immediately via .exclude state.
-	}
-	if (formItem.is('.exclude')) {
-		// Item on exclusion list, so drop it entirely
-		items.removeClass('exclude')
-		// And remove all markings on subordinate items
-		var mainFormEntity = $('#mainForm div.field-wrapper' + dataId)
-		mainFormEntity.add(mainFormEntity.find('div.field-wrapper')).removeClass('include, exclude')
-		cartItem.remove()
-	}
-
-}
-
-function itemAnimate(item, effectClass) {
-	// Apply given css effectClass to given DOM item for 1 second
-	$(item).addClass(effectClass)
-	setTimeout('$("'+item+'").removeClass("'+effectClass+'")', 1000)
-}
-
-function renderCartItem(ontologyId) {
-	// NavFlag enables display of up-arrows that user can click on
-	// to navigate to an item's parent.
-	var ptr = ontologyId.lastIndexOf('/')
-	// Get last path item id.
-	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
-	var entity = top.specification[entityId]
-	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED]'}
-	return ['<div class="cart-item" ', getIdHTMLAttribute(ontologyId), '>',
-		'<i class="fi-shopping-cart"></i>',
-		'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a></div>'].join('')
-}
-
-
-function renderCartObj(ontologyId) {
-	// This version of renderCartItem is optimized for sorting, and is used in
-	// search results page.  It also provides icons for navigating to an item's parent.
-	var ptr = ontologyId.lastIndexOf('/')
-	// Get last path item id.
-	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
-	var entity = top.specification[entityId]
-	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
-	var html = ['<div class="cart-item" ', getIdHTMLAttribute(ontologyId), '>',
-		'<i class="fi-shopping-cart"></i>',
-		('parent' in entity || 'member_of' in entity || 'otherParent' in entity) ? '<i class="fi-arrow-up dropdown member"></i>' : '', // parent
-		//('member_of' in entity) ? '<i class="fi-arrow-up dropdown member"></i>' : '',
-		//('otherParent' in entity) ? '<i class="fi-arrow-up dropdown part"></i>' : '',
-		'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a></div>'].join('')
-	
-	return [entity['uiLabel'].toLowerCase(), html]
-
-}
 
 
 
@@ -683,4 +523,71 @@ function renderMenu(entityId, depth = 0 ) {
 	return html
 }
 
+/* A package consists of 
+{
+	name: string
+	description: string
+	version: int //auto-increment per update function.
+	ontologies:	[
+		{prefix: string // "genepio"; OBOFoundry ontology lower case name.
+		version: string // identifier or if none, GEEM download date.
+		}
+	] 
+	specifications:
+		{}
 
+}
+
+
+*/
+
+
+function initSummaryTab() {
+	// Deals with #summary_delete, #summary_download, #summary_update
+
+	$('#specificationSourceForm').on('click','#summary_download', function() {
+			var content =  {
+				content: JSON.stringify(top.specification),
+				report_type: 'geem.json',
+				id: top.specification.metadata.prefix
+			}
+			downloadDataSpecification(content)
+	})
+}
+
+function initFormTab() {
+
+	// This control toggles the visibility of ontology ID's in the given 
+	// form content (for reference during content review)
+	$('input#toggleIdVisibility').on('change', function() {
+		top.formSettings.ontologyDetails = $(this).is(':checked')
+		myForm.renderEntity()
+	})
+
+	// Display all optional elements as label [+] for concise display.
+	$('input#toggleMinimalForm').on('change', function() {
+		top.formSettings.minimalForm = $(this).is(':checked')
+		myForm.renderEntity()
+	})
+
+	// Check and update shopping cart include/exclude status of this item
+	$("#tabsContent").on('click', "i.fi-shopping-cart", function(event){
+
+		event.stopPropagation(); // otherwise parent cart items catch same click
+		cartCheck(getEntityId(this))
+		return false
+	})
+
+}
+
+
+function initSpecificationTab() {
+
+	// Trigger popup JSON / EXCELL / YAML view of specification
+	$('#specificationType').on('change', function() {
+		setDataSpecification(getdataSpecification( $(this).val() )) 
+	}) 
+
+	$('#spec_download').on('click', downloadDataSpecification) // the button, not the surrounding link.
+	
+}

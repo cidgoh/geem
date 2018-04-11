@@ -44,6 +44,7 @@
         <p class="medium"><i>This form viewer is tested with Google Chrome v. 62; other browsers will be supported in the future. It may take time to load.</i></p>
 
         <form id="mainForm" data-abide="ajax">
+
           This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
 
           <a href="http://genepio.org/geem/form.html#GENEPIO:0001624">
@@ -51,6 +52,7 @@
           </a>
           <br/>
           <br/>
+          
         </form>
 
       </div>
@@ -58,49 +60,60 @@
       <div class="large-3 medium-3 columns" id="rightbar">
         <br/>
 
-        <div style="margin-top:3px;border-radius:2px;background-color:lightblue;padding:7px">
-          <div class="switch tiny float-left" style="margin-right:15px;margin-bottom:0  ">
-            <input class="switch-input" id="toggleMinimalForm" type="checkbox" name="toggleMinimalForm">
-            <label class="switch-paddle" for="toggleMinimalForm">
-              <span class="show-for-sr">Minimize form view</span>
-            </label>
+        <div style="margin-top:15px;margin-right:10px;border-radius:2px;background-color:lightblue;padding:7px;position:relative">
+              
+            <div class="input-group">
+              
+              <select id="specificationType" class="input-group-field">
+                <option value="">View Specification ...</option>
+
+                <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
+                <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
+
+                <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
+                <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
+
+                <option value="raw.json">GEEM raw.json</option>
+                <option value="raw.yml">GEEM raw.yaml</option>
+
+                <option value="form.json">GEEM form.json</option>
+                <option value="form.yml">GEEM form.yaml</option>
+
+                <!-- option value="form.html">GEEM form.html</option -->
+                <option value="form_submission.json">GEEM form submission</option>
+
+                <optiongroup label="Coming in 2018!">
+                  <option value="redcap.tsv"> ... RedCap</option>
+                  <option value="ontofox.txt"> ... OntoFox</option>
+                </optiongroup>
+
+              </select>
+
+              <div class="input-group-field">
+                <i class="fi-info blue has-tip float-right" data-disable-hover="false" data-hover-delay="10" title="The specification used to make this form is available in a variety of formats."></i>
+              </div>
+            </div>
+
+            <div class="input-group">
+              
+              <div class="switch tiny input-group-field"" style="margin-right:15px;">
+                <input class="switch-input" id="toggleMinimalForm" type="checkbox" name="toggleMinimalForm">
+                <label class="switch-paddle" for="toggleMinimalForm">
+                  <span class="show-for-sr">Minimize form view</span>
+                </label>
+              </div>
+                
+              <div class="input-group-field">
+                Minimize form view
+                <i class="fi-info blue has-tip float-right" data-disable-hover="false" data-hover-delay="10" title="When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry."></i>
+              </div>
+
+            </div>
           </div>
-          <span>Minimize form view</span>
         </div>
           
-        <p>When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry.</p>
+        <p></p>
 
-        <div style="margin-top:15px;margin-right:10px;border-radius:2px;background-color:lightblue;padding:7px">
-
-          <select id="specificationType" class="input-group-field">
-            <option value="">View Specification ...</option>
-
-            <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
-            <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
-
-            <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
-            <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
-
-            <option value="raw.json">GEEM raw.json</option>
-            <option value="raw.yml">GEEM raw.yaml</option>
-
-            <option value="form.json">GEEM form.json</option>
-            <option value="form.yml">GEEM form.yaml</option>
-
-            <!-- option value="form.html">GEEM form.html</option -->
-            <option value="form_submission.json">GEEM form submission</option>
-
-            <optiongroup label="Coming in 2018!">
-              <option value="spreadsheet.xlsm"> ... Microsoft Excel</option>
-              <option value="redcap.tsv"> ... RedCap</option>
-              <option value="ontofox.txt"> ... OntoFox</option>
-            </optiongroup>
-
-          </select>
-
-        </div>
-
-        <p>The specification used to make this form is available in a variety of formats.</p>
 
       </div>
     
@@ -133,6 +146,7 @@
     <script src="js/chosen/chosen.jquery.min.js"></script>
     <script src="js/vendor/js-yaml.min.js"></script> <!-- http://adilapapaya.com/docs/js-yaml/ -->
     <script src="js/geem_form.js"></script>
+    <script src="js/geem_lookup.js"></script>
     <script src="js/geem_specifications.js"></script>
     <script src="js/geem_form_standalone.js"></script>
 

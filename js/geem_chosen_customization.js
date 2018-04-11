@@ -32,6 +32,6 @@ c.search_text=c.group?c.label:c.html,
 				c.search_text=i.substr(0,h)+"<em>"+i.substr(h)),
 
 				null!=f&&(f.group_match=!0)):null!=c.group_array_index&&this.results_data[c.group_array_index].search_match&&(c.search_match=!0)
-		)
+...
 
 	);return this.result_clear_highlight(),1>e&&g.length?(

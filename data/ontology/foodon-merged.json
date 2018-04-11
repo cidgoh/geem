@@ -1,0 +1,3017 @@
+{
+    "@context": {
+        "DOID": "http://purl.obolibrary.org/obo/DOID_",
+        "owl": "http://www.w3.org/2002/07/owl/",
+        "EO": "http://purl.obolibrary.org/obo/EO_",
+        "ancestro": "http://purl.obolibrary.org/obo/ancestro_",
+        "NCIT": "http://purl.obolibrary.org/obo/NCIT_",
+        "OBI": "http://purl.obolibrary.org/obo/OBI_",
+        "NDF-RT": "http://evs.nci.nih.gov/ftp1/NDF-RT/NDF-RT.owl#",
+        "HP": "http://purl.obolibrary.org/obo/HP_",
+        "BFO": "http://purl.obolibrary.org/obo/BFO_",
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "NCBITaxon": "http://purl.obolibrary.org/obo/NCBITaxon_",
+        "AGRO": "http://purl.obolibrary.org/obo/AGRO_",
+        "MESH": "http://purl.bioontology.org/ontology/MESH/",
+        "SYMP": "http://purl.obolibrary.org/obo/SYMP_",
+        "EFO": "http://www.ebi.ac.uk/efo/EFO_",
+        "STATO": "http://purl.obolibrary.org/obo/STATO_",
+        "OMP": "http://purl.obolibrary.org/obo/OMP_",
+        "SIO": "http://semanticscience.org/resource/SIO_",
+        "vcard": "http://www.w3.org/2006/vcard/ns#",
+        "xmls": "http://www.w3.org/2001/XMLSchema#",
+        "MPATH": "http://purl.obolibrary.org/obo/MPATH_",
+        "GENEPIO": "http://purl.obolibrary.org/obo/GENEPIO_",
+        "TRANS": "http://purl.obolibrary.org/obo/TRANS_",
+        "IAO": "http://purl.obolibrary.org/obo/IAO_",
+        "GAZ": "http://purl.obolibrary.org/obo/GAZ_",
+        "vcf": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "ExO": "http://purl.obolibrary.org/obo/ExO_",
+        "oboInOwl": "http://www.geneontology.org/formats/oboInOwl#",
+        "IDO": "http://purl.obolibrary.org/obo/IDO_",
+        "PO": "http://purl.obolibrary.org/obo/PO_",
+        "OMIABIS": "http://purl.obolibrary.org/obo/OMIABIS_",
+        "UO": "http://purl.obolibrary.org/obo/UO_",
+        "GEO": "http://purl.obolibrary.org/obo/GEO_",
+        "ENVO": "http://purl.obolibrary.org/obo/ENVO_",
+        "PATO": "http://purl.obolibrary.org/obo/PATO_",
+        "UBERON": "http://purl.obolibrary.org/obo/UBERON_",
+        "FOODON": "http://purl.obolibrary.org/obo/FOODON_",
+        "SO": "http://purl.obolibrary.org/obo/SO_",
+        "RO": "http://purl.obolibrary.org/obo/RO_",
+        "CHEBI": "http://purl.obolibrary.org/obo/CHEBI_",
+        "typon": "http://purl.phyloviz.net/ontology/typon#"
+    },
+    "specifications": {
+        "FOODON:03460111": {
+            "definition": "Used to specifically characterize a food product based on the treatment or processes applied to the product or any indexed ingredient. The processes include adding, substituting or removing components or modifying the food or component, e.g., through fermentation. Multiple values can be assigned.",
+            "uiLabel": "food treatment process",
+            "hasDbXref": [
+                "LANGUAL:H0111"
+            ],
+            "id": "FOODON:03460111",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0398": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bahamian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0398",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "GAZ:00004483": {
+            "definition": "A country in the Middle East spanning most of the northwestern end of the Zagros mountain range, the eastern part of the Syrian Desert and the northern part of the Arabian Desert. It shares borders with Kuwait and Saudi Arabia to the south, Jordan to the west, Syria to the northwest, Turkey to the north, and Iran to the east. It has a very narrow section of coastline at Umm Qasr on the Persian Gulf. There are two major flowing rivers: the Tigris and the Euphrates. Iraq is divided into 18 governorates (or provinces) (muhafazah). The governorates are divided into qadhas (or districts).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "iraq"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0260"
+            ],
+            "id": "GAZ:00004483",
+            "uiLabel": "Iraq"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0341": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Afghan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0341",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0303": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "geographic isolate",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0303",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0290"
+            ]
+        },
+        "GAZ:00005279": {
+            "definition": "A country on the Arabian Peninsula. It is bordered by Jordan on the northwest, Iraq on the north and northeast, Kuwait, Qatar, Bahrain, and the United Arab Emirates on the east, Oman on the southeast, and Yemen on the south. The Persian Gulf lies to the northeast and the Red Sea to its west. Saudi Arabia is divided into 13 provinces or regions (manatiq; singular mintaqah). Each is then divided into Governorates.",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "saudi arabia"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0372"
+            ],
+            "id": "GAZ:00005279",
+            "uiLabel": "Saudi Arabia"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0538": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bissau-Guinean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0538",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0024": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Macanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0024",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0021"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0418": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Panamanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0418",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0526": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Burundian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0526",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0379": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Norfolk Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0379",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0378": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "New Zealandish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0378",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0457": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Curacaoan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0457",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0322": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Finish founder",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0322",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0321"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0415": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mexican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0415",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0371": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Latvian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0371",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0370": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Manx",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0370",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03530005": {
+            "definition": "Additional groups of descriptors of a miscellaneous nature. [FDA CFSAN 1995]",
+            "uiLabel": "adjunct characteristics of food",
+            "hasDbXref": [
+                "LANGUAL:Z0005"
+            ],
+            "id": "FOODON:03530005",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0372": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Liechtensteiner",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0372",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0375": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Maltese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0375",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0374": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Luxembourgish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0374",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0377": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Montenegrin",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0377",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0376": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Monegasque",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0376",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0472": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Nauruan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0472",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0419": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Paraguayan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0419",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0470": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Marshallese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0470",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0318": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Orcadian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0318",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0416": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Montserratian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0416",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0477": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Pitcairn Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0477",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0474": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Niuean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0474",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0475": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Palauan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0475",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0410": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Grenadian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0410",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0478": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Samoan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0478",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0527": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Central African",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0527",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "FOODON:03500010": {
+            "definition": "The specific container or coating materials in direct contact with the food. Multiple values can be assigned. [FDA CFSAN 1995]",
+            "uiLabel": "food contact surface",
+            "hasDbXref": [
+                "LANGUAL:N0010"
+            ],
+            "id": "FOODON:03500010",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0412": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Guyanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0412",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "OBI:0000658": {
+            "datatype": "model",
+            "models": {
+                "vcf:C103180": [],
+                "GENEPIO:0001342": [],
+                "FOODON:00000000": []
+            },
+            "uiLabel": "data representational model",
+            "id": "OBI:0000658",
+            "definition": "Data representational model is an information content entity of the  relationships between data items. A data representational model is encoded in a data format specification such as for cytoscape or biopax."
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0413": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Honduran",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0413",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0025": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Singaporean Chinese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0025",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0021"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0313": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Old Order Amish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0313",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0429": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Uruguayan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0429",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0507": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kenyan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0507",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0310": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Val Borbera",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0310",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0307"
+            ]
+        },
+        "GAZ:00009571": {
+            "hasAlternativeTerm": [
+                "gaza strip"
+            ],
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:R0241"
+            ],
+            "uiLabel": "Gaza Strip",
+            "id": "GAZ:00009571"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0333": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Anguillan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0333",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0368": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Hungrian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0368",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03470107": {
+            "definition": "The methods contributing to the prevention or retardation of microbial, enzymatic or oxidative spoilage and thus to the extension of shelf life. Index all methods for which information is available, even if a corresponding descriptor has already been used in *H. TREATMENT APPLIED*. Preservation descriptors refer to the finished food as a whole with these exceptions: (1) if the components of a multi-component food, such as cream pie, are preservation by different methods, index all methods; (2)  if chemical preservatives are declared on the label, always index them even if it is known that the preservative was introduced through or is only present in a component or ingredient of the food; and (3) if the preservation method for an ingredient is declared on the label (such as brie cheese made from pasteurized milk) index it. Also use *INGREDIENT preservation by THERMAL PROCESSING* or *INGREDIENT preservation by IRRADIATION* when ingredients have been pasteurized, ultrapasteurized, sterilized or irradiated.",
+            "uiLabel": "food preservation process",
+            "hasDbXref": [
+                "LANGUAL:J0107"
+            ],
+            "id": "FOODON:03470107",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0369": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Icelandic",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0369",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0366": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Greek",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0366",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0367": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Greenlander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0367",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0364": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "German",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0364",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0365": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Gibraltarian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0365",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0362": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Falkland Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0362",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0363": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "French",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0363",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0360": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Estonian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0360",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0361": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Faroese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0361",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0407": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ecuadorian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0407",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0406": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Dominican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0406",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0405": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cuban",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0405",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0404": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Costa Rican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0404",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0403": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Colombian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0403",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0402": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Caymanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0402",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0401": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "British Virgin Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0401",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0400": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bolivian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0400",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0466": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Fijian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0466",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0286": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0008"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Central Asian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0286",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0341": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0342": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0343": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0338": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0339": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0340": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0409": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "French Guianese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0409",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0408": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Salvadoran",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0408",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "FOODON:03520010": {
+            "definition": "Contains names of the continents, regions and countries of the world, as well as worldwide fishing regions and geopolitical designations.",
+            "uiLabel": "geographic places and regions",
+            "hasDbXref": [
+                "LANGUAL:R0010"
+            ],
+            "id": "FOODON:03520010",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0491": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sri Lankan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0491",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0027": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Han Chinese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0027",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0021"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0545": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Rwandan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0545",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0456": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cocos Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0456",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0004": {
+            "datatype": "xmls:anyURI",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0004",
+            "uiLabel": "ancestral group"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0489": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Nepalese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0489",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0488": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Maldivian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0488",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "FOODON:03450002": {
+            "uiLabel": "food cooking process",
+            "hasDbXref": [
+                "LANGUAL:G0002"
+            ],
+            "id": "FOODON:03450002",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0486": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bhutanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0486",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0485": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bangladeshi",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0485",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0484": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Wallis and Futuna Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0484",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0483": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ni-Vanuato",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0483",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0482": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tuvaluan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0482",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0481": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tongan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0481",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0480": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tokelauan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0480",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0393": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Swedish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0393",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03480020": {
+            "definition": "The medium in which the food is packed for preservation and handling or the medium surrounding homemade foods, e.g., peaches cooked in sugar syrup. The packing medium may provide a controlled environment for the food. It may also serve to improve palatability and consumer appeal.",
+            "uiLabel": "food packing medium",
+            "hasDbXref": [
+                "LANGUAL:K0020"
+            ],
+            "id": "FOODON:03480020",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0391": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Slovene",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0391",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0390": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Slovak",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0390",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0397": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Argentine",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0397",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0396": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ukrainian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0396",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0395": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Macedonian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0395",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0394": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Swiss",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0394",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0026": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Hong Kong Chinese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0026",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0021"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0399": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Belizean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0399",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "GENEPIO:0001655": {
+            "datatype": "xmls:anyURI",
+            "definition": "A categorical tree specification datum is a categorical value specification which takes its value from the ontology URI identifier of any one of its subclass items; these may be organized in a hierarchy.",
+            "uiLabel": "categorical tree specification",
+            "id": "GENEPIO:0001655",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0518": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Somali",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0518",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0320": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Dutch",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0320",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0323": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0414": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Martinican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0414",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0550": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Zimbabweian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0550",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0319": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Korculan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0319",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0321": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Finish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0321",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0322": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0007": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "South East Asian",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0008"
+            ],
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0007",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0492": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0497": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0493": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0498": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0494": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0495": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0496": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0500": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0501": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0502": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0006": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "South Asian",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0008"
+            ],
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0006",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0485": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0486": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0487": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0488": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0489": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0490": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0491": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0005": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "European",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0005",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0344": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0316": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0345": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0346": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0347": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0348": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0349": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0350": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0351": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0352": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0353": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0354": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0355": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0356": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0357": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0358": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0359": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0320": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0317": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0360": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0362": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0361": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0321": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0363": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0364": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0365": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0366": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0367": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0368": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0315": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0369": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0383": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0307": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0319": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0371": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0372": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0373": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0374": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0395": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0375": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0370": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0384": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0376": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0377": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0378": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0379": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0380": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0313": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0318": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0381": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0382": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0385": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0386": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0387": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0388": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0389": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0390": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0391": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0314": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0392": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0393": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0394": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0396": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0004": {
+            "member_of": [
+                "GENEPIO:0001655"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "ancestral group",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0004",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0010": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0013": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0008": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017": [],
+                "GAZ:00002464": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0328": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0290": []
+            }
+        },
+        "FOODON:00000000": {
+            "definition": "The FoodOn food ontology is a controlled vocabulary that currently covers human food raw ingredients, food products and product types. It will develop semantics for food safety, food security, the agricultural and animal husbandry practices linked to food production, culinary, nutritional and chemical ingredients and processes. FoodOn will also grow to encompass food-chains and natural ecosystems involving other animals and plants. It is built to interoperate with the OBO Library family of ontologies.\n\nFoodOn owes a large debt to LanguaL, the food indexing system developed since the mid 1970's (see LanguaL.org).  LanguaL's facets have all been imported here, with some adaptation.",
+            "parent": "OBI:0000658",
+            "components": {
+                "FOODON:03480020": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03460111": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03400361": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03411564": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03470107": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03510136": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03520010": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03440011": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03530005": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03510032": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03450002": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03490100": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03430113": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ],
+                "FOODON:03500010": [
+                    {
+                        "cardinality": "owl:someValuesFrom"
+                    }
+                ]
+            },
+            "datatype": "model",
+            "id": "FOODON:00000000",
+            "uiLabel": "foodon ontology"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0312": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Carlantino",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0312",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0307"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0009": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0008"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "East Asian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0009",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0021": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0019": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0022": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0023": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0020": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0008": {
+            "hasAlternativeTerm": [
+                "Asian unspecified"
+            ],
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Asian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0008",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0317": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Erasmus Rucphen",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0317",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0316": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Amish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0316",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0315": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Hutterites",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0315",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0314": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sorbian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0314",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0340": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Uzbekistani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0340",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0324": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ashkenazi Jew",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0324",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0302"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0311": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Friuli Venezia Giulia",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0311",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0307"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0523": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Beninese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0523",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0546": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Swazi",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0546",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "GAZ:00005284": {
+            "definition": "A country located on the Arabian Peninsula in Southwest Asia. Yemen is bordered by Saudi Arabia to the North, the Red Sea to the West, the Arabian Sea and Gulf of Aden to the South, and Oman to the east. Yemen's territory includes over 200 islands, the largest of which is Socotra, about 415 km to the south of Yemen, off the coast of Somalia. As of 2004-02, Yemen is divided into twenty governorates (muhafazah) and one municipality. The population of each governorate is listed in the table below. The governorates of Yemen are divided into 333 districts (muderiah). The districts are subdivided into 2,210 sub-districts, and then into 38,284 villages (as of 2001).",
+            "hasSynonym": [
+                "sanaa",
+                "yemen"
+            ],
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "yemen arab republic"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0483"
+            ],
+            "id": "GAZ:00005284",
+            "uiLabel": "Yemen"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0462": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "British",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0462",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0498": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Filipino",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0498",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0494": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Indonesian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0494",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0495": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Lao",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0495",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0496": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Malaysian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0496",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0497": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Burmese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0497",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0490": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Pakistani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0490",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0441": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Jordanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0441",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0492": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bruneian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0492",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0493": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cambodian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0493",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0380": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Norwegian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0380",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0381": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Polish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0381",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0382": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Portugese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0382",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0383": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Irish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0383",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0551": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0384": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Moldovan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0384",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0385": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Romanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0385",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0386": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Russian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0386",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0387": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Saint-Pierrais or Miquelonnais",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0387",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0388": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sammarinese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0388",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03440011": {
+            "definition": "Used to broadly characterize a food product based on the extent of heat applied. Heat treatment affects the flavor and textural characteristics of a food and thus consumer preparation time. Heat treatment causes chemical changes and/or reduction of enzyme and of microbial activity and thus affects food safety and shelflife. Specifics of preparation are covered by *G. COOKING METHOD* and *H. TREATMENT APPLIED*. [FDA CFSAN 1995]",
+            "uiLabel": "extent of food heat treatment",
+            "hasDbXref": [
+                "LANGUAL:F0011"
+            ],
+            "id": "FOODON:03440011",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0423": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Saint Lucian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0423",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0422": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kittitian or Nevisian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0422",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0425": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Surinamer",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0425",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0424": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Saint Vincentian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0424",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0427": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Turks and Caicos Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0427",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0529": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Congolese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0529",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0010": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "African",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0010",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0332": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0460": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0331": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0011": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0010"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sub-Saharan African",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0011",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0522": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0523": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0538": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0525": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0526": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0503": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0504": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0527": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0505": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0528": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0529": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0531": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0532": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0533": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0506": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0534": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0535": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0536": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0537": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0530": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0507": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0508": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0512": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0509": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0540": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0541": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0510": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0511": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0539": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0524": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0542": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0513": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0544": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0543": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0545": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0514": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0515": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0516": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0517": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0518": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0519": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0520": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0546": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0548": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0547": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0521": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0549": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0550": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0540": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Malawian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0540",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0013": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "American Indian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0013",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0014": {
+            "definition": "An admixed population ",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Hispanic/Latin American",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0014",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0397": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0398": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0399": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0400": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0401": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0402": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0403": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0404": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0405": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0406": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0407": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0409": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0410": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0411": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0412": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0413": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0422": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0414": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0415": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0416": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0417": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0418": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0419": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0420": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0421": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0423": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0424": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0408": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0425": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0426": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0427": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0429": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0430": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0428": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0547": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Togolese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0547",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0016": {
+            "definition": "People who defined themselves as American with an admixture of west african, amerindian and european",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "African American/Afro-Caribbean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0016",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0333": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0334": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0335": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0336": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0337": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0017": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Oceanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0017",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0464": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0465": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0466": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0467": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0468": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0469": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0470": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0471": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0472": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0473": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0483": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0474": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0475": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0476": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0477": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0478": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0479": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0480": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0481": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0482": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0484": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0018": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "uncategorised population",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0018",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0463": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0454": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0462": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0455": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0456": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0457": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0458": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0459": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0019": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Japanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0019",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0548": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tanzanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0548",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "FOODON:03520319": {
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:R0319"
+            ],
+            "uiLabel": "neutral zone",
+            "id": "FOODON:03520319"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0373": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Lithuanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0373",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03490100": {
+            "definition": "Type of container or wrapping defined by the main container material, the container form, and the material of the liner lids or ends. Also type of container or wrapping by form; prefer description by material first, then by form.  [FDA CFSAN 1995]",
+            "uiLabel": "food container or wrapping",
+            "hasDbXref": [
+                "LANGUAL:M0100"
+            ],
+            "id": "FOODON:03490100",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0417": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Nicaraguan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0417",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "FOODON:03411564": {
+            "definition": "Individual plant or animal from which the food product or its major ingredient is derived; also a chemical food source [FDA CFSAN 1995].",
+            "features": {
+                "order=\\nobolibrary": {
+                    "value": "FOODON_03411297 # vertebrate \\nobolibrary:FOODON_00002452 # invertebrate\\nobolibrary:FOODON_03411347 # plant\\nobolibrary:FOODON_03411301 # algae\\nobolibrary:FOODON_03411261 # fungae\\nobolibrary:FOODON_03412345 # lichen\\nobolibrary:FOODON_03412974 # liquid"
+                }
+            },
+            "hasDbXref": [
+                "LANGUAL:B1564"
+            ],
+            "uiLabel": "food source",
+            "otherParent": [
+                "FOODON:00000000"
+            ],
+            "id": "FOODON:03411564"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0532": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Equatorial Guinean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0532",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0458": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kosovar",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0458",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0541": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Malian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0541",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0309": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sardinian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0309",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0307"
+            ]
+        },
+        "FOODON:03430113": {
+            "definition": "The physical state of the food product (liquid, semiliquid, semisolid, or solid). Solid food products are further subdivided by shape or form. Terms are provided for products that have both liquid and solid components or that incorporate air or other gases. [FDA CFSAN 1995]",
+            "uiLabel": "food physical quality",
+            "hasDbXref": [
+                "LANGUAL:E0113"
+            ],
+            "id": "FOODON:03430113",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0438": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Iranian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0438",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0439": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Iraqi",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0439",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0436": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Egyptian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0436",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0437": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Georgian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0437",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0434": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bahraini",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0434",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0435": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cypriote",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0435",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0432": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Armenian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0432",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0433": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Azerbaijani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0433",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0430": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Venezuelan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0430",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0431": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Algerian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0431",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0537": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Guinean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0537",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0536": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ghanaian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0536",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0535": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Gambian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0535",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0534": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Gabonese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0534",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0021": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Chinese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0021",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0027": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0026": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0024": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0025": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0020": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Taiwanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0020",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0023": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mongolian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0023",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0022": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Korean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0022",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0009"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0335": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Barbadian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0335",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0533": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Eritrean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0533",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0337": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Jamaican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0337",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0336": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Haitian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0336",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0331": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sudanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0331",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0010"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0539": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mosotho",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0539",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0332": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sahrawi",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0332",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0010"
+            ]
+        },
+        "GAZ:00002464": {
+            "hasAlternativeTerm": [
+                "middle east"
+            ],
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasDbXref": [
+                "LANGUAL:R0351"
+            ],
+            "uiLabel": "Southwest Asia",
+            "choices": {
+                "GAZ:00005281": [],
+                "GAZ:00009571": [],
+                "GAZ:00004474": [],
+                "GAZ:00004483": [],
+                "GAZ:00002476": [],
+                "GAZ:00002473": [],
+                "GAZ:00005285": [],
+                "GAZ:00002478": [],
+                "GAZ:00005283": [],
+                "GAZ:00005286": [],
+                "GAZ:00005279": [],
+                "GAZ:00002474": [],
+                "GAZ:00005282": [],
+                "GAZ:00005284": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0431": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0432": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0433": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0434": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0435": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0436": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0452": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0437": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0438": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0439": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0440": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0441": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0442": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0443": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0444": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0445": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0447": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0446": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0448": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0449": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0461": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0450": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0451": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0453": [],
+                "FOODON:03520319": []
+            },
+            "id": "GAZ:00002464"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0411": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Guatemalan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0411",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0531": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Djiboutian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0531",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0428": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Virgin Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0428",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "FOODON:03510136": {
+            "uiLabel": "food consumer type",
+            "hasDbXref": [
+                "LANGUAL:P0136"
+            ],
+            "id": "FOODON:03510136",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0528": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Comoran",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0528",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0530": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ivoirian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0530",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0421": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Puerto Rican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0421",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "FOODON:03510032": {
+            "definition": "Dietary use, where the food has special characteristics, claims or uses or is intended for individuals with particular dietary needs; and label or labeling claims, used when special dietary use factor terms were derived from actual food labels. Multiple descriptors may be used from all three categories. [FDA CFSAN 1995]\n\nFoodOn curation note: Consumer Group has been relocated to a top-level FoodOn category.",
+            "uiLabel": "food dietary use/label claim",
+            "hasDbXref": [
+                "LANGUAL:P0032"
+            ],
+            "id": "FOODON:03510032",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0338": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tajikistani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0338",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0334": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Antiguan or Barbudan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0334",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0016"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0479": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Solomon Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0479",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0420": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Peruvian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0420",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0524": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Motswana",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0524",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0525": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Burkinabe",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0525",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0449": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Saudi",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0449",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0448": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Qatari",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0448",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0520": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "St. Helenian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0520",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0521": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ugandan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0521",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0522": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Angolan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0522",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0389": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Serb",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0389",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0443": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Lebanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0443",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0442": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kuwaiti",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0442",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0328": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Carribean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0328",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0440": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Israeli",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0440",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0447": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Omani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0447",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0446": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Palestinian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0446",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0445": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Moroccan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0445",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0444": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Libyan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0444",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "vcf:C103180": {
+            "datatype": "model",
+            "definition": "A statement that defines conventions, guidelines, characteristics or methods for consistent data handling to facilitate exchange or processing of the data. This set of criteria are reviewed by and agreed upon by the user community or a governing body before they are released and adopted for use.",
+            "id": "vcf:C103180",
+            "parent": "OBI:0000658",
+            "uiLabel": "data standard"
+        },
+        "GAZ:00002476": {
+            "definition": "A country in Western Asia located on the eastern edge of the Mediterranean Sea. It borders Lebanon in the north, Syria in the northeast, Jordan in the east, and Egypt on the southwest. The West Bank and Gaza Strip, which are partially administrated by the Palestinian National Authority, are also adjacent. The State of Israel is divided into six main administrative districts, known as mehozot (singular mahoz). Districts are further divided into fifteen sub-districts known as nafot (singular: nafa), which are themselves partitioned into fifty natural regions.",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "israel"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0256"
+            ],
+            "id": "GAZ:00002476",
+            "uiLabel": "Israel"
+        },
+        "GAZ:00002474": {
+            "definition": "A country in Southwest Asia, bordering Lebanon, the Mediterranean Sea and the island of Cyprus to the west, Israel to the southwest, Jordan to the south, Iraq to the east, and Turkey to the north. Syria has fourteen governorates, or muhafazat (singular: muhafazah). The governorates are divided into sixty districts, or manatiq (singular: mintaqah), which are further divided into sub-districts, or nawahi (singular: nahia).",
+            "hasSynonym": [
+                "syrian arab republic"
+            ],
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "syria"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0390"
+            ],
+            "id": "GAZ:00002474",
+            "uiLabel": "Syria"
+        },
+        "GAZ:00002473": {
+            "definition": "A country in Southwest Asia, bordered by Syria to the north, Iraq to the north-east, Israel and the West Bank to the west, and Saudi Arabia to the east and south. It shares the coastlines of the Dead Sea, and the Gulf of Aqaba with Israel, Saudi Arabia, and Egypt. Jordan is divided into 12 provinces called governorates. The Governorates are subdivided into approximately fifty-two nahias.",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "jordan"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0265"
+            ],
+            "id": "GAZ:00002473",
+            "uiLabel": "Jordan"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0323": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Dutch founder",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0323",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0320"
+            ]
+        },
+        "GAZ:00002478": {
+            "definition": "A small, mostly mountainous country in Western Asia, on the eastern shore of the Mediterranean Sea. It is bordered by Syria to the north and east, and Israel to the south. Lebanon is divided into six governorates (mohaafazaat, which are further subdivided into twenty-five districts (aqdya, singular: qadaa).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "lebanon"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0279"
+            ],
+            "id": "GAZ:00002478",
+            "uiLabel": "Lebanon"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0487": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Indian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0487",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0006"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0463": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "American",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0463",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0426": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Trinidadian or Tobagonian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0426",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0014"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0339": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Turkmen",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0339",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0519": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "South African",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0519",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0542": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mozambican",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0542",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0459": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Northern Mariana Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0459",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0473": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "New Caledonian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0473",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "GENEPIO:0001342": {
+            "datatype": "model",
+            "id": "GENEPIO:0001342",
+            "parent": "OBI:0000658",
+            "uiLabel": "data standard component"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0543": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Nigerien",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0543",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0511": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mauritian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0511",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0510": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mauritanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0510",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0513": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Namibian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0513",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0512": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Mahoran",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0512",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0515": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Senegalese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0515",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0514": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sao Tomean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0514",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0517": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Sierra Leonean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0517",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0516": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Seychellois",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0516",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0357": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Croatian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0357",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0356": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Chilean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0356",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0355": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Channel Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0355",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0354": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Canadian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0354",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0353": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bulgarian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0353",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0352": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Brazilian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0352",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0351": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bosnian or Herzegovinian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0351",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0350": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Bermudian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0350",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0450": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Tunisian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0450",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0451": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Turkish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0451",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0452": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Emirati",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0452",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0453": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Yemeni",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0453",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0454": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Aruban",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0454",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0455": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Christmas Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0455",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0018"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0359": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Danish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0359",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0358": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Czech",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0358",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "FOODON:03400361": {
+            "definition": "A food product type is a class of food products that is differentiated by its food composition, processing and/or consumption characteristics. This does not include brand name products but it may include generic food dish categories.",
+            "uiLabel": "food product type",
+            "hasDbXref": [
+                "LANGUAL:A0361"
+            ],
+            "id": "FOODON:03400361",
+            "otherParent": [
+                "FOODON:00000000"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0544": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Nigerian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0544",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0392": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Spanish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0392",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "GAZ:00005281": {
+            "definition": "A borderless island country in the Persian Gulf. Saudi Arabia lies to the west and is connected to Bahrain by the King Fahd Causeway, and Qatar is to the south across the Gulf of Bahrain. Bahrain is split into five governorates.",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "bahrain"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0158"
+            ],
+            "id": "GAZ:00005281",
+            "uiLabel": "Bahrain"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0460": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "South Sudanese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0460",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0010"
+            ]
+        },
+        "GAZ:00005283": {
+            "definition": "A country in southwest Asia, on the southeast coast of the Arabian Peninsula. It borders the United Arab Emirates on the northwest, Saudi Arabia on the west, and Yemen on the southwest. The coast is formed by the Arabian Sea on the south and east, and the Gulf of Oman on the northeast. The country also contains Madha, an exclave enclosed by the United Arab Emirates, and Musandam, an exclave also separated by Emirati territory. Oman is divided into four governorates (muhafazah) and five regions (mintaqat). The regions are subdivided into provinces (wilayat).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "oman"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0322"
+            ],
+            "id": "GAZ:00005283",
+            "uiLabel": "Oman"
+        },
+        "GAZ:00005282": {
+            "definition": "A Middle Eastern federation of seven states situated in the southeast of the Arabian Peninsula in Southwest Asia on the Persian Gulf, bordering Oman and Saudi Arabia. The seven states, termed emirates, are Abu Dhabi, Ajman, Dubai, Fujairah, Ras al-Khaimah, Sharjah, and Umm al-Quwain.",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "united arab emirates"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0101"
+            ],
+            "id": "GAZ:00005282",
+            "uiLabel": "United Arab Emirates"
+        },
+        "GAZ:00005285": {
+            "definition": "A sovereign emirate on the coast of the Persian Gulf, enclosed by Saudi Arabia to the south and Iraq to the north and west. Kuwait is divided into six governorates (muhafazat, singular muhafadhah).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "kuwait"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0275"
+            ],
+            "id": "GAZ:00005285",
+            "uiLabel": "Kuwait"
+        },
+        "GAZ:00004474": {
+            "definition": "A country in Central Eurasia. Iran is bounded by the Gulf of Oman and the Persian Gulf to the south and the Caspian Sea to its north. It borders Armenia, Azerbaijan, Turkmenistan to the north, Afghanistan and Pakistan to the east, and Turkey and Iraq to the west. Iran is divided into 30 provinces (ostan). The provinces are divided into counties (shahrestan), and subdivided into districts (bakhsh) and sub-districts (dehestan).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "Iran",
+                "iran"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0261"
+            ],
+            "id": "GAZ:00004474",
+            "uiLabel": "Iran"
+        },
+        "GAZ:00005286": {
+            "definition": "An Arab emirate in Southwest Asia, occupying the small Qatar Peninsula on the northeasterly coast of the larger Arabian Peninsula. It is bordered by Saudi Arabia to the south; otherwise the Persian Gulf surrounds the state. Qatar is divided into ten municipalities (Arabic: baladiyah), which are further divided into zones (districts).",
+            "member_of": [
+                "GAZ:00002464"
+            ],
+            "datatype": "xmls:anyURI",
+            "hasAlternativeTerm": [
+                "qatar"
+            ],
+            "hasDbXref": [
+                "LANGUAL:R0338"
+            ],
+            "id": "GAZ:00005286",
+            "uiLabel": "Qatar"
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0551": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "genetically homogenous Irish",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0551",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0383"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0302": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0290"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "cultural isolate",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0302",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0324": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0471": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Micronesian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0471",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0549": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Zambian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0549",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0508": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Liberian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0508",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0509": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Malagasy",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0509",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0506": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Ethiopian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0506",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0461": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Syrian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0461",
+            "member_of": [
+                "GAZ:00002464"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0504": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cape Verdean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0504",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0505": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Chadian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0505",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0502": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Vietnamese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0502",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0503": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cameroonian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0503",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0011"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0500": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Thai",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0500",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0501": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Timorese",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0501",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0007"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0344": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Albanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0344",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0345": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Andorran",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0345",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0346": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Australian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0346",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0347": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Austrian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0347",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0469": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "I-Kiribati",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0469",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0468": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Guamanian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0468",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0342": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kazakhstani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0342",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0343": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Kyrgyzstani",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0343",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0286"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0465": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Cook Islander",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0465",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0464": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "American Samoan",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0464",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0467": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "French Polynesian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0467",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0307": {
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Italian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0307",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0312": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0311": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0309": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0310": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0348": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Belarusian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0348",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0349": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Belgian",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0349",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0005"
+            ]
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0290": {
+            "hasAlternativeTerm": [
+                "founder population"
+            ],
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0004"
+            ],
+            "datatype": "xmls:anyURI",
+            "uiLabel": "population isolate",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0290",
+            "choices": {
+                "http://www.ebi.ac.uk/ancestro/ancestro_0302": [],
+                "http://www.ebi.ac.uk/ancestro/ancestro_0303": []
+            }
+        },
+        "http://www.ebi.ac.uk/ancestro/ancestro_0476": {
+            "datatype": "xmls:anyURI",
+            "uiLabel": "Papua New Guinean",
+            "id": "http://www.ebi.ac.uk/ancestro/ancestro_0476",
+            "member_of": [
+                "http://www.ebi.ac.uk/ancestro/ancestro_0017"
+            ]
+        }
+    },
+    "metadata": {
+        "resource": "http://purl.obolibrary.org/obo/foodon.owl",
+        "description": "FoodOn (http://foodon.org) is a consortium-driven project to build a comprehensive and easily accessible global farm-to-fork ontology about food, that accurately and consistently describes foods commonly known in cultures from around the world.",
+        "license": "http://creativecommons.org/licenses/by/3.0/",
+        "title": "Food Ontology",
+        "prefix": "FOODON",
+        "versionURI": "http://purl.obolibrary.org/obo/foodon/releases/2018-04-10/foodon.owl",
+        "date": {
+            "datatype": "xmls:date",
+            "value": "2018-02-28"
+        }
+    }
+}

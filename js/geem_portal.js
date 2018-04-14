@@ -331,6 +331,10 @@ function doResourceForm(data, form_URL, new_flag = false) {
 		})
 
 		$('#resourceForm').on('click', '#summary_update', function() {
+			alert('Coming soon!')
+			return
+
+			
 			var path = $('#resourceForm #summary_path').val()
 			var content =  {
 				type: 'private',

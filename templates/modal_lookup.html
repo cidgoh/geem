@@ -1,0 +1,42 @@
+
+<!-- Picklist selections / dynamic searches -->
+<div id="modalLookup" class="reveal" data-reveal>
+  <div id="modalLookupHeader" style="background-color:gray;color:white;padding-left:15px">
+    <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal" style="margin:7px"></button>
+    <div id="modalLookupHeaderContent" style="padding:15px 10px 15px 5px;"></div>
+  </div> 
+
+  <div style="background-color:gray;padding:10px 10px 0px 15px;color:white">
+
+    <div class="input-group" style="background-color:#f0f0f0">
+      <div id="modalLookupContentContainer"class="input-group-field">
+        <select id="modalLookupSelections" size="7" style="height:auto;margin:0;border:0;width:350px;cursor:pointer"></select>
+      </div>
+      <div class="input-group-field" style="color: black;padding: 10px;font-size: .7rem;vertical-align: top;overflow-y: scroll;height:100px;width:200px;line-height: 1rem"><!-- width and height ignored except as calculation for overflow, positioning -->
+         <div id="modalLookupDefinition" style="height:inherit" ></div>
+      </div>
+    </div>
+    
+    <button class="button" id="modalLookupSelect" class="button medium" style="float:right;">Select</button>
+    <i>Double-click item to select or expore. (<sup>*</sup>item has further choices.)</i>
+    <!-- These options only shown when in edit mode -->
+    <div id="modalChoiceBuilder" class="input-group hide">
+      <input type="checkbox" id="modalLookupSelectAll"> Select all<br/>
+      <input type="checkbox" id="modalLookupSelectDescendants"> Select all ancestors of selected items.
+    </div>
+    <br style="clear: both;" />
+  </div>
+
+  <div style="background-color:gray;padding:10px;margin-top:10px;color:white">
+    <div class="input-group">
+      <input id="modalChoiceSearchText" type="text" placeholder="Search Ontology Lookup Service directly" style="margin:0">
+      <div class="input-group-label" style="padding:0;border:0;background-color:transparent">
+        <input id="modalChoiceSearchButton" type="button" class="button" value="Search" style="margin:0;border-right:0">
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    Lookup service: <a href="https://www.ebi.ac.uk/ols/" target="_blank">https://www.ebi.ac.uk/ols/</a>
+  </div>
+</div>

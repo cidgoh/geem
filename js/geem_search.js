@@ -5,11 +5,11 @@ function initSearchTab() {
 	// Provide type-as-you-go searching
 	$("#searchField").on('keyup', function() {
 		var text = $(this).val().toLowerCase()
-		searchAsYouType(top.specification, text)
+		searchAsYouType(top.resource.specifications, text)
 	})
 
 	$('#toggleSearchDefinition').on('change', function() {
-		searchAsYouType(top.specification, $("#searchField").val().toLowerCase())
+		searchAsYouType(top.resource.specifications, $("#searchField").val().toLowerCase())
 	})
 
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', displayContext)
@@ -18,7 +18,7 @@ function initSearchTab() {
 
 function searchAsYouType(collection, text) {
 	/* As user types text (more than 2 characters) into searchField, exact
-	 substring search is conducted through top.specification entities (all
+	 substring search is conducted through top.resource.specifications entities (all
 	 of their numeric or textual attributes)
 	*/
 	text = text.toLowerCase()

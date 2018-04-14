@@ -25,50 +25,43 @@
       </div>
     </div>
     <br/>
+
+    <!-- This is invisible but has to be positioned above bottom of page as it takes up height -->
+    <div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true">
+
+      <div class="input-group" >
+        <label>Add to existing package</label>
+        <select class="input-group-field" id="userPackages"></select>
+        <p> Package must have a "draft" status in order to be modified.</p>
+      </div>
+      <button id="updatePackageButton" class="button">update</button>
+
+    </div>
+
     <div class="row">
 
       <!-- ************************ ONTOLOGY MENU AND SEARCH ********************* -->
       <div class="large-5 medium-5 columns" id="sidebar">
 
-        <select id="selectResource">
-          <option value="">Select a specification resource ...</option>
-
-          <optgroup label="Ontologies" type="ontology">
-            <option value="data/ontology/genepio-merged.json">Genomic Epidemiology Ontology (GenEpiO)</option>
-            <option value="data/ontology/foodon-merged.json">Food Ontology (FoodOn)</option>
-            <option value="data/ontology/test.epi.json">Draft Epi Form</option>
-          </optgroup>
-
-          <optgroup label="Shared Packages" type="shared">
-            <option value="data/shared_packages/package_2_ui.json" disabled>Coming soon!<i class="fi-folder"></i></option>
-          </optgroup>
-
-          <optgroup label="My Packages (login required)" type="private">
-            <option value="data/user_packages/package_1_ui.json">Demo package</option>
-            <option value="new">Add new package ...</option>
-          </optgroup>
-
-        </select>
-
+        <select id="selectResource"></select>
 
         <!-- data-options="scroll_to_content: false" data-options="deep_linking:true" -->
-        <ul id="specificationSourceTabs" class="tabs disabled" data-tabs>
+        <ul id="resourceTabs" class="tabs disabled" data-tabs>
           <li class="tabs-title"><a id="specificationSummaryTabLink" href="#panelLibrary">Summary</a></li>
           <li class="tabs-title"><a href="#panelEntities">Browse Specifications</a></li>
           <li class="tabs-title"><a href="#panelSearch">Search</a></li>
         </ul>
 
 
-        <div id="tabsSpecification" class="tabs-content" data-tabs-content="specificationSourceTabs"> 
+        <div id="tabsSpecification" class="tabs-content" data-tabs-content="resourceTabs"> 
           
           <!-- ******************* SPECIFICATION MENU ******************* -->
           <div class="tabs-panel disabled" id="panelLibrary" style="padding:0">
-            <div id="specificationSourceForm"></div>
+            <div id="resourceForm"></div>
           </div>
 
           <!-- ******************* ENTITY MENU ********************* -->
           <div class="tabs-panel" id="panelEntities" style="padding:0">
-            [Browsable hierarchy of specifications go here]
           </div>
 
           <!-- ************************ SEARCH ********************* -->
@@ -252,33 +245,18 @@
     </div>
     
     <!-- MODAL DIALOGS -->
+    <div id="template_area" style="position:absolute">
+        
+      <div id="modalEntity" class="reveal" data-reveal>
+        <div id="modalEntityHeader">
+          <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal"></button>
+          <div id="modalEntityHeaderContent"></div>
+        </div> 
+        <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
+      </div>
 
-    <div id="modalEntity" class="reveal" data-reveal>
-      <div id="modalEntityHeader">
-        <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal"></button>
-        <div id="modalEntityHeaderContent"></div>
-      </div> 
-      <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
     </div>
 
-
-    <div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true">
-
-      <div class="input-group" >
-        <label>Add to existing package</label>
-        <select name="name" class="input-group-field" id="userPackages"></select>
-      </div>
-      <button id="updatePackageButton" class="button" type="submit">update</button>
-
-      <br/>or
-
-      <div class="input-group" >
-        <label>Add to new package</label>
-        <input name="name" class="input-group-field" type="text" placeholder="Enter name of new package" pattern="alpha" required />
-        (Add remaining details of your new package by selecting it in the specification resource list)<br/>
-        <button id="makePackageButton" class="button" type="submit">submit</button>
-      </div>
-    </div>
 
     <script src="js/vendor/jquery.js"></script>
     <script src="js/vendor/what-input.js"></script>
@@ -292,6 +270,7 @@
     <script src="js/geem_search.js"></script>
     <script src="js/geem_lookup.js"></script>
     <script src="js/geem_portal.js"></script>
+
 
   </body>
 

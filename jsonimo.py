@@ -95,6 +95,7 @@ class Ontology(object):
  			"ENVO": "http://purl.obolibrary.org/obo/ENVO_",
  			'EFO': 'http://www.ebi.ac.uk/efo/EFO_',
  			'EO': "http://purl.obolibrary.org/obo/EO_",
+ 			'ERO': "http://purl.obolibrary.org/obo/ERO_",
  			'ExO': 'http://purl.obolibrary.org/obo/ExO_',
             "FOODON": "http://purl.obolibrary.org/obo/FOODON_",
 			"GEO": "http://purl.obolibrary.org/obo/GEO_",
@@ -152,6 +153,8 @@ class Ontology(object):
 		#...
 
 		# Load main ontology file into RDF graph
+		# ISSUE: ontology file taken in as ascii; rdflib doesn't accept utf-8 characters
+		# so can experience conversion issues in string conversion stuff like .replace() below
 		self.graph.parse(main_ontology_file)
 
 		# Add each ontology include file (must be in OWL RDF format)
@@ -194,12 +197,16 @@ class Ontology(object):
 		with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
 			output_handle.write(json.dumps(self.struct,  sort_keys=False, indent=4, separators=(',', ': ')))
 
+
 	def ontologyMetadata(self, table):
 		# Should only be 1 row.
-		print "doing metadata"
-		print table
+		print
+		print "Metadata:", table
 		for myDict in table: 
 			self.struct['metadata'] = myDict
+		self.struct['metadata']['type'] = 'ontology'
+		self.struct['metadata']['status'] = 'release'
+		self.struct['metadata']['date'] = self.struct['metadata']['date']['value']
 
 
 	def doSpecifications(self, table):
@@ -651,7 +658,8 @@ class Ontology(object):
 								synonymTypeList = self.setDefault(self.struct, table, id, 'has' + field, [])
 								# Clean up synonym phrases
 								# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
-								phrases = str(row[field]).strip().replace(', ','\n').replace('"','').split('\n')
+								stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
+								phrases = stringy.strip().replace(', ','\n').replace('"','').split('\n')
 								for phrase in phrases:
 									synonymTypeList.append( phrase.strip())
 

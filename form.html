@@ -40,17 +40,13 @@
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
-      <div class="large-6 medium-6 columns" style="margin-top:25px;position:relative;border:2px solid black;max-height: 620px;overflow:scroll">
-        <p class="medium"><i>This form viewer is tested with Google Chrome v. 62; other browsers will be supported in the future. It may take time to load.</i></p>
+      <div class="large-6 medium-6 columns" style="margin-top:25px;position:relative;border:1px solid silver; background:#F8F8F8  !important; max-height: 620px;overflow:scroll;padding-top:15px">
 
         <form id="mainForm" data-abide="ajax">
 
-          This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:
+          <p>This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:</p>
 
-          <a href="http://genepio.org/geem/form.html#GENEPIO:0001624">
-            http://genepio.org/geem/form.html#GENEPIO:0001624
-          </a>
-          <br/>
+          <a href="form.html#GENEPIO:0001624">form.html#GENEPIO:0001624</a><br/>
           <br/>
           
         </form>
@@ -90,7 +86,7 @@
               </select>
 
               <div class="input-group-field">
-                <i class="fi-info blue has-tip float-right" data-disable-hover="false" data-hover-delay="10" title="The specification used to make this form is available in a variety of formats."></i>
+                &nbsp; <i class="fi-info blue" data-tooltip title="The specification used to make this form is available in a variety of formats."></i>
               </div>
             </div>
 
@@ -105,16 +101,17 @@
                 
               <div class="input-group-field">
                 Minimize form view
-                <i class="fi-info blue has-tip float-right" data-disable-hover="false" data-hover-delay="10" title="When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry."></i>
+                &nbsp; <i class="fi-info blue" data-tooltip title="When minimize form is activated, only required fields or fields with selections will show their input elements. All other fields will be shown by label only. Mousing over a minimized field label will open it to its full size for data entry."></i>
               </div>
 
             </div>
           </div>
+          <br/>
+          <p style="font-size:.8rem"><i>This form viewer is tested with Google Chrome v. 62; other browsers will be supported in the future. It may take time to load.</i></p>
+
+
         </div>
           
-        <p></p>
-
-
       </div>
     
     </div>

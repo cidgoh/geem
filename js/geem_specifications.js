@@ -4,11 +4,15 @@ function getdataSpecification(report_type) {
 	In portal.html this is called each time a dataSpecification is loaded, 
 	and also when a	new specificationType is selected.
 
+	FUTURE: resource.@context needs to be tailored to only what is in returned spec.
+	FUTURE: resource.metadata needs to be tailored to only what is in returned spec?
+	FUTURE: units array will be ordered so that favoured unit is first.
+
 	INPUT
 	report_type: 	Desired report type, see below; also supplied by 
 					#specificationType select
 	top.focusEntityId: The current entity being focused on, looked up in
-                       top.specification components: specification, picklists and units 
+                       top.resource.specifications components: specification, picklists and units 
     OUTPUT
     content:		textual representation.
     report_type:	As above
@@ -31,12 +35,18 @@ function getdataSpecification(report_type) {
 		$("#helpDataSpecification").remove()
 
 		switch (report_type) {
+
 			case 'raw.json':
 				content = JSON.stringify(getEntitySpecRoot(entityId), null, 2)
 				break; 
 			case 'raw.yml':
 				content = jsyaml.dump(getEntitySpecRoot(entityId), 4)  //indent of 4
 				break;
+			
+			// Provides @context JSON-LD RDF prefix list pertinent to given entity 
+			case 'context.json':
+				content = JSON.stringify(getEntitySpecContext(entityId), null, 2)
+				break; 
 
 			// FEATURE: These two could have all entity.path removed, as all info
 			// is already in entity.domID
@@ -68,7 +78,6 @@ function getdataSpecification(report_type) {
 				content = getFormData('form#mainForm')
 				break
 
-			case 'spreadsheet.xlsm':
 			case 'redcap.tsv':
 				// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
 			case 'ontofox.txt':
@@ -227,28 +236,85 @@ function getTabularTable(dataArray) {
 
 
 function getEntitySpecRoot(entityId = null) {
-	// Adds context to given entityId specification
-	var rootSpecification = {
-		'@context': top.context,
-		'specifications': getEntitySpec(null, entityId)
-	 }
-	return rootSpecification
+
+	// Return only entityId specification from resource.specifications
+	if (entityId) {
+		spec = getEntitySpec(null, entityId)
+		return {
+			'@context': getEntitySpecContext(spec),
+			'specifications': spec,
+			'metadata': top.resource.metadata // Inherited from resource
+		 }
+	}
+	// Return everything in top.resource - @context, specifications, and metadata
+ 	return top.resource
+}
+
+function getEntitySpecContext(entity_dict=null) {
+	/* A GEEM resource file has all the @context prefixes required for 
+	identifiers in its specifications
+	    "@context": {
+	        "DOID": "http://purl.obolibrary.org/obo/DOID_",
+	        "owl": "http://www.w3.org/2002/07/owl/",
+	        "EO": "http://purl.obolibrary.org/obo/EO_",
+	        "ancestro": "http://www.ebi.ac.uk/ancestro/ancestro_",
+	        ...
+
+	Check entity_dict content to make a new @context dictionary subset for it.
+	    Check id, datatype,
+	    array: member_of, units, otherParent
+	    dict: , components, models, choices
+		*/
+
+	if (entity_dict) {
+		context = {'owl':'http://www.w3.org/2002/07/owl/'} // 'owl:' shows up in cardinality statements
+		resContext = top.resource['@context']
+		// Cycle through content, adding all pertinent prefixes.
+		for (var entity_id in entity_dict) {
+			var entity = entity_dict[entity_id]
+			setContext(entity_id, context, resContext)
+			setContext(entity.datatype, context, resContext)
+			if ('components' in entity) 
+				for (entity_id in entity.components) setContext(entity_id, context, resContext) 
+			if ('models' in entity) 
+				for (entity_id in entity.models) setContext(entity_id, context, resContext)
+			if ('choices' in entity) 
+				for (entity_id in entity.models) setContext(entity_id, context, resContext)
+			if ('member_of' in entity) 
+				for (ptr in entity.member_of) setContext(entity.member_of[ptr], context, resContext)
+			if ('units' in entity) 
+				for (ptr in entity.units) setContext(entity.units[ptr], context, resContext)
+			if ('otherParent' in entity) 
+				for (ptr in entity.otherParent) setContext(entity.otherParent[ptr], context, resContext)
+		}
+
+		return context
+	}
+
+	return top.resource['@context']
+}
+
+function setContext(ref, context, resContext) {
+	// If context doesn't have prefix, add it.
+	prefix = ref.split(':')[0]
+	if (! (prefix in context))
+		context[prefix] = resContext[prefix]
 }
 
 function getEntitySpec(spec, entityId = null, inherited = false) {
 	/* Recursively copy the entityId specification element and all its
 	   underlings into a a single javascript object. This differs from
 	   getEntitySpecForm() in that entities are copied verbatim from
-	   top.specification, and via reference, so no branch-specific
+	   top.resource.specifications, and via reference, so no branch-specific
 	   processing goes on.
 	*/
 	if (spec == null)
 		spec = {}
 
-	if (entityId in top.specification) {
-		var entity = top.specification[entityId]
+	if (entityId in top.resource.specifications) {
+		var entity = top.resource.specifications[entityId]
 		if (entity) {
-			spec[entityId] = entity // reference entity directly.
+			spec[entityId] = entity // reference entity directly - flat list
 			
 			if (inherited == true) {
 				// Entity inherits primary ancestors' parts (the ones that led
@@ -279,13 +345,13 @@ function getEntitySpecItems(spec, entity, type) {
 			// units is an array; 
 			for (var ptr in entity['units']) { 
 				var partId = entity[type][ptr]
-				spec[partId] = top.specification[partId] // load object
+				spec[partId] = top.resource.specifications[partId] // load object
 				getEntitySpec(spec, partId) // sub-units?
 			}
 		else
 			// models, components, choices, which are dictionaries
 			for (var partId in entity[type]) { 
-				spec[partId] = top.specification[partId] // load object
+				spec[partId] = top.resource.specifications[partId] // load object
 				getEntitySpec(spec, partId)
 			} 
 	}

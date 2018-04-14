@@ -6,7 +6,7 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 
 #content > form{border:0;margin:0;}
 #content.disabled ul#content-tabs, #content.disabled #tabsContent {display:none;}
-/* #content.disabled {opacity:0.3;cursor:not-allowed !important;}  */
+/* #content.disabled {opacity:0.3;cursor:not-allowed !important; pointer-events: none;}  */
 
 /* CART ITEMS */
 ul#content-tabs > li.tabs-title i {font-size:1.5rem;position:absolute;margin-top:-5px;margin-left:5px;}
@@ -189,7 +189,7 @@ label {text-transform: capitalize;}
 i.fi-info.blue {color:#2199e8;font-size: 1.2rem}
 i.fi-calendar  {color:#2199e8;font-size: 1.5rem;cursor:pointer;}
 i.fi-x  {color:white;background-color:#2199e8;cursor:pointer;width:auto;}
-.icon.disabled {color:silver;cursor:not-allowed;}
+.icon.disabled {color:silver;cursor:not-allowed; pointer-events: none;}
 
 /* Quick fix until GEEM made foundation 6.4 compatible */
 .grid-x div.cell label {line-height:1 !important; margin:0 !important;}

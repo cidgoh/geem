@@ -3,6 +3,8 @@
 The OntologyForm class provides all functions needed (using jquery, Zurb 
 Foundation and app.css) to render and populate an ontology-driven form.
 
+REDESIGN SO renderEntity() runs off of getEntitySpecForm()
+
 WISHLIST:
 	- Allow xml datatype formats for date&time to be inherited from parent model
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
@@ -10,22 +12,32 @@ WISHLIST:
 	- Select list values: enable to be other than ontology id.
 		e.g. ui feature: values_from: ... [hasAlternateId]
 
+
 Author: Damion Dooley
 Project: genepio.org/geem
-Created: Sept 4, 2017
+Updated: April 15, 2018
 
 */
 
 // These fields are merged into select options synonyms="..." for searching.
 synonymFields = ['hasSynonym', 'hasExactSynonym', 'hasNarrowSynonym', 'hasAlternativeTerm']
 
-function OntologyForm(domId, specification, settings, callback) {
+function OntologyForm(domId, resource, settings, callback) {
+	/*
+	 "resource" includes @context, metadata, and specifications
+	 self.specification is currently loaded by reference.  
+	 SHOULD THIS BE A DEEP COPY?!!! OR A SPECIFICATION GLEANED VIA 
+	 	getEntitySpecRoot(entityId = null)
+	 So user can go select package to place spec in?
+	 VIA $.extend(true, {}, self.specification) 
 
+	*/
 	var self = this
 	//bag = {}
 	self.settings = {}
 	self.formDomId = $(domId)
-	self.specification = specification // By reference
+	self.specification = resource.specifications 
+	self.context = resource.context
 	self.formCallback = callback
 
 	// Some of these defaults can be overridden by particular fields via ui_feature specification
@@ -37,27 +49,39 @@ function OntologyForm(domId, specification, settings, callback) {
 	/*********** FORM RENDERER *************************/
 	this.renderEntity = function(entityId) {
 
+		formDelete()
+
+		// Deselect any other form menu item that might be open.
+		$('li.active[role="menuitem"]').removeClass('active')
+
 		if (entityId) {
+			// Splits off first entity id if path given
 			if (entityId.indexOf('/') != -1)
 				entityId = entityId.substr(0, entityId.indexOf('/'))
 			self.entityId = entityId
 		}
-		formDelete()
-		// Deselect any other form menu item that might be open.
-		$('li.active[role="menuitem"]').removeClass('active')
 
+		// If entityId wasn't passed, then reverts to self.entityId
+		// to enable re-rendering of existing object.
 		if (self.entityId) {
 
 			// Highlight any menu item that is this entity
-			// Ideally open menu to this item if it isn't already open.
+			// FUTURE: Ideally open menu to this item if not already.
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
-			//top.bag = {} // For catching entity in a loop.
 			form_html = render(self.entityId)
-			form_html += renderButton('View Form Submission', 'buttonFormSubmit') 
 
-			// Place new form html into page and activate its foundation interactivity
-			self.formDomId.html(form_html) //.foundation()
+			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
+			if (form_html == '') {
+				// Sometimes given element is not a field and has no parts.
+				form_html += '<br/><p>This ontology item has no form specification.</p>'
+			}
+			else {
+				form_html += renderButton('View Form Submission', 'buttonFormSubmit') 
+			}
+
+			// Place new form html into page
+			self.formDomId.html(form_html)
 
 			// Set up UI widget for all date inputs; 
 			// Using http://foundation-datepicker.peterbeno.com/example.html
@@ -90,20 +114,11 @@ function OntologyForm(domId, specification, settings, callback) {
 
 			window.document.title = title
 
-		 	// Actually load an existing data record
+		 	// Load an existing data record
 		 	//loadFormData()
 
 			// Set required/optional status of fields and controls for adding more elements.
 			setCardinality() 
-
-			// Clear out specification tab.  THIS SHOULD BE DONE via form hook ON SHOW OF SPEC TAB INSTEAD.
-		 	if (window.getdataSpecification) {
-		 		$('#dataSpecification').empty()
-		 		//$("#spec_download").attr('disabled','disabled')
-		 		$('#specification-tabs li.is-active')
-		 			.removeClass('is-active')
-		 			.find('a').removeAttr('aria-selected'); // how else?
-		 	}
 
 		 	if (self.settings.minimalForm) setMinimalForm() // Hides empty optional field content.
 
@@ -111,8 +126,8 @@ function OntologyForm(domId, specification, settings, callback) {
 		 	// get some extra smarts for type-as-you-go filtering.
 		 	$('select.regular').each(configureSelect); 
 		 	
-		 	$('#specificationType').prop("selected", false);
-
+		 	// Reinitialize form since it was deleted above.
+		 	// FUTURE: UPGRADE FOUNDATION, use reInit()
 			self.formDomId.foundation()
 
 			//Setup of this class enables callback function to be supplied.  Could make an event instead.
@@ -124,8 +139,9 @@ function OntologyForm(domId, specification, settings, callback) {
 
 
 	formDelete = function() {
-		if (self.formDomId)
+		if (self.formDomId) {
 			self.formDomId.off().empty()
+		}
 	}
 
 	setMinimalForm = function() {
@@ -285,7 +301,7 @@ function OntologyForm(domId, specification, settings, callback) {
 		from pure JSON specification. At the top level it is an array of form
 		elements. The first element is the form item itself, and it contains 
 		a components [] array, a choices [] array and a units [] array.
-		Each item in these arrays are copies of the top.specification object,
+		Each item in these arrays are copies of the top.resource.specifications object,
 		trimmed down.
 
 		The complexity occurs in that some form elements may inherit components
@@ -300,7 +316,7 @@ function OntologyForm(domId, specification, settings, callback) {
 			specification: javascript object containing all form elements and JSON-LD @context
 		*/
 		var rootSpecification = {
-			'@context': top.context,
+			'@context': self.context,
 			'specifications': {[entityId]: getEntitySpecFormComponent(entityId) }
 		}
 		return rootSpecification
@@ -1595,7 +1611,8 @@ OntologyForm.initFoundation = function() {
 	Foundation.Abide.defaults.timeout = 1000
 	Foundation.Abide.defaults.patterns = {
 		alpha: /^[a-zA-Z]+$/,
-		alpha_numeric : /^[a-zA-Z0-9]+$/,
+		alpha_numeric: /^[a-zA-Z0-9]+$/,
+		title: /^[a-zA-Z0-9 ]+$/,
 		integer: /^[-+]?(0|[1-9]\d*)$/,
 		number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
 		decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,

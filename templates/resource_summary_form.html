@@ -1,0 +1,99 @@
+<form class="grid-x grid-padding-x" data-abide style="padding-right:10px">
+
+  <!-- Provide checkbox too to enable sharing of package? -->
+  <div class="small-2 cell summary_type">
+    <label for="middle-label" class="text-right middle">type</label>
+  </div>
+  <div class="small-4 cell summary_type" style="float:left">
+    <select id="summary_type" disabled required>
+      <option value="private">private</option>
+      <option value="shared">shared</option>
+      <option value="ontology">ontology</option>
+    </select>
+  </div>
+
+  <div class="small-2 cell summary_status" style="float:left;clear:none">
+    <label for="middle-label" class="text-right middle">status</label>
+  </div>
+  <div class="small-4 cell summary_status" style="float:left">
+    <select id="summary_status" disabled required>
+      <option value="draft">draft</option>
+      <option value="release">release</option>
+    </select>
+  </div>
+
+
+  <div class="small-2 cell summary_title">
+    <label for="middle-label" class="text-right middle">title</label>
+  </div>
+  <div class="small-10 cell summary_title">
+    <input type="text" id="summary_title" placeholder="title" value="@title" pattern="[A-Za-z0-9 ]+" required style="font-weight:bold">
+  </div>
+
+  <div class="small-2 cell summary_resource">
+    <label for="middle-label" class="text-right middle">URL</label>
+  </div>
+  <div class="small-1 cell summary_resource">
+    <a href="@resource" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
+  </div>
+  <div class="small-9 cell summary_resource">
+    <input type="text" id="summary_resource" placeholder="source file URL" value="@resource">
+  </div>
+
+  <div class="small-2 cell summary_description">
+    <label for="middle-label" class="text-right middle">desc.</label>
+  </div>
+  <div class="small-10 cell summary_description">
+    <textarea placeholder="" id="summary_description" rows="3">@description</textarea>
+  </div>
+  
+  <div class="small-2 cell summary_license">
+    <label for="middle-label" class="text-right middle">license</label>
+  </div>
+  <div class="small-1 cell summary_license">
+    <a href="@license" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
+  </div>
+  <div class="small-9 cell summary_license">
+    <input type="text" id="summary_license" readonly placeholder="license" value="@license">
+  </div>
+
+  <div class="small-2 cell summary_prefix">
+    <label for="middle-label" class="text-right middle">prefix</label>
+  </div>
+  <div class="small-10 cell summary_prefix">
+    <input type="text" id="summary_prefix" placeholder="ontology prefix" value="@prefix">
+  </div>
+
+  <div class="small-2 cell summary_version">
+    <label for="middle-label" class="text-right middle">version</label>
+  </div>
+   <div class="small-1 cell summary_version">
+    <a href="@versionIRI" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
+  </div>
+  <div class="small-9 cell summary_version">
+    <input type="text" id="summary_version" placeholder="version URI" readonly value="@versionIRI">
+  </div>
+
+  <div class="small-2 cell summary_date">
+    <label for="middle-label" class="text-right middle">updated</label>
+  </div>
+  <div class="small-4 cell summary_date" style="float:left">
+    <input type="text" id="summary_date" readonly placeholder="publication date" value="@date">
+  </div>
+
+
+  <!-- Delete, Download, Copy and Update buttons -->
+
+  <div class="small-12 cell text-center" style="clear:both">
+
+    <button class="button" id="summary_delete">Delete</button>
+
+    <button class="button" data-tooltip data-click-open="false" id="summary_download" title="Download this entire GEEM resource file of specifications in JSON format.">Download</button>
+
+    <!-- <button class="button" data-tooltip data-click-open="false" id="summary_copy" title="Copy this ontology or package's specifications">Copy</button> -->
+
+    <button class="button" id="summary_update">Save</button>
+
+  </div>
+
+</form>

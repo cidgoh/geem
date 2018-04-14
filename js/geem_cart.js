@@ -24,10 +24,37 @@ function initCartTab() {
 		shoppingListStatus()
 	})
 
+	// Check and update shopping cart include/exclude status of this item
+	$("#tabsContent").on('click', "i.fi-shopping-cart", function(event){
 
-	$("#updatePackageForm").on('submit', function() {})
+		event.stopPropagation(); // otherwise parent cart items catch same click
+		cartCheck(getEntityId(this))
+		return false
+	})
 
-	$("#makePackageForm").on('submit', function() {})
+	$("#addToPackageButton").on('mouseenter',function(){
+		/* Provides a menu of packages in 'draft' mode that user manages that
+		 they could add shopping cart to. 
+		 Couldn't figure out foundation event for this
+		 Alot like initResourceSelect()
+		*/
+		stack = top.resources.slice(0)
+
+		html = ['<option value="">Select a package ...</option>']
+		while (stack.length && stack[0].type == 'ontology') stack.shift()
+		// manager_filter turned on so only those items user manages are shown.
+		initResourceSelectItem(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
+		initResourceSelectItem(stack, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
+		html = html.join('\n')
+
+		// Load menu selection
+		$('#userPackages').html(html)
+
+	})
+
+	$("#updatePackageButton").on('click', function() {
+		alert('Shopping cart package update coming soon!')
+	})
 
 }
 
@@ -196,7 +223,7 @@ function renderCartItem(ontologyId) {
 	var ptr = ontologyId.lastIndexOf('/')
 	// Get last path item id.
 	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
-	var entity = top.specification[entityId]
+	var entity = top.resource.specifications[entityId]
 	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED]'}
 	return ['<div class="cart-item" ', getIdHTMLAttribute(ontologyId), '>',
 		'<i class="fi-shopping-cart"></i>',
@@ -210,7 +237,7 @@ function renderCartObj(ontologyId) {
 	var ptr = ontologyId.lastIndexOf('/')
 	// Get last path item id.
 	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
-	var entity = top.specification[entityId]
+	var entity = top.resource.specifications[entityId]
 	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
 	var html = ['<div class="cart-item" ', getIdHTMLAttribute(ontologyId), '>',
 		'<i class="fi-shopping-cart"></i>',

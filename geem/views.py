@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import Context
+from oauth2_provider.models import Application
 import json
 
 # Create your views here.
@@ -8,6 +10,11 @@ def index(request):
 
 def portal(request):
     return render(request, 'geem/portal.html', context={})
+
+def login(request):
+    context = {}
+    context['client_id'] = Application.objects.filter(name='geem').values()[0]['client_id']
+    return render(request, 'geem/login.html', context)
 
 def form(request):
     return render(request, 'geem/form.html', context={})

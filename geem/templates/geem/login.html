@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+  <head profile="http://www.w3.org/2005/10/profile">
+    <link rel="icon" type="image/ico" href="favicon.ico">
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genomic Epidemiology Entity Mart Prototype</title>
+    <link rel="stylesheet" href="{% static "geem/css/foundation.min.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-icons/foundation-icons.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-datepicker.min.css" %}">
+    <link rel="stylesheet" href="{% static "geem/js/chosen/chosen.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/app.css" %}">
+  </head>
+  <body>
+    <div class="row" style="background-color:#2199e8;color:white">
+      <div class="callout text-center">
+	<form class="medium-offset-3 medium-6" role="form" method="post" action="{% url 'login' %}">
+	  <h2 class="form-login-heading">Please sign in</h2>
+	  {% csrf_token %}
+	  <input id="grant_type" name="grant_type" type="hidden" value="password" />
+	  <input id="client_id" name="client_id" type="hidden" value="{{ client_id }}" />
+	  <input id="{{ form.username.auto_id }}" type="text" name="{{ form.username.name }}" class="form-control input-lg" placeholder="Username" required>
+	  <input id="{{ form.password.auto_id }}" type="password" name="{{ form.password.name }}" class="form-control input-lg" placeholder="Password" required>
+	  <input type="hidden" name="next" value="{{ next }}" />
+	  <input value="Login" type="submit" class="button expanded" />
+	</form>
+	
+	{% if form.errors %}
+	<div class="row text-center">
+	  <p>Your username and password didn't match. Please try again.</p>
+	</div>
+	{% endif %}
+      </div>
+    </div>
+  </body>
+</html>

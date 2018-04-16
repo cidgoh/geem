@@ -4,3 +4,30 @@ The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downlo
 
 * View details of our overal project aim, description, and implementation on the [Wiki](https://github.com/GenEpiO/geem/wiki/) site.
 * A working prototype of the portal is available at <http://genepio.org/geem>
+
+## Launching a Development Server
+
+1. Create a conda environment:
+
+```bash
+$ conda create -n geem python=3.6
+$ source activate geem
+```
+
+2. Install dependencies:
+
+```bash
+$ pip install -r requirements.txt
+```
+
+3. Prepare development database:
+
+```bash
+$ python manage.py migrate
+```
+
+4. Run the development server:
+
+```
+$ python manage.py runserver
+```

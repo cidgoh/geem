@@ -21,7 +21,18 @@
       </div>
       <div class="large-2 medium-2 columns">
         <a class="button" href="https://github.com/GenEpiO/geem/wiki" target="_blank">Help</a>
-        <a class="button" onclick="alert('Coming soon!');return false">Login</a>
+        <a class="button" type="button"  data-toggle="login-dropdown">Login</a>
+	<div id="login-dropdown" class="dropdown-pane" data-dropdown data-auto-focus="true">
+	  <form class="log-in-form">
+	    <label>Email
+	      <input type="email" placeholder="email">
+	    </label>
+	    <label>Password
+	      <input type="password" placeholder="password">
+	    </label>
+	    <p><input type="submit" class="button expanded" value="Log in"></input></p>
+	  </form>
+	</div>
         <!-- i class="fi-widget large">&nbsp;</i -->
       </div>
     </div>

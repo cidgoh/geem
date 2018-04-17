@@ -1,5 +1,5 @@
 
-specification = {}
+resource = {}
 focusEntityId = null
 formSettings = {}
 form = {}
@@ -10,9 +10,6 @@ ontologyLookupService = 'http://purl.obolibrary.org/obo/'
 $( document ).ready(function() {
 
   OntologyForm.initFoundation()
-
-  //Default load of GenEpiO
-  loadResource('data/ontology/genepio-merged.json')
 
   // Bring in shared templates
   $.ajax('templates/modal_lookup.html').done(function(response) {
@@ -31,39 +28,58 @@ $( document ).ready(function() {
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
-  $(window).on('hashchange', loadForm);
+  $(window).on('hashchange', checkForHashEntity);
 
   $('#modalEntity').foundation()
   $('#rightbar').foundation()
+
+  checkForHashEntity()
+
 });
 
 
-function loadResource(resource_file) {
-  $.getJSON(resource_file, function(resource) {
-    // Setup Zurb Foundation user interface and form validation
-    top.resource = resource;
+function loadResource(resource_URL) { //, resource_type
+  $.ajax({
+    type: 'GET',
+    url: resource_URL,
+    timeout: 30000, //30 sec timeout
+    success: function(resource) {
 
-    loadForm() // tries to get entity id from URL.
+      top.resource = resource;
 
+      // loadResource() triggered if hash entity id detected 
+      // but no top.resource loaded. 
+      checkForHashEntity()
+    },
+    error:function(XMLHttpRequest, textStatus, errorThrown) {
+      alert('Given resource could not be found: \n\n\t' + resource_URL) 
+    }
   });
+}
+
+function checkForHashEntity() {
+
+ if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
+    top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
+
+    // Returns if loading resource or if no appropriate resource found
+    if (!checkEntityResource(top.focusEntityId) ) return
+
+    loadForm()
+
+  }
+
 }
 
 function loadForm() {
 
   top.form = new OntologyForm("#mainForm", top.resource, top.formSettings)
 
-  // PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
-  var focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-  top.focusEntityId = focusEntityId
-
-  if (focusEntityId && focusEntityId.indexOf(':')) {
-    top.form.renderEntity(focusEntityId)
-    doSectionMenu()
-  }
+  top.form.renderEntity(top.focusEntityId)
+  doSectionMenu()
 
   // Deselect specification menu.
   $('#specificationType')[0].selectedIndex = 0
-  //$('#dataSpecification').empty()
 
   $('#buttonFormSubmit').on('click', function () {    
     setModalDownload(getdataSpecification('form_submission.json'))

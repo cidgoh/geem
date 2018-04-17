@@ -74,7 +74,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
 			if (form_html == '') {
 				// Sometimes given element is not a field and has no parts.
-				form_html += '<br/><p>This ontology item has no form specification.</p>'
+				form_html += '<br/><p>This item has no field specification.</p>'
 			}
 			else {
 				form_html += renderButton('View Form Submission', 'buttonFormSubmit') 

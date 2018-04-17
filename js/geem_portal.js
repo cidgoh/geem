@@ -44,7 +44,8 @@
 resources = [
 	{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
 	{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
-	{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'}
+	{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
+	{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
 ]	
 resource = {} 	// Current specification database being browsed and searched
 focusEntityId = null
@@ -334,7 +335,7 @@ function doResourceForm(data, form_URL, new_flag = false) {
 			alert('Coming soon!')
 			return
 
-			
+
 			var path = $('#resourceForm #summary_path').val()
 			var content =  {
 				type: 'private',
@@ -390,13 +391,8 @@ function checkForHashEntity() {
 	*/
     if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
 		top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-		//top.resource.metadata.prefix != 'GENEPIO'
-		if (!top.resource.specifications || ! top.focusEntityId in top.resource.specifications) {
-			// CURRENTLY: HARD WIRED TO JUST BE GENEPIO.
-			loadResource('data/ontology/genepio-merged.json')
-			// rechecks hash
-			return
-		}
+
+		if (!checkEntityResource(top.focusEntityId)) return
 
 		$('#specificationSourceInfoBox').hide()
 		$('#content').removeClass('disabled')
@@ -634,6 +630,8 @@ function renderMenu(entityId = null, depth = 0 ) {
 	if (depth > 0)
 		html +=	'</li>'
 
+	if (html == '') 
+		html = '<div class="infoBox">This package does not contain any specifications.</div>'
 	return html
 }
 

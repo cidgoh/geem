@@ -26,10 +26,18 @@ $ pip install -r requirements.txt
 $ python manage.py migrate
 ```
 
-4. Run the development server:
+4. Create your admin user. (Enter details when prompted)
+
+```bash
+$ python manage.py createsuperuser
+```
+
+5. Run the development server:
 
 ```
 $ python manage.py runserver
 ```
 
-5. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+6. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+
+7. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 4.

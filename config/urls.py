@@ -18,6 +18,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('geem.urls')),
+    path('', include('api.urls')),
     path('admin/', admin.site.urls),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path(r'api-auth/', include('rest_framework.urls'))
 ]

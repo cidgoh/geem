@@ -7,37 +7,74 @@ The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downlo
 
 ## Launching a Development Server
 
-1. Create a conda environment:
+### Using Docker
+
+1. Build the GEEM docker image:
+
+```bash
+$ docker build .
+```
+
+2. Set up the database:
+
+```bash
+$ docker-compose run web python /code/manage.py makemigrations --noinput
+$ docker-compose run web python /code/manage.py migrate --noinput
+```
+
+3. Create your admin user:
+
+```bash
+$ docker-compose run web python /code/manage.py createsuperuser
+```
+
+4. Run the development server:
+
+```bash
+$ docker-compose up
+```
+
+5. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+
+6. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 3.
+
+### Without Docker
+
+1. Create a postgresql database and edit `config/settings.py` with connection details.
+
+2. Create a conda environment:
 
 ```bash
 $ conda create -n geem python=3.6
 $ source activate geem
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 
 ```bash
 $ pip install -r requirements.txt
 ```
 
-3. Prepare development database:
+4. Prepare development database:
 
 ```bash
 $ python manage.py migrate
 ```
 
-4. Create your admin user. (Enter details when prompted)
+5. Create your admin user. (Enter details when prompted)
 
 ```bash
 $ python manage.py createsuperuser
 ```
 
-5. Run the development server:
+6. Run the development server:
 
 ```
 $ python manage.py runserver
 ```
 
-6. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+7. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
 
-7. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 4.
+8. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 5.
+
+

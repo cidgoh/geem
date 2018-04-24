@@ -3363,14 +3363,14 @@
     }
   },
   "metadata": {
-    "versionIRI": "http://purl.obolibrary.org/obo/genepio/releases/2018-04-11/genepio.owl",
-    "description": "The Genomic Epidemiology Ontology aims to provide a comprehensive controlled vocabulary for infectious disease surveillance and outbreak investigations. It is an application ontology that draws on many other ontologies including anatomy, taxonomy, disease, symptoms, environment and food types.",
+    "versionIRI": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+    "description": "A GEEM draft standard for European Bioinformatics Institute (EBI) antibiogram data submission",
     "license": "http://creativecommons.org/licenses/by/3.0/",
-    "title": "Genomic Epidemiology Ontology",
-    "prefix": "GENEPIO",
-    "date": "2018-04-14",
-    "resource": "http://purl.obolibrary.org/obo/genepio.owl",
-    "type": "ontology",
+    "title": "Draft Antimicrobial Succeptibility Test Form",
+    "prefix": "",
+    "date": "2018-04-16",
+    "resource": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+    "type": "shared",
     "status": "draft"
   }
 }

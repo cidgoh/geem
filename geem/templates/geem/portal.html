@@ -37,7 +37,7 @@
     <div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true">
 
       <div class="input-group" >
-        <label>Add to existing package</label>
+        <label>Add cart items to package you manage</label>
         <select class="input-group-field" id="userPackages"></select>
         <p> Package must have a "draft" status in order to be modified.</p>
       </div>
@@ -103,6 +103,8 @@
         <div id="formEntityLabel"></div>
 
         <div class="infoBox" id="specificationSourceInfoBox">
+          <p>This is a semi-functional prototype for reviewing and downloading GEEM annotated ontology content that enables data specifications to be extracted from curated ontologies. Such specifications can be used to render reports and data entry forms, or to enforce data validation. The GEEM project ultimately aims to interface with existing systems like RedCap to enable standardized, ontology-driven data collection.</p>
+
           <p>To start, select a GEEM-integrated specification resource from the list to work with. This can be an ontology, a shared specification package or one of your own private packages.</p>
 
           <p>Then use the "Browse Specifications" or "Search" menu to see what specifications an ontology or package provides.  Choose an item to see how it would be presented as a form or form part. Options are also provided for downloading that specification <!--, discussing it with others-->, or adding parts of it to your shopping list in order to make a new package.</p>
@@ -271,6 +273,7 @@
     <script src="{% static "geem/js/vendor/foundation-datepicker.min.js" %}"></script>
     <script src="{% static "geem/js/vendor/js-yaml.min.js" %}"></script>
     <script src="{% static "geem/js/chosen/chosen.jquery.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "geem/js/geem_resource.js" %}"></script>
     <script src="{% static "geem/js/geem_form.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>
     <script src="{% static "geem/js/geem_cart.js" %}"></script>

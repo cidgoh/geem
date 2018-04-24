@@ -2,16 +2,6 @@ from django.contrib.auth.models import User, Group
 from geem.models import Package
 from rest_framework import serializers
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'email', 'groups')
-
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Group
-        fields = ('url', 'name')
-
 class PackageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Package
@@ -19,11 +9,19 @@ class PackageSerializer(serializers.HyperlinkedModelSerializer):
             'owner',
             'created',
             'updated',
-            'package_type',
-            'status',
-            'title',
-            'description',
-            'license',
-            'version',
             'contents'
         )
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    packages = PackageSerializer(
+        many=True,
+        read_only=True
+    )
+    class Meta:
+        model = User
+        fields = ('url', 'username', 'email', 'packages')
+
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('url', 'name')

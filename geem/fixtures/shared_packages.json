@@ -6,12 +6,6 @@
 	    "owner": 1,
 	    "created": "2018-04-24T18:04:39.023Z",
 	    "updated": "2018-04-24T18:04:39.023Z",
-	    "package_type": "shared",
-	    "status": "draft",
-	    "title": "Draft Antimicrobial Succeptibility Test Form",
-	    "description": "A test package",
-	    "license": "http://creativecommons.org/licenses/by/3.0/",
-	    "version": "http://genepio.org/geem/data/shared_packages/test.epi.json",
 	    "contents": {
 		"@context": {
 		    "owl": "http://www.w3.org/2002/07/owl/",

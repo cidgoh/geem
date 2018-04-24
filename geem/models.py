@@ -6,20 +6,15 @@ from django.contrib.postgres.fields import JSONField
 class Package(models.Model):
     owner = models.ForeignKey(
         User,
+        related_name='packages',
         on_delete=models.CASCADE,
         blank=False,
         null=False,
     )
-    contents = JSONField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    package_type = models.CharField(max_length=64, blank=True)
-    status = models.CharField(max_length=64, blank=True)
-    title = models.CharField(max_length=256, blank=True)
-    description = models.TextField()
-    license = models.CharField(max_length=256, blank=True)
-    version = models.CharField(max_length=256, blank=True)
+    contents = JSONField()
 
     def __str__(self):
-        return "id:" + str(self.id) + " owner:" + self.owner.username + " type:" + self.package_type
+        return "id:" + str(self.id) + " owner:" + self.owner.username + " created:" + str(self.created)
     

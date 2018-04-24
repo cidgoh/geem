@@ -11,7 +11,6 @@ class Package(models.Model):
         null=False,
     )
     contents = JSONField()
-    shared = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     package_type = models.CharField(max_length=64, blank=True)
@@ -22,5 +21,5 @@ class Package(models.Model):
     version = models.CharField(max_length=256, blank=True)
 
     def __str__(self):
-        return "id:" + str(self.id) + " owner:" + self.owner.username + " shared:" + str(self.shared)
+        return "id:" + str(self.id) + " owner:" + self.owner.username + " type:" + self.package_type
     

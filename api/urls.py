@@ -4,8 +4,9 @@ from django.urls import include, path
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
+router.register('users', views.UserViewSet)
+router.register('groups', views.GroupViewSet)
+router.register('packages', views.PackageViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

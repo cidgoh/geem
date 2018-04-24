@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
+from geem.models import Package
 from rest_framework import viewsets
-from api.serializers import UserSerializer, GroupSerializer
+from api.serializers import UserSerializer, GroupSerializer, PackageSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -17,3 +18,10 @@ class GroupViewSet(viewsets.ModelViewSet):
     """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+
+class PackageViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows packages to be viewed or edited.
+    """
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer

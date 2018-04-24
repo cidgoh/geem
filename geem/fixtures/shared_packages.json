@@ -1,0 +1,3393 @@
+[
+    {
+	"model": "geem.package",
+	"pk": 1, 
+	"fields": {
+	    "owner": 1,
+	    "created": "2018-04-24T18:04:39.023Z",
+	    "updated": "2018-04-24T18:04:39.023Z",
+	    "package_type": "shared",
+	    "status": "draft",
+	    "title": "Draft Antimicrobial Succeptibility Test Form",
+	    "description": "A test package",
+	    "license": "http://creativecommons.org/licenses/by/3.0/",
+	    "version": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+	    "contents": {
+		"@context": {
+		    "owl": "http://www.w3.org/2002/07/owl/",
+		    "GENEPIO": "http://purl.obolibrary.org/obo/GENEPIO_",
+		    "OBI": "http://purl.obolibrary.org/obo/OBI_",
+		    "NCIT": "http://purl.obolibrary.org/obo/NCIT_",
+		    "xmls": "http://www.w3.org/2001/XMLSchema#",
+		    "NCBITaxon": "http://purl.obolibrary.org/obo/NCBITaxon_",
+		    "CHEBI": "http://purl.obolibrary.org/obo/CHEBI_",
+		    "UO": "http://purl.obolibrary.org/obo/UO_"
+		},
+		"specifications": {
+		    "GENEPIO:0002109": {
+			"definition": "A standard for European Bioinformatics Institute (EBI) antibiogram data submission",
+			"parent": "GENEPIO:0000106",
+			"components": {
+			    "OBI:0001616": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				},
+				{
+				    "feature": "label",
+				    "value": "BioSample_ID"
+				}
+			    ],
+			    "GENEPIO:0001640": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				},
+				{
+				    "feature": "lookup"
+				}
+			    ],
+			    "GENEPIO:0001187": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002062": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002111": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "NCIT:C85540": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002112": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002080": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0001001": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "NCIT:C85539": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				},
+				{
+				    "feature": "label",
+				    "value": "Resistance_phenotype"
+				}
+			    ],
+			    "GENEPIO:0002181": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002049": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:maxQualifiedCardinality",
+				    "value": "1"
+				}
+			    ]
+			},
+			"datatype": "model",
+			"uiLabel": "draft EBI antimicrobial susceptibility test V. 2017-08-30",
+			"id": "GENEPIO:0002109",
+			"features": {
+			    "order": {
+				"value": [
+				    "OBI:0001616",
+				    "GENEPIO:0001640",
+				    "GENEPIO:0001187",
+				    "GENEPIO:0002062",
+				    "GENEPIO:0002111",
+				    "NCIT:C85540",
+				    "GENEPIO:0002112",
+				    "GENEPIO:0002080",
+				    "GENEPIO:0001001",
+				    "NCIT:C85539",
+				    "GENEPIO:0002181",
+				    "GENEPIO:0002049"
+				]
+			    }
+			}
+		    },
+		    "OBI:0001616": {
+			"definition": "A CRID symbol denotes a specimen and used to distinguish one specimen from another in an investigation.",
+			"features": {
+			    "required": {}
+			},
+			"hasSynonym": [
+			    "sample identifier"
+			],
+			"datatype": "xmls:string",
+			"uiLabel": "specimen identifier",
+			"otherParent": [
+			    "GENEPIO:0001835",
+			    "GENEPIO:0000111",
+			    "GENEPIO:0002109",
+			    "GENEPIO:0001073",
+			    "GENEPIO:0001621",
+			    "GENEPIO:0001650",
+			    "GENEPIO:0001007",
+			    "GENEPIO:0002000",
+			    "GENEPIO:0002091",
+			    "GENEPIO:0001581"
+			],
+			"id": "OBI:0001616",
+			"constraints": [
+			    {
+				"datatype": "xmls:nonNegativeInteger",
+				"value": "1",
+				"constraint": "owl:qualifiedCardinality"
+			    }
+			]
+		    },
+		    "GENEPIO:0001640": {
+			"definition": "This is the taxonomic species descriptor of a specimen isolate (an organism found within a specimen.)",
+			"features": {
+			    "lookup": {}
+			},
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"choices": {
+			    "NCBITaxon:2157": [],
+			    "NCBITaxon:2": [],
+			    "NCBITaxon:2759": [],
+			    "NCBITaxon:10239": []
+			},
+			"otherParent": [
+			    "GENEPIO:0002129",
+			    "GENEPIO:0002092",
+			    "GENEPIO:0002109",
+			    "GENEPIO:0000132",
+			    "GENEPIO:0002084",
+			    "GENEPIO:0001835",
+			    "GENEPIO:0002091",
+			    "GENEPIO:0001740",
+			    "GENEPIO:0001638"
+			],
+			"uiLabel": "specimen organism taxonomy (species)",
+			"id": "GENEPIO:0001640"
+		    },
+		    "NCBITaxon:2157": {
+			"definition": "The Archaea constitute a domain and kingdom of single-celled microorganisms",
+			"member_of": [
+			    "GENEPIO:0001640",
+			    "OBI:0100026"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "NCBITaxon:2157",
+			"uiLabel": "Archaea"
+		    },
+		    "NCBITaxon:2": {
+			"hasAlternativeTerm": [
+			    "eubacteria"
+			],
+			"otherParent": [
+			    "GENEPIO:0001787"
+			],
+			"member_of": [
+			    "GENEPIO:0001640",
+			    "OBI:0100026"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Bacteria",
+			"id": "NCBITaxon:2",
+			"choices": {
+			    "NCBITaxon:816": [],
+			    "NCBITaxon:1224": [],
+			    "NCBITaxon:1783272": []
+			}
+		    },
+		    "NCBITaxon:816": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Bacteroides",
+			"id": "NCBITaxon:816",
+			"member_of": [
+			    "NCBITaxon:2"
+			]
+		    },
+		    "NCBITaxon:1224": {
+			"hasAlternativeTerm": [
+			    "purple bacteria",
+			    "purple non-sulfur bacteria",
+			    "purple photosynthetic bacteria",
+			    "purple bacteria and relatives",
+			    "purple photosynthetic bacteria and relatives"
+			],
+			"member_of": [
+			    "NCBITaxon:2"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Proteobacteria",
+			"choices": {
+			    "NCBITaxon:194": [],
+			    "NCBITaxon:543": []
+			},
+			"id": "NCBITaxon:1224"
+		    },
+		    "NCBITaxon:194": {
+			"member_of": [
+			    "NCBITaxon:1224"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Campylobacter",
+			"id": "NCBITaxon:194",
+			"choices": {
+			    "NCBITaxon:197": []
+			}
+		    },
+		    "NCBITaxon:197": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Campylobacter jejuni",
+			"id": "NCBITaxon:197",
+			"member_of": [
+			    "NCBITaxon:194"
+			]
+		    },
+		    "NCBITaxon:543": {
+			"member_of": [
+			    "NCBITaxon:1224"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Enterobacteriaceae",
+			"id": "NCBITaxon:543",
+			"choices": {
+			    "NCBITaxon:562": [],
+			    "NCBITaxon:590": []
+			}
+		    },
+		    "NCBITaxon:562": {
+			"hasAlternativeTerm": [
+			    "Escherichia/Shigella coli",
+			    "E. coli"
+			],
+			"member_of": [
+			    "NCBITaxon:543"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli",
+			"id": "NCBITaxon:562",
+			"choices": {
+			    "NCBITaxon:1365258": [],
+			    "NCBITaxon:1055536": [],
+			    "NCBITaxon:1232152": [],
+			    "NCBITaxon:376725": [],
+			    "NCBITaxon:991913": [],
+			    "NCBITaxon:1055535": [],
+			    "NCBITaxon:1078021": [],
+			    "NCBITaxon:991915": [],
+			    "NCBITaxon:244317": [],
+			    "NCBITaxon:397454": [],
+			    "NCBITaxon:991919": [],
+			    "NCBITaxon:1045010": [],
+			    "NCBITaxon:1095706": [],
+			    "NCBITaxon:404399": [],
+			    "NCBITaxon:244319": [],
+			    "NCBITaxon:404394": [],
+			    "NCBITaxon:1078032": []
+			}
+		    },
+		    "NCBITaxon:1365258": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli 151_06",
+			"id": "NCBITaxon:1365258",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1055536": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O103",
+			"id": "NCBITaxon:1055536",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1232152": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O103:H11",
+			"id": "NCBITaxon:1232152",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:376725": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O103:H2",
+			"id": "NCBITaxon:376725",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:991913": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O103:H25",
+			"id": "NCBITaxon:991913",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1055535": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O111",
+			"id": "NCBITaxon:1055535",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1078021": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O113:H21",
+			"id": "NCBITaxon:1078021",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:991915": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O121:H19",
+			"id": "NCBITaxon:991915",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:244317": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O128:H2",
+			"id": "NCBITaxon:244317",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:397454": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O142:H6",
+			"id": "NCBITaxon:397454",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:991919": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O145:NM",
+			"id": "NCBITaxon:991919",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1045010": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O157",
+			"id": "NCBITaxon:1045010",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1095706": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O18",
+			"id": "NCBITaxon:1095706",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:404399": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O26",
+			"id": "NCBITaxon:404399",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:244319": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O26:H11",
+			"id": "NCBITaxon:244319",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:404394": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O26:NM",
+			"id": "NCBITaxon:404394",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:1078032": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Escherichia coli O45:H2",
+			"id": "NCBITaxon:1078032",
+			"member_of": [
+			    "NCBITaxon:562"
+			]
+		    },
+		    "NCBITaxon:590": {
+			"member_of": [
+			    "NCBITaxon:543"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella",
+			"id": "NCBITaxon:590",
+			"choices": {
+			    "NCBITaxon:54736": [],
+			    "NCBITaxon:28901": []
+			}
+		    },
+		    "NCBITaxon:54736": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella bongori",
+			"id": "NCBITaxon:54736",
+			"member_of": [
+			    "NCBITaxon:590"
+			]
+		    },
+		    "NCBITaxon:28901": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica",
+			"member_of": [
+			    "NCBITaxon:590"
+			],
+			"id": "NCBITaxon:28901",
+			"choices": {
+			    "NCBITaxon:59201": []
+			}
+		    },
+		    "NCBITaxon:59201": {
+			"member_of": [
+			    "NCBITaxon:28901"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica",
+			"id": "NCBITaxon:59201",
+			"choices": {
+			    "NCBITaxon:149539": [],
+			    "NCBITaxon:149385": [],
+			    "NCBITaxon:611": [],
+			    "NCBITaxon:595": [],
+			    "NCBITaxon:363569": [],
+			    "NCBITaxon:108619": [],
+			    "NCBITaxon:192953": [],
+			    "NCBITaxon:90371": [],
+			    "NCBITaxon:48409": []
+			}
+		    },
+		    "NCBITaxon:149539": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Enteritidis",
+			"id": "NCBITaxon:149539",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:149385": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Hadar",
+			"id": "NCBITaxon:149385",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:611": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Heidelberg",
+			"id": "NCBITaxon:611",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:595": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Infantis",
+			"id": "NCBITaxon:595",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:363569": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Javiana",
+			"id": "NCBITaxon:363569",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:108619": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Newport",
+			"id": "NCBITaxon:108619",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:192953": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Stanley",
+			"id": "NCBITaxon:192953",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:90371": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Typhimurium",
+			"id": "NCBITaxon:90371",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:48409": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Salmonella enterica subsp. enterica serovar Virchow",
+			"id": "NCBITaxon:48409",
+			"member_of": [
+			    "NCBITaxon:59201"
+			]
+		    },
+		    "NCBITaxon:1783272": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Terrabacteria group",
+			"member_of": [
+			    "NCBITaxon:2"
+			],
+			"id": "NCBITaxon:1783272",
+			"choices": {
+			    "NCBITaxon:1637": [],
+			    "NCBITaxon:1773": []
+			}
+		    },
+		    "NCBITaxon:1637": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Listeria",
+			"member_of": [
+			    "NCBITaxon:1783272"
+			],
+			"id": "NCBITaxon:1637",
+			"choices": {
+			    "NCBITaxon:1639": []
+			}
+		    },
+		    "NCBITaxon:1639": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Listeria monocytogenes",
+			"id": "NCBITaxon:1639",
+			"member_of": [
+			    "NCBITaxon:1637"
+			]
+		    },
+		    "NCBITaxon:1773": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Mycobacterium tuberculosis",
+			"id": "NCBITaxon:1773",
+			"member_of": [
+			    "NCBITaxon:1783272"
+			]
+		    },
+		    "NCBITaxon:2759": {
+			"hasAlternativeTerm": [
+			    "eucaryotes",
+			    "eukaryotes"
+			],
+			"member_of": [
+			    "GENEPIO:0001640",
+			    "OBI:0100026"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Eukaryota",
+			"id": "NCBITaxon:2759",
+			"choices": {
+			    "NCBITaxon:33213": [],
+			    "NCBITaxon:33090": []
+			}
+		    },
+		    "NCBITaxon:33213": {
+			"member_of": [
+			    "GENEPIO:0001567",
+			    "NCBITaxon:2759"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Bilateria",
+			"id": "NCBITaxon:33213",
+			"choices": {
+			    "NCBITaxon:6447": [],
+			    "NCBITaxon:7742": []
+			}
+		    },
+		    "NCBITaxon:6447": {
+			"hasAlternativeTerm": [
+			    "mollusks",
+			    "molluscs",
+			    "clam",
+			    "squid",
+			    "octopus"
+			],
+			"member_of": [
+			    "NCBITaxon:33213"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Mollusca",
+			"id": "NCBITaxon:6447"
+		    },
+		    "NCBITaxon:7742": {
+			"hasAlternativeTerm": [
+			    "Vertebrata",
+			    "vertebrates"
+			],
+			"member_of": [
+			    "NCBITaxon:33213"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Vertebrata <Metazoa>",
+			"id": "NCBITaxon:7742",
+			"choices": {
+			    "NCBITaxon:7776": []
+			}
+		    },
+		    "NCBITaxon:7776": {
+			"hasAlternativeTerm": [
+			    "jawed vertebrates",
+			    "Gnathostomata"
+			],
+			"member_of": [
+			    "NCBITaxon:7742"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Gnathostomata <vertebrate>",
+			"id": "NCBITaxon:7776",
+			"choices": {
+			    "NCBITaxon:32524": [],
+			    "NCBITaxon:7777": []
+			}
+		    },
+		    "NCBITaxon:32524": {
+			"hasAlternativeTerm": [
+			    "amniotes"
+			],
+			"member_of": [
+			    "NCBITaxon:7776"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Amniota",
+			"choices": {
+			    "NCBITaxon:8782": [],
+			    "NCBITaxon:1437010": []
+			},
+			"id": "NCBITaxon:32524"
+		    },
+		    "NCBITaxon:8782": {
+			"hasAlternativeTerm": [
+			    "birds"
+			],
+			"member_of": [
+			    "NCBITaxon:32524"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Aves",
+			"id": "NCBITaxon:8782",
+			"choices": {
+			    "NCBITaxon:1549675": []
+			}
+		    },
+		    "NCBITaxon:1549675": {
+			"hasAlternativeTerm": [
+			    "ducks",
+			    "geese",
+			    "chickens",
+			    "fowl",
+			    "quail",
+			    "currasows and allies"
+			],
+			"member_of": [
+			    "NCBITaxon:8782"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Galloanserae",
+			"choices": {
+			    "NCBITaxon:8839": [],
+			    "NCBITaxon:9005": []
+			},
+			"id": "NCBITaxon:1549675"
+		    },
+		    "NCBITaxon:8839": {
+			"hasAlternativeTerm": [
+			    "mallard ducks",
+			    "duck",
+			    "mallard duck",
+			    "mallard"
+			],
+			"member_of": [
+			    "NCBITaxon:1549675"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Anas platyrhynchos",
+			"id": "NCBITaxon:8839"
+		    },
+		    "NCBITaxon:9005": {
+			"hasAlternativeTerm": [
+			    "turkeys"
+			],
+			"member_of": [
+			    "NCBITaxon:1549675"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Phasianidae",
+			"id": "NCBITaxon:9005",
+			"choices": {
+			    "NCBITaxon:9091": [],
+			    "NCBITaxon:9031": [],
+			    "NCBITaxon:9103": []
+			}
+		    },
+		    "NCBITaxon:9091": {
+			"hasAlternativeTerm": [
+			    "common quail"
+			],
+			"member_of": [
+			    "NCBITaxon:9005"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Coturnix coturnix",
+			"id": "NCBITaxon:9091"
+		    },
+		    "NCBITaxon:9031": {
+			"hasAlternativeTerm": [
+			    "chickens",
+			    "chicken",
+			    "bantam"
+			],
+			"member_of": [
+			    "NCBITaxon:9005"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Gallus gallus",
+			"id": "NCBITaxon:9031"
+		    },
+		    "NCBITaxon:9103": {
+			"hasAlternativeTerm": [
+			    "common turkey",
+			    "wild turkey",
+			    "turkey"
+			],
+			"member_of": [
+			    "NCBITaxon:9005"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Meleagris gallopavo",
+			"id": "NCBITaxon:9103"
+		    },
+		    "NCBITaxon:1437010": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Boreoeutheria",
+			"member_of": [
+			    "NCBITaxon:32524"
+			],
+			"id": "NCBITaxon:1437010",
+			"choices": {
+			    "NCBITaxon:314146": [],
+			    "NCBITaxon:314145": []
+			}
+		    },
+		    "NCBITaxon:314146": {
+			"member_of": [
+			    "NCBITaxon:1437010"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Euarchontoglires",
+			"id": "NCBITaxon:314146",
+			"choices": {
+			    "NCBITaxon:314147": [],
+			    "NCBITaxon:9606": []
+			}
+		    },
+		    "NCBITaxon:314147": {
+			"hasAlternativeTerm": [
+			    "Rodents and rabbits"
+			],
+			"member_of": [
+			    "NCBITaxon:314146"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Glires",
+			"id": "NCBITaxon:314147",
+			"choices": {
+			    "NCBITaxon:10141": [],
+			    "NCBITaxon:9986": []
+			}
+		    },
+		    "NCBITaxon:10141": {
+			"hasAlternativeTerm": [
+			    "domestic guinea pig",
+			    "guinea pig"
+			],
+			"member_of": [
+			    "NCBITaxon:314147"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Cavia porcellus",
+			"id": "NCBITaxon:10141"
+		    },
+		    "NCBITaxon:9986": {
+			"hasAlternativeTerm": [
+			    "Japanese white rabbit",
+			    "European rabbit",
+			    "rabbit",
+			    "rabbits",
+			    "domestic rabbit"
+			],
+			"member_of": [
+			    "NCBITaxon:314147"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Oryctolagus cuniculus",
+			"id": "NCBITaxon:9986"
+		    },
+		    "NCBITaxon:9606": {
+			"hasAlternativeTerm": [
+			    "human",
+			    "man"
+			],
+			"member_of": [
+			    "GENEPIO:0001567",
+			    "NCBITaxon:314146"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Homo sapiens",
+			"id": "NCBITaxon:9606"
+		    },
+		    "NCBITaxon:314145": {
+			"member_of": [
+			    "NCBITaxon:1437010"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Laurasiatheria",
+			"id": "NCBITaxon:314145",
+			"choices": {
+			    "NCBITaxon:33554": [],
+			    "NCBITaxon:91561": [],
+			    "NCBITaxon:9796": []
+			}
+		    },
+		    "NCBITaxon:33554": {
+			"hasAlternativeTerm": [
+			    "carnivores"
+			],
+			"member_of": [
+			    "NCBITaxon:314145"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Carnivora",
+			"id": "NCBITaxon:33554",
+			"choices": {
+			    "NCBITaxon:9615": [],
+			    "NCBITaxon:9685": []
+			}
+		    },
+		    "NCBITaxon:9615": {
+			"hasAlternativeTerm": [
+			    "dogs",
+			    "dog"
+			],
+			"member_of": [
+			    "NCBITaxon:33554"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Canis lupus familiaris",
+			"id": "NCBITaxon:9615"
+		    },
+		    "NCBITaxon:9685": {
+			"hasAlternativeTerm": [
+			    "cats",
+			    "domestic cat",
+			    "cat"
+			],
+			"member_of": [
+			    "NCBITaxon:33554"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Felis catus",
+			"id": "NCBITaxon:9685"
+		    },
+		    "NCBITaxon:91561": {
+			"hasAlternativeTerm": [
+			    "whales",
+			    "hippos",
+			    "ruminants",
+			    "pigs",
+			    "camels etc."
+			],
+			"member_of": [
+			    "NCBITaxon:314145"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Cetartiodactyla",
+			"id": "NCBITaxon:91561",
+			"choices": {
+			    "NCBITaxon:9895": [],
+			    "NCBITaxon:9825": []
+			}
+		    },
+		    "NCBITaxon:9895": {
+			"member_of": [
+			    "NCBITaxon:91561"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Bovidae",
+			"id": "NCBITaxon:9895",
+			"choices": {
+			    "NCBITaxon:9913": [],
+			    "NCBITaxon:9963": []
+			}
+		    },
+		    "NCBITaxon:9913": {
+			"hasAlternativeTerm": [
+			    "bovine",
+			    "domestic cattle",
+			    "cattle",
+			    "cow",
+			    "domestic cow"
+			],
+			"member_of": [
+			    "NCBITaxon:9895"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Bos taurus",
+			"id": "NCBITaxon:9913"
+		    },
+		    "NCBITaxon:9963": {
+			"member_of": [
+			    "NCBITaxon:9895"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Caprinae",
+			"id": "NCBITaxon:9963",
+			"choices": {
+			    "NCBITaxon:9922": [],
+			    "NCBITaxon:9940": []
+			}
+		    },
+		    "NCBITaxon:9922": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Capra",
+			"member_of": [
+			    "NCBITaxon:9963"
+			],
+			"id": "NCBITaxon:9922",
+			"choices": {
+			    "NCBITaxon:9923": [],
+			    "NCBITaxon:9925": []
+			}
+		    },
+		    "NCBITaxon:9923": {
+			"hasAlternativeTerm": [
+			    "bezoar ibex",
+			    "wild goat"
+			],
+			"member_of": [
+			    "NCBITaxon:9922"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Capra aegagrus",
+			"id": "NCBITaxon:9923"
+		    },
+		    "NCBITaxon:9925": {
+			"hasAlternativeTerm": [
+			    "goat",
+			    "goats",
+			    "domestic goat"
+			],
+			"member_of": [
+			    "NCBITaxon:9922"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Capra hircus",
+			"id": "NCBITaxon:9925"
+		    },
+		    "NCBITaxon:9940": {
+			"hasAlternativeTerm": [
+			    "wild sheep",
+			    "lambs",
+			    "sheep",
+			    "domestic sheep"
+			],
+			"member_of": [
+			    "NCBITaxon:9963"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Ovis aries",
+			"id": "NCBITaxon:9940"
+		    },
+		    "NCBITaxon:9825": {
+			"hasAlternativeTerm": [
+			    "domestic pig"
+			],
+			"member_of": [
+			    "NCBITaxon:91561"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Sus scrofa domesticus",
+			"id": "NCBITaxon:9825"
+		    },
+		    "NCBITaxon:9796": {
+			"hasAlternativeTerm": [
+			    "equine",
+			    "domestic horse",
+			    "horse"
+			],
+			"member_of": [
+			    "NCBITaxon:314145"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Equus caballus",
+			"id": "NCBITaxon:9796"
+		    },
+		    "NCBITaxon:7777": {
+			"hasAlternativeTerm": [
+			    "fish",
+			    "cartilaginous fishes",
+			    "fishes"
+			],
+			"member_of": [
+			    "NCBITaxon:7776"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Chondrichthyes",
+			"id": "NCBITaxon:7777"
+		    },
+		    "NCBITaxon:33090": {
+			"hasAlternativeTerm": [
+			    "green plants"
+			],
+			"member_of": [
+			    "GENEPIO:0001567",
+			    "NCBITaxon:2759"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Viridiplantae",
+			"id": "NCBITaxon:33090"
+		    },
+		    "NCBITaxon:10239": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Viruses",
+			"id": "NCBITaxon:10239",
+			"member_of": [
+			    "GENEPIO:0001640",
+			    "OBI:0100026"
+			]
+		    },
+		    "GENEPIO:0001187": {
+			"definition": "This is a collection of drugs used to test antimicrobial resistance.",
+			"otherParent": [
+			    "GENEPIO:0001100",
+			    "GENEPIO:0002109"
+			],
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antimicrobial resistance test drug",
+			"id": "GENEPIO:0001187",
+			"choices": {
+			    "CHEBI:36420": [],
+			    "CHEBI:86478": [],
+			    "CHEBI:2790": [],
+			    "CHEBI:68452": [],
+			    "CHEBI:27933": [],
+			    "CHEBI:60584": [],
+			    "CHEBI:46633": [],
+			    "CHEBI:124991": [],
+			    "CHEBI:209807": [],
+			    "CHEBI:29007": [],
+			    "CHEBI:23066": [],
+			    "CHEBI:3716": [],
+			    "CHEBI:3907": [],
+			    "CHEBI:4885": [],
+			    "CHEBI:87211": [],
+			    "CHEBI:5195": [],
+			    "CHEBI:24531": [],
+			    "CHEBI:63607": [],
+			    "CHEBI:281056": [],
+			    "CHEBI:599928": [],
+			    "CHEBI:63611": [],
+			    "CHEBI:7025": [],
+			    "CHEBI:17154": [],
+			    "CHEBI:87230": [],
+			    "CHEBI:71415": [],
+			    "CHEBI:28368": [],
+			    "CHEBI:7731": [],
+			    "CHEBI:35991": [],
+			    "CHEBI:17334": [],
+			    "CHEBI:26144": [],
+			    "CHEBI:9997": [],
+			    "CHEBI:17939": [],
+			    "CHEBI:39447": [],
+			    "CHEBI:46770": [],
+			    "CHEBI:26513": [],
+			    "CHEBI:86324": [],
+			    "CHEBI:29673": [],
+			    "CHEBI:75246": [],
+			    "CHEBI:9215": [],
+			    "CHEBI:9321": [],
+			    "CHEBI:63845": [],
+			    "CHEBI:87228": [],
+			    "CHEBI:9421": [],
+			    "CHEBI:9587": [],
+			    "GENEPIO:0002072": []
+			}
+		    },
+		    "CHEBI:36420": {
+			"definition": "A polycyclic heteroarene that is anthracene in which one of the central CH groups is replaced by a nitrogen atom.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:36420",
+			"uiLabel": "acridine"
+		    },
+		    "CHEBI:86478": {
+			"definition": "Heteroorganic entities that are microbial metabolites (or compounds derived from them) which have significant antifungal properties.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antibiotic antifungal agent",
+			"id": "CHEBI:86478",
+			"choices": {
+			    "CHEBI:87113": [],
+			    "CHEBI:87114": []
+			}
+		    },
+		    "CHEBI:87113": {
+			"definition": "Any antibiotic antifungal agent used to treat fungal infections in humans or animals.",
+			"member_of": [
+			    "CHEBI:86478"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antibiotic antifungal drug",
+			"id": "CHEBI:87113",
+			"choices": {
+			    "CHEBI:17076": []
+			}
+		    },
+		    "CHEBI:17076": {
+			"definition": "A amino cyclitol glycoside that consists of streptidine having a disaccharyl moiety attached at the 4-position. The parent of the streptomycin class",
+			"member_of": [
+			    "CHEBI:87113",
+			    "CHEBI:87114",
+			    "GENEPIO:0001097",
+			    "GENEPIO:0002071"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Sm",
+			    "STR",
+			    "Stm"
+			],
+			"id": "CHEBI:17076",
+			"uiLabel": "streptomycin"
+		    },
+		    "CHEBI:87114": {
+			"definition": "Any antibiotic antifungal agent that has been used as a fungicide.",
+			"member_of": [
+			    "CHEBI:86478"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antibiotic fungicide",
+			"id": "CHEBI:87114",
+			"choices": {
+			    "CHEBI:17076": []
+			}
+		    },
+		    "CHEBI:2790": {
+			"definition": "An aminoglycoside that is 2-deoxystreptamine that is substituted on the oxygen at position 4 by an (8R)-2-amino-8-O-(4-amino-4-deoxy-alpha-D-glucopyranosyl)-2,3,7-trideoxy-7-(methylamino)-D-glycero-alpha-D-allo-octodialdo-1,5:8,4-dipyranos-1-yl) group.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:2790",
+			"uiLabel": "apramycin"
+		    },
+		    "CHEBI:68452": {
+			"definition": "Any monocyclic heteroarene consisting of a five-membered ring containing nitrogen. Azoles can also contain one or more other non-carbon atoms, such as nitrogen, sulfur or oxygen.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "azole",
+			"id": "CHEBI:68452",
+			"choices": {
+			    "CHEBI:23677": [],
+			    "CHEBI:35790": [],
+			    "CHEBI:26455": [],
+			    "CHEBI:35689": [],
+			    "CHEBI:48901": [],
+			    "CHEBI:35727": []
+			}
+		    },
+		    "CHEBI:23677": {
+			"definition": "An azole that is either one of a pair of heterocyclic organic compounds comprising three carbon atoms and two nitrogen atoms arranged in a ring.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "diazole",
+			"id": "CHEBI:23677",
+			"choices": {
+			    "CHEBI:24780": []
+			}
+		    },
+		    "CHEBI:24780": {
+			"definition": "A five-membered organic heterocycle containing two nitrogen atoms at positions 1 and 3, or any of its derivatives; compounds containing an imidazole skeleton.",
+			"member_of": [
+			    "CHEBI:23677"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "imidazoles",
+			"id": "CHEBI:24780",
+			"choices": {
+			    "CHEBI:6909": [],
+			    "CHEBI:63627": []
+			}
+		    },
+		    "CHEBI:6909": {
+			"definition": "A member of the class of imidazoles substituted at C-1, -2 and -5 with 2-hydroxyethyl, nitro and methyl groups respectively. It has activity against anaerobic bacteria and protozoa, and has a radiosensitising effect on hypoxic tumour cells. It may be given by mouth in tablets, or as the benzoate in an oral suspension. The hydrochloride salt can be used in intravenous infusions. Metronidazole is a prodrug and is selective for anaerobic bacteria due to their ability to intracellularly reduce the nitro group of metronidazole to give nitroso-containing intermediates. These can covalently bind to DNA, disrupting its helical structure, inducing DNA strand breaks and inhibiting bacterial nucleic acid synthesis, ultimately resulting in bacterial cell death.",
+			"member_of": [
+			    "CHEBI:15734",
+			    "CHEBI:24780"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:6909",
+			"uiLabel": "metronidazole"
+		    },
+		    "CHEBI:63627": {
+			"definition": "1H-imidazole substituted at C-1 by a (2-ethylsulfonyl)ethyl group, at C-2 by a methyl group and at C-5 by a nitro group.  It is used as an antiprotozoal, antibacterial agent.",
+			"member_of": [
+			    "CHEBI:24780"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:63627",
+			"uiLabel": "tinidazole"
+		    },
+		    "CHEBI:35790": {
+			"definition": "An azole based on a five-membered heterocyclic aromatic skeleton containing one N and one O atom.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "oxazole",
+			"id": "CHEBI:35790",
+			"choices": {
+			    "CHEBI:46812": [],
+			    "CHEBI:55373": []
+			}
+		    },
+		    "CHEBI:46812": {
+			"member_of": [
+			    "CHEBI:35790"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "1,3-oxazoles",
+			"id": "CHEBI:46812",
+			"choices": {
+			    "CHEBI:9997": []
+			}
+		    },
+		    "CHEBI:9997": {
+			"definition": "A macrolide that is (together with pristinamycin IA) a component of pristinamycin, an oral streptogramin antibiotic produced by Streptomyces pristinaespiralis. Pristinamycin exhibits bactericidal activity against Gram positive organisms including methicillin-resistant Staphylococcus aureus.",
+			"member_of": [
+			    "CHEBI:35681",
+			    "CHEBI:46812",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9997",
+			"uiLabel": "pristinamycin IIA"
+		    },
+		    "CHEBI:55373": {
+			"definition": "Oxazoles in which the N and O atoms are adjacent.",
+			"member_of": [
+			    "CHEBI:35790"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "isoxazoles",
+			"id": "CHEBI:55373",
+			"choices": {
+			    "CHEBI:9332": [],
+			    "CHEBI:102484": []
+			}
+		    },
+		    "CHEBI:9332": {
+			"definition": "An isoxazole (1,2-oxazole) compound having a methyl substituent at the 5-position and a 4-aminobenzenesulfonamido group at the 3-position.",
+			"member_of": [
+			    "CHEBI:55373",
+			    "CHEBI:87228"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9332",
+			"uiLabel": "sulfamethoxazole"
+		    },
+		    "CHEBI:102484": {
+			"definition": "A sulfonamide antibacterial with an oxazole substituent. It has antibiotic activity against a wide range of gram-negative and gram-positive organisms.",
+			"member_of": [
+			    "CHEBI:55373",
+			    "CHEBI:87228"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:102484",
+			"uiLabel": "sulfisoxazole"
+		    },
+		    "CHEBI:26455": {
+			"definition": "An azole that includes only one N atom and no other heteroatom as a part of the aromatic skeleton.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "pyrroles",
+			"id": "CHEBI:26455",
+			"choices": {
+			    "CHEBI:3907": []
+			}
+		    },
+		    "CHEBI:3907": {
+			"definition": "A hydroxycoumarin antibiotic that is obtained from Streptomyces rishiriensis and exhibits potent antibacterial and anticancer activity.",
+			"member_of": [
+			    "CHEBI:26455",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3907",
+			"uiLabel": "coumermycin A1"
+		    },
+		    "CHEBI:35689": {
+			"definition": "An azole in which the five-membered heterocyclic aromatic skeleton contains four N atoms and one C atom.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "tetrazoles",
+			"id": "CHEBI:35689",
+			"choices": {
+			    "CHEBI:474053": []
+			}
+		    },
+		    "CHEBI:474053": {
+			"definition": "A cephalosporin compound having [(5-methyl-1,3,4-thiadiazol-2-yl)sulfanyl]methyl and (1H-tetrazol-1-ylacetyl)amino side-groups.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:35689"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:474053",
+			"uiLabel": "cefazolin"
+		    },
+		    "CHEBI:48901": {
+			"definition": "An azole in which the five-membered heterocyclic aromatic skeleton contains a N atom and one S atom.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "thiazoles",
+			"id": "CHEBI:48901",
+			"choices": {
+			    "CHEBI:38418": []
+			}
+		    },
+		    "CHEBI:38418": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "1,3-thiazole",
+			"member_of": [
+			    "CHEBI:48901"
+			],
+			"id": "CHEBI:38418",
+			"choices": {
+			    "CHEBI:204928": [],
+			    "CHEBI:70718": [],
+			    "CHEBI:29007": []
+			}
+		    },
+		    "CHEBI:204928": {
+			"definition": "A cephalosporin compound having acetoxymethyl and [2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetyl]amino side groups.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:38418"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:204928",
+			"uiLabel": "cefotaxime"
+		    },
+		    "CHEBI:70718": {
+			"definition": "A cephalosporin that is the N-phospho prodrug of ceftaroline. A broad-spectrum antibiotic, it is active against methicillin-resistant Staphylococcus aureus (MRSA). It is used for the treatment of adults with acute bacterial skin and skin structure infections.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:38418"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:70718",
+			"uiLabel": "ceftaroline fosamil"
+		    },
+		    "CHEBI:29007": {
+			"definition": "A cephalosporin compound having 2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetylamino and [(2-methyl-5,6-dioxo-1,2,5,6-tetrahydro-1,2,4-triazin-3-yl)sulfanyl]methyl side-groups.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:38418",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:29007",
+			"uiLabel": "ceftriaxone"
+		    },
+		    "CHEBI:35727": {
+			"definition": "An azole in which the five-membered heterocyclic aromatic skeleton contains three N atoms and two C atoms.",
+			"member_of": [
+			    "CHEBI:68452"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "triazoles",
+			"id": "CHEBI:35727",
+			"choices": {
+			    "CHEBI:9421": []
+			}
+		    },
+		    "CHEBI:9421": {
+			"definition": "A member of the class of penicillanic acids that is sulbactam in which one of the exocyclic methyl hydrogens is replaced by a 1,2,3-triazol-1-yl group; used (in the form of its sodium salt) in combination with ceftolozane sulfate for treatment of complicated intra-abdominal infections and complicated urinary tract infections.",
+			"member_of": [
+			    "CHEBI:25865",
+			    "CHEBI:35727",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9421",
+			"uiLabel": "tazobactam"
+		    },
+		    "CHEBI:27933": {
+			"definition": "An organonitrogen heterocyclic antibiotic that contains a beta-lactam ring.",
+			"member_of": [
+			    "CHEBI:25558",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "beta-lactam antibiotic",
+			"id": "CHEBI:27933",
+			"choices": {
+			    "CHEBI:55504": [],
+			    "CHEBI:46633": [],
+			    "CHEBI:38311": [],
+			    "CHEBI:50695": [],
+			    "CHEBI:55506": [],
+			    "CHEBI:35992": []
+			}
+		    },
+		    "CHEBI:55504": {
+			"definition": "Any member of a group of synthetic antibiotics, similar to cephems but with carbon substituted for the sulfur; all possessing an acylated amine functionality at C-6 and (S,R) stereochemistry at C-6 and C-7.",
+			"member_of": [
+			    "CHEBI:27933"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "carbacephem",
+			"id": "CHEBI:55504",
+			"choices": {
+			    "CHEBI:281056": []
+			}
+		    },
+		    "CHEBI:281056": {
+			"definition": "The conjugate base of loracarbef.",
+			"member_of": [
+			    "CHEBI:55504",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:281056",
+			"uiLabel": "loracarbef anion"
+		    },
+		    "CHEBI:46633": {
+			"definition": "The class of beta-lactam antibiotics that whose members have a carbapenem skeleton which is variously substituted at positions 3, 4, and 6.",
+			"member_of": [
+			    "CHEBI:27933",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "carbapenems",
+			"id": "CHEBI:46633",
+			"choices": {
+			    "CHEBI:46634": [],
+			    "CHEBI:471744": []
+			}
+		    },
+		    "CHEBI:46634": {
+			"member_of": [
+			    "CHEBI:46633"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "carbapenemcarboxylic acid",
+			"id": "CHEBI:46634",
+			"choices": {
+			    "CHEBI:404903": [],
+			    "CHEBI:43968": []
+			}
+		    },
+		    "CHEBI:404903": {
+			"definition": "Meropenem in which the one of the two methyl groups attached to the amide nitrogen is replaced by hydrogen while the other is replaced by a 3-carboxyphenyl group. The sodium salt is used for the treatment of moderate to severe susceptible infections including intra-abdominal  and acute gynaecological infections, pneumonia, and infections of the skin and of the urinary tract.",
+			"member_of": [
+			    "CHEBI:46634",
+			    "CHEBI:46770"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:404903",
+			"uiLabel": "ertapenem"
+		    },
+		    "CHEBI:43968": {
+			"definition": "A carbapenemcarboxylic acid in which the azetidine and pyrroline rings carry 1-hydroxymethyl and in which the azetidine and pyrroline rings carry 1-hydroxymethyl and 5-(dimethylcarbamoyl)pyrrolidin-3-ylthio substituents respectively.",
+			"member_of": [
+			    "CHEBI:46634",
+			    "CHEBI:46770"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:43968",
+			"uiLabel": "meropenem"
+		    },
+		    "CHEBI:471744": {
+			"definition": "A broad-spectrum, intravenous beta-lactam antibiotic of the carbapenem subgroup.",
+			"member_of": [
+			    "CHEBI:46633",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:471744",
+			"uiLabel": "imipenem"
+		    },
+		    "CHEBI:38311": {
+			"member_of": [
+			    "CHEBI:27933"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "cephem",
+			"id": "CHEBI:38311",
+			"choices": {
+			    "CHEBI:23066": [],
+			    "CHEBI:55429": []
+			}
+		    },
+		    "CHEBI:23066": {
+			"definition": "A class of beta-lactam antibiotics differing from the penicillins in having a 6-membered, rather than a 5-membered, side ring.  Although cephalosporins are among the most commonly used antibiotics in the treatment of routine infections, and their use is increasing over time, they can cause a range of hypersensitivity reactions, from mild, delayed-onset cutaneous reactions to life-threatening anaphylaxis in patients with immunoglobulin E (IgE)-mediated allergy.",
+			"member_of": [
+			    "CHEBI:38311",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "cephalosporin",
+			"id": "CHEBI:23066",
+			"choices": {
+			    "CHEBI:3478": [],
+			    "CHEBI:3479": [],
+			    "CHEBI:124991": [],
+			    "CHEBI:3480": [],
+			    "CHEBI:474053": [],
+			    "CHEBI:3485": [],
+			    "CHEBI:59343": [],
+			    "CHEBI:478164": [],
+			    "CHEBI:472657": [],
+			    "CHEBI:3489": [],
+			    "CHEBI:3491": [],
+			    "CHEBI:3493": [],
+			    "CHEBI:204928": [],
+			    "CHEBI:355510": [],
+			    "CHEBI:209807": [],
+			    "CHEBI:3504": [],
+			    "CHEBI:3506": [],
+			    "CHEBI:70718": [],
+			    "CHEBI:3508": [],
+			    "CHEBI:3510": [],
+			    "CHEBI:553473": [],
+			    "CHEBI:29007": [],
+			    "CHEBI:3534": [],
+			    "CHEBI:554446": [],
+			    "CHEBI:3547": [],
+			    "CHEBI:599928": []
+			}
+		    },
+		    "CHEBI:3478": {
+			"definition": "A cephalosporin bearing chloro and (R)-2-amino-2-phenylacetamido groups at positions 3 and 7, respectively, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3478",
+			"uiLabel": "cefaclor"
+		    },
+		    "CHEBI:3479": {
+			"definition": "A cephalosporin bearing methyl and  (2R)-2-amino-2-(4-hydroxyphenyl)acetamido groups at positions 3 and 7, respectively, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3479",
+			"uiLabel": "cefadroxil"
+		    },
+		    "CHEBI:124991": {
+			"definition": "A semisynthetic, first-generation cephalosporin antibiotic with acetoxymethyl and (2-thienylacetyl)nitrilo moieties at positions 3 and 7, respectively, of the core structure. Administered parenterally during surgery and to treat a wide spectrum of blood infections.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:124991",
+			"uiLabel": "cefalotin"
+		    },
+		    "CHEBI:3480": {
+			"definition": "A cephalosporin compound having (R)-mandelamido and N-methylthiotetrazole side-groups.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3480",
+			"uiLabel": "cefamandole"
+		    },
+		    "CHEBI:3485": {
+			"definition": "A cephalosporin compound having 7beta-2-(2-amino-thiazol-4-yl)-2-[(Z)-hydroxyimino]-acetylamino- and 3-vinyl side groups.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3485",
+			"uiLabel": "cefdinir"
+		    },
+		    "CHEBI:59343": {
+			"definition": "A broad spectrum, third-generation cephalosporin antibiotic with (Z)-2-(4-methyl-1,3-thiazol-5-yl)ethenyl and (2Z)-2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetamido groups at positions 3 and 7, respectively, of the cephem skeleton. Generally administered as its orally absorbed pivaloyloxymethyl ester prodrug, it is used for the treatment of mild to moderate infections caused by susceptible strains of microorganisms in acute bacterial exacerbation of chronic bronchitis, community-acquired pneumonia, pharyngitis/tonsillitis, and uncomplicated skin and skin-structure infections.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:59343",
+			"uiLabel": "cefditoren"
+		    },
+		    "CHEBI:478164": {
+			"definition": "A cephalosporin bearing (1-methylpyrrolidinium-1-yl)methyl and (2Z)-2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetamido groups at positions 3 and 7, respectively, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:478164",
+			"uiLabel": "cefepime"
+		    },
+		    "CHEBI:472657": {
+			"definition": "A third-generation cephalosporin antibiotic bearing vinyl and (2Z)-2-(2-amino-1,3-thiazol-4-yl)-2-[(carboxymethoxy)imino]acetamido groups at positions 3 and 7, respectively, of the cephem skeleton. It is used in the treatment of gonorrhoea, tonsilitis, pharyngitis, bronchitis, and urinary tract infections.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:472657",
+			"uiLabel": "cefixime"
+		    },
+		    "CHEBI:3489": {
+			"definition": "A cephalosporin antibiotic containg an N(1)-methyltetrazol-5-ylthiomethyl side-chain at C-3 of the parent cephem bicyclic structure.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3489",
+			"uiLabel": "cefmetazole"
+		    },
+		    "CHEBI:3491": {
+			"definition": "A cephalosporin bearing {[1-(sulfomethyl)-1H-tetrazol-5-yl]sulfanyl}methyl and (R)-2-hydroxy-2-phenylacetamido groups at positions 3 and 7, respectively, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3491",
+			"uiLabel": "cefonicid"
+		    },
+		    "CHEBI:3493": {
+			"definition": "A semi-synthetic parenteral cephalosporin with a tetrazolyl moiety that confers beta-lactamase resistance.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3493",
+			"uiLabel": "cefoperazone"
+		    },
+		    "CHEBI:355510": {
+			"definition": "A cephalosporin with ({1-[2-(dimethylamino)ethyl]-1H-tetrazol-5-yl}sulfanyl)methyl and (2-amino-1,3-thiazol-4-yl)acetamido substituents at positions 3 and 7, respectively, of the cephem skeleton. A third generation beta-lactam cephalosporin antibiotic, it is active against a broad spectrum of both Gram positive and Gram negative bacteria.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:355510",
+			"uiLabel": "cefotiam"
+		    },
+		    "CHEBI:209807": {
+			"definition": "A semisynthetic cephamycin antibiotic which, in addition to the methoxy group at the 7alpha position, has 2-thienylacetamido and carbamoyloxymethyl side-groups. It is resistant to beta-lactamase.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:55429",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:209807",
+			"uiLabel": "cefoxitin"
+		    },
+		    "CHEBI:3504": {
+			"definition": "A third-generation cephalosporin antibiotic with methoxymethyl and (2Z)-2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetamino substituents at positions 3 and 7, respectively, of the cephem skeleton. Given by mouth as its proxetil ester prodrug, it is used to treat acute otitis media, pharyngitis, and sinusitis.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3504",
+			"uiLabel": "cefpodoxime"
+		    },
+		    "CHEBI:3506": {
+			"definition": "A semisynthetic, second-generation cephalosporin, with prop-1-enyl and (R)-2-amino-2-(4-hydroxyphenyl)acetamido groups at positions 3 and 7, respectively, of the cephem skeleton. It is used to treat bronchitis as well as ear, skin and other bacterial infections.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3506",
+			"uiLabel": "cefprozil"
+		    },
+		    "CHEBI:3508": {
+			"definition": "A cephalosporin bearing pyridinium-1-ylmethyl and {[(2Z)-2-(2-amino-1,3-thiazol-4-yl)-2-{[(2-carboxypropan-2-yl)oxy]imino}acetamido groups at positions 3 and 7, respectively, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3508",
+			"uiLabel": "ceftazidime"
+		    },
+		    "CHEBI:3510": {
+			"definition": "A third-generation cephalosporin antibiotic with a [(2Z)-2-(2-amino-1,3-thiazol-4-yl)-4-carboxybut-2-enoyl]amino substituent at the 7 position of the cephem skeleton. An orally-administered agent, ceftibuten is used as the dihydrate to treat urinary-tract and respiratory-tract infections.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3510",
+			"uiLabel": "ceftibuten"
+		    },
+		    "CHEBI:553473": {
+			"definition": "A parenteral third-generation cephalosporin, bearing a 2-(2-amino-1,3-thiazol-4-yl)-2-(methoxyimino)acetyl]amino group at the 7beta-position.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:553473",
+			"uiLabel": "ceftizoxime"
+		    },
+		    "CHEBI:3534": {
+			"definition": "A semisynthetic first-generation cephalosporin antibiotic having methyl and beta-(2R)-2-amino-2-phenylacetamido groups at the 3- and 7- of the cephem skeleton, respectively. It is effective against both Gram-negative and Gram-positive organisms, and is used for treatment of infections of the skin, respiratory tract and urinary tract.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3534",
+			"uiLabel": "cephalexin"
+		    },
+		    "CHEBI:554446": {
+			"definition": "A cephalosporin with  acetoxymethyl and 2(pyridin-4-ylsulfanyl)acetamido substituents at positions 3 and 7, respectively, of the cephem skeleton. It is used (as its sodium salt) as an antibiotic, being effective against gram-negative and gram-positive organisms.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:554446",
+			"uiLabel": "cephapirin"
+		    },
+		    "CHEBI:3547": {
+			"definition": "A cephalosporin with a methyl substituent at position 3, and a (2R)-2-amino-2-cyclohexa-1,4-dien-1-ylacetamido substituent at position 7, of the cephem skeleton.",
+			"member_of": [
+			    "CHEBI:23066"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3547",
+			"uiLabel": "cephradine"
+		    },
+		    "CHEBI:599928": {
+			"definition": "A broad-spectrum oxacephem antibiotic in which the oxazine ring is substituted with a tetrazolylthiomethyl group and the azetidinone ring carries methoxy and 2-carboxy-2-(4-hydroxyphenyl)acetamido substituents.",
+			"member_of": [
+			    "CHEBI:23066",
+			    "CHEBI:55506",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:599928",
+			"uiLabel": "moxalactam"
+		    },
+		    "CHEBI:55429": {
+			"definition": "Any member of the cephamycin sub-group of cephem antibiotics, differing from cephalosporins in possessing a methoxy group at the 7alpha-position of the cephem nucleus, and in being resistant to beta-lactamase.",
+			"member_of": [
+			    "CHEBI:38311"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "cephamycin",
+			"id": "CHEBI:55429",
+			"choices": {
+			    "CHEBI:209807": []
+			}
+		    },
+		    "CHEBI:50695": {
+			"definition": "Monocyclic, bacterially produced or semisynthetic beta-lactam antibiotic. It lacks the double ring construction of the traditional beta-lactam antibiotics and can be easily synthesized.",
+			"member_of": [
+			    "CHEBI:27933"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "monobactam",
+			"id": "CHEBI:50695",
+			"choices": {
+			    "CHEBI:161680": []
+			}
+		    },
+		    "CHEBI:161680": {
+			"definition": "A synthetic monocyclic beta-lactam antibiotic (monobactam).",
+			"member_of": [
+			    "CHEBI:50695"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:161680",
+			"uiLabel": "aztreonam"
+		    },
+		    "CHEBI:55506": {
+			"definition": "Any member of the oxacephem sub-group of cephem antibiotics, in which the thiaazabicyclo moiety of the cephalosporins is replaced by an oxaazabicyclo moiety, and  where R3 is -H or -OCH3.",
+			"member_of": [
+			    "CHEBI:27933"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "oxacephem",
+			"id": "CHEBI:55506",
+			"choices": {
+			    "CHEBI:599928": []
+			}
+		    },
+		    "CHEBI:35992": {
+			"definition": "Natural and synthetic antibiotics containing the 4-thia-1-azabicyclo[3.2.0]heptan-7-one structure, generally assumed to have the 5R configuration unless otherwise specified.",
+			"member_of": [
+			    "CHEBI:27933"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "penams",
+			"id": "CHEBI:35992",
+			"choices": {
+			    "CHEBI:35991": [],
+			    "CHEBI:25865": []
+			}
+		    },
+		    "CHEBI:35991": {
+			"definition": "Compound comprising a beta-lactam ring fused to a saturated 5-membered ring containing one sulfur atom.",
+			"member_of": [
+			    "CHEBI:35992",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:35991",
+			"uiLabel": "penam"
+		    },
+		    "CHEBI:25865": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "penicillanic acids",
+			"member_of": [
+			    "CHEBI:35992"
+			],
+			"id": "CHEBI:25865",
+			"choices": {
+			    "CHEBI:17334": [],
+			    "CHEBI:9321": [],
+			    "CHEBI:9421": []
+			}
+		    },
+		    "CHEBI:17334": {
+			"definition": "Any member of the group of substituted penams containing two methyl substituents at position 2, a carboxylate substituent at position 3 and a carboxamido group at position 6.",
+			"member_of": [
+			    "CHEBI:25865",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "penicillin",
+			"id": "CHEBI:17334",
+			"choices": {
+			    "CHEBI:28971": [],
+			    "CHEBI:2956": [],
+			    "CHEBI:3393": [],
+			    "CHEBI:49566": [],
+			    "CHEBI:4511": [],
+			    "CHEBI:5098": [],
+			    "CHEBI:18165": [],
+			    "CHEBI:6827": [],
+			    "CHEBI:6919": [],
+			    "CHEBI:7447": [],
+			    "CHEBI:18203": [],
+			    "CHEBI:88187": [],
+			    "CHEBI:52429": [],
+			    "CHEBI:9587": []
+			}
+		    },
+		    "CHEBI:28971": {
+			"definition": "A penicillin in which the substituent at position 6 of the penam ring is a 2-amino-2-phenylacetamido group.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:28971",
+			"uiLabel": "ampicillin"
+		    },
+		    "CHEBI:2956": {
+			"definition": "A semisynthetic penicillin antibiotic used in treating infections caused by Pseudomonas aeruginosa, Escherichia coli, and Haemophilus influenzae.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:2956",
+			"uiLabel": "azlocillin"
+		    },
+		    "CHEBI:3393": {
+			"definition": "A penicillin antibiotic having a 6beta-2-carboxy-2-phenylacetamido side-chain.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3393",
+			"uiLabel": "carbenicillin"
+		    },
+		    "CHEBI:49566": {
+			"definition": "A semisynthetic penicillin antibiotic carrying a 3-(2-chlorophenyl)-5-methylisoxazole-4-carboxamido group at position 6.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:49566",
+			"uiLabel": "cloxacillin"
+		    },
+		    "CHEBI:4511": {
+			"definition": "A penicillin that is 6-aminopenicillanic acid in which one of the amino hydrogens is replaced by a 3-(2,6-dichlorophenyl)-5-methyl-1,2-oxazol-4-yl]formyl group.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:4511",
+			"uiLabel": "dicloxacillin"
+		    },
+		    "CHEBI:5098": {
+			"definition": "A penicillin compound having a 6beta-[3-(2-chloro-6-fluorophenyl)-5-methyl-1,2-oxazole-4-carboxamido] side-chain.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:5098",
+			"uiLabel": "flucloxacillin"
+		    },
+		    "CHEBI:18165": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "isopenicillin N",
+			"id": "CHEBI:18165",
+			"member_of": [
+			    "CHEBI:17334"
+			]
+		    },
+		    "CHEBI:6827": {
+			"definition": "A penicillin that is 6-aminopenicillanic acid in which one of the amino hydrogens is replaced by a 2,6-dimethoxybenzoyl group.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:6827",
+			"uiLabel": "methicillin"
+		    },
+		    "CHEBI:6919": {
+			"definition": "A penicillin in which the substituent at position 6 of the penam ring is a (2R)-2-[3-(methanesulfonyl)-2-oxoimidazolidine-1-carboxamido]-2-phenylacetamido group.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:6919",
+			"uiLabel": "mezlocillin"
+		    },
+		    "CHEBI:7447": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "nafcillin",
+			"id": "CHEBI:7447",
+			"member_of": [
+			    "CHEBI:17334"
+			]
+		    },
+		    "CHEBI:18203": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "penicillin N",
+			"id": "CHEBI:18203",
+			"member_of": [
+			    "CHEBI:17334"
+			]
+		    },
+		    "CHEBI:88187": {
+			"definition": "Any penicillin which causes the onset of an allergic reaction.",
+			"member_of": [
+			    "CHEBI:17334"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "penicillin allergen",
+			"id": "CHEBI:88187",
+			"choices": {
+			    "CHEBI:2676": [],
+			    "CHEBI:18208": [],
+			    "CHEBI:8232": []
+			}
+		    },
+		    "CHEBI:2676": {
+			"definition": "A penicillin in which the substituent at position 6 of the penam ring is a 2-amino-2-(4-hydroxyphenyl)acetamido group.",
+			"member_of": [
+			    "CHEBI:88187",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Amx"
+			],
+			"id": "CHEBI:2676",
+			"uiLabel": "amoxicillin"
+		    },
+		    "CHEBI:18208": {
+			"definition": "A penicillin in which the substituent at position 6 of the penam ring is a phenylacetamido group.",
+			"member_of": [
+			    "CHEBI:88187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:18208",
+			"uiLabel": "benzylpenicillin"
+		    },
+		    "CHEBI:8232": {
+			"definition": "A penicillin in which the substituent at position 6 of the penam ring is a 2-[(4-ethyl-2,3-dioxopiperazin-1-yl)carboxamido]-2-phenylacetamido group.",
+			"member_of": [
+			    "CHEBI:88187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:8232",
+			"uiLabel": "piperacillin"
+		    },
+		    "CHEBI:52429": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "propicillin",
+			"id": "CHEBI:52429",
+			"member_of": [
+			    "CHEBI:17334"
+			]
+		    },
+		    "CHEBI:9587": {
+			"definition": "A penicillin compound having a 6beta-[(2R)-2-carboxy-2-thiophen-3-ylacetyl]amino side-group.",
+			"member_of": [
+			    "CHEBI:17334",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9587",
+			"uiLabel": "ticarcillin"
+		    },
+		    "CHEBI:9321": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "sulbactam",
+			"id": "CHEBI:9321",
+			"member_of": [
+			    "CHEBI:25865",
+			    "GENEPIO:0001187"
+			]
+		    },
+		    "CHEBI:60584": {
+			"definition": "A commercially important azabicyclic antibiotic obtained from Streptomyces sapporonensis. It inhibits the Rho protein of E. coli.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:60584",
+			"uiLabel": "bicozamycin"
+		    },
+		    "CHEBI:3716": {
+			"definition": "A member of the class of  cinnolines  that is 6,7-methylenedioxycinnolin-4(1H)-one bearing an ethyl group at position 1 and a carboxylic acid group at position 3. An analogue of oxolinic acid, it has similar antibacterial actions. It was formerly used for the treatment of urinary tract infections.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3716",
+			"uiLabel": "cinoxacin"
+		    },
+		    "CHEBI:4885": {
+			"definition": "A thiocarboxamide that is pyridine-4-carbothioamide substituted by an ethyl group at position 2. A prodrug that undergoes metabolic activation by conversion to the corresponding S-oxide.",
+			"member_of": [
+			    "GENEPIO:0001097",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Eto",
+			    "ETH"
+			],
+			"id": "CHEBI:4885",
+			"uiLabel": "ethionamide"
+		    },
+		    "CHEBI:87211": {
+			"definition": "An organonitrogen heterocyclic antibiotic containing a quinolone (or quinolone-like) moiety and which have a fluorine atom attached to the central ring system.",
+			"member_of": [
+			    "CHEBI:25558",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "fluoroquinolone antibiotic",
+			"id": "CHEBI:87211",
+			"choices": {
+			    "CHEBI:5543": [],
+			    "CHEBI:100241": [],
+			    "CHEBI:157175": [],
+			    "CHEBI:31810": [],
+			    "CHEBI:116278": [],
+			    "CHEBI:63611": [],
+			    "CHEBI:100246": [],
+			    "CHEBI:7731": [],
+			    "CHEBI:50199": [],
+			    "CHEBI:9212": []
+			}
+		    },
+		    "CHEBI:5543": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Grepafloxacin",
+			"id": "CHEBI:5543",
+			"member_of": [
+			    "CHEBI:26513",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			]
+		    },
+		    "CHEBI:100241": {
+			"definition": "A  quinolone that is quinolin-4(1H)-one bearing cyclopropyl, carboxylic acid, fluoro and piperazin-1-yl substituents at positions 1, 3, 6 and 7, respectively.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:36709",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:100241",
+			"uiLabel": "ciprofloxacin"
+		    },
+		    "CHEBI:157175": {
+			"definition": "A 1,8-naphthyridine derivative that is 1,4-dihydro-1,8-naphthyridine with an ethyl group at the 1 position, a carboxy group at the 3-position, an oxo sustituent at the 4-position, a fluoro substituent at the 5-position and a piperazin-1-yl group at the 7 position. An antibacterial, it is used in the treatment of urinary-tract infections and gonorrhoea.",
+			"member_of": [
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:157175",
+			"uiLabel": "enoxacin"
+		    },
+		    "CHEBI:31810": {
+			"definition": "A fluoroquinolone antibiotic that is 4-oxo-1,4-dihydroquinoline which is substituted at positions 1, 3, 6, 7 and 8 by 2-fluoroethyl, carboxy, fluoro, 4-methylpiperazin-1-yl and fluoro groups, respectively. It is active against many Gram-positive and Gram-negative bacteria.",
+			"member_of": [
+			    "CHEBI:26513",
+			    "CHEBI:46845",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:31810",
+			"uiLabel": "fleroxacin"
+		    },
+		    "CHEBI:116278": {
+			"definition": "A fluoroquinolone antibiotic, used (generally as the hydrochloride salt) to treat bacterial infections including bronchitis and urinary tract infections. It is also used to prevent urinary tract infections prior to surgery.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:116278",
+			"uiLabel": "lomefloxacin"
+		    },
+		    "CHEBI:63611": {
+			"definition": "A quinolone that consits of 4-oxo-1,4-dihydroquinoline-3-carboxylic acid bearing a cyclopropyl substituent at position 1, a fluoro substitiuent at position 6, a (4aS,7aS)-octahydro-6H-pyrrolo[3,4-b]pyridin-6-yl group at position 7 and a methoxy substituent at position 8. A member of the fluoroquinolone class of antibacterial agents.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:86324",
+			    "CHEBI:87211",
+			    "GENEPIO:0001097",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "MXF",
+			    "Mfx"
+			],
+			"id": "CHEBI:63611",
+			"uiLabel": "moxifloxacin"
+		    },
+		    "CHEBI:100246": {
+			"definition": "A quinolinemonocarboxylic acid with broad-spectrum antibacterial activity against most gram-negative and gram-positive bacteria. Norfloxacin is bactericidal and its mode of action depends on blocking of bacterial DNA replication by binding itself to an enzyme called DNA gyrase.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:100246",
+			"uiLabel": "norfloxacin"
+		    },
+		    "CHEBI:7731": {
+			"definition": "An oxazinoquinolone carrying carboxy, fluoro, methyl and 4-methylpiperazino substituents. A synthetic fluoroquinolone antibacterial agent, it inhibits the supercoiling activity of bacterial DNA gyrase, halting DNA replication.",
+			"member_of": [
+			    "CHEBI:46845",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211",
+			    "GENEPIO:0001097",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Ofx"
+			],
+			"uiLabel": "ofloxacin",
+			"id": "CHEBI:7731",
+			"choices": {
+			    "CHEBI:63598": []
+			}
+		    },
+		    "CHEBI:63598": {
+			"definition": "An optically active form of ofloxacin having (S)-configuration; an inhibitor of bacterial topoisomerase IV and DNA gyrase",
+			"member_of": [
+			    "CHEBI:7731",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Lfx"
+			],
+			"id": "CHEBI:63598",
+			"uiLabel": "levofloxacin"
+		    },
+		    "CHEBI:50199": {
+			"definition": "A quinolone that is 4-oxo-1,4-dihydroquinoline which is substituted at positions 1, 3, 6 and 7 by ethyl, carboxy, fluorine, and 4-methylpiperazin-1-yl groups, respectively.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:46845",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:50199",
+			"uiLabel": "pefloxacin"
+		    },
+		    "CHEBI:9212": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "sparfloxacin",
+			"id": "CHEBI:9212",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "CHEBI:87211"
+			]
+		    },
+		    "CHEBI:5195": {
+			"definition": "A member of the class of oxazolidines that is 1,3-oxazolidin-2-one in which the hydrogen attached to the nitrogen is replaced by an N-{[(5-nitro-2-furyl)methylene]amino} group. It has antibacterial and antiprotozoal properties, and is used in the treatment of giardiasis and cholera.",
+			"member_of": [
+			    "CHEBI:87230",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:5195",
+			"uiLabel": "furazolidone"
+		    },
+		    "CHEBI:24531": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "heterocyclic antibiotic",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"id": "CHEBI:24531",
+			"choices": {
+			    "CHEBI:25558": [],
+			    "CHEBI:25807": []
+			}
+		    },
+		    "CHEBI:25558": {
+			"member_of": [
+			    "CHEBI:24531"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "organonitrogen heterocyclic antibiotic",
+			"id": "CHEBI:25558",
+			"choices": {
+			    "CHEBI:40009": [],
+			    "CHEBI:27933": [],
+			    "CHEBI:87211": [],
+			    "CHEBI:87230": [],
+			    "CHEBI:86324": []
+			}
+		    },
+		    "CHEBI:40009": {
+			"definition": "A 4-amino-1,2-oxazolidin-3-one that has R configuration. It is an antibiotic produced by Streptomyces garyphalus or S. orchidaceus and is used as part of a multi-drug regimen for the treatment of tuberculosis when resistance to, or toxicity from, primary drugs has developed. An analogue of D-alanine, it interferes with bacterial cell wall synthesis in the cytoplasm by competitive inhibition of L-alanine racemase (which forms D-alanine from L-alanine) and  D-alanine--D-alanine ligase (which incorporates D-alanine into the pentapeptide required for peptidoglycan formation and bacterial cell wall synthesis).",
+			"member_of": [
+			    "CHEBI:25558",
+			    "CHEBI:25807",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "CYC",
+			    "Cs"
+			],
+			"id": "CHEBI:40009",
+			"uiLabel": "D-cycloserine"
+		    },
+		    "CHEBI:87230": {
+			"definition": "A member of the class of furans in which the furan ring is substituted by a nitro group and which also has significant antibiotic properties.",
+			"member_of": [
+			    "CHEBI:25558",
+			    "CHEBI:25807",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "nitrofuran antibiotic",
+			"id": "CHEBI:87230",
+			"choices": {
+			    "CHEBI:5195": [],
+			    "CHEBI:71415": []
+			}
+		    },
+		    "CHEBI:71415": {
+			"definition": "An imidazolidine-2,4-dione that is hydantoin substituted at position 1 by a [(5-nitro-2-furyl)methylene]amino group. An antibiotic that damages bacterial DNA.",
+			"member_of": [
+			    "CHEBI:87230",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:71415",
+			"uiLabel": "nitrofurantoin"
+		    },
+		    "CHEBI:86324": {
+			"definition": "An organonitrogen heterocyclic antibiotic whose structure contains a quinolone or quinolone-related skeleton.",
+			"member_of": [
+			    "CHEBI:25558",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "quinolone antibiotic",
+			"id": "CHEBI:86324",
+			"choices": {
+			    "CHEBI:5543": [],
+			    "CHEBI:100241": [],
+			    "CHEBI:157175": [],
+			    "CHEBI:5280": [],
+			    "CHEBI:116278": [],
+			    "CHEBI:63611": [],
+			    "CHEBI:100147": [],
+			    "CHEBI:100246": [],
+			    "CHEBI:7731": [],
+			    "CHEBI:50199": [],
+			    "CHEBI:9212": []
+			}
+		    },
+		    "CHEBI:5280": {
+			"definition": "A monocarboxylic acid that is 4-oxo-1,4-dihydroquinoline-3-carboxylic acid which is substituted on the nitrogen by a cyclopropyl group and at positions 6, 7, and 8 by fluoro, 3-methylpiperazin-1-yl, and methoxy groups, respectively. Gatifloxacin is an antibiotic of the fourth-generation fluoroquinolone family, that like other members of that family, inhibits the bacterial topoisomerase type-II enzymes.",
+			"member_of": [
+			    "CHEBI:23765",
+			    "CHEBI:26512",
+			    "CHEBI:46848",
+			    "CHEBI:86324",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:5280",
+			"uiLabel": "gatifloxacin"
+		    },
+		    "CHEBI:100147": {
+			"definition": "A monocarboxylic acid comprising 1,8-naphthyridin-4-one substituted by carboxylic acid, ethyl and methyl groups at positions 3, 1, and 7, respectively. An orally administered antibacterial, it is used in the treatment of lower urinary-tract infections due to Gram-negative bacteria, including the majority of E. coli, Enterobacter, Klebsiella, and Proteus species.",
+			"member_of": [
+			    "CHEBI:86324"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:100147",
+			"uiLabel": "nalidixic acid"
+		    },
+		    "CHEBI:25807": {
+			"member_of": [
+			    "CHEBI:24531"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "organooxygen heterocyclic antibiotic",
+			"id": "CHEBI:25807",
+			"choices": {
+			    "CHEBI:40009": [],
+			    "CHEBI:87230": []
+			}
+		    },
+		    "CHEBI:63607": {
+			"definition": "An organofluorine compound that consists of 1,3-oxazolidin-2-one bearing an N-3-fluoro-4-(morpholin-4-yl)phenyl group as well as an acetamidomethyl group at position 5. A synthetic antibacterial agent that inhibits bacterial protein synthesis by binding to a site on 23S ribosomal RNA of the 50S subunit and prevents further formation of a functional 70S initiation complex.",
+			"member_of": [
+			    "GENEPIO:0001097",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Lzd"
+			],
+			"id": "CHEBI:63607",
+			"uiLabel": "linezolid"
+		    },
+		    "CHEBI:7025": {
+			"definition": "An alpha,beta-unsaturated ester resulting from the formal condensation of the alcoholic hydroxy group of 9-hydroxynonanoic acid with the carboxy group of (2E)-4-[(2S)-tetrahydro-2H-pyran-2-yl]-3-methylbut-2-enoic acid in which the tetrahydropyranyl ring is substituted at positions 3 and 4 by hydroxy groups and at position 5 by a {(2S,3S)-3-[(2S,3S)-3-hydroxybutan-2-yl]oxiran-2-yl}methyl group. Originally isolated from the Gram-negative bacterium Pseudomonas fluorescens, it is used as a topical antibiotic for the treatment of Gram-positive bacterial infections.",
+			"member_of": [
+			    "CHEBI:35681",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:7025",
+			"uiLabel": "mupirocin"
+		    },
+		    "CHEBI:17154": {
+			"definition": "A pyridinecarboxamide that is pyridine in which the hydrogen at position 3 is replaced by a carboxamide group.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:17154",
+			"uiLabel": "nicotinamide"
+		    },
+		    "CHEBI:28368": {
+			"definition": "A coumarin-derived antibiotic obtained from Streptomyces niveus.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:28368",
+			"uiLabel": "novobiocin"
+		    },
+		    "CHEBI:26144": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "piperazines",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"id": "CHEBI:26144",
+			"choices": {
+			    "CHEBI:46845": [],
+			    "CHEBI:46848": [],
+			    "CHEBI:46847": []
+			}
+		    },
+		    "CHEBI:46845": {
+			"member_of": [
+			    "CHEBI:26144"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "N-alkylpiperazine",
+			"id": "CHEBI:46845",
+			"choices": {
+			    "CHEBI:46920": [],
+			    "CHEBI:31810": [],
+			    "CHEBI:7731": [],
+			    "CHEBI:50199": []
+			}
+		    },
+		    "CHEBI:46920": {
+			"member_of": [
+			    "CHEBI:46845"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "N-methylpiperazine",
+			"id": "CHEBI:46920",
+			"choices": {
+			    "CHEBI:28077": []
+			}
+		    },
+		    "CHEBI:28077": {
+			"definition": "A member of the class of rifamycins that is a a semisynthetic antibiotic derived from Amycolatopsis rifamycinica (previously known as Amycolatopsis mediterranei and Streptomyces mediterranei)",
+			"member_of": [
+			    "CHEBI:46847",
+			    "CHEBI:46920",
+			    "GENEPIO:0002071"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Rif"
+			],
+			"id": "CHEBI:28077",
+			"uiLabel": "rifampicin"
+		    },
+		    "CHEBI:46848": {
+			"member_of": [
+			    "CHEBI:26144"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "N-arylpiperazine",
+			"id": "CHEBI:46848",
+			"choices": {
+			    "CHEBI:100241": [],
+			    "CHEBI:157175": [],
+			    "CHEBI:5280": [],
+			    "CHEBI:116278": [],
+			    "CHEBI:100246": [],
+			    "CHEBI:7731": [],
+			    "CHEBI:50199": [],
+			    "CHEBI:9212": []
+			}
+		    },
+		    "CHEBI:46847": {
+			"member_of": [
+			    "CHEBI:26144"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "N-iminopiperazine",
+			"id": "CHEBI:46847",
+			"choices": {
+			    "CHEBI:28077": []
+			}
+		    },
+		    "CHEBI:17939": {
+			"definition": "An aminonucleoside antibiotic, derived from the Streptomyces alboniger bacterium, that causes premature chain termination during translation taking place in the ribosome.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:17939",
+			"uiLabel": "puromycin"
+		    },
+		    "CHEBI:39447": {
+			"definition": "Any compound having a pyrimidine as part of its structure.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "pyrimidines",
+			"id": "CHEBI:39447",
+			"choices": {
+			    "CHEBI:9328": [],
+			    "CHEBI:9329": [],
+			    "CHEBI:102265": []
+			}
+		    },
+		    "CHEBI:9328": {
+			"definition": "A sulfonamide consisting of pyrimidine with a 4-aminobenzenesulfonamido group at the 2-position.",
+			"member_of": [
+			    "CHEBI:39447",
+			    "CHEBI:87228"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9328",
+			"uiLabel": "sulfadiazine"
+		    },
+		    "CHEBI:9329": {
+			"definition": "A sulfonamide consisting of pyrimidine having methoxy substituents at the 5- and 6-positions and a 4-aminobenzenesulfonamido group at the 4-position. In combination with the antiprotozoal pyrimethamine (CHEBI:8673) it is used as an antimalarial.",
+			"member_of": [
+			    "CHEBI:39447"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9329",
+			"uiLabel": "sulfadoxine"
+		    },
+		    "CHEBI:102265": {
+			"definition": "A sulfonamide consisting of pyrimidine with methyl substituents at the 4- and 6-positions and a 4-aminobenzenesulfonamido group at the 2-position.",
+			"member_of": [
+			    "CHEBI:39447",
+			    "CHEBI:87228"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:102265",
+			"uiLabel": "sulfamethazine"
+		    },
+		    "CHEBI:46770": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "pyrrolidinecarboxamide",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"id": "CHEBI:46770",
+			"choices": {
+			    "CHEBI:3745": [],
+			    "CHEBI:404903": [],
+			    "CHEBI:6472": [],
+			    "CHEBI:43968": []
+			}
+		    },
+		    "CHEBI:3745": {
+			"definition": "A carbohydrate-containing antibiotic that is the  semisynthetic derivative of lincomycin, a natural antibiotic.",
+			"member_of": [
+			    "CHEBI:46770"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:3745",
+			"uiLabel": "clindamycin"
+		    },
+		    "CHEBI:6472": {
+			"definition": "A carbohydrate-containing antibiotic produced by the actinomyces Streptomyces lincolnensis.",
+			"member_of": [
+			    "CHEBI:46770"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:6472",
+			"uiLabel": "lincomycin"
+		    },
+		    "CHEBI:26513": {
+			"definition": "A class of aromatic heterocyclic compounds each of which contains a benzene ring ortho fused to carbons 2 and 3 of a pyridine ring.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "quinolines",
+			"id": "CHEBI:26513",
+			"choices": {
+			    "CHEBI:5543": [],
+			    "CHEBI:36709": [],
+			    "CHEBI:72292": [],
+			    "CHEBI:31810": [],
+			    "CHEBI:26512": [],
+			    "CHEBI:23765": []
+			}
+		    },
+		    "CHEBI:36709": {
+			"member_of": [
+			    "CHEBI:26513"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "aminoquinoline",
+			"id": "CHEBI:36709",
+			"choices": {
+			    "CHEBI:100241": []
+			}
+		    },
+		    "CHEBI:72292": {
+			"definition": "A quinoline-based antimycobacterial drug used (as its fumarate salt) for the treatment of pulmonary multi-drug resistant tuberculosis by inhibition of ATP synthase, an enzyme essential for the replication of the mycobacteria.",
+			"member_of": [
+			    "CHEBI:26513",
+			    "CHEBI:26878",
+			    "GENEPIO:0001097"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "Bdq"
+			],
+			"id": "CHEBI:72292",
+			"uiLabel": "bedaquiline"
+		    },
+		    "CHEBI:26512": {
+			"definition": "Any aromatic carboxylic acid that contains a quinoline moiety that is substituted by one carboxy substituent.",
+			"member_of": [
+			    "CHEBI:26513"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "quinolinemonocarboxylic acid",
+			"id": "CHEBI:26512",
+			"choices": {
+			    "CHEBI:100241": [],
+			    "CHEBI:5280": [],
+			    "CHEBI:116278": [],
+			    "CHEBI:63611": [],
+			    "CHEBI:100246": [],
+			    "CHEBI:9212": []
+			}
+		    },
+		    "CHEBI:23765": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "quinolone",
+			"member_of": [
+			    "CHEBI:26513"
+			],
+			"id": "CHEBI:23765",
+			"choices": {
+			    "CHEBI:100241": [],
+			    "CHEBI:5280": [],
+			    "CHEBI:116278": [],
+			    "CHEBI:63611": [],
+			    "CHEBI:100246": [],
+			    "CHEBI:50199": [],
+			    "CHEBI:9212": []
+			}
+		    },
+		    "CHEBI:29673": {
+			"definition": "A member of the class of rifamycins that exhibits antibiotic and antitubercular properties.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:29673",
+			"uiLabel": "rifamycin SV"
+		    },
+		    "CHEBI:75246": {
+			"definition": "A semisynthetic member of the class of rifamycins and non-systemic gastrointestinal site-specific broad spectrum antibiotic. Used in the treatment of traveller's diarrhoea, hepatic encephalopathy and irritable bowel syndrome.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:75246",
+			"uiLabel": "rifaximin"
+		    },
+		    "CHEBI:9215": {
+			"definition": "An organic heterotricyclic antibiotic that is active against gram-negative bacteria and used (as its dihydrochloride pentahydrate) to treat gonorrhea. It is produced by the bacterium Streptomyces spectabilis.",
+			"member_of": [
+			    "CHEBI:59780",
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9215",
+			"uiLabel": "spectinomycin"
+		    },
+		    "CHEBI:63845": {
+			"definition": "A sulfonamide that is sulfanilamide acylated on the sulfonamide nitrogen.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:63845",
+			"uiLabel": "sulfacetamide"
+		    },
+		    "CHEBI:87228": {
+			"definition": "A class of sulfonamides whose members generally have bacteriostatic antibiotic properties.",
+			"member_of": [
+			    "GENEPIO:0001187"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "sulfonamide antibiotic",
+			"id": "CHEBI:87228",
+			"choices": {
+			    "CHEBI:9328": [],
+			    "CHEBI:102265": [],
+			    "CHEBI:9331": [],
+			    "CHEBI:9332": [],
+			    "CHEBI:102484": []
+			}
+		    },
+		    "CHEBI:9331": {
+			"definition": "A sulfonamide consisting of a 1,3,4-thiadiazole nucleus with a methyl substituent at C-5 and a 4-aminobenzenesulfonamido group at C-2.",
+			"member_of": [
+			    "CHEBI:87228"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "CHEBI:9331",
+			"uiLabel": "sulfamethizole"
+		    },
+		    "GENEPIO:0002072": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "last resort antibiotic",
+			"id": "GENEPIO:0002072",
+			"member_of": [
+			    "GENEPIO:0001187"
+			]
+		    },
+		    "GENEPIO:0002062": {
+			"definition": "The clinical and laboratory guidelines or standards that prescribe the threshold values for determining resistance phenotypes.",
+			"otherParent": [
+			    "GENEPIO:0001007",
+			    "GENEPIO:0002088",
+			    "GENEPIO:0002109"
+			],
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antimicrobial resistance testing reference standard",
+			"id": "GENEPIO:0002062",
+			"choices": {
+			    "GENEPIO:0002069": [],
+			    "GENEPIO:0002070": [],
+			    "GENEPIO:0002063": [],
+			    "GENEPIO:0002064": [],
+			    "GENEPIO:0002065": [],
+			    "GENEPIO:0002066": [],
+			    "GENEPIO:0002067": [],
+			    "GENEPIO:0002068": []
+			}
+		    },
+		    "GENEPIO:0002069": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "SIR",
+			"id": "GENEPIO:0002069",
+			"member_of": [
+			    "GENEPIO:0002062"
+			]
+		    },
+		    "GENEPIO:0002070": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "WRG",
+			"id": "GENEPIO:0002070",
+			"member_of": [
+			    "GENEPIO:0002062"
+			]
+		    },
+		    "GENEPIO:0002063": {
+			"definition": "BSAC is a British inter-professional organisation involved in antibiotic education, research and leadership",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "BSAC",
+			"id": "GENEPIO:0002063",
+			"label": "British Society for Antimicrobial Chemotherapy (BSAC)"
+		    },
+		    "GENEPIO:0002064": {
+			"definition": "The Clinical and Laboratory Standards Institute develops and implements clinical laboratory testing standards",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"hasAlternativeTerm": [
+			    "NCCLS"
+			],
+			"uiLabel": "CLSI",
+			"id": "GENEPIO:0002064",
+			"label": "Clinical and Laboratory Standards Institute (CLSI)"
+		    },
+		    "GENEPIO:0002065": {
+			"definition": "DIN is recognized by the Federal Government of Germany as the competent standards organization for Germany and as the national standards body representing Germany in non-governmental international standards organizations.",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "DIN",
+			"id": "GENEPIO:0002065",
+			"label": "German Institute for Standardization (DIN)"
+		    },
+		    "GENEPIO:0002066": {
+			"definition": "EUCAST is a standing committee jointly organized by ESCMID, ECDC and European national breakpoint committees; it deals with breakpoints and technical aspects of phenotypic in vitro antimicrobial susceptibility testing.",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "EUCAST",
+			"id": "GENEPIO:0002066",
+			"label": "European Committe on Antimicrobial Susceptibility Testing (EUCAST)"
+		    },
+		    "GENEPIO:0002067": {
+			"definition": "On January 1, 2005 the National Committee on Clinical Laboratory Standards (NCCLS) changed its name to CLSI",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "NCCLS",
+			"id": "GENEPIO:0002067",
+			"label": "National Committee on Clinical Laboratory Standards (NCCLS)"
+		    },
+		    "GENEPIO:0002068": {
+			"definition": "The French Society of Microbiology (SFM) is a non-profit association which aims to bring together microbiologists from French-speaking countries, working in the domains of bacteria, viruses, Fungi and parasites, and related medical, industrial and environmental microbiology, physiology, genetics, taxonomy, hygiene, and antimicrobial agents.",
+			"member_of": [
+			    "GENEPIO:0002062"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "SFM",
+			"id": "GENEPIO:0002068",
+			"label": "Société Française de Microbiologie (SFM)"
+		    },
+		    "GENEPIO:0002111": {
+			"definition": "The version of the antimicrobial reistance testing reference standard protocol used in assessing an isolate.",
+			"otherParent": [
+			    "GENEPIO:0002109"
+			],
+			"datatype": "xmls:string",
+			"uiLabel": "antimicrobial resistance testing reference standard version",
+			"id": "GENEPIO:0002111",
+			"constraints": [
+			    {
+				"datatype": "xmls:nonNegativeInteger",
+				"value": "1",
+				"constraint": "owl:qualifiedCardinality"
+			    }
+			]
+		    },
+		    "NCIT:C85540": {
+			"definition": "A method to determine whether microbial growth is affected by an antimicrobial compound.",
+			"uiLabel": "antimicrobial resistance testing method",
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"choices": {
+			    "NCIT:C85555": [],
+			    "NCIT:C85595": [],
+			    "NCIT:C85701": [],
+			    "NCIT:C85596": []
+			},
+			"otherParent": [
+			    "GENEPIO:0001007",
+			    "GENEPIO:0002109",
+			    "GENEPIO:0002088"
+			],
+			"label": "Microbial Susceptibility Test",
+			"id": "NCIT:C85540"
+		    },
+		    "NCIT:C85555": {
+			"definition": "A method to determine microbial susceptibility to antibiotics in which test bacteria is inoculated onto agar plates with serial dilutions of know quantities of antibiotics. The minimum inhibitory concentration of antibiotic is assessed.",
+			"member_of": [
+			    "NCIT:C85540"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "NCIT:C85555",
+			"uiLabel": "Agar Dilution Method"
+		    },
+		    "NCIT:C85595": {
+			"definition": "A method to determine microbial susceptibility to antibiotics in which filter paper disks containing known concentrations of antibiotics are placed on the agar surface that has been previously inoculated with the bacteria of interest. Microbial susceptibility is assessed by measuring the area around the disk that is free of microbial growth.",
+			"member_of": [
+			    "NCIT:C85540"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "NCIT:C85595",
+			"uiLabel": "Disk Diffusion Method"
+		    },
+		    "NCIT:C85701": {
+			"definition": "A method to determine the minimum inhibitory concentration (MIC) of antibiotics in which growth media is pipetted into a multi-well plate. Each well contains a known concentration of drug which is inoculated with a known quantity of bacteria. The plate is incubated for a specified period of time and each well is assessed for bacterial cell growth. The drug concentration in the first well showing no growth is known as the MIC for that antibiotic.",
+			"hasSynonym": [
+			    "broth microdilution",
+			    "frozen broth microdilution",
+			    "microbroth dilution",
+			    "microdilution"
+			],
+			"member_of": [
+			    "NCIT:C85540"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "NCIT:C85701",
+			"uiLabel": "Micro Broth Dilution Method"
+		    },
+		    "NCIT:C85596": {
+			"definition": "A method to determine microbial susceptibility to antibiotics in which a plastic strip impregnated with the antibiotic of interest is placed on an agar plate that has been inoculated with bacteria. The antibiotic diffuses from the strip producing a concentration gradient of drug on the agar. The point at which the elliptical shaped area of growth inhibition meets the strip is the minimum inhibitory concentration of the drug of interest.",
+			"member_of": [
+			    "NCIT:C85540"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "E-test (Epsilometry)",
+			"id": "NCIT:C85596",
+			"label": "Epsilometry"
+		    },
+		    "GENEPIO:0002112": {
+			"definition": "This is a component of an antibiogram that enables a choice of MIC measurements based on either the diffusion or dilution method. These methods call for different numeric input ranges and units.",
+			"parent": "GENEPIO:0001342",
+			"components": {
+			    "N97d3cdb186db41feb5bc7847d3f5b9c1": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ]
+			},
+			"datatype": "model",
+			"uiLabel": "draft sequence repository data - antibiogram MIC measurement",
+			"id": "GENEPIO:0002112",
+			"otherParent": [
+			    "GENEPIO:0001100",
+			    "GENEPIO:0002109"
+			]
+		    },
+		    "N97d3cdb186db41feb5bc7847d3f5b9c1": {
+			"parent": "GENEPIO:0002112",
+			"datatype": "disjunction",
+			"uiLabel": "",
+			"otherParent": [
+			    "GENEPIO:0002112"
+			],
+			"components": {
+			    "GENEPIO:0002110": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ],
+			    "GENEPIO:0002044": [
+				{
+				    "datatype": "xmls:nonNegativeInteger",
+				    "cardinality": "owl:qualifiedCardinality",
+				    "value": "1"
+				}
+			    ]
+			},
+			"id": "N97d3cdb186db41feb5bc7847d3f5b9c1"
+		    },
+		    "GENEPIO:0002110": {
+			"definition": "A MIC test measurement resulting from a laboratory diffusion method.",
+			"datatype": "xmls:positiveInteger",
+			"uiLabel": "MIC diffusion measurement",
+			"units": [
+			    "UO:0000016"
+			],
+			"id": "GENEPIO:0002110",
+			"constraints": [
+			    {
+				"datatype": "xmls:positiveInteger",
+				"value": 99,
+				"constraint": "xmls:maxInclusive"
+			    },
+			    {
+				"datatype": "xmls:positiveInteger",
+				"value": 6,
+				"constraint": "xmls:minInclusive"
+			    }
+			]
+		    },
+		    "UO:0000016": {
+			"datatype": "xmls:anyURI",
+			"id": "UO:0000016",
+			"uiLabel": "millimeter"
+		    },
+		    "GENEPIO:0002044": {
+			"definition": "A MIC test measurement resulting from a laboratory dilution method.",
+			"datatype": "xmls:float",
+			"uiLabel": "MIC dilution measurement",
+			"units": [
+			    "UO:0000273",
+			    "UO:0000274"
+			],
+			"id": "GENEPIO:0002044",
+			"constraints": [
+			    {
+				"datatype": "xmls:float",
+				"value": "0.01",
+				"constraint": "xmls:minInclusive"
+			    },
+			    {
+				"datatype": "xmls:float",
+				"value": "2048.0",
+				"constraint": "xmls:maxInclusive"
+			    }
+			]
+		    },
+		    "UO:0000273": {
+			"datatype": "xmls:anyURI",
+			"id": "UO:0000273",
+			"uiLabel": "milligram per liter"
+		    },
+		    "UO:0000274": {
+			"datatype": "xmls:anyURI",
+			"id": "UO:0000274",
+			"uiLabel": "microgram per milliliter"
+		    },
+		    "GENEPIO:0002080": {
+			"definition": "The unit provided for an antibiotic drug test dosage.",
+			"uiLabel": "drug MIC unit",
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"choices": {
+			    "UO:0000274": [],
+			    "UO:0000273": [],
+			    "UO:0000016": []
+			},
+			"otherParent": [
+			    "GENEPIO:0002109",
+			    "GENEPIO:0001100"
+			],
+			"label": "drug minimum inhibitory concentration unit",
+			"id": "GENEPIO:0002080"
+		    },
+		    "GENEPIO:0001001": {
+			"definition": "The measurement comparator is a sign indicating that a measurement is above, equal to, or below a given threshold.",
+			"otherParent": [
+			    "GENEPIO:0001100",
+			    "GENEPIO:0002109"
+			],
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "measurement comparator",
+			"id": "GENEPIO:0001001",
+			"choices": {
+			    "GENEPIO:0001002": [],
+			    "GENEPIO:0001003": [],
+			    "GENEPIO:0001004": [],
+			    "GENEPIO:0001006": [],
+			    "GENEPIO:0001005": []
+			}
+		    },
+		    "GENEPIO:0001002": {
+			"definition": "The \"less than\" comparator indicates that a given substance was present at less than a given quantity or concentration.",
+			"member_of": [
+			    "GENEPIO:0001001"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "<",
+			"id": "GENEPIO:0001002",
+			"label": "less than"
+		    },
+		    "GENEPIO:0001003": {
+			"definition": "The \"less than or equal to\" comparator indicates that a given substance was present at less than or equal to a given quantity or concentration.",
+			"member_of": [
+			    "GENEPIO:0001001"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "<=",
+			"id": "GENEPIO:0001003",
+			"label": "less than or equal to"
+		    },
+		    "GENEPIO:0001004": {
+			"definition": "The \"equal to\" comparator indicates that a given substance was present at the given quantity or concentration.",
+			"member_of": [
+			    "GENEPIO:0001001"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "==",
+			"id": "GENEPIO:0001004",
+			"label": "equal to"
+		    },
+		    "GENEPIO:0001006": {
+			"definition": "The \"less than or equal to\" comparator indicates that a given substance was present at less than or equal to a given quantity or concentration.",
+			"member_of": [
+			    "GENEPIO:0001001"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": ">",
+			"id": "GENEPIO:0001006",
+			"label": "greater than"
+		    },
+		    "GENEPIO:0001005": {
+			"definition": "The \"greater than or equal to\" comparator indicates that a given substance was present at greater than or equal to a given quantity or concentration.",
+			"member_of": [
+			    "GENEPIO:0001001"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": ">=",
+			"id": "GENEPIO:0001005",
+			"label": "greater than or equal to"
+		    },
+		    "NCIT:C85539": {
+			"definition": "The outcome of a test to determine whether microbial growth is affected by an antimicrobial compound.",
+			"features": {
+			    "order": {
+				"value": [
+				    "NCIT:C85561",
+				    "NCIT:C85560",
+				    "NCIT:C85563",
+				    "NCIT:C85559",
+				    "NCIT:C85562"
+				]
+			    }
+			},
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"choices": {
+			    "NCIT:C85561": [],
+			    "GENEPIO:0002040": [],
+			    "NCIT:C85560": [],
+			    "NCIT:C85563": [],
+			    "NCIT:C85559": [],
+			    "NCIT:C85562": []
+			},
+			"otherParent": [
+			    "GENEPIO:0001100",
+			    "GENEPIO:0002109"
+			],
+			"uiLabel": "Microbial Susceptibility Test Result",
+			"id": "NCIT:C85539"
+		    },
+		    "NCIT:C85561": {
+			"definition": "A microbial susceptibility test result in which the growth of microorganisms is not inhibited by the usually achievable concentrations of antimicrobial agent when the recommended dosage is used for the site of infection. This category may be applied to new antimicrobial agents for which no resistant microorganisms have been encountered at the time the initial interpretive criteria are determined. Microorganisms that test with an MIC above or a zone measurement below the susceptible interpretive criteria may be designated as nonsusceptible. A designation of nonsusceptible does not necessarily mean that a resistance mechanism(s) exists in the microorganism.",
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "nonsensitive",
+			"id": "NCIT:C85561",
+			"label": "Antimicrobial Nonsusceptibility Result"
+		    },
+		    "GENEPIO:0002040": {
+			"definition": "A not defined resistance indicates that an isolate was not tested against a given antibiotic, or the result of the test was inconclusive.",
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "not defined",
+			"id": "GENEPIO:0002040",
+			"label": "antibiotic resistance not defined"
+		    },
+		    "NCIT:C85560": {
+			"definition": "A microbial susceptibility test result in which the growth of microorganisms may be inhibited by the usually achievable concentrations of antimicrobial agent when the recommended dosage is used for the site of infection. The response rates may be lower than for susceptible isolates.",
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "intermediate",
+			"id": "NCIT:C85560",
+			"label": "Antimicrobial Intermediate Susceptibility Result"
+		    },
+		    "NCIT:C85563": {
+			"definition": "A microbial susceptibility test result in which the growth of microorganisms is inhibited by the usually achievable concentrations of antimicrobial agent when the recommended dosage is used for the site of infection.",
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "sensitive",
+			"id": "NCIT:C85563",
+			"label": "Antimicrobial Susceptibility Result"
+		    },
+		    "NCIT:C85559": {
+			"definition": "A microbial susceptibility test result in which the growth of microorganisms may be inhibited when higher than normal dosages of an antimicrobial agent are used and maximal possible blood concentration of the antimicrobial agent is achieved.",
+			"hasExactSynonym": [
+			    "susceptible dose-dependent"
+			],
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "sensitive - dose dependent",
+			"id": "NCIT:C85559",
+			"label": "Antimicrobial Dose Dependent Susceptibility Result"
+		    },
+		    "NCIT:C85562": {
+			"definition": "A microbial susceptibility test result in which the growth of microorganisms is not inhibited by the usually achievable concentrations of antimicrobial agent with normal dosage, or microorganisms demonstrate minimum inhibitory concentrations (MIC) or zone diameters that fall in the range where specific microbial resistance mechanisms are likely in effect, or clinical efficacy of the agent against the microorganism has not been reliably shown in treatment studies.",
+			"member_of": [
+			    "NCIT:C85539"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "resistant",
+			"id": "NCIT:C85562",
+			"label": "Antimicrobial Resistance Result"
+		    },
+		    "GENEPIO:0002181": {
+			"uiLabel": "AMR phenotype - EUCAST ECOFF",
+			"otherParent": [
+			    "GENEPIO:0002109",
+			    "GENEPIO:0001100"
+			],
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"label": "antimicrobial resistance phenotype - epidemiological cut-off values",
+			"id": "GENEPIO:0002181",
+			"choices": {
+			    "GENEPIO:0002099": [],
+			    "GENEPIO:0002098": []
+			}
+		    },
+		    "GENEPIO:0002099": {
+			"definition": "A non-wild type (WT) resistance phenotype indicates a bacterial pathogen has an acquired or mutational resistance mechanism present with respect to the antimicrobial in question. The bacteria has a reduced susceptibility to this agent.",
+			"member_of": [
+			    "GENEPIO:0002181"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "GENEPIO:0002099",
+			"uiLabel": "non-wild type (NWT)"
+		    },
+		    "GENEPIO:0002098": {
+			"definition": "A wild type (WT) resistance phenotype indicates a bacterial pathogen belongs to a \"Naïve\", susceptible wild-type population with respect to a given antimicrobial. No acquired or mutational resistance mechanisms are\npresent to the antimicrobial in question.",
+			"member_of": [
+			    "GENEPIO:0002181"
+			],
+			"datatype": "xmls:anyURI",
+			"id": "GENEPIO:0002098",
+			"uiLabel": "wild type (WT)"
+		    },
+		    "GENEPIO:0002049": {
+			"definition": "The instrumentation used to determine minimum inhibitory concentration values.",
+			"otherParent": [
+			    "GENEPIO:0002109",
+			    "GENEPIO:0001007",
+			    "GENEPIO:0002088"
+			],
+			"member_of": [
+			    "GENEPIO:0001655"
+			],
+			"datatype": "xmls:anyURI",
+			"uiLabel": "antimicrobial resistance testing platform",
+			"id": "GENEPIO:0002049",
+			"choices": {
+			    "GENEPIO:0002050": [],
+			    "GENEPIO:0002051": [],
+			    "GENEPIO:0002052": [],
+			    "GENEPIO:0002053": [],
+			    "GENEPIO:0002055": []
+			}
+		    },
+		    "GENEPIO:0002050": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Microscan",
+			"id": "GENEPIO:0002050",
+			"member_of": [
+			    "GENEPIO:0002049"
+			]
+		    },
+		    "GENEPIO:0002051": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Phoenix",
+			"id": "GENEPIO:0002051",
+			"member_of": [
+			    "GENEPIO:0002049"
+			]
+		    },
+		    "GENEPIO:0002052": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Sensititre",
+			"id": "GENEPIO:0002052",
+			"member_of": [
+			    "GENEPIO:0002049"
+			]
+		    },
+		    "GENEPIO:0002053": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "Vitek",
+			"id": "GENEPIO:0002053",
+			"member_of": [
+			    "GENEPIO:0002049"
+			]
+		    },
+		    "GENEPIO:0002055": {
+			"datatype": "xmls:anyURI",
+			"uiLabel": "manual - noncommercial",
+			"id": "GENEPIO:0002055",
+			"member_of": [
+			    "GENEPIO:0002049"
+			]
+		    }
+		},
+		"metadata": {
+		    "versionIRI": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+		    "description": "A GEEM draft standard for European Bioinformatics Institute (EBI) antibiogram data submission",
+		    "license": "http://creativecommons.org/licenses/by/3.0/",
+		    "title": "Draft Antimicrobial Succeptibility Test Form",
+		    "prefix": "",
+		    "date": "2018-04-16",
+		    "resource": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+		    "type": "shared",
+		    "status": "draft"
+		}
+	    }
+	}
+    }    
+]

@@ -17,7 +17,6 @@ class PackageSerializer(serializers.HyperlinkedModelSerializer):
         model = Package
         fields = (
             'owner',
-            'shared',
             'created',
             'updated',
             'package_type',

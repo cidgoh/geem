@@ -28,15 +28,21 @@ $ docker-compose run web python /code/manage.py migrate --noinput
 $ docker-compose run web python /code/manage.py createsuperuser
 ```
 
-4. Run the development server:
+4. Load initial data:
+
+```bash
+$ docker-compose run web python /code/manage.py loaddata shared_packages
+```
+
+5. Run the development server:
 
 ```bash
 $ docker-compose up
 ```
 
-5. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+6. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
 
-6. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 3.
+7. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 3.
 
 ### Without Docker
 
@@ -67,14 +73,20 @@ $ python manage.py migrate
 $ python manage.py createsuperuser
 ```
 
-6. Run the development server:
+6. Load initial data:
+
+```bash
+$ python manage.py loaddata shared_packages
+```
+
+7. Run the development server:
 
 ```
 $ python manage.py runserver
 ```
 
-7. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+8. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
 
-8. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 5.
+9. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 5.
 
 

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from geem.models import Package
 from rest_framework import viewsets, permissions
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
-from api.serializers import UserSerializer, GroupSerializer, PackageSerializer
+from api.serializers import UserSerializer, PackageSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -13,16 +13,6 @@ class UserViewSet(viewsets.ModelViewSet):
     required_scopes = ['read']
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['read']
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
 
 class PackageViewSet(viewsets.ModelViewSet):
     """

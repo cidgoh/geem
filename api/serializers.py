@@ -13,10 +13,10 @@ class PackageSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    packages = PackageSerializer(
-        many=True,
-        read_only=True
-    )
     class Meta:
         model = User
-        fields = ('url', 'username', 'email', 'packages')
+        fields = (
+            'url',
+            'username',
+            'email'
+        )

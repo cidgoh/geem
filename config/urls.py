@@ -19,7 +19,8 @@ from django.urls import include, path
 urlpatterns = [
     path('', include('geem.urls')),
     path('', include('api.urls')),
+    path('', include('social_django.urls', namespace='social')),
     path('admin/', admin.site.urls),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('auth/', include('rest_framework_social_oauth2.urls')),
     path('api-auth/', include('rest_framework.urls'))
 ]

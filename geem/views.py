@@ -29,6 +29,10 @@ def test_epi(request):
     data = json.load(open('geem/static/geem/data/shared_packages/test.epi.json'))
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+def new_2018_04_16(request):
+    data = json.load(open('geem/static/geem/data/private_packages/new_2018-04-16.json'))
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 def genepio_merged(request):
     data = json.load(open('geem/static/geem/data/ontology/genepio-merged.json'))
     return HttpResponse(json.dumps(data), content_type='application/json')

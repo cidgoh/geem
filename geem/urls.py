@@ -9,6 +9,7 @@ urlpatterns = [
     path('portal.html', views.portal, name='portal'),
     path('form.html', views.form),
     path('data/shared_packages/test.epi.json', views.test_epi),
+    path('data/private_packages/new_2018-04-16.json', views.new_2018_04_16),
     path('data/ontology/foodon-merged.json', views.foodon_merged),
     path('data/ontology/genepio-merged.json', views.genepio_merged),
     path('templates/modal_lookup.html', views.modal_lookup),

@@ -114,6 +114,7 @@ AUTHENTICATION_BACKENDS = [
     'oauth2_provider.backends.OAuth2Backend',
     'rest_framework_social_oauth2.backends.DjangoOAuth2',
     'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
     # Comment-out to disable admin page login
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -158,4 +159,5 @@ REST_FRAMEWORK = {
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_GITHUB_KEY = ''
 SOCIAL_AUTH_GITHUB_SECRET = ''
-DRFSO2_PROPRIETARY_BACKEND_NAME = 'GitHub'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''

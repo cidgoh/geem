@@ -8,13 +8,17 @@ class Package(models.Model):
         User,
         related_name='packages',
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     contents = JSONField()
 
     def __str__(self):
-        return "id:" + str(self.id) + " owner:" + self.owner.username + " created:" + str(self.created)
+        owner = self.owner
+        if (owner):
+            return "id:" + str(self.id) + " owner:" + self.owner.username + " created:" + str(self.created)
+        else:
+            return "id:" + str(self.id) + " owner:" + "public" + " created:" + str(self.created)
     

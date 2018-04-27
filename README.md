@@ -5,7 +5,7 @@ The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downlo
 * View details of our overal project aim, description, and implementation on the [Wiki](https://github.com/GenEpiO/geem/wiki/) site.
 * A working prototype of the portal is available at <http://genepio.org/geem>
 
-## Launching a Development Server
+## Creating a Development Server
 
 ### Using Docker
 
@@ -39,10 +39,6 @@ $ docker-compose run web python /code/manage.py loaddata shared_packages
 ```bash
 $ docker-compose up
 ```
-
-6. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
-
-7. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 3.
 
 ### Without Docker
 
@@ -85,8 +81,28 @@ $ python manage.py loaddata shared_packages
 $ python manage.py runserver
 ```
 
-8. View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+### Setting up Social Authentication
 
-9. The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used in step 5.
+1. Create a file `config/settings_secret.py` to contain our application secrets. This file is included in the project `.gitignore` file and should not be checked into version control.
+
+```
+SECRET_KEY = ''
+SOCIAL_AUTH_GITHUB_KEY = ''
+SOCIAL_AUTH_GITHUB_SECRET = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+```
+
+2. A Django `SECRET_KEY` can be generated with the following command:
+
+```
+python manage.py shell -c 'from django.core.management import utils; print(utils.get_random_secret_key())'
+```
+
+## Viewing the Application
+
+ - View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
+
+ - The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used during the `createsuperuser` step.
 
 

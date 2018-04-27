@@ -99,10 +99,14 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 python manage.py shell -c 'from django.core.management import utils; print(utils.get_random_secret_key())'
 ```
 
+3. Register an Oauth2 application on Github: https://github.com/settings/applications/new Enter `http://localhost:8000/complete/github/` as the Authorization callback URL. Once the application is created, enter the Client ID and Client Secret into the `settings_secret.py` file as `SOCIAL_AUTH_GITHUB_KEY` and `SOCIAL_AUTH_GITHUB_SECRET`, respectively.
+
+4. Create a new project on the Google Developers Console: https://console.developers.google.com/ Create OAuth client ID Credentials. Select 'Web Application' as the appliction type. Enter `http://localhost:8000/complete/google-oauth2/` as the 'Authorized redirect URI'. Once the application is created, enter the Client ID and Client Secret into the `settings_secret.py` file as `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and `SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET`, respectively.
+
 ## Viewing the Application
 
  - View on a web browser at: [http://localhost:8000/index.html](http://localhost:8000/index.html)
 
  - The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used during the `createsuperuser` step.
 
-
+ - The browsable GEEM API can be viewed at: http://localhost:8000/api/ 

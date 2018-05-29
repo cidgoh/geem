@@ -9,6 +9,7 @@ function checkEntityResource(entityId) {
 		var prefix = entityId.split(':')[0].toLowerCase()
 
 		// CURRENTLY: HARD WIRED TO JUST BE GENEPIO or FOODON
+		// If no resource loaded, or resource ontology prefix doesn't match given URL prefix ...
 		if (!top.resource.specifications || top.resource.metadata.prefix.toLowerCase() != prefix) {
 			if (prefix == 'genepio') {
 				loadResource('data/ontology/genepio-merged.json')

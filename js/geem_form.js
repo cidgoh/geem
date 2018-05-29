@@ -361,7 +361,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		switch (entity['datatype']) {
 			case undefined:
 
-				console.log('No form part for: "' + entity['uiLabel'] + '" (' + entityId + ')')
+				console.log('This specification component needs a "value specification" so that it can be rendered: "' + entity['uiLabel'] + '" (' + entityId + ')')
 
 			case 'disjunction':
 				// CURRENTLY WE JUST LUMP 'disjunction' IN WITH 'model'
@@ -375,7 +375,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				// Catch is situation where M has component N, where N is a model that 
 				// inherits components from an is_a ancestor. Travel up the tree,
 				// incorporating ALL 'has component' Z items.
-				entity['components'] = getEntitySpecFormParts(entity, inherited, depth)
+				entity['components'] = getEntitySpecFormParts(entity, depth)
 				break;
 
 			/* PRIMITIVE data types 
@@ -473,35 +473,15 @@ function OntologyForm(domId, resource, settings, callback) {
 		return $.extend(true, freshEntity, entity) 
 	}
 
-	getEntitySpecFormParts = function(entity, inherited, depth) {
+	getEntitySpecFormParts = function(entity, depth, inherited = false) {
 		/*
 		Convert given "specification" entity's "parts" list into a list of 
 		processed entities.
+		INPUT
+			inherited: UNUSED
+			depth: integer, used to track number of parent components.
 		*/
 		var components = []
-
-		/*
-		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
-		// Will venture upward as long as each ancestor is a model and 'has component' X.
-		if ('parent' in entity) {
-			var parentId = entity['parent']
-			if (parentId != 'OBI:0000658') {//Top level spec.
-				var parent = self.specification[parentId]
-				if (!parent) console.log("MISSING:", parentId)
-
-				if (parent && parent['datatype'] == 'model' && 'components' in parent) {
-					for (componentId in parent['components']) {
-						if (entity['id'] != componentId) {
-							var component = self.specification[componentId]
-							// "true" prevents a parent's other is_a subclass models from being pursued.
-							//components.push ( this.getEntitySpecFormParts(component, true, depth + 1) )
-							components.push( this.getEntitySpecFormComponent(componentId, entity['path'], depth + 1) )
-						}
-					}	
-				}
-			}
-		}
-		*/
 
 		// Whether we're going up or down, we add on ALL 'has component' items EXCEPT FOR VISITED ones.
 		if (inherited == false)
@@ -597,9 +577,7 @@ function OntologyForm(domId, resource, settings, callback) {
 						part['definition'] = part['definition'].split('.',1)[0] + '.'
 					}
 
-					// Currently showing "hidden" feature as disabled.
-					if (getFeature(part, 'hidden', entity['id']) )
-						part['disabled'] = true;
+					part['disabled'] = '';
 
 					newChoices.push(getEntitySpecFormChoice(part , depth+1))
 				}
@@ -611,6 +589,15 @@ function OntologyForm(domId, resource, settings, callback) {
 		getEntitySimplification(entity)
 		return entity
 	}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -646,7 +633,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		switch (entity['datatype']) {
 			case undefined: // Anonymous node
-				html += renderSection(entity, labelHTML, '<span class="small"><i>No form part for this! Is it a "categorical tree specification" or does it have a "has primitive value spec" data type?</i></span>')
+				html += renderSection(entity, labelHTML, '<span class="small"><i>This specification component needs a "value specification" so that it can be rendered.</i></span>')
 				break;
 
 			case 'disjunction':
@@ -655,7 +642,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				break;
 
 			case 'model':
-				html += renderSpecification(entity, inherited, depth)
+				html += renderSpecification(entity, depth)
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity['uiLabel'] != '[no label]')
 					return getModelWrapper(entity, labelHTML + html)
@@ -777,30 +764,18 @@ function OntologyForm(domId, resource, settings, callback) {
 			getCardinality(entity)
 		}
 
-		// Currently showing "hidden" feature fields as disabled.
-		if (entity.features.hidden)
-			entity['disabled'] = true;
+		entity['disabled'] = ''
 	}
 
-	renderSpecification = function(entity, inherited, depth) {
-		html = ''
-		// Here we go up the hierarchy to render all (and only) components of 
-		// superclass model, if any. This is RECURSIVE.
+	renderSpecification = function(entity, depth, inherited = false) {
 		/*
-		if (inherited == false && 'parent' in entity) { // aka member_of or subclass of
-			var parentId = entity['parent']
-			if (parentId != 'OBI:0000658') {//Top level spec.
-				var parent = self.specification[parentId]
-				if (!parent) console.log("MISSING:", parentId)
-				if ('datatype' in parent && parent['datatype'] == 'model' && 'components' in parent) {
-					for (componentId in parent['components']) {
-						if (entity['id'] != componentId)
-							html += this.render(componentId, entity['path'], depth+1)
-					}		
-				}
-			}
-		}	
+	
+		INPUTS
+			inherited: integer UNUSED
 		*/
+		html = ''
+
+
 		// Render each component
 		for (var entityId in entity['components']) { 
 			html += this.render(entityId, entity['path'], depth+1)
@@ -809,7 +784,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (inherited == false && 'choices' in entity) { //no inheritance on choices
 			for (var entityId in entity['choices']) { 
 				// Depth however is paid attention to for picklist depth cutoff option.
-				html += this.render(entityId, entity['path'], depth + 1) 
+				html += this.render(entityId, entity['path'], depth+1) 
 			}
 		}
 		return html	
@@ -988,16 +963,16 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		html = [labelHTML,
 			,'<div class="input-group">\n'
-	 		,'		<input class="input-group-field ' + entity['id'] + '"'
-	 		,			' id="' + entity['domId'] + '"'
-	 		,			typeAttr
-			,			stepAttr
-			,			entity['disabled']
-			,			getNumericConstraintHTML(entity, minInclusive, maxInclusive)
-			,			' placeholder="' + type + '"'
-			,			' pattern="' + type + '"'
-			,			' data-validator="min_max"'
-			,			' />\n'
+	 		,'	<input class="input-group-field ' + entity['id'] + '"'
+	 		,		' id="' + entity['domId'] + '"'
+	 		,		typeAttr
+			,		stepAttr
+			,		entity['disabled']
+			,		getNumericConstraintHTML(entity, minInclusive, maxInclusive)
+			,		' placeholder="' + type + '"'
+			,		' pattern="' + type + '"'
+			,		' data-validator="min_max"'
+			,	' />\n'
     		,	renderUnits(entity)
 			//,	renderHelp(entity)
 			,'</div>\n'
@@ -1011,8 +986,10 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		html = [
 			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
-			,'		  <input id="'+entity['domId']+'" class="switch-input" type="checkbox" name="' + entity['id']+ '"' + entity['disabled'] + '/>\n'
-			,	'		<label class = "switch-paddle" for="'+entity['domId']+'"></label>\n'
+			,'		<input id="'+entity['domId']+'" class="switch-input" type="checkbox" name="' + entity['id']+ '"'
+			,		entity['disabled']
+			,		' />\n'
+			,	'	<label class = "switch-paddle" for="'+entity['domId']+'"></label>\n'
 			,	'	</div>\n'
 			,	labelHTML
 			].join('')
@@ -1114,8 +1091,10 @@ function OntologyForm(domId, resource, settings, callback) {
 					console.log("Error: picklist choice doesn't have datatype xmls:anyURI: ", memberId, " in list ", entity['id'])
 
 				else {
-					// Currently showing "hidden" feature as disabled.
-					var disabled = getFeature(part, 'hidden', entity['id']) ? ' disabled="disabled"' : '';
+					// On Hold: Currently showing "hidden" feature as disabled.
+					//var disabled = getFeature(part, 'hidden', entity['id']) ? ' disabled="disabled"' : '';
+					part.disabled = '';
+
 					var label = getLabel(part)
 					if (!label) {
 						label = ''
@@ -1154,7 +1133,7 @@ function OntologyForm(domId, resource, settings, callback) {
 							else
 								var synonyms = ''
 
-							html += '<option value="' + part['id'] + '" class="depth' + depth + '" ' + disabled + synonyms + '>' + ' '.repeat(depth) + label + '</option>\n'  
+							html += '<option value="' + part['id'] + '" class="depth' + depth + '" ' + part.disabled + synonyms + '>' + ' '.repeat(depth) + label + '</option>\n'  
 					}
 
 					html += kid_html
@@ -1647,4 +1626,46 @@ OntologyForm.initFoundation = function() {
 
 	}
 }
+
+
+
+
+		/*
+		if (inherited == false && 'parent' in entity) { // aka member_of or subclass of
+			var parentId = entity['parent']
+			if (parentId != 'OBI:0000658') {//Top level spec.
+				var parent = self.specification[parentId]
+				if (!parent) console.log("MISSING:", parentId)
+				if ('datatype' in parent && parent['datatype'] == 'model' && 'components' in parent) {
+					for (componentId in parent['components']) {
+						if (entity['id'] != componentId)
+							html += this.render(componentId, entity['path'], depth+1)
+					}		
+				}
+			}
+		}	
+		*/
+
+		/*
+		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
+		// Will venture upward as long as each ancestor is a model and 'has component' X.
+		if ('parent' in entity) {
+			var parentId = entity['parent']
+			if (parentId != 'OBI:0000658') {//Top level spec.
+				var parent = self.specification[parentId]
+				if (!parent) console.log("MISSING:", parentId)
+
+				if (parent && parent['datatype'] == 'model' && 'components' in parent) {
+					for (componentId in parent['components']) {
+						if (entity['id'] != componentId) {
+							var component = self.specification[componentId]
+							// "true" prevents a parent's other is_a subclass models from being pursued.
+							//components.push ( this.getEntitySpecFormParts(component, depth + 1, true) )
+							components.push( this.getEntitySpecFormComponent(componentId, entity['path'], depth + 1) )
+						}
+					}	
+				}
+			}
+		}
+		*/
 

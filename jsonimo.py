@@ -42,7 +42,7 @@ except ImportError: # Python 2.6
 	from ordereddict import OrderedDict
 
 
-CODE_VERSION = '0.0.4'
+CODE_VERSION = '0.0.5'
 
 def stop_err( msg, exit_code=1 ):
 	sys.stderr.write("%s\n" % msg)
@@ -80,8 +80,6 @@ class Ontology(object):
 			'vcf': 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#',
 			'dc': 'http://purl.org/dc/elements/1.1/',
 			'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
-			#'ancestro': 'http://purl.obolibrary.org/obo/ancestro_',    # SOON
-			'ancestro': 'http://www.ebi.ac.uk/ancestro/ancestro_',
 			'MESH': 'http://purl.bioontology.org/ontology/MESH/',
 			'SIO': 'http://semanticscience.org/resource/SIO_',
 			'typon': 'http://purl.phyloviz.net/ontology/typon#',
@@ -89,6 +87,7 @@ class Ontology(object):
 
 			# OBOFoundry ontologies:
 			"AGRO": "http://purl.obolibrary.org/obo/AGRO_",
+			'ancestro': 'http://purl.obolibrary.org/obo/ancestro_',  
 			"BFO": "http://purl.obolibrary.org/obo/BFO_",
  			"CHEBI": "http://purl.obolibrary.org/obo/CHEBI_",
  			"DOID": "http://purl.obolibrary.org/obo/DOID_",
@@ -1089,7 +1088,7 @@ class Ontology(object):
 		# This list is dumped into the specifications tree; subordinate items
 		# are placed in the picklists tree.
 		#
-		# These root nodes for categorical pick lists go into 'specifications' table
+		# These root nodes for categorical tree specification go into 'specifications' table
 
 		'categoricals': rdflib.plugins.sparql.prepareQuery("""
 			SELECT DISTINCT ?id ?datatype
@@ -1257,7 +1256,7 @@ class Ontology(object):
 		""", initNs = namespace),
 
 		# ################################################################
-		# STANDARDS INFORMATION
+		# CURRENTLY UNUSED: STANDARDS INFORMATION
 		# A "[field] 'member of' [some standard]" can have annotations of 
 		# standard-specific label, definition, hasAlternateId, etc.
 		# This query retrieves them; they are loaded into the parent entity's

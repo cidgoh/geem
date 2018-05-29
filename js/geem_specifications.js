@@ -4,9 +4,8 @@ function getdataSpecification(report_type) {
 	In portal.html this is called each time a dataSpecification is loaded, 
 	and also when a	new specificationType is selected.
 
-	FUTURE: resource.@context needs to be tailored to only what is in returned spec.
 	FUTURE: resource.metadata needs to be tailored to only what is in returned spec?
-	FUTURE: units array will be ordered so that favoured unit is first.
+	FUTURE: units array will be ordered so that favoured (default) unit is first.
 
 	INPUT
 	report_type: 	Desired report type, see below; also supplied by 
@@ -56,14 +55,14 @@ function getdataSpecification(report_type) {
 			case 'form.yml':
 				content = jsyaml.dump(getEntitySpecForm(entityId), 4) //indent of 4
 				break; 
-			
+
 			case 'form_all_nodes.tsv': // for all nodes
 				content = getTabularSpecification(getEntitySpecForm(entityId), true, true)
 				break; 
 			case 'form_all_edges.tsv': //for all edges
 				content = getTabularSpecification(getEntitySpecForm(entityId), false, true) 
 				break; 
-			// "Core" version strips off all choice nodes & edges
+			// "Core" version strips off all categorical choice nodes & edges
 			case 'form_core_nodes.tsv': // for core nodes
 				content = getTabularSpecification(getEntitySpecForm(entityId), true, false)
 				break; 
@@ -72,8 +71,9 @@ function getdataSpecification(report_type) {
 				break;
 
 			case 'form.html':
-				content = $('form#mainForm')[0].outerHTML
+				content = render(entityId);
 				break
+
 			case 'form_submission.json':
 				content = getFormData('form#mainForm')
 				break
@@ -82,9 +82,11 @@ function getdataSpecification(report_type) {
 				// https://labkey.med.ualberta.ca/labkey/wiki/REDCap%20Support/page.view?name=crftemp
 			case 'ontofox.txt':
 			case 'sql.txt':
+
 			// Future formats:
 			// https://github.com/geneontology/obographs/
 			// https://www.ebi.ac.uk/ols/docs/api#resources-terms ???
+			
 				content = '<strong>This feature is coming soon!</strong>'
 				break; 
 		}
@@ -112,11 +114,12 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 	Converts given flat table object of ontology entities, including each
 	item's links to components, models, and choices.
 
-	ISSUE: NEED TO DISTINGUISH ITEMS BY PATH BECAUSE EACH NODE MAY DIFFER
-	BECAUSE OF PATH FEATURES
-	minCardinality and maxCardinality
+	ISSUE: NEED TO DISTINGUISH ITEMS BY PATH BECAUSE EACH NODE MAY DIFFER, BECAUSE OF PATH FEATURES
+	e.g. two "Organism" lists, but one has certain items filtered 
+	or, e.g. minCardinality and maxCardinality differ on lists of same entity.
 
 	FUTURE: 3rd table for language lookup?
+
 	Other possible node headers :depth, disabled, hasDbXref=[], features={}, fractionDigits, totalDigits, whiteSpace, enumeration
 
 	*/
@@ -132,8 +135,8 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 	else
 		var parts = ['component', 'unit']
 
-	for (var ontology_id in userSpecification.specifications) { //So far just 1
-		// specification should be
+	for (var ontology_id in userSpecification.specifications) { 
+		// So far just 1 specification id should be provided
 		var stack = [userSpecification.specifications[ontology_id]] // Starts with reference to root node.
 		var done = {}
 
@@ -150,10 +153,12 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 						// We skip the disjunction (anonymous) nodes for now.  
 						// No logic at moment to enforce cardinality restrictions
 
+
+
 					}
 					else {
-
-						var parent_path = '/' + entity['path'].slice(1,-1).join('/') // conveys hierarchy
+						// Convey path hierarchy to entity.
+						var parent_path = '/' + entity['path'].slice(1,-1).join('/') 
 
 						var record = []
 						for (var fieldptr in nodeHeader) {
@@ -189,7 +194,8 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 								var maxCardinality = ('maxCardinality' in item) ? item['maxCardinality'] : ''
 								edges.push([parts[ptr], full_path, item['id'], minCardinality, maxCardinality])
 
-								// Maintains visual order like form rendering:
+								// Insert this component or choice or unit into stack at beginning. 
+								// This maintains visual order to support form rendering.
 								stack.splice(pointer, 0, item)
 								pointer ++
 							}
@@ -200,11 +206,13 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 		}
 	}
 
-	// Sort all items by datatype, then label
+	// On hold: Sort all items by datatype, then label. Issue is then sorting of field order is lost.
 	//nodes.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[2].localeCompare(b[2]) }) // datatype, label
+
 	// Then make header to 1st line
 	nodes.splice(0, 0, nodeHeader); 
 
+	// On hold, as above.
 	//edges.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) }) // 0=id, 1=relation
 	// Then make header to 1st line
 	edges.splice(0, 0, edgeHeader); 
@@ -250,7 +258,7 @@ function getEntitySpecRoot(entityId = null) {
  	return top.resource
 }
 
-function getEntitySpecContext(entity_dict=null) {
+function getEntitySpecContext(entity_dict = null) {
 	/* A GEEM resource file has all the @context prefixes required for 
 	identifiers in its specifications
 	    "@context": {
@@ -267,13 +275,15 @@ function getEntitySpecContext(entity_dict=null) {
 		*/
 
 	if (entity_dict) {
-		context = {'owl':'http://www.w3.org/2002/07/owl/'} // 'owl:' shows up in cardinality statements
-		resContext = top.resource['@context']
+		var context = {'owl':'http://www.w3.org/2002/07/owl/'} // 'owl:' shows up in cardinality statements
+		var resContext = top.resource['@context']
 		// Cycle through content, adding all pertinent prefixes.
 		for (var entity_id in entity_dict) {
 			var entity = entity_dict[entity_id]
 			setContext(entity_id, context, resContext)
-			setContext(entity.datatype, context, resContext)
+			if (entity.datatype && entity.datatype.indexOf(':') > 0) // e.g. xsd:string 
+				setContext(entity.datatype, context, resContext)
+
 			if ('components' in entity) 
 				for (entity_id in entity.components) setContext(entity_id, context, resContext) 
 			if ('models' in entity) 
@@ -296,9 +306,15 @@ function getEntitySpecContext(entity_dict=null) {
 
 function setContext(ref, context, resContext) {
 	// If context doesn't have prefix, add it.
-	prefix = ref.split(':')[0]
-	if (! (prefix in context))
-		context[prefix] = resContext[prefix]
+
+	if (ref && ref.indexOf(':') > 0) {
+		var prefix = ref.split(':')[0]
+
+		if (! (prefix in context))
+			context[prefix] = resContext[prefix]
+	}
+	else
+		console.log('No prefix for: ', ref) 
 }
 
 function getEntitySpec(spec, entityId = null, inherited = false) {
@@ -405,38 +421,37 @@ function setModalDownload(contentObj) {
 	$("#modalEntityContentContainer").empty().html(contentPre)
 	$("#modalEntity").foundation('open')
 	$("#spec_download")
-		.show()
     	.off()
     	.on('click', function() { downloadDataSpecification(contentObj) })
+    	.show()
 }
 
 function setDataSpecification(contentObj) {
 	// Used on portal.html page, not as popup.
 	$('#dataSpecification').removeClass('hide').show().html(contentObj.content) 
 	$("#spec_download")
-		.removeAttr('disabled').removeClass('disabled')
     	.off()
     	.on('click', function() { downloadDataSpecification(contentObj) })
-
+		.removeAttr('disabled').removeClass('disabled')
 }
 
 
 function downloadDataSpecification(contentObj) {
 	/* This creates dynamic file download link for a given ontology entity. 
-	File generated from #dataSpecification field contents directly.
-	It fires when user clicks download button of specification, immediately 
-	before file is downloaded.
+	File generated from contentObj contents directly.
+	It fires when user clicks download button (#spec_download) of 
+	specification, immediately before file is downloaded.
 
 	INPUT
 		contentObj
 			.content 		Textual content to download	 
-			.report_type	a file name suffix string including "[file suffix].[file type]"" 
+			.report_type	a file name suffix string formatted as "[file suffix].[file type]"
 			.id				ontology term/form identifier.
 
 	OUTPUT
 	Download file link has attributes:
-		download = [ontology_id]_[report_type]
-		href = base 64 encoding of #dataSpecification field.
+		download = [ontology_id]_[file suffix].[file type]
+		href = base 64 encoding of contentObj.content
 	*/
 	if (contentObj.content.length) {
 

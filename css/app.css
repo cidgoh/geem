@@ -40,9 +40,9 @@ a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#219
 #makePackageDropdown {max-width:400px;}
 
 #mainForm div.field-wrapper {clear:both;border-left:1px solid transparent;}
-#mainForm div.field-wrapper.exclude {background-color:silver;}
-#mainForm div.field-wrapper.exclude input {display:none;}
-#mainForm div.field-wrapper.exclude .chosen-container {display:none;}
+#mainForm div.field-wrapper.exclude {background-color:silver;} 
+#mainForm div.field-wrapper.exclude input, #mainForm div.field-wrapper.exclude select {cursor:not-allowed; pointer-events: none;background-color:silver;}
+#mainForm div.field-wrapper.exclude .chosen-container {display:none;} /* chosen select container */
 
 /* #mainForm > div.field-wrapper.children > label {font-weight:bold;font-size:1.2rem;} */
 /* #mainForm > div.field-wrapper.children > div.field-wrapper.children > label {font-size:1.1rem;} */

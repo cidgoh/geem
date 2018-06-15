@@ -3,9 +3,9 @@
 The OntologyForm class provides all functions needed (using jquery, Zurb 
 Foundation and app.css) to render and populate an ontology-driven form.
 
-REDESIGN SO renderEntity() runs off of getEntitySpecForm()
-
 WISHLIST:
+	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be generic
+	  and have a Foundation additional rendering pass.
 	- Allow xml datatype formats for date&time to be inherited from parent model
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
 	- Also option for 3rd party database field name for form storage
@@ -15,8 +15,8 @@ WISHLIST:
 
 Author: Damion Dooley
 Project: genepio.org/geem
-Updated: April 15, 2018
-
+Updated: May 28, 2018
+ 
 */
 
 // These fields are merged into select options synonyms="..." for searching.
@@ -26,9 +26,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	/*
 	 "resource" includes @context, metadata, and specifications
 	 self.specification is currently loaded by reference.  
-	 SHOULD THIS BE A DEEP COPY?!!! OR A SPECIFICATION GLEANED VIA 
 	 	getEntitySpecRoot(entityId = null)
-	 So user can go select package to place spec in?
 	 VIA $.extend(true, {}, self.specification) 
 
 	*/
@@ -55,7 +53,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		$('li.active[role="menuitem"]').removeClass('active')
 
 		if (entityId) {
-			// Splits off first entity id if path given
+			// Focuses on first entity id if path given
 			if (entityId.indexOf('/') != -1)
 				entityId = entityId.substr(0, entityId.indexOf('/'))
 			self.entityId = entityId
@@ -69,7 +67,17 @@ function OntologyForm(domId, resource, settings, callback) {
 			// FUTURE: Ideally open menu to this item if not already.
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
-			form_html = render(self.entityId)
+			/*
+			spec = getEntitySpecForm(self.entityId)
+			form_html = ''
+			// Should only be one entityId in spec.
+			for (var entityId in spec.specifications) {
+				entity = spec.specificspec.specifications[entityId]
+				form_html += renderFormSpecification(entity)
+			}
+			*/
+
+			form_html = render(entityId)
 
 			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
 			if (form_html == '') {
@@ -124,7 +132,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		 	// All of form's regular <select> inputs (e.g. NOT the ones for picking units)
 		 	// get some extra smarts for type-as-you-go filtering.
-		 	$('select.regular').each(configureSelect); 
+		 	configureSelect($('#mainForm select.regular')) 
 		 	
 		 	// Reinitialize form since it was deleted above.
 		 	// FUTURE: UPGRADE FOUNDATION, use reInit()
@@ -142,6 +150,13 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (self.formDomId) {
 			self.formDomId.off().empty()
 		}
+	}
+
+	setOptionalHidden = function() {
+		/* Displays form with only required fields visible.
+		
+		*/
+		self.formDomId.find('div:not(.tabs-panel) > div.field-wrapper.optional').hide()
 	}
 
 	setMinimalForm = function() {
@@ -186,44 +201,53 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	}
 
-	configureSelect = function() {
-		// Applies jQuery chosen()
- 		var fieldWrapper = $(this).parents("div.field-wrapper").first()
- 		var min = fieldWrapper.attr("minCardinality")
-		var max = fieldWrapper.attr("maxCardinality")
-		var required = fieldWrapper.is('.required')
-		if (required) $(this).prop('required',true); //Should do this in setCardinality() instead?
- 		singleDeselect = (!min || min == 0) ? true : false
+	configureSelect = function(select_inputs) {
+		select_inputs.each( function() {
 
- 		$(this).chosen({
- 			placeholder_text_multiple: 'Select items ...',
- 			placeholder_text_single: 'Select an item ...',
- 			no_results_text: "Oops, nothing found!",
- 			disable_search_threshold: 10,
- 			max_selected_options: max,
- 			allow_single_deselect: singleDeselect, //only works on single-select where first option value is ""
- 			search_contains: true, //substring search
- 			inherit_select_classes: true // inherits <select class=""> css
- 		})
+			// Applies jQuery chosen() 
+	 		var fieldWrapper = $(this).parents("div.field-wrapper").first()
+	 		var min = fieldWrapper.attr("minCardinality")
+			var max = fieldWrapper.attr("maxCardinality")
+			var required = fieldWrapper.is('.required')
+			if (required) $(this).prop('required',true); //Should do this in setCardinality() instead?
+	 		singleDeselect = (!min || min == 0) ? true : false
 
- 		// But using this doesn't allow us to keep selection list open:
- 		//.on('chosen:showing_dropdown',function(event) {
- 		//	console.log('showing')
- 		//})
+	 		$(this).chosen({
+	 			placeholder_text_multiple: 'Select items ...',
+	 			placeholder_text_single: 'Select an item ...',
+	 			no_results_text: "Oops, nothing found!",
+	 			disable_search_threshold: 10,
+	 			max_selected_options: max,
+	 			allow_single_deselect: singleDeselect, //only works on single-select where first option value is ""
+	 			search_contains: true, //substring search
+	 			inherit_select_classes: true // inherits <select class=""> css
+	 		})
 
- 		// Other options:
- 		// width: xyz pixels.
- 		// max_shown_results: only show the first (n) matching options...
- 		// <option selected> , <option disabled> 
+	 		// But using this doesn't allow us to keep selection list open:
+	 		//.on('chosen:showing_dropdown',function(event) {
+	 		//	console.log('showing')
+	 		//})
 
+	 		// Other options:
+	 		// width: xyz pixels.
+	 		// max_shown_results: only show the first (n) matching options...
+	 		// <option selected> , <option disabled> 
+	 	
+	 	})
  	}
 
 
 	setCardinality = function() {
 		/* This renders each form element's HTML required attribute via 
 		javascript.	It also adds attributes for minCardinality and 
-		maxCardinality.  These are used dynamically by the form 
-		processor to show user controls for adding or removing input elements.
+		maxCardinality.  
+
+		FUTURE: These are used dynamically by the form processor to
+		show user controls for adding or removing input elements.
+
+		OUTPUT:
+			div.field-wrapper class annotated with .required or .optional
+			div.field-wrapper gets extra label for optional/required info
 		*/
 		var cardinalityLabel = ''
 
@@ -281,7 +305,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				else
 					$(this).addClass('optional')
 
-				// Show optional and required status messages.
+				// Show optional and required information.
 				if (self.settings.ontologyDetails && cardinalityLabel.length > 0 ) 
 					$(this).children('label') //children(".fi-shopping-cart")
 						.before('<span class="info label float-right">' + cardinalityLabel + '</span>')
@@ -322,7 +346,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return rootSpecification
 	}
 
-	getEntitySpecFormComponent = function(entityId, path = [], depth = 0, inherited = false) {
+	getEntitySpecFormComponent = function(entityId, path = [], depth = 0) { //, inherited = false
 		/*
 		Modelled closely on OntologyForm.render(), this returns just the form 
 		specification object as it is "unwound" from pure JSON specification.
@@ -339,7 +363,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			return {} //specification // Nothing selected yet.
 		}
 
-		console.log("Render Form Spec ", path, entityId, depth, inherited)
+		console.log("Render Form Spec ", path, entityId, depth)
 
 		if (depth > 20) {
 			console.log ("Node: ", entityId, " loop went AWOL while rendering path", path )
@@ -351,7 +375,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			return {} //specification
 		}
 
-		if (!inherited) inherited = false // NECESSARY?
+		//if (!inherited) inherited = false
 
 		// deepcopy specification entity so we can change it.
 		var entity = $.extend(true, {}, self.specification[entityId]) 
@@ -398,7 +422,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			case 'xmls:token':
 				getEntitySpecFormUnits(entity)
 				break;
-	 
+																							
 			// renderInteger(entity, minInclusive, maxInclusive)
 			case 'xmls:integer':			getEntitySpecFormNumber(entity);	break
 			case 'xmls:positiveInteger': 	getEntitySpecFormNumber(entity, 1);	break
@@ -473,7 +497,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return $.extend(true, freshEntity, entity) 
 	}
 
-	getEntitySpecFormParts = function(entity, depth, inherited = false) {
+	getEntitySpecFormParts = function(entity, depth) { //, inherited = false
 		/*
 		Convert given "specification" entity's "parts" list into a list of 
 		processed entities.
@@ -484,10 +508,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		var components = []
 
 		// Whether we're going up or down, we add on ALL 'has component' items EXCEPT FOR VISITED ones.
-		if (inherited == false)
-			for (var entityId2 in entity['components'] ) { 
-				components.push( this.getEntitySpecFormComponent(entityId2, entity['path'], depth + 1) )
-			}
+		//if (inherited == false)
+		for (var entityId2 in entity['components'] ) { 
+			components.push( this.getEntitySpecFormComponent(entityId2, entity['path'], depth + 1) )
+		}
 
 		return components
 	}
@@ -598,19 +622,72 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 
+	renderFormSpecification = function(entity, path = [], depth = 0) { //, inherited = false
+		/*
 
+		*/
+		var entityId = entity.id
+		path = entity.path
+		depth = entity.depth
+
+		var entity = $.extend(true, {}, self.specification[entityId])
+
+		var html = ''
+
+
+	}
+
+
+	initializeEntity = function(entity, entityId, path, depth) {
+		// Initialize entity
+		entity['depth'] = depth
+
+		// Created entity takes on whatever parent involks it.
+		if (depth > 0) {
+			entity['parent'] = path[path.length - 1]
+			//console.log('Assigning parent', entity['parent'], ' to ', entityId )
+		}
+
+		entity['path'] = path.concat([entityId])
+		// Create a unique domId out of all the levels 
+		entity['domId'] = entity['path'].join('/')
+
+		getFeatures(entity) // Guarantees that entity['features'] exists
+
+		// These may depend on above features fetch.
+		entity['uiLabel'] = getLabel(entity)
+		entity['uiDefinition'] = getDefinition(entity)
+
+		//var help = getFeature(entity, 'help', entity['parent_id'])
+		if (entity.features.help)
+			entity['help'] = entity.features.help.value
+
+		// Future: do only with some kinds of datatype
+		//var preferred_unit = getFeature(entity, 'preferred_unit', entity['parent_id'])
+		if (entity.features.preferred_unit) 
+			entity['preferred_unit'] = entity.features.preferred_unit.value
+
+		setConstraints(entity)
+
+		if (entity['depth'] > 0) {
+			// When this entity is displayed within context of parent entity, that entity will 
+			// indicate how many of this part are allowed.
+			getCardinality(entity)
+		}
+
+		entity['disabled'] = ''
+	}
 
 
 	/*********************** FORM PART RENDERING **********************/
 
 
-	render = function(entityId, path = [], depth = 0, inherited = false, minimal = false) {
+	render = function(entityId, path = [], depth = 0) { //, inherited = false
 		if (entityId === false) return '' // Nothing selected yet.
 
-		console.log("Render [path, entityId, depth, inherited] ", path, entityId, depth, inherited)
+		console.log("Render [path, entityId, depth, inherited] ", path, entityId, depth)
 
-		if (!inherited) inherited = false
-		if (!minimal) minimal = false
+		//if (!inherited) inherited = false
 		var html = ''
 
 		if (depth > 20) {
@@ -629,7 +706,9 @@ function OntologyForm(domId, resource, settings, callback) {
 		initializeEntity(entity, entityId, path, depth)
 
 		// Used for some controls for sub-parts
-		var	labelHTML = (minimal) ? '' : renderLabel(entity)
+		var	labelHTML = ''
+		if (entity.datatype != 'disjunction')
+			labelHTML = renderLabel(entity)
 
 		switch (entity['datatype']) {
 			case undefined: // Anonymous node
@@ -909,7 +988,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + renderLabel(child) + '</a></li>'
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
-			htmlTabContent += 	this.render(entityId, entity['path'], depth+1, false, true )
+			htmlTabContent += 	this.render(entityId, entity['path'], depth+1) //, false, true 
 			htmlTabContent += '</div>\n'		
 		}
 
@@ -1256,9 +1335,12 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 	getDefinition = function(entity) {
-		/*
-		 NOTE: Definition currently cropped to tweet-size below
+		/* If an entity has a features.definition - coming from 3rd party 
+		specification, then use that. Otherwise if it has a general ontology
+		driven uiDefinition, use that. Otherwise use entity's definition annotation.
 
+		NOTE: End of next sentence in definition after 140 characters is sought. 
+		returned definition is clipped to that point.
 		*/
 		var definition = ''
 
@@ -1285,7 +1367,10 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 	getFieldWrapper = function(entity, html) {
-
+		/* Surrounds given field element with general DOM id, css and cardinality controls
+			If the given entity has model or choice components, this adds a
+			'chindren' CSS class.
+		*/ 
 		return ['<div class="field-wrapper field'
 			,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 			,		'" '

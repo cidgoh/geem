@@ -35,6 +35,8 @@ function getdataSpecification(report_type) {
 
 		switch (report_type) {
 
+			// These are flat formats, i.e. each ontology element is in a top-level
+			// specification dictionary.
 			case 'raw.json':
 				content = JSON.stringify(getEntitySpecRoot(entityId), null, 2)
 				break; 
@@ -42,12 +44,12 @@ function getdataSpecification(report_type) {
 				content = jsyaml.dump(getEntitySpecRoot(entityId), 4)  //indent of 4
 				break;
 			
-			// Provides @context JSON-LD RDF prefix list pertinent to given entity 
+			// Provides only the @context JSON-LD RDF prefix list pertinent to given entity 
 			case 'context.json':
 				content = JSON.stringify(getEntitySpecContext(entityId), null, 2)
 				break; 
 
-			// FEATURE: These two could have all entity.path removed, as all info
+			// FUTURE: These two could have all entity.path removed, as all info
 			// is already in entity.domID
 			case 'form.json':
 				content = JSON.stringify(getEntitySpecForm(entityId), null, 2)
@@ -75,6 +77,7 @@ function getdataSpecification(report_type) {
 				break
 
 			case 'form_submission.json':
+				// Provides a json structure of field identifiers and values that user has entered.
 				content = getFormData('form#mainForm')
 				break
 
@@ -86,7 +89,7 @@ function getdataSpecification(report_type) {
 			// Future formats:
 			// https://github.com/geneontology/obographs/
 			// https://www.ebi.ac.uk/ols/docs/api#resources-terms ???
-			
+
 				content = '<strong>This feature is coming soon!</strong>'
 				break; 
 		}
@@ -145,16 +148,15 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 			if ('path' in entity)  {
 				var pathString = entity['path'].join('')
 				if (! (pathString in done) ) {
+					// FUTURE: Verify that done[] is needed. How would duplicates show up?
 					done[pathString] = true
 
 					var full_path = '/' + entity['path'].slice(1,-1).join('/')
 
+					// We skip the disjunction (anonymous) nodes for now 
+					// but their components are pursued via parts loop below
+					// No logic at moment to enforce cardinality restrictions
 					if (entity.datatype == 'disjunction') {
-						// We skip the disjunction (anonymous) nodes for now.  
-						// No logic at moment to enforce cardinality restrictions
-
-
-
 					}
 					else {
 						// Convey path hierarchy to entity.
@@ -332,6 +334,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 		if (entity) {
 			spec[entityId] = entity // reference entity directly - flat list
 			
+			/* NOT CURRENTLY CALLED
 			if (inherited == true) {
 				// Entity inherits primary ancestors' parts (the ones that led
 				// from start of rendering to here). 
@@ -340,6 +343,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 				if (parentId && parentId != 'OBI:0000658') 
 					getEntitySpec(spec, parentId, true)
 			}
+			*/
 
 			getEntitySpecItems(spec, entity, 'components')
 			getEntitySpecItems(spec, entity, 'models') 
@@ -378,6 +382,11 @@ function getEntitySpecItems(spec, entity, type) {
 function getFormData(domId) {
 	/* The hierarchic form data is converted into minimal JSON data 
 	   packet for transmission back to server.
+
+	   OUTPUT
+	   	json string representation of html input and select values,
+	   	organized by hierarchy of ontology ids as they appear in 
+	   	input id attribute (separated by forward slashes)
 	*/
 	var obj = {}
 
@@ -388,7 +397,8 @@ function getFormData(domId) {
 			var path = id.split('/')
 			for (var ptr in path) {
 				var item2 = path[ptr]
-				if (!(item2 in focus) ) focus[item2] = {}
+				if (!(item2 in focus) ) 
+					focus[item2] = {}
 				if (ptr == path.length-1) //If at end of path, make assignment
 					focus[item2] = $(item).val()
 				else

@@ -472,7 +472,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
 			,		' id="'+entity.domId+'"'
 			,		' type="text"'
-			,		getHTMLInputlaceholder(entity)
+			,		getHTMLInputPlaceholder(entity)
 			//,		getStringConstraints(entity)
 			,		entity.disabled
 			,		'/>\n'

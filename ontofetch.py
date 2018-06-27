@@ -156,23 +156,7 @@ class Ontology(object):
 		if not len(args):
 			stop_err('Please supply an OWL ontology file (in RDF format)')
 
-		# Input is either a file or URL
-		# e.g. https://raw.githubusercontent.com/obi-ontology/obi/master/obi.owl
-		main_ontology_file = args[0] 
-
-		if main_ontology_file[0:4].lower() != 'http':
-			main_ontology_file = self.onto_helper.check_folder(main_ontology_file, "Ontology file")
-			if not os.path.isfile(main_ontology_file):
-				stop_err('Please check the OWL ontology file path')			
-
-		# Ontology core filename (minus .owl suffix) used in output file name
-		ontology_filename = os.path.basename(main_ontology_file).rsplit('.',1)[0]
-		# Output folder can be relative to current folder
-		if options.output_folder:
-			output_folder = options.output_folder 
-		else:
-			output_folder = os.path.dirname(os.path.realpath(sys.argv[0]))
-		output_file_basename = output_folder + '/' + ontology_filename
+		(main_ontology_file, output_file_basename) = self.onto_helper.check_ont_file(args[0], options)
 
 		# Load main ontology file into RDF graph
 		print "Fetching and parsing " + main_ontology_file + " ..."
@@ -205,33 +189,8 @@ class Ontology(object):
 		print 'Doing terms', len(entities)
 		self.do_entities(entities)
 		
-		self.do_output_json(output_file_basename)
-		self.do_output_tsv(output_file_basename)
-
-	def do_output_json(self, output_file_basename):
-		with (open(output_file_basename + '.json', 'w')) as output_handle:
-			# DO NOT USE sort_keys=True on piclists etc. because this overrides
-			# OrderedDict() sort order.
-			output_handle.write(json.dumps(self.onto_helper.struct, sort_keys = False, indent = 4, separators = (',', ': ')))
-
-	def do_output_tsv(self, output_file_basename):
-
-		# TSV OUTPUT
-		output = []
-
-		# Header:			
-		output.append('\t'.join(self.fields))
-
-		for (key, entity) in self.onto_helper.struct['specifications'].items():
-			row = []
-			for field in self.fields:
-				value = entity[field] if field in entity else ''
-				row.append(value.replace('\t',' ').encode('utf-8'))  #
-
-			output.append('\t'.join(row))
-
-		with (open(output_file_basename + '.tsv', 'w')) as output_handle:
-			output_handle.write('\n'.join(output))
+		self.onto_helper.do_output_json(output_file_basename)
+		self.onto_helper.do_output_tsv(output_file_basename, self.fields)
 
 
 	def do_entities(self, table):
@@ -307,7 +266,6 @@ class Ontology(object):
 		self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, myDict)
 
 		self.do_entity_text(id)
-
 		self.do_entity_synonyms(id)
 
 

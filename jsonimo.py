@@ -43,8 +43,6 @@ except ImportError: # Python 2.6
 	from ordereddict import OrderedDict
 
 
-CODE_VERSION = '0.0.5'
-
 def stop_err( msg, exit_code=1 ):
 	sys.stderr.write("%s\n" % msg)
 	sys.exit(exit_code)
@@ -60,72 +58,384 @@ class Ontology(object):
 	"""
 	Read in an ontology and its include files. Run Sparql 1.1 queries which retrieve:
 	- ontology defined fields, including preferred label and definition 
+	
 
 
 	"""
+	CODE_VERSION = '0.0.5'
 
 	def __init__(self):
 
-		self.graph=rdflib.Graph()
+		self.onto_helper.graph = rdflib.Graph()
 
-		self.struct = OrderedDict()
-		# JSON-LD @context markup, also used by jsonimo.py to make compact URI's.
-		# This enables output .json file to have shorter URI's using prefixes.
+		""" 
+		Add these PREFIXES to Protege Sparql query window if you want to test a query there:
 
-		# SHOULD AUTO-GENERATE THIS BASED ON MERGED ONTOLOGY'S ENTITY PREFIXES
-		self.struct['@context'] = {
-			'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-			'owl': 'http://www.w3.org/2002/07/owl#',
-			'xmls': 'http://www.w3.org/2001/XMLSchema#',
-			'vcard': 'http://www.w3.org/2006/vcard/ns#',
-			'vcf': 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#',
-			'dc': 'http://purl.org/dc/elements/1.1/',
-			'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
-			'MESH': 'http://purl.bioontology.org/ontology/MESH/',
-			'SIO': 'http://semanticscience.org/resource/SIO_',
-			'typon': 'http://purl.phyloviz.net/ontology/typon#',
-			'NDF-RT':'http://evs.nci.nih.gov/ftp1/NDF-RT/NDF-RT.owl#',
+		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#>
+		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX OBO: <http://purl.obolibrary.org/obo/>
+		PREFIX xmls: <http://www.w3.org/2001/XMLSchema#>
+		""" 
 
-			# OBOFoundry ontologies:
-			"AGRO": "http://purl.obolibrary.org/obo/AGRO_",
-			'ancestro': 'http://purl.obolibrary.org/obo/ancestro_',  
-			"BFO": "http://purl.obolibrary.org/obo/BFO_",
- 			"CHEBI": "http://purl.obolibrary.org/obo/CHEBI_",
- 			"DOID": "http://purl.obolibrary.org/obo/DOID_",
- 			"ENVO": "http://purl.obolibrary.org/obo/ENVO_",
- 			'EFO': 'http://www.ebi.ac.uk/efo/EFO_',
- 			'EO': "http://purl.obolibrary.org/obo/EO_",
- 			'ERO': "http://purl.obolibrary.org/obo/ERO_",
- 			'ExO': 'http://purl.obolibrary.org/obo/ExO_',
-            "FOODON": "http://purl.obolibrary.org/obo/FOODON_",
-			"GEO": "http://purl.obolibrary.org/obo/GEO_",
-            "GENEPIO": "http://purl.obolibrary.org/obo/GENEPIO_",
-			"GAZ": "http://purl.obolibrary.org/obo/GAZ_",
-			"HP": "http://purl.obolibrary.org/obo/HP_",
-			"IAO": "http://purl.obolibrary.org/obo/IAO_",
-        	"IDO": "http://purl.obolibrary.org/obo/IDO_",
-        	"MI": "http://purl.obolibrary.org/obo/MI_",
-        	"MPATH": "http://purl.obolibrary.org/obo/MPATH_",
- 			'NCBITaxon' : 'http://purl.obolibrary.org/obo/NCBITaxon_',
-			"NCIT": "http://purl.obolibrary.org/obo/NCIT_",
-			"OBI": "http://purl.obolibrary.org/obo/OBI_",
-			'OMIABIS': 'http://purl.obolibrary.org/obo/OMIABIS_',
-			"OMP": "http://purl.obolibrary.org/obo/OMP_",
-			'PATO': "http://purl.obolibrary.org/obo/PATO_",
-     		"PCO": "http://purl.obolibrary.org/obo/PCO_",
-     		"PO": "http://purl.obolibrary.org/obo/PO_",
-        	"RO": "http://purl.obolibrary.org/obo/RO_",
-        	"SO": "http://purl.obolibrary.org/obo/SO_",
-            "STATO": "http://purl.obolibrary.org/obo/STATO_",
-			"SYMP": "http://purl.obolibrary.org/obo/SYMP_",
-			"TRANS": "http://purl.obolibrary.org/obo/TRANS_",
-			"UBERON": "http://purl.obolibrary.org/obo/UBERON_",
-			"UO": "http://purl.obolibrary.org/obo/UO_"
+		self.queries = {
+			##################################################################
+			# Generic TREE "is a" hierarchy from given root.
+			#
+			'tree': rdflib.plugins.sparql.prepareQuery("""
+				SELECT DISTINCT ?id ?label ?parent_id ?deprecated ?replaced_by
+				WHERE {	
+					?parent_id rdfs:subClassOf* ?root.
+					?id rdfs:subClassOf ?parent_id.
+					OPTIONAL {?id rdfs:label ?label}.
+	 				OPTIONAL {?id GENEPIO:0000006 ?ui_label}. # for ordering
+					OPTIONAL {?id owl:deprecated ?deprecatedAnnot.
+						BIND(xsd:string(?deprecatedAnnot) As ?deprecated).
+					}.
+					OPTIONAL {?id IAO:0100001 ?replaced_byAnnot.
+						BIND(xsd:string(?replaced_byAnnot) As ?replaced_by).
+					}.	
+				}
+				ORDER BY ?parent_id ?ui_label ?label 
+			""", initNs = self.onto_helper.namespace),
 
-			# metadata needs its field/URI mapping too. 
+			# SECOND VERSION FOR ''
+			##################################################################
+			# RETRIEVE DATUM CARDINALITY, LIMIT FOR SPECIFICATION RELATIVE TO PARENT
+			# X 'has component' [some|exactly N|min n| max n] Y 
+			#
+			'specification_components': rdflib.plugins.sparql.prepareQuery("""
+
+				SELECT DISTINCT ?parent (?datum as ?id) ?cardinality ?limit
+				WHERE { 	
+					?restriction owl:onProperty RO:0002180. # has component
+					?parent rdfs:subClassOf ?restriction. 
+
+					{?restriction owl:onClass ?datum.
+					?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?limit. 
+					?restriction ?cardinality ?limit.}
+					UNION 
+					{?restriction owl:someValuesFrom ?datum.
+					?restriction ?cardinality ?datum} # Sets ?cardinality to "owl:someValuesFrom" 
+
+					OPTIONAL {?datum rdfs:label ?label}.
+				 } ORDER BY ?label
+
+			""", initNs = self.onto_helper.namespace),
+
+			##################################################################
+			# 
+			#    <owl:Class rdf:about="&obo;GENEPIO_0001627">
+	        #		<rdfs:label xml:lang="en">temperature of sample</rdfs:label>
+	        #		<rdfs:subClassOf rdf:resource="&obo;GENEPIO_0001628"/>
+	        #		<rdfs:subClassOf>
+	        #    		<owl:Restriction>
+	        #        		<owl:onProperty rdf:resource="&obo;GENEPIO_0001605"/>
+	        #        		<owl:someValuesFrom rdf:resource="&xsd;decimal"/>
+	        #    		</owl:Restriction>
+	        #		</rdfs:subClassOf>
+	        #		...
+	        #
+			'primitives': rdflib.plugins.sparql.prepareQuery("""
+
+			SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
+				WHERE { 	
+					BIND (GENEPIO:0001605 as ?hasPvaluespec).
+					BIND (GENEPIO:0001655 as ?categorical).
+					?restriction owl:onProperty ?hasPvaluespec. 
+					?datum rdfs:subClassOf ?restriction.
+					
+					{?restriction owl:someValuesFrom ?datatype. FILTER ( isURI(?datatype))} 
+					UNION
+						{?restriction owl:someValuesFrom ?datatypeObj. 
+						?datatypeObj owl:onDatatype ?datatype.
+						?datatypeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
+						?restrictColl ?constraint ?expression} 
+					UNION # retrieve all categorical datums that are descended from a 'has primitive value spec' class. 
+						{?datum rdfs:subClassOf ?categorical.
+						BIND (xmls:anyURI as ?datatype)} 
+					UNION # matches a single condition on 
+						{?restriction owl:onDataRange ?datatype.  FILTER (! isBlank(?datatype)).
+						?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?expression.
+						?restriction ?constraint ?expression } 
+					UNION
+						{?restriction owl:onDataRange ?dataRangeObj.
+						?dataRangeObj owl:onDatatype ?datatype. 
+						?dataRangeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
+						?restrictColl ?constraint ?expression.
+						 } 
+				 } 
+			""", initNs = self.onto_helper.namespace),
+
+		
+			##################################################################
+			# 
+			#   The difference between this and below "primitives" query is that this one 
+			#	returns descendant datums.  Run inherited query first to calculate inheritances; 
+			#	then run "primitives" to override inherited values with more specific ones.
+			# 
+			#	Handle much simpler inheritance of categoricals in 'categoricals' query below
+
+			'inherited': rdflib.plugins.sparql.prepareQuery("""
+
+			SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
+				WHERE { 	
+					BIND (GENEPIO:0001605 as ?hasPvaluespec).
+					?restriction owl:onProperty ?hasPvaluespec. 
+					?datum rdfs:subClassOf/rdfs:subClassOf+ ?restriction.
+
+					{?restriction owl:someValuesFrom ?datatype.} 
+					UNION {?restriction owl:someValuesFrom ?datatypeObj. 
+						?datatypeObj owl:onDatatype ?datatype.
+						?datatypeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
+						?restrictColl ?constraint ?expression.}
+					UNION # matches a single condition on 
+						{?restriction owl:onDataRange ?datatype.  FILTER (! isBlank(?datatype)).
+						?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?expression.
+						?restriction ?constraint ?expression } 
+					UNION
+						{?restriction owl:onDataRange ?dataRangeObj.
+						?dataRangeObj owl:onDatatype ?datatype. 
+						?dataRangeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
+						?restrictColl ?constraint ?expression.
+						 } 
+					 FILTER (?datatype != xmls:anyURI)
+				 } order by ?datatype
+		 """, initNs = self.onto_helper.namespace),
+
+
+			##################################################################
+			# CATEGORICAL FIELDS
+			# One must mark an ontology term as a 'categorical tree specification'
+			# in order for it to have the 'xmls:anyURI' datatype.
+			# This list is dumped into the specifications tree; subordinate items
+			# are placed in the picklists tree.
+			#
+			# These root nodes for categorical tree specification go into 'specifications' table
+
+			'categoricals': rdflib.plugins.sparql.prepareQuery("""
+				SELECT DISTINCT ?id ?datatype
+				WHERE { 
+					BIND (GENEPIO:0001655 as ?categorical).
+					BIND (xmls:anyURI as ?datatype).
+					?id rdfs:subClassOf ?categorical.
+				 } 
+			""", initNs = self.onto_helper.namespace),
+
+			##################################################################
+			# INDIVIDUALS
+			# We accept the convention that categorical picklist trees containing 
+			# entities represented by proper names - like "British Columbia", 
+			# "Vancouver (BC)", "Washington (DC)", etc. - may have "individual" nodes, 
+			# i.e. are represented by owl:NamedIndividual.
+			#
+			# Multilingual selection of items in sorted order is done client side.
+			# 
+			'individuals': rdflib.plugins.sparql.prepareQuery("""
+				
+				SELECT DISTINCT ?id ?parent ?datatype
+				WHERE {
+					BIND (GENEPIO:0001655 as ?categorical_root).
+					BIND (xmls:anyURI as ?datatype).
+					?id rdf:type owl:NamedIndividual.
+					?id rdf:type ?parent.
+					?parent rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
+
+					OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
+					OPTIONAL {?id rdfs:label ?label}.
+
+				}
+				ORDER BY ?parent ?ui_label ?label
+			""", initNs = self.onto_helper.namespace),
+
+			##################################################################
+			# ALL PRIMITIVE FIELD UNITS
+
+			'units' :rdflib.plugins.sparql.prepareQuery("""
+
+				SELECT DISTINCT (?datum as ?id)	?unit	?label ?ui_label
+				WHERE { 
+					BIND (GENEPIO:0001605 as ?has_primitive_value_spec). 
+					BIND (IAO:0000039 as ?has_measurement_unit_label).
+					?datum rdfs:subClassOf* ?restriction3.
+					FILTER (isIRI(?datum)).
+					?restriction3 owl:onProperty ?has_measurement_unit_label.
+					?restriction3 (owl:someValuesFrom | owl:withRestrictions*/owl:someValuesFrom/owl:unionOf*/rdf:rest*/rdf:first) ?unit.
+					?unit rdfs:label ?label
+					FILTER ( isURI(?unit))
+
+				 } ORDER BY ?datum ?unit ?label
+			""", initNs = self.onto_helper.namespace),
+
+
+			# ################################################################
+			# UI FEATURES
+			# A picklist item or form input or specification can be hidden or required or
+			# other feature with respect to its parent, via 
+			# As well, a form input datum can have UI features indicated just by annotating it directly.
+			# FUTURE: a feature may be qualified by user's user type.
+			#
+			# Typical "lookup" UI feature axioms:
+			#
+			#    <owl:Class rdf:about="http://purl.obolibrary.org/obo/GENEPIO_0001742">
+			#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GENEPIO_0001655"/>
+			#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GEO_000000005"/>
+			#        <GENEPIO:0000006 xml:lang="en">region</GENEPIO:0000006>
+			#        <GENEPIO:0001763>lookup</GENEPIO:0001763>
+			#		...
+			#
+		    #	<owl:Axiom>
+		    #	    <GENEPIO:0001763>lookup</GENEPIO:0001763>
+		    #	    <owl:annotatedSource rdf:resource="&obo;GENEPIO_0001740"/>
+		    #	    <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
+		    #	    <owl:annotatedTarget>
+		    #	        <owl:Restriction>
+		    #	            <owl:onProperty rdf:resource="&obo;RO_0002180"/>
+		    #	            <owl:someValuesFrom rdf:resource="&obo;GENEPIO_0001287"/>
+		    #	        </owl:Restriction>
+		    #	    </owl:annotatedTarget>
+		    #	</owl:Axiom>
+		    #
+
+
+			'features': rdflib.plugins.sparql.prepareQuery("""
+				SELECT DISTINCT ?id ?referrer ?feature ?value 
+				WHERE { 
+					{# Get direct (Class annotated) features
+						?id rdf:type owl:Class.  
+						?id GENEPIO:0001763 ?value.  # user interface feature
+						?id ?feature ?value. #
+						BIND ('' as ?referrer).
+					}
+					UNION
+					# VERIFY IF THIS IS RETURNING ANYTHING?
+					{	# Get features placed on axiom if it is a simple (subClass?) someValuesFrom relation. 
+						?axiom rdf:type owl:Axiom.
+						?axiom owl:annotatedSource ?id.
+						?axiom owl:annotatedTarget ?referrer. 
+						FILTER(isURI(?referrer))
+						?axiom GENEPIO:0001763 ?value.  # user interface feature
+						?axiom ?feature ?value.
+					}
+				}
+			""", initNs = self.onto_helper.namespace),
+
+			
+			# ################################################################
+			# UI "MEMBER OF" STANDARD FEATURES
+			#
+			# A standard has datums via "has component" which can be annotated
+			# with standard-specific label, definition, UI definition,
+			# hasAlternateId and other attributes. Add all of these to list of
+			# features above.
+			# 
+		    #    <owl:Axiom>
+			#        <GENEPIO:0001763>lookup</GENEPIO:0001763>
+			#        <owl:annotatedSource rdf:resource="&obo;OBI_0000938"/>
+			#        <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
+			#        <owl:annotatedTarget>
+			#            <owl:Restriction>
+			#                <owl:onProperty rdf:resource="&obo;GENEPIO_0001605"/>
+			#                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+			#                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
+			#            </owl:Restriction>
+			#        </owl:annotatedTarget>
+			#    </owl:Axiom>
+
+			'feature_annotations': rdflib.plugins.sparql.prepareQuery("""
+				SELECT DISTINCT ?id ?referrer ?feature ?value 
+				WHERE { 
+					?axiom rdf:type owl:Axiom.
+					?axiom owl:annotatedSource ?referrer.
+					?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
+					?restriction owl:onProperty RO:0002180. # has component
+					?restriction (owl:onClass|owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality | owl:someValuesFrom) ?id
+					FILTER(isURI(?id))
+					#Get feature as label, definition, UI feature, alternative identifier (database field)
+					?axiom (rdfs:label|IAO:0000115|GENEPIO:0001763|OBO:hasAlternativeId) ?value.
+					# Not using these here: UI definition GENEPIO:0000162, UI label GENEPIO:0000006
+					?axiom ?feature ?value.
+				}
+			""", initNs = self.onto_helper.namespace),
+
+			# ################################################################
+			# UI LABELS 
+			# These are annotations directly on an entity.  This is the only place
+			# that ui_label and ui_definition should really operate. Every entity
+			# in OWL file is retrieved for their rdfs:label, IAO definition etc.
+			#
+			'entity_text': rdflib.plugins.sparql.prepareQuery("""
+
+				SELECT DISTINCT ?label ?definition ?ui_label ?ui_definition
+				WHERE {  
+					{?datum rdf:type owl:Class} 
+					UNION {?datum rdf:type owl:NamedIndividual} 
+					UNION {?datum rdf:type rdf:Description}.
+					OPTIONAL {?datum rdfs:label ?label.} 
+					OPTIONAL {?datum IAO:0000115 ?definition.}
+					OPTIONAL {?datum GENEPIO:0000006 ?ui_label.} 
+					OPTIONAL {?datum GENEPIO:0000162 ?ui_definition.}
+				} ORDER BY ?label
+			""", initNs = self.onto_helper.namespace),
+
+			# ################################################################
+			# CURRENTLY UNUSED: STANDARDS INFORMATION
+			# A "[field] 'member of' [some standard]" can have annotations of 
+			# standard-specific label, definition, hasAlternateId, etc.
+			# This query retrieves them; they are loaded into the parent entity's
+			# corresponding members[id] dictionary
+			#
+			# CURRENTLY UNUSED
+			#
+			'standards_information': rdflib.plugins.sparql.prepareQuery("""
+				SELECT DISTINCT ?id ?referrer ?feature ?value 
+				WHERE { 
+					?axiom rdf:type owl:Axiom.
+					?axiom owl:annotatedSource ?id.
+					?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
+					?restriction owl:onProperty RO:0002350. # member of
+					?restriction owl:someValuesFrom ?referrer.
+					FILTER(isURI(?id)).
+					#Get feature as label, definition, UI feature, 
+					#Not using these here: UI definition GENEPIO:0000162, UI label GENEPIO:0000006
+					?axiom (rdfs:label|IAO:0000115|GENEPIO:0001763) ?value.  
+					?axiom ?feature ?value.
+				}
+			""", initNs = self.onto_helper.namespace),
+
+
+			# ################################################################
+			# oboInOwl:hasDbXref (an annotation property) cross references to other terminology databases 
+			'dbreferences': rdflib.plugins.sparql.prepareQuery("""
+
+				SELECT DISTINCT ?dbXref
+				WHERE {  
+					{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
+					?datum oboInOwl:hasDbXref ?dbXref.
+				}
+			""", initNs = self.onto_helper.namespace),
+
+
+			# ################################################################
+			# oboInOwl:hasSynonym
+			# Picklist items are augmented with synonyms in order for 
+			# type-as-you-go inputs to return appropriately filtered phrases
+			#
+			# INPUT
+			# 	?datum : id of term to get labels for
+			# OUTPUT
+			#   ?Synonym ?ExactSynonym ?NarrowSynonym
+			#
+			'entity_synonyms': rdflib.plugins.sparql.prepareQuery("""
+
+				SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
+				WHERE {  
+					{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
+					{?datum oboInOwl:hasSynonym ?Synonym.} 
+					UNION {?datum oboInOwl:hasExactSynonym ?ExactSynonym.}
+					UNION {?datum oboInOwl:hasNarrowSynonym ?NarrowSynonym.}
+					UNION {?datum IAO:0000118 ?AlternativeTerm.}
+				}
+			""", initNs = self.onto_helper.namespace),
 		}
-		self.struct['specifications'] = {}
-		self.struct['metadata'] = {}
 
 
 	def __main__(self): #, main_ontology_file
@@ -135,143 +445,215 @@ class Ontology(object):
 		(options, args) = self.get_command_line()
 
 		if options.code_version:
-			print CODE_VERSION
-			return CODE_VERSION
+			print self.CODE_VERSION
+			return self.CODE_VERSION
 
 		if not len(args):
 			stop_err('Please supply an OWL ontology file (in RDF format)')
 
 		# Accepts relative path with file name e.g. ../genepio-edit.owl
-		main_ontology_file = args[0] 
-
-		main_ontology_file = self.check_folder(main_ontology_file, "Ontology file")
-		if not os.path.isfile(main_ontology_file):
-			stop_err('Please check the OWL ontology file path')			
-
+		(main_ontology_file, output_file_basename) = self.onto_helper.check_ont_file(args[0], options)
 		print "Processing ", main_ontology_file, " ..."
 
-		# Get ontology core filename, without .owl suffix
-		ontology_filename = os.path.basename(main_ontology_file).rsplit('.',1)[0]
-		
-		# Get ontology version, and add to core filename
-		#...
-
 		# Load main ontology file into RDF graph
-		# ISSUE: ontology file taken in as ascii; rdflib doesn't accept utf-8 characters
-		# so can experience conversion issues in string conversion stuff like .replace() below
-		self.graph.parse(main_ontology_file)
+		try:
+			# ISSUE: ontology file taken in as ascii; rdflib doesn't accept
+			# utf-8 characters so can experience conversion issues in string
+			# conversion stuff like .replace() below
+			self.onto_helper.graph.parse(main_ontology_file, format='xml')
+
+		except URLError as e:
+			#urllib2.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+			stop_err('WARNING:' + main_ontology_file + " could not be loaded!\n")
 
 		# Add each ontology include file (must be in OWL RDF format)
-		self.ontologyIncludes(os.path.dirname(main_ontology_file) + '/imports')
+		self.onto_helper.do_ontology_includes(main_ontology_file)
 
-		# load self.struct with ontology metadata
-		self.ontologyMetadata(self.doQueryTable('metadata'))
+		# Load self.onto_helper.struct with ontology metadata
+		self.onto_helper.set_ontology_metadata()
+		print "Metadata:", json.dumps(self.onto_helper.struct['metadata'],  sort_keys=False, indent=4, separators=(',', ': '))
 
-		# Retrieve all subclasses of 'data representational model'
-		# and place in self.struct.specifications
-		specBinding = {'root': rdflib.URIRef(self.expandId('OBI:0000658'))} 
-		self.doSpecifications(self.doQueryTable('tree', specBinding ))
-		
-		# ALSO GET OTHER TOP-LEVEL TERMS?
-		# ... 
+		# Retrieve subclasses of "data representational model"(OBI:0000658) 
+		# and place in self.onto_helper.struct.specifications
+		print 'Doing term hierarchy query'
+		specBinding = {'root': rdflib.URIRef(self.get_expanded_id('OBI:0000658'))} 
+		entities = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
+		print 'Doing terms', len(entities)
+		self.do_entities(entities, 'model')
 
-		self.doSpecComponents(self.doQueryTable('specification_components' ) )	
-		self.doPrimitives(self.doQueryTable('inherited') )		
-		self.doPrimitives(self.doQueryTable('primitives') )
-		self.doPrimitives(self.doQueryTable('categoricals') )
+		self.doSpecComponents(self.onto_helper.do_query_table(self.queries['specification_components'] ))
+		self.doPrimitives(self.onto_helper.do_query_table(self.queries['inherited'] ))
+		self.doPrimitives(self.onto_helper.do_query_table(self.queries['primitives'] ))
+		self.doPrimitives(self.onto_helper.do_query_table(self.queries['categoricals'] ))
 
 
 		# GENEPIO_0001655 = Class:Categorical tree specification
-		picklistBinding = {'root': rdflib.URIRef(self.expandId('GENEPIO:0001655'))}
-		self.doPickLists(self.doQueryTable('tree', picklistBinding ))
-		self.doPickLists(self.doQueryTable('individuals') )
+		# CHANGE TO: ANY categorical Value Specification 
+		#	- include targets of 'specifies value of'(OBI:0001927)
+		# 	- AS WELL AS ANY subClassOf expressions of categorical.
+		#
+		picklistBinding = {'root': rdflib.URIRef(self.get_expanded_id('GENEPIO:0001655'))}
+		self.doPickLists(self.onto_helper.do_query_table(self.queries['tree'], picklistBinding ))
+		self.doPickLists(self.onto_helper.do_query_table(self.queries['individuals']))
 
-		self.doUIFeatures(self.doQueryTable('features') ,'features')
+		self.doUIFeatures(self.onto_helper.do_query_table(self.queries['features']) ,'features')
 		# Second call for 'member of' can override entity and 'has component' features established above.
 
-		self.doLabels(['specifications']) 
-		
 		# doUIFeatures here because its "order" feature reorganizes some of above content.
-		self.doUIFeatures(self.doQueryTable('feature_annotations'), 'feature_annotations')
+		self.doUIFeatures(self.onto_helper.do_query_table(self.queries['feature_annotations']), 'feature_annotations')
 		# This is implementing any user interface feature="preferred_unit:..." 
-		self.doUnits(self.doQueryTable('units') )
+		self.doUnits(self.onto_helper.do_query_table(self.queries['units'] ))
 
 		# DO NOT USE sort_keys=True on piclists etc. because this overrides OrderedDict() sort order.
 		# BUT NEED TO IMPLEMENT json ordereddict sorting patch.
+		self.onto_helper.do_output_json(output_file_basename)
 
-		with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
-			output_handle.write(json.dumps(self.struct,  sort_keys=False, indent=4, separators=(',', ': ')))
-
-
-	def ontologyMetadata(self, table):
-		""" Each ontology has metadata fields associated with it, in self.struct.metadata
-		# Fields directly from sparql: 
-		# dc:title -> title 					// e.g. Genomic Epidemiology Ontology
-		# dc:description -> description
-		# owl:versionIRI -> versionIRI  		// e.g. http://purl.obolibrary.org/obo/genepio/releases/2018-04-24/genepio.owl
-		# oboInOwl:default-namespace -> prefix  // e.g. GENEPIO
-		# dc:license -> license 				// e.g. http://creativecommons.org/licenses/by/3.0/
-		# dc:date -> date 						// have to get value component , self.struct['metadata']['date']['value']
-
-		# status = release // Assumed
-        # resource = "http://purl.obolibrary.org/obo/genepio.owl",
-        # type = "ontology"
-
-		"""
-		print
-		print "Metadata:", table
-		for myDict in table: # Should only be 1 row containing a dictionary.
-			self.struct['metadata'] = myDict
-		self.struct['metadata']['type'] = 'ontology'
-		self.struct['metadata']['status'] = 'release'
-		self.struct['metadata']['date'] = self.struct['metadata']['date']['value']
+		#with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
+		#	output_handle.write(json.dumps(self.onto_helper.struct,  sort_keys=False, indent=4, separators=(',', ': ')))
 
 
-	def doSpecifications(self, table):
-		""" ####################################################################
-			SPECIFICATIONS
+	def do_entities(self, table, datatype):
+		""" 
+			Converts table of ontology terms - each having its own row of
+			dictionary, into self.struct['specifications'] dictionary.
+			References to parents are also pursued - on a second iteration
+			so that they are primarily filled in on first pass if already
+			mentioned in hierarchy, but barebones record is created for
+			them if not.
 
-			A specification is a subClassOf 'data representational model', and is
-			basically a complex entity that defines a form, record or report. 
+			FUTURE: add "other_parents" column?
 
-			* The 'has_member' relation specifies what component entities it has
-			  and include the cardinality restrictions on how many of a given 
-			  component type are allowed (some, > 0, = 1, < n).
-			* A component entity may have a "has primitive data type".  
-
-			For example one can specify that a contact can have up to 3 phone numbers.
-
-			When an entity "is a" subclass of a specification, it means that in addition to
-			all of the entity's own 'has_value_specification' attributes, it inherits those
-			of its parent(s).  WHERE TO PLACE THEM?
-
-			In example below, a "contact specification - patient" (GENEPIO:0001677) inherits 
-			attributes from "contact specification - person" (GENEPIO:0001606)
-
-			Example:
+			Example output of one term conversion:
 				"GENEPIO:0001677": {
 		            "id": "GENEPIO:0001677",
 		            "parent": "GENEPIO:0001606",
-		            "prefLabel": "contact specification - patient"
+		            "ui_label": "contact specification - patient"
 		            }
 		        }
 
+			
 		"""
-		struct = 'specifications'
+
+		# List of parents to process after 1st pass through table's entities.
+		parents = [] 
+
 		for myDict in table:
-			myDict['id'] = str(myDict['id'])
-			myDict['datatype'] = 'model'
-			self.setDefault(self.struct, struct, myDict['id'], myDict)
+			self.do_entity(myDict, datatype)
 
-			parentId = self.get_parent_id(myDict) # primary parent according to data rep hierarchy
+			parent_id = self.onto_helper.get_parent_id(myDict) 
+			if not parent_id in parents:
+				parents.append(parent_id)
 
-			self.setDefault(self.struct, struct, parentId, {
-				'id': parentId, 
-				'datatype': 'model',
-				'models': OrderedDict()
-			})
+		# 2nd pass does parents:
+		# Parent gets entry in structure too, though maybe not a label.
+		# If not already mentioned in its own right, then it was parent
+		# of top-level entity, and not really important.
+		for parent_id in parents:
+			if not parent_id in self.onto_helper.struct['specifications']:
+				self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', parent_id, {
+					'id': parent_id, 
+					'datatype': 'entity'
+				})
 
-			self.setStruct(self.struct, struct, parentId, 'models', myDict['id'], [])
+	##### ISSSUE: MUST ATTACH PARENT MODELS[child_id] = []
+	#self.set_struct(self.onto_helper.struct, 'specifications', parentId, 'models', myDict['id'], [])
+
+
+	def do_entity(self, myDict, datatype):
+		"""
+		Inserts or overlays entity described by myDict into 
+		self.struct['specifications']
+		
+		INPUT
+			myDict:dict (erow from table)
+			prefix:string indicates source ontology for term
+		"""
+
+		id = str(myDict['id'])
+		myDict['id'] = id
+		myDict['datatype'] = datatype
+
+		if 'prefix' in self.onto_helper.struct['metadata']:
+			myDict['ontology'] = self.onto_helper.struct['metadata']['prefix']
+
+		if 'replaced_by' in myDict:
+			myDict['replaced_by'] = self.onto_helper.get_entity_id(myDict['replaced_by'])
+
+	# Addresses case where a term is in query more than once, as
+	# a result of being positioned in different places in hierarchy.
+	# self.struct[struct][id]['other_parent'].append(parentId)
+
+		self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, myDict)
+
+		self.do_entity_text(id)
+		self.do_entity_synonyms(id)
+		self.do_entity_dbxrefs(id)
+
+
+	def do_entity_text(self, id):
+		"""
+		For given entity, all 'labels' query fields are returned (rdfs:label, IAO 
+		definition, UI label, UI definition) and added to the entity directly.
+
+		"""
+		myURI = rdflib.URIRef(self.onto_helper.get_expanded_id(id))
+		rows = self.onto_helper.graph.query(
+			self.queries['entity_text'],	
+			initBindings = {'datum': myURI} 
+		)
+		# Should only be 1 row to loop through
+		for row in rows: 
+			myDict = row.asdict()	
+			# Adds any new text items to given id's structure
+			self.onto_helper.struct['specifications'][id].update(myDict) 
+
+
+	def do_entity_dbxrefs(self, id):
+		"""
+		Adds list of hasDbXref references to given entity.
+		"""
+		uriID = rdflib.URIRef(self.get_expanded_id(id))
+		dbreferences = self.onto_helper.graph.query(self.queries['dbreferences'], initBindings = {'datum': uriID })
+		if len(dbreferences):
+			dbxrefList = self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, 'hasDbXref', [])		
+			for row in dbreferences:
+				dbxrefList.append(row['dbXref'])
+
+
+	def do_entity_synonyms(self, id):
+		"""
+		Augment each entry in 'specifications' with array of hasSynonym etc. 
+		synonyms gathered from 'entity_synonyms' query of annotations: 
+
+			oboInOwl:hasSynonym
+			oboInOwl:hasExactSynonym
+			oboInOwl:hasNarrowSynonym
+			IAO:0000118 AlternativeTerm
+
+		ISSUE: 
+		Not Multilingual yet.  Some synonym entries have {language: french} or
+		{language: Scottish Gaelic} etc. at end. 
+
+		INPUT
+			?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
+		"""
+
+		# Add preferred label and definition for items in each table
+		for id in self.onto_helper.struct['specifications']:
+
+			uriID = rdflib.URIRef(self.get_expanded_id(id))
+			synonyms = self.onto_helper.graph.query(self.queries['entity_synonyms'], initBindings={'datum': uriID })
+			for row in synonyms:
+				for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
+
+					if row[field]: 
+						synonymTypeList = self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, 'has' + field, [])
+						# Clean up synonym phrases
+						# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
+						stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
+						phrases = stringy.strip().replace(', ','\n').replace('"','').split('\n')
+						for phrase in phrases:
+							synonymTypeList.append( phrase.strip())
 
 
 	def doPickLists(self, table):
@@ -293,16 +675,16 @@ class Ontology(object):
 			myDict.pop('parent_id')
 			#This picklist node might already have been mentioned in another picklist 
 			# node's member list so it might already be set up.
-			self.setDefault(self.struct, struct, id, myDict)
-			self.setDefault(self.struct, struct, id, 'datatype', 'xmls:anyURI') # MARKS PICKLIST ITEMS
-			self.setDefault(self.struct, struct, id, 'member_of', [])
-			self.getStruct(self.struct, struct, id, 'member_of').append(parentId)
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, myDict)
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'datatype', 'xmls:anyURI') # MARKS PICKLIST ITEMS
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'member_of', [])
+			self.onto_helper.get_struct(self.onto_helper.struct, struct, id, 'member_of').append(parentId)
 			# ALSO ADD 'located in' as 'part of' links?????
 
 			# Ditto for parent, if any...
-			self.setDefault(self.struct, struct, parentId, {'id': parentId} )
-			self.setDefault(self.struct, struct, parentId, 'choices', OrderedDict())
-			self.setStruct(self.struct, struct, parentId, 'choices', id, []) # empty array is set of features.
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, {'id': parentId} )
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'choices', OrderedDict())
+			self.set_struct(self.onto_helper.struct, struct, parentId, 'choices', id, []) # empty array is set of features.
 
 
 	def doSpecComponents(self, table):
@@ -324,8 +706,8 @@ class Ontology(object):
 				print "Field Groups problem - missing id as string:", myDict
 				return
 
-			self.setDefault(self.struct, struct, id, {'id': id} )
-			self.setDefault(self.struct, struct, id, 'otherParent', [] )	
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, {'id': id} )
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'otherParent', [] )	
 
 			parentId = self.get_parent_id(myDict)
 			if parentId:
@@ -334,17 +716,17 @@ class Ontology(object):
 					print 'ERROR: an entity mistakenly is "parent" of itself: %s ' % id
 				else:
 					# Ensure parent exists and with default data type of 'model' since it has components.
-					self.setDefault(self.struct, struct, parentId, {'id': parentId, 'datatype': 'model'} )
-					self.struct[struct][id]['otherParent'].append(parentId)
+					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, {'id': parentId, 'datatype': 'model'} )
+					self.onto_helper.struct[struct][id]['otherParent'].append(parentId)
 
 					obj = {'cardinality': myDict['cardinality']}
 					if 'limit' in myDict: 
-						obj.update(self.getBindings(myDict['limit']))
+						obj.update(self.onto_helper.get_bindings(myDict['limit']))
 
 					# First time children list populated with this id's content:
-					self.setDefault(self.struct, struct, parentId, 'components', {})
-					self.setDefault(self.struct, struct, parentId, 'components', id, [])
-					self.getStruct(self.struct, struct, parentId, 'components', id).append(obj)
+					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'components', {})
+					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'components', id, [])
+					self.onto_helper.get_struct(self.onto_helper.struct, struct, parentId, 'components', id).append(obj)
 
 					# BNodes have no name but have expression.
 					if 'expression' in myDict: 
@@ -353,24 +735,20 @@ class Ontology(object):
 						print "HAS EXPRESSION: ", myDict['expression']
 
 						expression = myDict['expression']
-						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction usually
-						self.struct[struct][id]['parent_id'] = parentId
+						self.onto_helper.struct[struct][id]['datatype'] = expression['datatype'] # disjunction usually
+						self.onto_helper.struct[struct][id]['parent_id'] = parentId
 						# Anonymous nodes imbedded within other classes don't get labels.
-						self.struct[struct][id]['ui_label'] = '' 
-						self.struct[struct][id]['components'] = {}
+						self.onto_helper.struct[struct][id]['ui_label'] = '' 
+						self.onto_helper.struct[struct][id]['components'] = {}
 						# List off each of the disjunction items, all with a 'some'
 						for ptr, partId in enumerate(expression['data']):
 							# So far logical expression parts have no further info. (like cardinality)
-							self.struct[struct][id]['components'][partId] = [{
+							self.onto_helper.struct[struct][id]['components'][partId] = [{
 		                        "datatype": "xmls:nonNegativeInteger",
 		                        "cardinality": "owl:qualifiedCardinality",
 		                        "value": "1"
 		                    }] 
 
-#			else:
-				# If entity has no parent , case can't happen?!?!?!
-				# was only a 'component of' some other component.
-#				self.setDefault(self.struct, struct, id, 'datatype', 'model')
 
 	def doPrimitives(self, table):
 		""" 
@@ -414,13 +792,13 @@ class Ontology(object):
 		struct = 'specifications'
 		for myDict in table:
 			id = myDict['id']
-			self.setDefault(self.struct, struct, id, {'id':id} )
-			record = self.struct[struct][id]
-			self.setDefault(record, 'datatype', myDict['datatype'])
+			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, {'id':id} )
+			record = self.onto_helper.struct[struct][id]
+			self.onto_helper.set_entity_default(record, 'datatype', myDict['datatype'])
 
 			if record['datatype'] != myDict['datatype']:
-				self.setStruct(record,'datatype', myDict['datatype'])
-				self.setStruct(record,'constraints', []) #override past constraints.
+				self.set_struct(record,'datatype', myDict['datatype'])
+				self.set_struct(record,'constraints', []) #override past constraints.
 				#print "ERROR for %s: multiple datatypes assigned: %s, %s" % (id, record['datatype']['type'], myDict['datatype'])
 
 			if 'constraint' in myDict:
@@ -431,7 +809,7 @@ class Ontology(object):
 					if isinstance(myDict['expression'], basestring):	
 						obj['value'] = myDict['expression']
 					else:
-						obj.update(self.getBindings(myDict['expression']))
+						obj.update(self.onto_helper.get_bindings(myDict['expression']))
 
 				"""
 				The use of "<" and ">" lead to minExcludes and maxExcludes constraints.
@@ -452,8 +830,8 @@ class Ontology(object):
 				elif record['datatype'] in ['xmls:anyURI'] and constraint == 'owl:qualifiedCardinality' and int(obj['value']) == 1:
 					continue
 
-				self.setDefault(record,'constraints', [])
-				self.getStruct(self.struct, struct, id, 'constraints').append(obj)
+				self.onto_helper.set_entity_default(record,'constraints', [])
+				self.onto_helper.get_struct(self.onto_helper.struct, struct, id, 'constraints').append(obj)
 
 
 	def doUnits(self, table):
@@ -469,15 +847,15 @@ class Ontology(object):
 		"""
 
 		for myDict in table:
-			if not myDict['id'] in self.struct['specifications']:
+			if not myDict['id'] in self.onto_helper.struct['specifications']:
 				print "NOTE: field [%s] isn't listed in a specification, but a unit [%s] is attached to it" % (myDict['id'],myDict['unit'])
 				continue
 			else:
-				self.setDefault(self.struct, 'specifications', myDict['id'], 'units', [])
-				self.getStruct(self.struct, 'specifications', myDict['id'], 'units').append(myDict['unit'])
+				self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', myDict['id'], 'units', [])
+				self.onto_helper.get_struct(self.onto_helper.struct, 'specifications', myDict['id'], 'units').append(myDict['unit'])
 
 				# Ensure specifications has this unit
-				self.setStruct(self.struct, 'specifications' ,myDict['unit'] , {
+				self.set_struct(self.onto_helper.struct, 'specifications' ,myDict['unit'] , {
 					'id': myDict['unit'],
 					'ui_label': myDict['label'],
 					'datatype': 'xmls:anyURI'
@@ -543,7 +921,7 @@ class Ontology(object):
 		#Loop through query results; each line has one id, feature, referrer.
 		for myDict in table:
 			entityId = myDict['id']
-			if not entityId in self.struct['specifications']:
+			if not entityId in self.onto_helper.struct['specifications']:
 				print "Error, no specification for id ", entityId, " when working on", table_name
 				continue
 
@@ -602,327 +980,29 @@ class Ontology(object):
 			# 'features' list.  Client side programming determines
 			# what overrides what.
 			if parent_id == '':
-				entity = self.struct['specifications'][entityId]
-				self.setDefault(entity, 'features', {})
+				entity = self.onto_helper.struct['specifications'][entityId]
+				self.onto_helper.set_entity_default(entity, 'features', {})
 				entity['features'][feature] = featureDict
 				if feature == 'order':
 					# Reorganize entity's components, models, and choices according to featureDict['value'] list.
-					self.reorder(entity,'models', featureDict['value'])
-					self.reorder(entity,'components', featureDict['value'])
-					self.reorder(entity,'choices', featureDict['value'])
+					self.onto_helper.reorder(entity,'models', featureDict['value'])
+					self.onto_helper.reorder(entity,'components', featureDict['value'])
+					self.onto_helper.reorder(entity,'choices', featureDict['value'])
 
 				continue
 
 			# Here entity has feature with respect to a parent, so mark in 
 			# parent's entity.  Normally use "components" link but what
 			# about models?
-			parent = self.getStruct(self.struct, 'specifications', parent_id)
+			parent = self.onto_helper.get_struct(self.onto_helper.struct, 'specifications', parent_id)
 			if not parent:
 				print "Error when adding feature: couldn't locate ", parent_id
 				continue
 				
 			featureDict['feature'] = feature
-			self.setDefault(parent, 'components', OrderedDict())
-			self.setDefault(parent, 'components', entityId,[])
-			self.getStruct(parent, 'components', entityId).append(featureDict)	
-
-
-	def reorder(self, entity, part, orderedKeys = None):
-		""" Order given entity part dictionary by given order array of ids, or alphabetically if none.
-			# components, models, choices are all orderedDict already.
-		"""
-		if part in entity:
-			if orderedKeys:
-				# Each entity[part] item is given a rank by the index location of its id in given orderedKeys list
-				entity[part] = OrderedDict(sorted(entity[part].items(), key=lambda item: orderedKeys.index(item[0]) if item[0] in orderedKeys else False))
-			else:
-				print "ordering", entity[part].items()
-				entity[part] = OrderedDict(sorted(entity[part].items(), key=attrgetter('ui_label')) )
-
-
-	def doLabels(self, list):
-		""" ####################################################################
-			For given list of entity dictionaries, augment each dictionary with onto
-			term label and definition.
-			ALSO lookup 
-				synonyms = ?datum ?synonym ?exactSynonym ?narrowSynonym
-				rdfs:DbXRefs = reference
-
-			FUTURE: handle multi-lingual content
-			ISSUE: Not Multilingual yet.  Some synonym entries have {language: french} or {language: Scottish Gaelic} etc. at end. 
-
-			INPUTS
-				 ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
-		"""
-
-		# Add preferred label and definition for items in each table
-		for table in list:
-			for id in self.struct[table]:
-				self.doALabel(table, id)
-				uriID = rdflib.URIRef(self.expandId(id))
-				dbreferences = self.graph.query(self.queries['dbreferences'], initBindings = {'datum': uriID })
-				if len(dbreferences):
-					dbxrefList = self.setDefault(self.struct, table, id, 'hasDbXref', [])		
-					for row in dbreferences:
-						dbxrefList.append(row['dbXref'])
-
-				synonyms = self.graph.query(self.queries['synonyms'], initBindings={'datum': uriID })
-				if len(synonyms):	
-					for row in synonyms:
-
-						for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
-	
-							if row[field]: 
-								synonymTypeList = self.setDefault(self.struct, table, id, 'has' + field, [])
-								# Clean up synonym phrases
-								# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
-								stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
-								phrases = stringy.strip().replace(', ','\n').replace('"','').split('\n')
-								for phrase in phrases:
-									synonymTypeList.append( phrase.strip())
-
-
-	def doALabel(self, table, id):
-		"""
-		For given entity, all 'labels' query fields are returned (label, IAO 
-		definition, UI label, UI definition) and added to the entity directly.
-
-		In order to do a sparql query to get back the label fields for an item,
-		we have to supply the query with initBindings which includes the 
-		binding for [prefix]:id so query can succeed for that item.  
-		E.g. GENEPIO:GENEPIO_12345 -> purl.obolibrary.org/obo/GENEPIO/GENEPIO_12345
-		"""
-		rows = self.graph.query(self.queries['labels'],	initBindings={'datum': rdflib.URIRef(self.expandId(id) ) } )
-		for row in rows: # Only one row returned per idRef / entity.
-			myDict = row.asdict()	
-			self.doLabel(myDict)
-			self.struct[table][id].update(myDict) #Adds new text items to given id's structure
-
-
-	def doLabel(self, myDict):
-		""" 
-			All ontology items have and need a rdfs:Label, but this is often
-			not nice to display to users. If no ui_label, ui_label is created as
-			a copy of Label. Then ui_label always exists, and is displayed on
-			form. If label <> ui_label, drop label field for efficiency's sake.
-
-			label, definition etc. annotations on an entity 'member of' parent
-			are kept in parent's 'components'.
-		"""
-		if not 'ui_label' in myDict: 
-			if not 'label' in myDict: # a data maintenance issue
-				myDict['label'] = '[no label]'
-				
-			myDict['ui_label'] = myDict['label']
-		if 'label' in myDict:
-			if myDict['label'] == myDict['ui_label']: myDict.pop('label')
-
-	############################## UTILITIES ###########################
-
-	def getBindings(self, myDict):
-		obj = {}
-		for entity in myDict:
-			obj[entity] = myDict[entity]
-
-		return obj
-
-	def get_parent_id(self, myDict):
-		if 'parent_id' in myDict: 
-			return str(myDict['parent_id']) # Sometimes binary nodes are returned
-		return None
-
-	def setStruct(self, focus,*args):
-		# Create a recursive dictionary path from focus ... to n-1 args, and 
-		# set it to value provided in last argument
-		value = args[-1]
-		for ptr, arg in enumerate(args[0:-1]):
-			if not arg in focus: focus[arg]={}
-			if ptr == len(args)-2:
-				focus[arg] = value 
-			else:
-				focus = focus[arg]
-
-
-	def setDefault(self, focus,*args):
-		""" 
-			Same as setStruct() but won't create path; it will only use existing path.
-		"""
-		if not focus:
-			print ( "ERROR: in setDefault(), no focus for setting: %s" % str(args[0:-1]) )
-			return None
-
-		value = args[-1]
-		for ptr, arg in enumerate(args[0:-1]):
-			#arg = str(arg) # binary nodes are objects
-			if not arg: stop_err( "ERROR: in setDefault(), an argument isn't set: %s" % str(args[0:-1]) ) 
-			if ptr == len(args)-2:
-				if not arg in focus:
-					focus[arg] = value
-				return focus[arg]
-
-			elif not arg in focus: 
-				print ( "ERROR: in setDefault(), couldn't find %s" % str(args[0:-1]) )
-				return False
-			else:
-				focus = focus[arg]
-
-	def getStruct(self, focus, *args):
-		"""
-			Navigate from focus object dictionary hierarchy down through 
-			textual keys, returning value of last key.
-		"""
-		try:
-			for arg in args:
-				focus = focus[arg]
-		except:
-			print "ERROR: in getStruct(), couldn't find '%s' key or struct in %s" % (str(arg), str(args) )
-			return None
-		return focus
-
-
-	def extractId(self, URI):
-		"""
-		 If URI's fragment has a recognized value from @context, return
-		 shortened version, e.g.
-		 
-		 	URI: http://purl.obolibrary.org/obo/GENEPIO_0001234
-		 	@context item: "GENEPIO": "http://purl.obolibrary.org/obo/GENEPIO_",
-		 """
-		if '_' in URI:
-			(path, fragment) = URI.rsplit('_',1)
-		elif '#' in URI: # Need '#' test first!    path#fragment
-			(path, fragment) = URI.rsplit('#',1)
-		elif '/' in URI:
-			(path, fragment) = URI.rsplit('/',1)
-		else:
-			path = False
-
-		if path:
-
-			for prefix, context_prefix in self.struct['@context'].iteritems():
-				if path == context_prefix[0:-1]: # snips last separation character 
-					return prefix + ":" + fragment
-			
-		return URI 
-
-
-	def expandId(self, URI):
-		# If a URI has a recognized prefix, create full version
-		if ':' in URI: 
-			(prefix, myid) = URI.rsplit(':',1)
-			for key, value in self.struct['@context'].iteritems():
-				if key == prefix: return value + myid
-			
-		return URI 
-
-
-	def ontologyIncludes(self, ontology_file_path='./imports/'):
-		"""
-		Detects all the import files in a loaded OWL ontology graph and adds them to the graph.
-		Currently assumes imports are sitting in a folder called "imports" in parent folder of this script. 
-		"""
-		imports = self.graph.query("""
-			SELECT distinct ?import_file
-			WHERE {?s owl:imports ?import_file.}
-			ORDER BY (?import_file)
-		""")		
-
-		print("It has %s import files ..." % len(imports))
-
-		for result_row in imports: # a rdflib.query.ResultRow
-			file = result_row.import_file.rsplit('/',1)[1]
-			file_path = ontology_file_path + '/' + file
-			try:
-				if os.path.isfile( file_path):
-					self.graph.parse(file_path)	
-				else:
-					print ('WARNING:' + file_path + " could not be loaded!  Does its ontology include purl have a corresponding local file? \n")
-
-			except rdflib.exceptions.ParserError as e:
-				print (file_path + " needs to be in RDF OWL format!")			
-
-
-	def doQueryTable(self, query_name, initBinds = {}):
-		"""
-		Given a sparql 1.1 query, returns a list of objects, one for each row result
-		Simplifies XML/RDF URI http://... reference down to a known ontology entity code defined in 
-		"""
-
-		query = self.queries[query_name]
-
-		try:
-			result = self.graph.query(query, initBindings=initBinds) #, initBindings=initBindings
-		except Exception as e:
-			print ("\nSparql query [%s] parsing problem: %s \n" % (query_name, str(e) ))
-			return None
-
-		# Can't get columns by row.asdict().keys() because columns with null results won't be included in a row.
-		# Handles "... SELECT DISTINCT (?something as ?somethingelse) ?this ?and ?that WHERE ....""
-		#columns = re.search(r"(?mi)\s*SELECT(\s+DISTINCT)?\s+((\?\w+\s+|\(\??\w+\s+as\s+\?\w+\)\s*)+)\s*WHERE", query)
-		#columns = re.findall(r"\s+\?(?P<name>\w+)\)?", columns.group(2))
-
-		STRING_DATATYPE = rdflib.term.URIRef('http://www.w3.org/2001/XMLSchema#string')
-		table = []
-		for ptr, row in enumerate(result):
-			rowdict = row.asdict()
-			newrowdict = {}
-
-			for column in rowdict:
-
-				# Each value has a datatype defined by RDF Parser: URIRef, Literal, BNode
-				value = rowdict[column]
-				valType = type(value) 
-				if valType is rdflib.term.URIRef : 
-					newrowdict[column] = self.extractId(value)  # a plain string
-
-				elif valType is rdflib.term.Literal :
-					literal = {'value': value.replace('\n', r'\n')} # Text may include carriage returns; escape to json
-					#_invalid_uri_chars = '<>" {}|\\^`'
-
-					if hasattr(value, 'datatype'): #rdf:datatype
-						#Convert literal back to straight string if its datatype is simply xmls:string
-						if value.datatype == None or value.datatype == STRING_DATATYPE:
-							literal = literal['value']
-						else:
-							literal['datatype'] = self.extractId(value.datatype)															
-
-					elif hasattr(value, 'language'): # e.g.  xml:lang="en"
-						#A query Literal won't have a language if its the result of str(?whatever) !
-						literal['language'] = self.extractId(value.language)
-					
-					else: # WHAT OTHER OPTIONS?
-						literal = literal['value']
-
-					newrowdict[column] = literal
-
-				elif valType is rdflib.term.BNode:
-					"""
-					Convert a variety of BNode structures into something simple.
-					E.g. "(province or state or territory)" is a BNode structure coded like
-					 	<owl:someValuesFrom> 
-							<owl:Class>
-								<owl:unionOf rdf:parseType="Collection">
-                    			   <rdf:Description rdf:about="&resource;SIO_000661"/> 
-                    			   <rdf:Description rdf:about="&resource;SIO_000662"/>
-                    			   ...
-                    """
-                    # Here we fetch list of items in disjunction
-					disjunction = self.graph.query(
-						"SELECT ?id WHERE {?datum owl:unionOf/rdf:rest*/rdf:first ?id}", 
-						initBindings={'datum': value} )		
-					results = [self.extractId(item[0]) for item in disjunction] 
-					newrowdict['expression'] = {'datatype':'disjunction', 'data':results}
-
-					newrowdict[column] = value
-
-				else:
-
-					newrowdict[column] = {'value': 'unrecognized column [%s] type %s for value %s' % (column, type(value), value)}
-
-			table.append(newrowdict)
-
-		return table
-
+			self.onto_helper.set_entity_default(parent, 'components', OrderedDict())
+			self.onto_helper.set_entity_default(parent, 'components', entityId,[])
+			self.onto_helper.get_struct(parent, 'components', entityId).append(featureDict)	
 
 
 	def get_command_line(self):
@@ -939,428 +1019,6 @@ class Ontology(object):
 
 		return parser.parse_args()
 
-
-	def check_folder(self, file_path, message = "Directory for "):
-		"""
-		Ensures file folder path for a file exists.
-		It can be a relative path.
-		"""
-		if file_path != None:
-
-			path = os.path.normpath(file_path)
-			if not os.path.isdir(os.path.dirname(path)): 
-				# Not an absolute path, so try default folder where script launched from:
-				path = os.path.normpath(os.path.join(os.getcwd(), path) )
-				if not os.path.isdir(os.path.dirname(path)):
-					stop_err(message + "[" + path + "] does not exist!")			
-					
-			return path
-		return None
-
-
-	""" 
-	Add these PREFIXES to Protege Sparql query window if you want to test a query there:
-
-	PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#>
-	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX OBO: <http://purl.obolibrary.org/obo/>
-	PREFIX xmls: <http://www.w3.org/2001/XMLSchema#>
-	""" 
-	namespace = { 
-		'owl': rdflib.URIRef('http://www.w3.org/2002/07/owl#'),
-		'rdfs': rdflib.URIRef('http://www.w3.org/2000/01/rdf-schema#'),
-		'rdf':	rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
-		'xmls': rdflib.URIRef('http://www.w3.org/2001/XMLSchema#'),
-		'dc': rdflib.URIRef('http://purl.org/dc/elements/1.1/'),
-		'oboInOwl': rdflib.URIRef('http://www.geneontology.org/formats/oboInOwl#'),
-		'OBO': rdflib.URIRef('http://purl.obolibrary.org/obo/'), # shortcut for all OBOFoundry purls
-		'IAO':	rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_'),
-		'GENEPIO':rdflib.URIRef('http://purl.obolibrary.org/obo/GENEPIO_'),
-		'RO':	rdflib.URIRef('http://purl.obolibrary.org/obo/RO_'),
-		'OBI':	rdflib.URIRef('http://purl.obolibrary.org/obo/OBI_')
-	}
-
-	queries = {
-		##################################################################
-		# Generic TREE "is a" hierarchy from given root.
-		# FUTURE: ADD SORTING OPTIONS, CUSTOM ORDER.
-		#
-		'tree': rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?id ?parent
-			WHERE {	
-				?parent_id rdfs:subClassOf* ?root.
-				?id rdfs:subClassOf ?parent_id.
-				OPTIONAL {?id rdfs:label ?label}.
-				OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
-			}
-			ORDER BY ?parent_id ?ui_label ?label 
-		""", initNs = namespace),
-
-		# SECOND VERSION FOR ''
-		##################################################################
-		# RETRIEVE DATUM CARDINALITY, LIMIT FOR SPECIFICATION RELATIVE TO PARENT
-		# X 'has component' [some|exactly N|min n| max n] Y 
-		#
-		'specification_components': rdflib.plugins.sparql.prepareQuery("""
-
-			SELECT DISTINCT ?parent (?datum as ?id) ?cardinality ?limit
-			WHERE { 	
-				?restriction owl:onProperty RO:0002180. # has component
-				?parent rdfs:subClassOf ?restriction. 
-
-				{?restriction owl:onClass ?datum.
-				?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?limit. 
-				?restriction ?cardinality ?limit.}
-				UNION 
-				{?restriction owl:someValuesFrom ?datum.
-				?restriction ?cardinality ?datum} # Sets ?cardinality to "owl:someValuesFrom" 
-
-				OPTIONAL {?datum rdfs:label ?label}.
-			 } ORDER BY ?label
-
-		""", initNs = namespace),
-
-		##################################################################
-		# 
-		#    <owl:Class rdf:about="&obo;GENEPIO_0001627">
-        #		<rdfs:label xml:lang="en">temperature of sample</rdfs:label>
-        #		<rdfs:subClassOf rdf:resource="&obo;GENEPIO_0001628"/>
-        #		<rdfs:subClassOf>
-        #    		<owl:Restriction>
-        #        		<owl:onProperty rdf:resource="&obo;GENEPIO_0001605"/>
-        #        		<owl:someValuesFrom rdf:resource="&xsd;decimal"/>
-        #    		</owl:Restriction>
-        #		</rdfs:subClassOf>
-        #		...
-        #
-		'primitives': rdflib.plugins.sparql.prepareQuery("""
-
-		SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
-			WHERE { 	
-				BIND (GENEPIO:0001605 as ?hasPvaluespec).
-				BIND (GENEPIO:0001655 as ?categorical).
-				?restriction owl:onProperty ?hasPvaluespec. 
-				?datum rdfs:subClassOf ?restriction.
-				
-				{?restriction owl:someValuesFrom ?datatype. FILTER ( isURI(?datatype))} 
-				UNION
-					{?restriction owl:someValuesFrom ?datatypeObj. 
-					?datatypeObj owl:onDatatype ?datatype.
-					?datatypeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
-					?restrictColl ?constraint ?expression} 
-				UNION # retrieve all categorical datums that are descended from a 'has primitive value spec' class. 
-					{?datum rdfs:subClassOf ?categorical.
-					BIND (xmls:anyURI as ?datatype)} 
-				UNION # matches a single condition on 
-					{?restriction owl:onDataRange ?datatype.  FILTER (! isBlank(?datatype)).
-					?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?expression.
-					?restriction ?constraint ?expression } 
-				UNION
-					{?restriction owl:onDataRange ?dataRangeObj.
-					?dataRangeObj owl:onDatatype ?datatype. 
-					?dataRangeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
-					?restrictColl ?constraint ?expression.
-					 } 
-			 } 
-		""", initNs = namespace),
-
-	
-		##################################################################
-		# 
-		#   The difference between this and below "primitives" query is that this one 
-		#	returns descendant datums.  Run inherited query first to calculate inheritances; 
-		#	then run "primitives" to override inherited values with more specific ones.
-		# 
-		#	Handle much simpler inheritance of categoricals in 'categoricals' query below
-
-		'inherited': rdflib.plugins.sparql.prepareQuery("""
-
-		SELECT DISTINCT (?datum as ?id) ?datatype ?constraint ?expression
-			WHERE { 	
-				BIND (GENEPIO:0001605 as ?hasPvaluespec).
-				?restriction owl:onProperty ?hasPvaluespec. 
-				?datum rdfs:subClassOf/rdfs:subClassOf+ ?restriction.
-
-				{?restriction owl:someValuesFrom ?datatype.} 
-				UNION {?restriction owl:someValuesFrom ?datatypeObj. 
-					?datatypeObj owl:onDatatype ?datatype.
-					?datatypeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
-					?restrictColl ?constraint ?expression.}
-				UNION # matches a single condition on 
-					{?restriction owl:onDataRange ?datatype.  FILTER (! isBlank(?datatype)).
-					?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?expression.
-					?restriction ?constraint ?expression } 
-				UNION
-					{?restriction owl:onDataRange ?dataRangeObj.
-					?dataRangeObj owl:onDatatype ?datatype. 
-					?dataRangeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
-					?restrictColl ?constraint ?expression.
-					 } 
-				 FILTER (?datatype != xmls:anyURI)
-			 } order by ?datatype
-	 """, initNs = namespace),
-
-
-		##################################################################
-		# CATEGORICAL FIELDS
-		# One must mark an ontology term as a 'categorical tree specification'
-		# in order for it to have the 'xmls:anyURI' datatype.
-		# This list is dumped into the specifications tree; subordinate items
-		# are placed in the picklists tree.
-		#
-		# These root nodes for categorical tree specification go into 'specifications' table
-
-		'categoricals': rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?id ?datatype
-			WHERE { 
-				BIND (GENEPIO:0001655 as ?categorical).
-				BIND (xmls:anyURI as ?datatype).
-				?id rdfs:subClassOf ?categorical.
-			 } 
-		""", initNs = namespace),
-
-		##################################################################
-		# INDIVIDUALS
-		# We accept the convention that categorical picklist trees containing 
-		# entities represented by proper names - like "British Columbia", 
-		# "Vancouver (BC)", "Washington (DC)", etc. - may have "individual" nodes, 
-		# i.e. are represented by owl:NamedIndividual.
-		#
-		# Multilingual selection of items in sorted order is done client side.
-		# 
-		'individuals': rdflib.plugins.sparql.prepareQuery("""
-			
-			SELECT DISTINCT ?id ?parent ?datatype
-			WHERE {
-				BIND (GENEPIO:0001655 as ?categorical_root).
-				BIND (xmls:anyURI as ?datatype).
-				?id rdf:type owl:NamedIndividual.
-				?id rdf:type ?parent.
-				?parent rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
-
-				OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
-				OPTIONAL {?id rdfs:label ?label}.
-
-			}
-			ORDER BY ?parent ?ui_label ?label
-		""", initNs = namespace),
-
-		##################################################################
-		# ALL PRIMITIVE FIELD UNITS
-
-		'units' :rdflib.plugins.sparql.prepareQuery("""
-
-			SELECT DISTINCT (?datum as ?id)	?unit	?label ?ui_label
-			WHERE { 
-				BIND (GENEPIO:0001605 as ?has_primitive_value_spec). 
-				BIND (IAO:0000039 as ?has_measurement_unit_label).
-				?datum rdfs:subClassOf* ?restriction3.
-				FILTER (isIRI(?datum)).
-				?restriction3 owl:onProperty ?has_measurement_unit_label.
-				?restriction3 (owl:someValuesFrom | owl:withRestrictions*/owl:someValuesFrom/owl:unionOf*/rdf:rest*/rdf:first) ?unit.
-				?unit rdfs:label ?label
-				FILTER ( isURI(?unit))
-
-			 } ORDER BY ?datum ?unit ?label
-		""", initNs = namespace),
-
-
-		# ################################################################
-		# UI FEATURES
-		# A picklist item or form input or specification can be hidden or required or
-		# other feature with respect to its parent, via 
-		# As well, a form input datum can have UI features indicated just by annotating it directly.
-		# FUTURE: a feature may be qualified by user's user type.
-		#
-		# Typical "lookup" UI feature axioms:
-		#
-		#    <owl:Class rdf:about="http://purl.obolibrary.org/obo/GENEPIO_0001742">
-		#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GENEPIO_0001655"/>
-		#        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/GEO_000000005"/>
-		#        <GENEPIO:0000006 xml:lang="en">region</GENEPIO:0000006>
-		#        <GENEPIO:0001763>lookup</GENEPIO:0001763>
-		#		...
-		#
-	    #	<owl:Axiom>
-	    #	    <GENEPIO:0001763>lookup</GENEPIO:0001763>
-	    #	    <owl:annotatedSource rdf:resource="&obo;GENEPIO_0001740"/>
-	    #	    <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
-	    #	    <owl:annotatedTarget>
-	    #	        <owl:Restriction>
-	    #	            <owl:onProperty rdf:resource="&obo;RO_0002180"/>
-	    #	            <owl:someValuesFrom rdf:resource="&obo;GENEPIO_0001287"/>
-	    #	        </owl:Restriction>
-	    #	    </owl:annotatedTarget>
-	    #	</owl:Axiom>
-	    #
-
-
-		'features': rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?id ?referrer ?feature ?value 
-			WHERE { 
-				{# Get direct (Class annotated) features
-					?id rdf:type owl:Class.  
-					?id GENEPIO:0001763 ?value.  # user interface feature
-					?id ?feature ?value. #
-					BIND ('' as ?referrer).
-				}
-				UNION
-				# VERIFY IF THIS IS RETURNING ANYTHING?
-				{	# Get features placed on axiom if it is a simple (subClass?) someValuesFrom relation. 
-					?axiom rdf:type owl:Axiom.
-					?axiom owl:annotatedSource ?id.
-					?axiom owl:annotatedTarget ?referrer. 
-					FILTER(isURI(?referrer))
-					?axiom GENEPIO:0001763 ?value.  # user interface feature
-					?axiom ?feature ?value.
-				}
-			}
-		""", initNs = namespace),
-
-		
-		# ################################################################
-		# UI "MEMBER OF" STANDARD FEATURES
-		#
-		# A standard has datums via "has component" which can be annotated
-		# with standard-specific label, definition, UI definition,
-		# hasAlternateId and other attributes. Add all of these to list of
-		# features above.
-		# 
-	    #    <owl:Axiom>
-		#        <GENEPIO:0001763>lookup</GENEPIO:0001763>
-		#        <owl:annotatedSource rdf:resource="&obo;OBI_0000938"/>
-		#        <owl:annotatedProperty rdf:resource="&rdfs;subClassOf"/>
-		#        <owl:annotatedTarget>
-		#            <owl:Restriction>
-		#                <owl:onProperty rdf:resource="&obo;GENEPIO_0001605"/>
-		#                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
-		#                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
-		#            </owl:Restriction>
-		#        </owl:annotatedTarget>
-		#    </owl:Axiom>
-
-		'feature_annotations': rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?id ?referrer ?feature ?value 
-			WHERE { 
-				?axiom rdf:type owl:Axiom.
-				?axiom owl:annotatedSource ?referrer.
-				?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
-				?restriction owl:onProperty RO:0002180. # has component
-				?restriction (owl:onClass|owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality | owl:someValuesFrom) ?id
-				FILTER(isURI(?id))
-				#Get feature as label, definition, UI feature, alternative identifier (database field)
-				?axiom (rdfs:label|IAO:0000115|GENEPIO:0001763|OBO:hasAlternativeId) ?value.
-				# Not using these here: UI definition GENEPIO:0000162, UI label GENEPIO:0000006
-				?axiom ?feature ?value.
-			}
-		""", initNs = namespace),
-
-		# ################################################################
-		# UI LABELS 
-		# These are annotations directly on an entity.  This is the only place
-		# that ui_label and ui_definition should really operate. Every entity
-		# in OWL file is retrieved for their rdfs:label, IAO definition etc.
-		#
-		'labels': rdflib.plugins.sparql.prepareQuery("""
-
-			SELECT DISTINCT ?label ?definition ?ui_label ?ui_definition
-			WHERE {  
-				{?datum rdf:type owl:Class} 
-				UNION {?datum rdf:type owl:NamedIndividual} 
-				UNION {?datum rdf:type rdf:Description}.
-				OPTIONAL {?datum rdfs:label ?label.} 
-				OPTIONAL {?datum IAO:0000115 ?definition.}
-				OPTIONAL {?datum GENEPIO:0000006 ?ui_label.} 
-				OPTIONAL {?datum GENEPIO:0000162 ?ui_definition.}
-			} ORDER BY ?label
-		""", initNs = namespace),
-
-		# ################################################################
-		# CURRENTLY UNUSED: STANDARDS INFORMATION
-		# A "[field] 'member of' [some standard]" can have annotations of 
-		# standard-specific label, definition, hasAlternateId, etc.
-		# This query retrieves them; they are loaded into the parent entity's
-		# corresponding members[id] dictionary
-		#
-		# CURRENTLY UNUSED
-		#
-		'standards_information': rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?id ?referrer ?feature ?value 
-			WHERE { 
-				?axiom rdf:type owl:Axiom.
-				?axiom owl:annotatedSource ?id.
-				?axiom owl:annotatedTarget ?restriction. ?restriction rdf:type owl:Restriction.
-				?restriction owl:onProperty RO:0002350. # member of
-				?restriction owl:someValuesFrom ?referrer.
-				FILTER(isURI(?id)).
-				#Get feature as label, definition, UI feature, 
-				#Not using these here: UI definition GENEPIO:0000162, UI label GENEPIO:0000006
-				?axiom (rdfs:label|IAO:0000115|GENEPIO:0001763) ?value.  
-				?axiom ?feature ?value.
-			}
-		""", initNs = namespace),
-
-
-		# ################################################################
-		# oboInOwl:hasDbXref (an annotation property) cross references to other terminology databases 
-		'dbreferences': rdflib.plugins.sparql.prepareQuery("""
-
-			SELECT DISTINCT ?dbXref
-			WHERE {  
-				{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
-				?datum oboInOwl:hasDbXref ?dbXref.
-			}
-		""", initNs = namespace),
-
-
-		# ################################################################
-		# oboInOwl:hasSynonym
-		# Picklist items are augmented with synonyms in order for 
-		# type-as-you-go inputs to return appropriately filtered phrases
-		#
-		# INPUT
-		# 	?datum : id of term to get labels for
-		# OUTPUT
-		#   ?Synonym ?ExactSynonym ?NarrowSynonym
-		#
-		'synonyms': rdflib.plugins.sparql.prepareQuery("""
-
-			SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
-			WHERE {  
-				{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
-				{?datum oboInOwl:hasSynonym ?Synonym.} 
-				UNION {?datum oboInOwl:hasExactSynonym ?ExactSynonym.}
-				UNION {?datum oboInOwl:hasNarrowSynonym ?NarrowSynonym.}
-				UNION {?datum IAO:0000118 ?AlternativeTerm.}
-			}
-		""", initNs = namespace),
-
-
-		#Get ontology metadata. Currently the listed annotations are included.
-	    #<owl:Ontology rdf:about="http://purl.obolibrary.org/obo/genepio.owl">
-	    #
-	    #    <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/genepio/releases/2018-02-28/genepio.owl"/>
-	    #   <oboInOwl:default-namespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GENEPIO</oboInOwl:default-namespace>
-	    #    <dc:title xml:lang="en">Genomic Epidemiology Ontology</dc:title>
-	    #    <dc:description xml:lang="en">The Ontology for Biomedical Investigations (OBI) is build in a ...</dc:description>
-	    #    <dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
-	    #    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
-
-	    #owl:Ontology rdf:about ?resource.
-        'metadata': rdflib.plugins.sparql.prepareQuery("""
-			SELECT distinct ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
-			WHERE {
-				
-				OPTIONAL {?resource dc:title ?title.}
-				OPTIONAL {?resource dc:description ?description.}
-				OPTIONAL {?resource owl:versionIRI ?versionIRI.}
-				OPTIONAL {?resource oboInOwl:default-namespace ?prefix.}
-				OPTIONAL {?resource dc:license ?license.}
-				OPTIONAL {?resource dc:date ?date.}
-			}
-
-        """, initNs = namespace)
-
-}
 
 if __name__ == '__main__':
 

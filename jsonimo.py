@@ -66,7 +66,7 @@ class Ontology(object):
 
 	def __init__(self):
 
-		self.onto_helper.graph = rdflib.Graph()
+		self.onto_helper = oh.OntoHelper()
 
 		""" 
 		Add these PREFIXES to Protege Sparql query window if you want to test a query there:

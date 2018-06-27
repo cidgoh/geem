@@ -63,7 +63,8 @@ class Ontology(object):
 	def __init__(self):
 
 		self.onto_helper = oh.OntoHelper()
-		self.fields = ['id','language','parent_id','other_parents','label','definition','ul_label','ui_definition','updated','synonyms','ui_help','preferred','deprecated','replaced_by']
+		# ADDITIONAL FIELDS THAT WOULD BE MANAGED IN SYNCHRONIZATION of TARGET LOOKUP TABLE: 'updated','preferred'
+		self.fields = ['id','parent_id','language','ontology','other_parents','label','definition','ul_label','ui_definition','ui_help','synonyms','deprecated','replaced_by']
 
 		""" 
 		Add these PREFIXES to Sparql query window if you want to test a query there:

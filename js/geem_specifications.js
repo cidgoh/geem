@@ -485,40 +485,43 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 		case 'xmls:token':
 			getEntitySpecFormUnits(entity)
 			break;
-																						
-		case 'xmls:integer':			getEntitySpecFormNumber(entity);	break
-		case 'xmls:positiveInteger': 	getEntitySpecFormNumber(entity, 1);	break
-		case 'xmls:nonNegativeInteger':	getEntitySpecFormNumber(entity, 0);	break
-		case 'xmls:unsignedByte':		getEntitySpecFormNumber(entity, 0, 255); break// (8-bit)	
-		case 'xmls:unsignedShort':		getEntitySpecFormNumber(entity, 0, 65535); break// (16-bit) 
-		case 'xmls:unsignedInt':		getEntitySpecFormNumber(entity, 0, 4294967295);	break// (32-bit)		
-		case 'xmls:unsignedLong':		getEntitySpecFormNumber(entity, 0, 18446744073709551615); break// (64-bit) 
 
-		case 'xmls:negativeInteger':	getEntitySpecFormNumber(entity, null, -1); break
-		case 'xmls:nonPositiveInteger':	getEntitySpecFormNumber(entity, null, 0); break
+		case 'xmls:integer':			//getEntitySpecFormNumber(entity);	break
+		case 'xmls:positiveInteger': 	//getEntitySpecFormNumber(entity, 1);	break
+		case 'xmls:nonNegativeInteger':	//getEntitySpecFormNumber(entity, 0);	break
+		case 'xmls:unsignedByte':		//getEntitySpecFormNumber(entity, 0, 255); break// (8-bit)	
+		case 'xmls:unsignedShort':		//getEntitySpecFormNumber(entity, 0, 65535); break// (16-bit) 
+		case 'xmls:unsignedInt':		//getEntitySpecFormNumber(entity, 0, 4294967295);	break// (32-bit)		
+		case 'xmls:unsignedLong':		//getEntitySpecFormNumber(entity, 0, 18446744073709551615); break// (64-bit) 
 
-		case 'xmls:byte': 	getEntitySpecFormNumber(entity, -128, 127);	break// (signed 8-bit)
-		case 'xmls:short': 	getEntitySpecFormNumber(entity, -32768, 32767);	break// (signed 16-bit)
-		case 'xmls:int': 	getEntitySpecFormNumber(entity, -2147483648, 2147483647);	break// (signed 32-bit)
-		case 'xmls:long': 	getEntitySpecFormNumber(entity, -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
+		case 'xmls:negativeInteger':	//getEntitySpecFormNumber(entity, null, -1); break
+		case 'xmls:nonPositiveInteger':	//getEntitySpecFormNumber(entity, null, 0); break
+
+		case 'xmls:byte': 	//getEntitySpecFormNumber(entity, -128, 127);	break// (signed 8-bit)
+		case 'xmls:short': 	//getEntitySpecFormNumber(entity, -32768, 32767);	break// (signed 16-bit)
+		case 'xmls:int': 	//getEntitySpecFormNumber(entity, -2147483648, 2147483647);	break// (signed 32-bit)
+		case 'xmls:long': 	//getEntitySpecFormNumber(entity, -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
+			getEntitySpecFormUnits(entity)	
+			break
 
 		// Decimal, double and float numbers
 		case 'xmls:decimal':
-		 	getEntitySpecFormNumber(entity)
+		 	getEntitySpecFormUnits(entity)
 		 	// Add maximum # of digits.
 			break;
 		// Size of float/double depends on precision sought, see
 		// https://stackoverflow.com/questions/872544/what-range-of-numbers-can-be-represented-in-a-16-32-and-64-bit-ieee-754-syste
 		case 'xmls:float':  
-			getEntitySpecFormNumber(entity, - Math.pow(2, 23), Math.pow(2, 23) - 1 )
-
-			break;
+			//getEntitySpecFormNumber(entity, - Math.pow(2, 23), Math.pow(2, 23) - 1 )
+			getEntitySpecFormUnits(entity)
+			break; 
 		case 'xmls:double': 
-			getEntitySpecFormNumber(entity, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+			//getEntitySpecFormNumber(entity, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) //-(Math.pow(2, 53) - 1) etc.
+			getEntitySpecFormUnits(entity)
 			break;
 
 
-		case 'xmls:boolean': // Yes/No inputs here
+		case 'xmls:boolean': // Yes/No inputs here; nothing to change.
 			//getEntitySpecFormBoolean(entity)
 			break;
 
@@ -539,8 +542,10 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 	return getEntitySimplification(entity)
 }
 
-
-
+getEntitySpecFormNumber = function(entity) { //, minInclusive=undefined, maxInclusive=undefined
+	// Just ensure field has right unit list
+	getEntitySpecFormUnits(entity)
+}
 
 initializeEntity = function(entity, entityId, path, depth) {
 	// Initialize entity
@@ -824,9 +829,6 @@ getEntitySpecFormParts = function(entity, depth) { //, inherited = false
 	return components
 }
 
-getEntitySpecFormNumber = function(entity, minInclusive=undefined, maxInclusive=undefined) {
-	getEntitySpecFormUnits(entity)
-}
 
 getEntitySpecFormUnits = function(entity) {
 	// Convert units array id references into reference to unit object

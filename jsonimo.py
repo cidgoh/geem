@@ -18,7 +18,7 @@
  RDFLib: This script requires python module RDFLib.
 
  RDFLib sparql ISSUE: Doing a "BINDING (?x as ?y)" expression prevents ?x from 
- being output in a SELECT bug leads to no such field being output.
+ being output in a SELECT. bug leads to no such field being output.
 
 ******************************************************************************* 
 """ 
@@ -29,6 +29,7 @@ import sys
 import os
 from pprint import pprint
 import optparse
+import lib.python.ontohelper as oh
 
 import rdflib
 import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
@@ -74,7 +75,7 @@ class Ontology(object):
 		# SHOULD AUTO-GENERATE THIS BASED ON MERGED ONTOLOGY'S ENTITY PREFIXES
 		self.struct['@context'] = {
 			'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-			'owl': 'http://www.w3.org/2002/07/owl/',
+			'owl': 'http://www.w3.org/2002/07/owl#',
 			'xmls': 'http://www.w3.org/2001/XMLSchema#',
 			'vcard': 'http://www.w3.org/2006/vcard/ns#',
 			'vcf': 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#',
@@ -103,6 +104,7 @@ class Ontology(object):
 			"HP": "http://purl.obolibrary.org/obo/HP_",
 			"IAO": "http://purl.obolibrary.org/obo/IAO_",
         	"IDO": "http://purl.obolibrary.org/obo/IDO_",
+        	"MI": "http://purl.obolibrary.org/obo/MI_",
         	"MPATH": "http://purl.obolibrary.org/obo/MPATH_",
  			'NCBITaxon' : 'http://purl.obolibrary.org/obo/NCBITaxon_',
 			"NCIT": "http://purl.obolibrary.org/obo/NCIT_",
@@ -110,6 +112,7 @@ class Ontology(object):
 			'OMIABIS': 'http://purl.obolibrary.org/obo/OMIABIS_',
 			"OMP": "http://purl.obolibrary.org/obo/OMP_",
 			'PATO': "http://purl.obolibrary.org/obo/PATO_",
+     		"PCO": "http://purl.obolibrary.org/obo/PCO_",
      		"PO": "http://purl.obolibrary.org/obo/PO_",
         	"RO": "http://purl.obolibrary.org/obo/RO_",
         	"SO": "http://purl.obolibrary.org/obo/SO_",
@@ -127,6 +130,8 @@ class Ontology(object):
 
 	def __main__(self): #, main_ontology_file
 
+		self.onto_helper = oh.OntoHelper()
+
 		(options, args) = self.get_command_line()
 
 		if options.code_version:
@@ -143,7 +148,7 @@ class Ontology(object):
 		if not os.path.isfile(main_ontology_file):
 			stop_err('Please check the OWL ontology file path')			
 
-		print "PROCESSING " + main_ontology_file + " ..."
+		print "Processing ", main_ontology_file, " ..."
 
 		# Get ontology core filename, without .owl suffix
 		ontology_filename = os.path.basename(main_ontology_file).rsplit('.',1)[0]
@@ -163,6 +168,7 @@ class Ontology(object):
 		self.ontologyMetadata(self.doQueryTable('metadata'))
 
 		# Retrieve all subclasses of 'data representational model'
+		# and place in self.struct.specifications
 		specBinding = {'root': rdflib.URIRef(self.expandId('OBI:0000658'))} 
 		self.doSpecifications(self.doQueryTable('tree', specBinding ))
 		
@@ -198,10 +204,23 @@ class Ontology(object):
 
 
 	def ontologyMetadata(self, table):
-		# Should only be 1 row.
+		""" Each ontology has metadata fields associated with it, in self.struct.metadata
+		# Fields directly from sparql: 
+		# dc:title -> title 					// e.g. Genomic Epidemiology Ontology
+		# dc:description -> description
+		# owl:versionIRI -> versionIRI  		// e.g. http://purl.obolibrary.org/obo/genepio/releases/2018-04-24/genepio.owl
+		# oboInOwl:default-namespace -> prefix  // e.g. GENEPIO
+		# dc:license -> license 				// e.g. http://creativecommons.org/licenses/by/3.0/
+		# dc:date -> date 						// have to get value component , self.struct['metadata']['date']['value']
+
+		# status = release // Assumed
+        # resource = "http://purl.obolibrary.org/obo/genepio.owl",
+        # type = "ontology"
+
+		"""
 		print
 		print "Metadata:", table
-		for myDict in table: 
+		for myDict in table: # Should only be 1 row containing a dictionary.
 			self.struct['metadata'] = myDict
 		self.struct['metadata']['type'] = 'ontology'
 		self.struct['metadata']['status'] = 'release'
@@ -244,7 +263,7 @@ class Ontology(object):
 			myDict['datatype'] = 'model'
 			self.setDefault(self.struct, struct, myDict['id'], myDict)
 
-			parentId = self.getParentId(myDict) # primary parent according to data rep hierarchy
+			parentId = self.get_parent_id(myDict) # primary parent according to data rep hierarchy
 
 			self.setDefault(self.struct, struct, parentId, {
 				'id': parentId, 
@@ -270,8 +289,8 @@ class Ontology(object):
 		# Fashion complete picklists (flat list) of items, with parent(s) of each item, and members.
 		for myDict in table:
 			id = str(myDict['id'])
-			parentId = self.getParentId(myDict)
-			myDict.pop('parent')
+			parentId = self.get_parent_id(myDict)
+			myDict.pop('parent_id')
 			#This picklist node might already have been mentioned in another picklist 
 			# node's member list so it might already be set up.
 			self.setDefault(self.struct, struct, id, myDict)
@@ -308,7 +327,7 @@ class Ontology(object):
 			self.setDefault(self.struct, struct, id, {'id': id} )
 			self.setDefault(self.struct, struct, id, 'otherParent', [] )	
 
-			parentId = self.getParentId(myDict)
+			parentId = self.get_parent_id(myDict)
 			if parentId:
 		
 				if parentId == id:
@@ -330,14 +349,14 @@ class Ontology(object):
 					# BNodes have no name but have expression.
 					if 'expression' in myDict: 
 
-						# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'SIO:000661', u'SIO:000662', u'SIO:000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent': u'GENEPIO:0001623'}
+						# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'SIO:000661', u'SIO:000662', u'SIO:000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent_id': u'GENEPIO:0001623'}
 						print "HAS EXPRESSION: ", myDict['expression']
 
 						expression = myDict['expression']
 						self.struct[struct][id]['datatype'] = expression['datatype'] # disjunction usually
-						self.struct[struct][id]['parent'] = parentId
+						self.struct[struct][id]['parent_id'] = parentId
 						# Anonymous nodes imbedded within other classes don't get labels.
-						self.struct[struct][id]['uiLabel'] = '' 
+						self.struct[struct][id]['ui_label'] = '' 
 						self.struct[struct][id]['components'] = {}
 						# List off each of the disjunction items, all with a 'some'
 						for ptr, partId in enumerate(expression['data']):
@@ -460,7 +479,7 @@ class Ontology(object):
 				# Ensure specifications has this unit
 				self.setStruct(self.struct, 'specifications' ,myDict['unit'] , {
 					'id': myDict['unit'],
-					'uiLabel': myDict['label'],
+					'ui_label': myDict['label'],
 					'datatype': 'xmls:anyURI'
 				})
 
@@ -483,7 +502,7 @@ class Ontology(object):
 			These features get put in entity['features'], e.g.
 
 			"NCIT:C87194": {
-				"uiLabel": "State"
+				"ui_label": "State"
         		"definition": "A constituent administrative district of a nation.",
 	            "features": [
 	                {
@@ -567,7 +586,7 @@ class Ontology(object):
 				featureDict['value'] = value
 				if featureType == 'rdfs:label':
 					feature = 'label'
-					# Issue is that entity['parent'] is not showing up
+					# Issue is that entity['parent_id'] is not showing up
 					#print feature, value, parentId
 
 				elif featureType == 'IAO:0000115':
@@ -618,7 +637,7 @@ class Ontology(object):
 				entity[part] = OrderedDict(sorted(entity[part].items(), key=lambda item: orderedKeys.index(item[0]) if item[0] in orderedKeys else False))
 			else:
 				print "ordering", entity[part].items()
-				entity[part] = OrderedDict(sorted(entity[part].items(), key=attrgetter('uiLabel')) )
+				entity[part] = OrderedDict(sorted(entity[part].items(), key=attrgetter('ui_label')) )
 
 
 	def doLabels(self, list):
@@ -683,20 +702,20 @@ class Ontology(object):
 	def doLabel(self, myDict):
 		""" 
 			All ontology items have and need a rdfs:Label, but this is often
-			not nice to display to users. If no uiLabel, uiLabel is created as
-			a copy of Label. Then uiLabel always exists, and is displayed on
-			form. If label <> uiLabel, drop label field for efficiency's sake.
+			not nice to display to users. If no ui_label, ui_label is created as
+			a copy of Label. Then ui_label always exists, and is displayed on
+			form. If label <> ui_label, drop label field for efficiency's sake.
 
 			label, definition etc. annotations on an entity 'member of' parent
 			are kept in parent's 'components'.
 		"""
-		if not 'uiLabel' in myDict: 
+		if not 'ui_label' in myDict: 
 			if not 'label' in myDict: # a data maintenance issue
 				myDict['label'] = '[no label]'
 				
-			myDict['uiLabel'] = myDict['label']
+			myDict['ui_label'] = myDict['label']
 		if 'label' in myDict:
-			if myDict['label'] == myDict['uiLabel']: myDict.pop('label')
+			if myDict['label'] == myDict['ui_label']: myDict.pop('label')
 
 	############################## UTILITIES ###########################
 
@@ -707,9 +726,9 @@ class Ontology(object):
 
 		return obj
 
-	def getParentId(self, myDict):
-		if 'parent' in myDict: 
-			return str(myDict['parent']) # Sometimes binary nodes are returned
+	def get_parent_id(self, myDict):
+		if 'parent_id' in myDict: 
+			return str(myDict['parent_id']) # Sometimes binary nodes are returned
 		return None
 
 	def setStruct(self, focus,*args):
@@ -968,12 +987,12 @@ class Ontology(object):
 		'tree': rdflib.plugins.sparql.prepareQuery("""
 			SELECT DISTINCT ?id ?parent
 			WHERE {	
-				?parent rdfs:subClassOf* ?root.
-				?id rdfs:subClassOf ?parent.
+				?parent_id rdfs:subClassOf* ?root.
+				?id rdfs:subClassOf ?parent_id.
 				OPTIONAL {?id rdfs:label ?label}.
-				OPTIONAL {?id GENEPIO:0000006 ?uiLabel}.
+				OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
 			}
-			ORDER BY ?parent ?uiLabel ?label 
+			ORDER BY ?parent_id ?ui_label ?label 
 		""", initNs = namespace),
 
 		# SECOND VERSION FOR ''
@@ -1118,11 +1137,11 @@ class Ontology(object):
 				?id rdf:type ?parent.
 				?parent rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
 
-				OPTIONAL {?id GENEPIO:0000006 ?uiLabel}.
+				OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
 				OPTIONAL {?id rdfs:label ?label}.
 
 			}
-			ORDER BY ?parent ?uiLabel ?label
+			ORDER BY ?parent ?ui_label ?label
 		""", initNs = namespace),
 
 		##################################################################
@@ -1130,7 +1149,7 @@ class Ontology(object):
 
 		'units' :rdflib.plugins.sparql.prepareQuery("""
 
-			SELECT DISTINCT (?datum as ?id)	?unit	?label ?uiLabel
+			SELECT DISTINCT (?datum as ?id)	?unit	?label ?ui_label
 			WHERE { 
 				BIND (GENEPIO:0001605 as ?has_primitive_value_spec). 
 				BIND (IAO:0000039 as ?has_measurement_unit_label).
@@ -1238,20 +1257,20 @@ class Ontology(object):
 		# ################################################################
 		# UI LABELS 
 		# These are annotations directly on an entity.  This is the only place
-		# that uiLabel and uiDefinition should really operate. Every entity
+		# that ui_label and ui_definition should really operate. Every entity
 		# in OWL file is retrieved for their rdfs:label, IAO definition etc.
 		#
 		'labels': rdflib.plugins.sparql.prepareQuery("""
 
-			SELECT DISTINCT ?label ?definition ?uiLabel ?uiDefinition
+			SELECT DISTINCT ?label ?definition ?ui_label ?ui_definition
 			WHERE {  
 				{?datum rdf:type owl:Class} 
 				UNION {?datum rdf:type owl:NamedIndividual} 
 				UNION {?datum rdf:type rdf:Description}.
 				OPTIONAL {?datum rdfs:label ?label.} 
 				OPTIONAL {?datum IAO:0000115 ?definition.}
-				OPTIONAL {?datum GENEPIO:0000006 ?uiLabel.} 
-				OPTIONAL {?datum GENEPIO:0000162 ?uiDefinition.}
+				OPTIONAL {?datum GENEPIO:0000006 ?ui_label.} 
+				OPTIONAL {?datum GENEPIO:0000162 ?ui_definition.}
 			} ORDER BY ?label
 		""", initNs = namespace),
 

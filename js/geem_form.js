@@ -583,7 +583,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			var typeAttr = ' type="number"' // foundation zurb does css on this.
 		}
 		else {
-			if ('minValue' in entity) {
+			if (entity.minValue) {
 				var step = entity.minValue % 1
 				if (step == 0) 
 					var stepAttr = ''
@@ -964,8 +964,6 @@ function OntologyForm(domId, resource, settings, callback) {
 		/*
 		Adds numeric upper and lower tests if appropriate.
 		RegEx pattern is also allowed.
-
-		// ISSUE: is 'pattern' getting duplicated?
 
 		OUTPUT:
 			min: min=N or empty string

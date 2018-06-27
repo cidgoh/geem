@@ -15,11 +15,16 @@
 	RDFLib: This script requires python module RDFLib. RDFLib sparql 
 	ISSUE: Doing a "BINDING (?x as ?y)" expression prevents ?x from 
 	being output in a SELECT. bug leads to no such field being output.
-	
-	FUTURE: Get ontology version, and add to output core filename ???
 
 	e.g. python ontofetch.py ../genepio/src/ontology/genepio-merged.owl
-	e.g. python ontofetch.py https://raw.githubusercontent.com/obi-ontology/obi/master/obi.owl
+	     writes files genepio-merged.json, genepio-merged.tsv into folder
+	     program was launched in.
+
+	e.g. python ontofetch.py https://raw.githubusercontent.com/obi-ontology/obi/master/obi.owl -o test/
+	     writes files test/obi.json and test/obi.tsv into test/ subfolder.
+
+	FUTURE: Get ontology version, and add to output core filename ???
+
 	**************************************************************************
 """ 
 

@@ -4,3 +4,8 @@ The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downlo
 
 * View details of our overal project aim, description, and implementation on the [Wiki](https://github.com/GenEpiO/geem/wiki/) site.
 * A working prototype of the portal is available at <http://genepio.org/geem>
+
+___________
+
+### Ontology Term Fetch
+We also now have an **ontofetch.py** script listed above which will process a given OBOFoundry RDF/XML-formatted ontology (by file or URI address) into json and tabular data output.  Assuming that the ontology's terms are positioned under owl:Thing, this script fetches term id, parent_id, label, definition, deprecated status, term replaced_by id (if any), and a number of other fields, for use in software applications and databases. It is a good place to start to see what an ontology provides in a basic flat format, outside of the context of an ontology editor or RDF/XML text file.

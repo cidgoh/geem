@@ -23,8 +23,9 @@
 	e.g. python ontofetch.py https://raw.githubusercontent.com/obi-ontology/obi/master/obi.owl -o test/
 	     writes files test/obi.json and test/obi.tsv into test/ subfolder.
 
-	FUTURE: Get ontology version, and add to output core filename ???
 
+	FUTURE: Get ontology version, and add to output core filename ???
+	
 	**************************************************************************
 """ 
 
@@ -32,7 +33,7 @@ import json
 import sys
 import os
 import optparse
-import lib.python.ontohelper as oh
+import python.ontohelper as oh
 
 import rdflib
 import rdfextras; rdfextras.registerplugins() # so we can Graph.query()

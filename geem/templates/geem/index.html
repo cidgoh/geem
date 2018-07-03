@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html class="no-js" lang="en" dir="ltr">
   <head profile="http://www.w3.org/2005/10/profile">
@@ -6,8 +7,8 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genomic Epidemiology Entity Mart Prototype</title>
-    <link rel="stylesheet" href="css/foundation.min.css">
-    <link rel="stylesheet" href="css/foundation-icons/foundation-icons.css">
+    <link rel="stylesheet" href="{% static "geem/css/foundation.min.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-icons/foundation-icons.css" %}">
   </head>
   <body>
     <div class="row" style="background-color:#2199e8;color:white">
@@ -62,12 +63,12 @@
 
         <p>The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and downloading ontology-driven specifications for standardized data components. The portal aims to provide term reviewers and software developers with ways to utilize application ontology contents (a collection of terms and relations from other ontologies that combine to model the operation of some domain) without the need to be trained in ontology curation or querying.</p>
         
-        <img src="docs/images/GEEM_interface.png"/>
+        <img src="{% static "geem/images/images/GEEM_interface.png" %}"/>
         <br clear="all"/>
         <br clear="all"/>
         <p>The GEEM portal enables an ontology's categorical and numeric datums and more complex data entities to be viewed as HTML form elements, including term preferred name, definition, synonyms, database cross-references, categorical selection lists, and numeric data entry and validation fields. Specifications for these elements can be generated for reuse by software developers; logged-in users will be able to save selected elements in packages that can be updated and downloaded later in JSON, YAML, or Microsoft Excel format; and finally, a form viewer is provided to show how such specifications can be used to drive data entry and reporting. GEEM itself does not currently provide a data storage platform - this is left as an implementation detail that will vary among agencies.</p>
         
-        <img src="docs/images/GEEM_design_2.png"/>
+        <img src="{% static "geem/images/GEEM_design_2.png" %}"/>
 
         <p>Ontology-driven standards benefit from features of open-source published OWL 2.0 ontologies such as globally unique identifiers for terms, multilingual label and definition functionality, and formal logic validation and reasoning over controlled vocabularies. Such a specification can be designed to satisfy the requirements of an environmental pH measurement, or a person's age, or a more structured entity like a contact address, or a genomic sequence repository submission for example.</p>
 
@@ -120,8 +121,8 @@
       <div class="row"></div>
     </div>
 
-    <script src="js/vendor/jquery.js"></script>
-    <script src="js/vendor/foundation.min.js"></script>
+    <script src="{% static "geem/js/vendor/jquery.js" %}"></script>
+    <script src="{% static "geem/js/vendor/foundation.min.js" %}"></script>
 
   </body>
 

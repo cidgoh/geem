@@ -115,3 +115,5 @@ python manage.py shell -c 'from django.core.management import utils; print(utils
  - The Django admin interface can be viewed at: [http://localhost:8000/admin/](http://localhost:8000/admin/). Login with the admin credentials used during the `createsuperuser` step.
 
  - The browsable GEEM API can be viewed at: http://localhost:8000/api/
+
+

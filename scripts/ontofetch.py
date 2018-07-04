@@ -196,8 +196,8 @@ class Ontology(object):
 		print 'Doing terms', len(entities)
 		self.do_entities(entities)
 		
-		self.onto_helper.do_output_json(output_file_basename)
-		self.onto_helper.do_output_tsv(output_file_basename, self.fields)
+		self.onto_helper.do_output_json(self.struct, output_file_basename)
+		self.onto_helper.do_output_tsv(self.struct, output_file_basename, self.fields)
 
 
 	def do_entities(self, table):

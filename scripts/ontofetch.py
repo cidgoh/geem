@@ -64,7 +64,7 @@ class Ontology(object):
 
 	"""
 
-	CODE_VERSION = '0.0.1'
+	CODE_VERSION = '0.0.2'
 
 	def __init__(self):
 

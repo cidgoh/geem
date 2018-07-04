@@ -26,7 +26,7 @@ def stop_err(msg, exit_code = 1):
 
 class OntoHelper(object):
 
-	CODE_VERSION = '0.0.1'
+	CODE_VERSION = '0.0.2'
 
 	def __init__(self):
 
@@ -74,6 +74,36 @@ class OntoHelper(object):
 			'GENEPIO':rdflib.URIRef('http://purl.obolibrary.org/obo/GENEPIO_'),
 			'RO':	rdflib.URIRef('http://purl.obolibrary.org/obo/RO_'),
 			'OBI':	rdflib.URIRef('http://purl.obolibrary.org/obo/OBI_')
+		}
+
+		self.queries = {
+
+			"""
+			##################################################################
+			# Fetch ontology metadata fields
+			#
+			# Example ontology header:
+			#	<owl:Ontology rdf:about="http://purl.obolibrary.org/obo/genepio.owl">
+		    #	    <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/genepio/releases/2018-02-28/genepio.owl"/>
+		    #		<oboInOwl:default-namespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GENEPIO</oboInOwl:default-namespace>
+		    #		<dc:title xml:lang="en">Genomic Epidemiology Ontology</dc:title>
+		    #		<dc:description xml:lang="en">The Ontology for Biomedical Investigations (OBI) is build in a ...</dc:description>
+		    #		<dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
+		    #		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
+			"""
+			ontology_metadata: rdflib.plugins.sparql.prepareQuery("""
+			SELECT DISTINCT ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
+			WHERE {
+				?resource rdf:type owl:Ontology.
+				OPTIONAL {?resource (dc:title|terms:title) ?title.}
+				OPTIONAL {?resource (dc:description|terms:description) ?description.}
+				OPTIONAL {?resource owl:versionIRI ?versionIRI.}
+				OPTIONAL {?resource oboInOwl:default-namespace ?prefix.}
+				OPTIONAL {?resource (dc:license|terms:license) ?license.}
+				OPTIONAL {?resource (dc:date|terms:date) ?date.}
+			}
+			""", initNs = self.namespace)
+
 		}
 
 	def __main__(self):
@@ -287,32 +317,9 @@ class OntoHelper(object):
 			dc:license -> license 				// e.g. http://creativecommons.org/licenses/by/3.0/
 			dc:date -> date 						// have to get value component , self.struct['metadata']['date']['value']
         	resource = "http://purl.obolibrary.org/obo/genepio.owl",
-
-		Example input:
-		
-			<owl:Ontology rdf:about="http://purl.obolibrary.org/obo/genepio.owl">
-	    
-	    	    <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/genepio/releases/2018-02-28/genepio.owl"/>
-	    		<oboInOwl:default-namespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GENEPIO</oboInOwl:default-namespace>
-	    		<dc:title xml:lang="en">Genomic Epidemiology Ontology</dc:title>
-	    		<dc:description xml:lang="en">The Ontology for Biomedical Investigations (OBI) is build in a ...</dc:description>
-	    		<dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
-	    		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
 		"""
-		query = rdflib.plugins.sparql.prepareQuery("""
-			SELECT DISTINCT ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
-			WHERE {
-				?resource rdf:type owl:Ontology.
-				OPTIONAL {?resource (dc:title|terms:title) ?title.}
-				OPTIONAL {?resource (dc:description|terms:description) ?description.}
-				OPTIONAL {?resource owl:versionIRI ?versionIRI.}
-				OPTIONAL {?resource oboInOwl:default-namespace ?prefix.}
-				OPTIONAL {?resource (dc:license|terms:license) ?license.}
-				OPTIONAL {?resource (dc:date|terms:date) ?date.}
-			}
-		""", initNs = self.namespace)
-
-		metadata = self.graph.query(query)
+		
+		metadata = self.graph.query(self.queries['ontology_metadata'])
 
 		for myDict in metadata: # Should only be 1 row containing a dictionary.
 			myDict2 = myDict.asdict()
@@ -464,7 +471,11 @@ class OntoHelper(object):
 
 	def do_output_tsv(self, output_file_basename, fields):
 		"""
-		TSV OUTPUT
+		Tab separated output based on given field names
+
+		INPUT
+			fields: list
+			self.struct['specifications']
 		"""
 		output = []
 

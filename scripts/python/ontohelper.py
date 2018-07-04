@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """ **************************************************************************
-
+ 
 """
 
 import os
@@ -78,7 +78,6 @@ class OntoHelper(object):
 
 		self.queries = {
 
-			"""
 			##################################################################
 			# Fetch ontology metadata fields
 			#
@@ -90,8 +89,8 @@ class OntoHelper(object):
 		    #		<dc:description xml:lang="en">The Ontology for Biomedical Investigations (OBI) is build in a ...</dc:description>
 		    #		<dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
 		    #		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
-			"""
-			ontology_metadata: rdflib.plugins.sparql.prepareQuery("""
+
+			'ontology_metadata': rdflib.plugins.sparql.prepareQuery("""
 			SELECT DISTINCT ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
 			WHERE {
 				?resource rdf:type owl:Ontology.
@@ -303,7 +302,7 @@ class OntoHelper(object):
 				print (file_path + " needs to be in RDF OWL format!")			
 
 
-	def set_ontology_metadata(self):
+	def set_ontology_metadata(self, query):
 		""" 
 		Create a self.struct.metadata dictionary holding metadata for 
 		incomming ontology, if any.	Query adjusts for one issue that
@@ -319,7 +318,7 @@ class OntoHelper(object):
         	resource = "http://purl.obolibrary.org/obo/genepio.owl",
 		"""
 		
-		metadata = self.graph.query(self.queries['ontology_metadata'])
+		metadata = self.graph.query(query)
 
 		for myDict in metadata: # Should only be 1 row containing a dictionary.
 			myDict2 = myDict.asdict()

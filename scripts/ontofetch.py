@@ -182,7 +182,7 @@ class Ontology(object):
 		self.onto_helper.do_ontology_includes(main_ontology_file)
 
 		# Load self.struct with ontology metadata
-		self.onto_helper.set_ontology_metadata()
+		self.onto_helper.set_ontology_metadata(self.onto_helper.queries['ontology_metadata'])
 		print "Metadata:", json.dumps(self.onto_helper.struct['metadata'],  sort_keys=False, indent=4, separators=(',', ': '))
 
 		# Retrieve all subclasses of 'owl:Thing' in given ontology

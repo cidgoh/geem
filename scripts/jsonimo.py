@@ -1017,6 +1017,8 @@ class Ontology(object):
 		# Standard code version identifier.
 		parser.add_option('-v', '--version', dest='code_version', default=False, action='store_true', help='Return version of this code.')
 
+		parser.add_option('-o', '--output', dest='output_folder', type='string', help='Path of output file to create')
+
 		return parser.parse_args()
 
 

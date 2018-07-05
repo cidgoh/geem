@@ -506,7 +506,7 @@ class Ontology(object):
 
 		# DO NOT USE sort_keys=True on piclists etc. because this overrides OrderedDict() sort order.
 		# BUT NEED TO IMPLEMENT json ordereddict sorting patch.
-		self.onto_helper.do_output_json(output_file_basename)
+		self.onto_helper.do_output_json(self.struct, output_file_basename)
 
 		#with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
 		#	output_handle.write(json.dumps(self.onto_helper.struct,  sort_keys=False, indent=4, separators=(',', ': ')))

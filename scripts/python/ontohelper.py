@@ -71,7 +71,7 @@ class OntoHelper(object):
 			'oboInOwl': rdflib.URIRef('http://www.geneontology.org/formats/oboInOwl#'),
 			'OBO': rdflib.URIRef('http://purl.obolibrary.org/obo/'), # shortcut for all OBOFoundry purls
 			'IAO':	rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_'),
-			'GENEPIO':rdflib.URIRef('http://purl.obolibrary.org/obo/GENEPIO_'),
+			'GENEPIO':rdflib.URIRef('http://purl.obolibrary.org/obo/GENEPIO_'), # Still needed for a few GEEM relations
 			'RO':	rdflib.URIRef('http://purl.obolibrary.org/obo/RO_'),
 			'OBI':	rdflib.URIRef('http://purl.obolibrary.org/obo/OBI_')
 		}
@@ -461,14 +461,14 @@ class OntoHelper(object):
 		return (main_ontology_file, output_file_basename)
 
 
-	def do_output_json(self, output_file_basename):
+	def do_output_json(self, struct, output_file_basename):
 		with (open(output_file_basename + '.json', 'w')) as output_handle:
 			# DO NOT USE sort_keys=True on piclists etc. because this overrides
 			# OrderedDict() sort order.
-			output_handle.write(json.dumps(self.struct, sort_keys = False, indent = 4, separators = (',', ': ')))
+			output_handle.write(json.dumps(struct, sort_keys = False, indent = 4, separators = (',', ': ')))
 
 
-	def do_output_tsv(self, output_file_basename, fields):
+	def do_output_tsv(self, struct, output_file_basename, fields):
 		"""
 		Tab separated output based on given field names
 
@@ -481,7 +481,7 @@ class OntoHelper(object):
 		# Header:			
 		output.append('\t'.join(fields))
 
-		for (key, entity) in self.struct['specifications'].items():
+		for (key, entity) in struct['specifications'].items():
 			row = []
 			for field in fields:
 				value = entity[field] if field in entity else ''

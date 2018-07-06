@@ -172,7 +172,7 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 								value = 'xmls:anyURI'
 							else if (field == 'path') {
 								// How else to tell if parent is NOT anonymous node?
-								if ('parent' in entity && entity['parent'].indexOf(':') > 0 ) 
+								if (entity.parent_id && entity.parent_id.indexOf(':') > 0 ) 
 									value = '/' + entity.path.slice(1,-2).join('/') 
 								else
 									value = parent_path
@@ -338,7 +338,7 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 			if (inherited == true) {
 				// Entity inherits primary ancestors' parts (the ones that led
 				// from start of rendering to here). 
-				var parentId = entity['parent']
+				var parentId = entity.parent_id
 				// Reach up to top level OBI "data representation model"
 				if (parentId && parentId != 'OBI:0000658') 
 					getEntitySpec(spec, parentId, true)
@@ -553,8 +553,8 @@ initializeEntity = function(entity, entityId, path, depth) {
 
 	// Created entity takes on whatever parent involks it.
 	if (depth > 0) {
-		entity['parent'] = path[path.length - 1]
-		//console.log('Assigning parent', entity['parent'], ' to ', entityId )
+		entity.parent_id = path[path.length - 1]
+		//console.log('Assigning parent', entity.parent_id, ' to ', entityId )
 	}
 
 	entity.path = path.concat([entityId])
@@ -598,7 +598,7 @@ getEntityFeatures = function(entity, parentId = null) {
 	if (parentId)
 		var referrerId = parentId
 	else
-		var referrerId = entity['parent']
+		var referrerId = entity.parent_id
 
 	var referrer = top.resource.specifications[referrerId]
 
@@ -800,7 +800,7 @@ getEntitySimplification = function(entity) {
 	/* Simple view of specification dispenses with cross-references and 
 	other aspects that have already been digested.
 	*/
-	delete (entity.parent)
+	delete (entity.parent_id)
 	delete (entity.otherParent)
 	delete (entity.models)
 	delete (entity.member_of)
@@ -1028,8 +1028,8 @@ function downloadDataSpecification(contentObj) {
 
 
 		/*
-		if (inherited == false && 'parent' in entity) { // aka member_of or subclass of
-			var parentId = entity['parent']
+		if (inherited == false && entity.parent_id) { // aka member_of or subclass of
+			var parentId = entity.parent_id
 			if (parentId != 'OBI:0000658') {//Top level spec.
 				var parent = top.resource.specifications[parentId]
 				if (!parent) console.log("MISSING:", parentId)
@@ -1046,7 +1046,7 @@ function downloadDataSpecification(contentObj) {
 		/*
 		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
 		// Will venture upward as long as each ancestor is a model and 'has component' X.
-		if ('parent' in entity) {
+		if (entity.parent_id) {
 			var parentId = entity['parent']
 			if (parentId != 'OBI:0000658') {//Top level spec.
 				var parent = top.resource.specifications[parentId]

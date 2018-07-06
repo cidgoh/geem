@@ -206,3 +206,5 @@ i.fi-x  {color:white;background-color:#2199e8;cursor:pointer;width:auto;}
 /* TO DO: make styling nicer for main ontology optgroup */
 
 ul.disabled li a {opacity:0.3;}
+
+i.addInputElement {float:right;color:blue;cursor:pointer;}

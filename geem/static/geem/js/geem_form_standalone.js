@@ -89,7 +89,7 @@ function loadForm() {
 
 
 function doSectionMenu() {
-  // Provide form menu to two levels down.
+  // Provide form menu that echoes form structure to two levels down of "model"
   $('#formSections').empty()
   var sections = 0
   var sectionHTML = ''

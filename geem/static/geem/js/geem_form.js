@@ -41,8 +41,6 @@ function OntologyForm(domId, resource, settings, callback) {
 	/*********** FORM RENDERER *************************/
 	this.renderEntity = function(entityId) {
 
-		formDelete()
-
 		// Deselect any other form menu item that might be open.
 		$('li.active[role="menuitem"]').removeClass('active')
 
@@ -53,18 +51,19 @@ function OntologyForm(domId, resource, settings, callback) {
 			self.entityId = entityId
 		}
 
-
 		// If entityId wasn't passed, then reverts to self.entityId
 		// to enable re-rendering of existing object (can happen after user
 		// changes form display setting.)
 		if (self.entityId) {
+
+			formDelete()
 
 			// Highlight any menu item that is this entity
 			// FUTURE: Ideally open menu to this item if not already.
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
 			var entity = getFormSpecificationComponent(self.entityId)
-			var form_html = renderFormSpecification(entity)
+			var form_html = render_form_specification(entity)
 
 			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
 			if (form_html == '') {
@@ -78,55 +77,19 @@ function OntologyForm(domId, resource, settings, callback) {
 			// Place new form html into page
 			self.formDomId.html(form_html)
 
-			// Set up UI widget for all date inputs; 
-			// Using http://foundation-datepicker.peterbeno.com/example.html
-			$('div[data-date-format]').fdatepicker({disableDblClickSelection: true}).find('input').off()
+			// Set required/optional status of fields and controls for adding more elements.
+			initialize_input_cardinality(self.formDomId) 
+			initialize_add_inputs(self.formDomId)
 
-			self.formDomId.on('click','.addInputElement',function() {
-				// Command to add rendering of new field-wrapper element
-				var element = $(this).parents('div.field-wrapper').first()
-				var element_id = element.attr('data-ontology-id').split('/').pop()
-				// NEED TO PROVIDE THIS WITH PATH + UNIQUE ID?
-				var fieldspec = getFormSpecificationComponent(element_id)
-				// Selection list items already accomodate min/max selections.
-				if (fieldspec.datatype != 'xmls:anyURI') {
-					// Prevent lable and wrapper from being drawn on input
-					fieldspec.input_group = true 
-					var html = renderFormSpecification(fieldspec, '', true)
-					element.append(html)
-
-					new_element = element.children().last()
-					setFormCardinality(new_element)
-
-		 			if (self.settings.minimalForm) setMinimalForm(new_element) 
-
-					// If new content has any select inputs, set them up
-					initializeSelectInputs(new_element.find('select.regular'))
-
-					
-					// ISSUE: date controls won't work until they have unique ids
-					new_element.foundation()
-				}
-					
-			})
-
-			var uiLabel = entity.uiLabel
-
-			// Enable page annotation by 3rd party tools by kicking browser to 
-			// understand that a #anchor and page title are different.
-			window.document.title = 'GEEM: ' + self.entityId + ':' + uiLabel
+			initialize_date_inputs(self.formDomId)
+		 	initialize_select_inputs(self.formDomId) 
 
 		 	// Load an existing data record
 		 	//loadFormData()
 
-			// Set required/optional status of fields and controls for adding more elements.
-			setFormCardinality(self.formDomId) 
+		 	if (self.settings.minimalForm) 
+		 		setMinimalForm(self.formDomId) // Hides empty optional field content.
 
-		 	if (self.settings.minimalForm) setMinimalForm(self.formDomId) // Hides empty optional field content.
-
-		 	// All of form's regular <select> inputs (e.g. NOT the ones for picking units)
-		 	// get some extra smarts for type-as-you-go filtering.
-		 	initializeSelectInputs($('#mainForm select.regular')) 
 		 	
 		 	// Reinitialize form since it was deleted above.
 		 	// FUTURE: UPGRADE FOUNDATION, use reInit()
@@ -137,11 +100,15 @@ function OntologyForm(domId, resource, settings, callback) {
 				self.formCallback(self)
 
 
+			// Enable page annotation by 3rd party tools by kicking browser to 
+			// understand that a #anchor and page title are different.
+			window.document.title = 'GEEM: ' + self.entityId + ':' + entity.uiLabel
+
 			// A hack that provides more styled info about form in portal.html
 			if ($('#formEntityLabel').length) {
 
 				$('#formEntityLabel')
-					.html(uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
+					.html(entity.uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
 				$('#mainForm > div.field-wrapper > label')
 					.html(entity.definition || '<span class="small float-right">(select all)</span>')
 			}
@@ -212,15 +179,95 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	}
 
-	initializeSelectInputs = function(select_inputs) {
-		select_inputs.each( function() {
+	initialize_add_inputs = function(dom_element) {
+		dom_element
+			.on('click', '.addInputElement', function() {
+
+				// Command to add rendering of new field-wrapper element
+				var element = $(this).parents('div.field-wrapper').first()
+				var element_path = element.attr('data-ontology-id').split('/')
+				var element_id = element_path.pop()
+
+				// Compare with maxValues to see if add button should be disabled
+				var kid_count = element.children('div.inputBlock').length
+
+				// NEED TO PROVIDE THIS WITH PATH + UNIQUE ID?
+				var fieldspec = getFormSpecificationComponent(element_id, element_path, element_path.length) // A path
+
+				// Skip selection lists as they already accomodate min/max selections.
+				if (fieldspec.datatype != 'xmls:anyURI') {
+
+					// Prevent lable and wrapper from being drawn on field content
+					fieldspec.input_group = true 
+
+					var header = '<div class="inputBlockSeparator"><i class="removeInputElement fi-x-circle"></i><label>Record ' + (kid_count + 1) + '</label></div>'
+					var html = render_form_specification(fieldspec, header, true)
+					element.append(html)
+
+					var new_element = element.children().last()
+					initialize_input_cardinality(new_element)
+
+					// If new content has any select inputs, set them up
+					initialize_select_inputs(new_element)
+					initialize_date_inputs(new_element) 
+					new_element.foundation()
+
+		 			if (self.settings.minimalForm) setMinimalForm(new_element) 
+
+		 			// Bring user's attention to new field they requested
+		 			// Using built-in fn until can figure out jquery .scrollTo(...)
+		 			new_element[0].scrollIntoView({ behavior: 'smooth', block:'start' })
+		 			new_element.fadeOut(0).fadeIn(2000)
+
+		 			// Disable "Add Record" button if maxcardinality exceeded
+					if (element.attr('maxcardinality')) {
+						if (kid_count >= parseInt( element.attr('maxcardinality') )) 
+							element.find('button.addInputElement').first().attr('disabled','disabled')
+							//alert(element.find('button.addInputElement').first().attr('disabled'))
+					}
+
+				}
+				return false
+			})
+			.on('click', '.removeInputElement', function() {
+
+				// ISSUE: Numbering - remaining items have "Record XYZ" not in sequence
+
+				$(this).parents('div.inputBlock').first().slideUp(400, function(){$(this).remove()} )
+
+				// Enable "Add Record" button.
+				var element = $(this).parents('div.field-wrapper').first()
+				//if (element.attr('mincardinality')) {
+				var kid_count = element.children('div.inputBlock').length
+				if (kid_count <= parseInt( element.attr('maxcardinality') )) 
+					element.find('button.addInputElement').first().removeAttr('disabled')
+				//}
+
+			})
+	}
+
+	initialize_date_inputs = function(dom_element) {
+		/* Set up UI widget for all date inputs; 
+		Using http://foundation-datepicker.peterbeno.com/example.html
+		The '.find('input').off() disables a click on the date text	field
+		itself, so that users can cut/paste or manually modify date info.
+		*/
+		dom_element.find('div[data-date-format]')
+			.fdatepicker({disableDblClickSelection: true}).find('input').off()
+	}
+
+	initialize_select_inputs = function(dom_element) {
+	 	/* All of form's regular <select> inputs (e.g. NOT the ones for picking
+	 	units) get some extra smarts for type-as-you-go filtering.
+	 	*/
+		dom_element.find('select.regular').each( function() {
 
 			// Applies jQuery chosen() 
 	 		var fieldWrapper = $(this).parents("div.field-wrapper").first()
 	 		var min = fieldWrapper.attr("minCardinality")
 			var max = fieldWrapper.attr("maxCardinality")
 			var required = fieldWrapper.is('.required')
-			if (required) $(this).prop('required', true); //Should do this in setFormCardinality() instead?
+			if (required) $(this).prop('required', true); //Should do this in initialize_input_cardinality() instead?
 	 		var singleDeselect = (!min || min == 0) ? true : false
 
 	 		$(this).chosen({
@@ -248,7 +295,7 @@ function OntologyForm(domId, resource, settings, callback) {
  	}
 
 
-	setFormCardinality = function(domObject) {
+	initialize_input_cardinality = function(domObject) {
 		/* This renders each form element's HTML required attribute via 
 		javascript.	It also adds attributes for minCardinality and 
 		maxCardinality.  
@@ -310,15 +357,19 @@ function OntologyForm(domId, resource, settings, callback) {
 
 				}
 
-				if (!max || max > 1) {
-					// Enables creation up to max cardinality of given element.
-					// Alternative would be to create max elements up-front.
-					// Don't do this though for <select> inputs, as the input
-					// element already accomodates multiple selections.
-					if (! $(this).is('.categorical') )
-						$(this).children('label').prepend('<i class="addInputElement fi-plus"></i>')
-					// x-circle
-				}
+				if (! $(this).is('.categorical'))
+					if (!max || (max > 1 && (!min || min < max ) ) ) {
+						/* Provides button for creation of given element up to max
+						cardinality. (Alternative would be to create max elements 
+						up-front.) Skips the button if min == max > 1, which means
+						that a fixed number of form elements should be visible.
+
+						Skips doing this though for <select> inputs, as selects 
+						already accomodates multiple selections.
+						*/
+
+						$(this).children('label').before('<button class="addInputElement">add record</button>')
+					}
 
 				if (required == true) {
 					$(this).addClass('required')
@@ -340,7 +391,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	/*********************** FORM PART RENDERING **********************/
 
-	renderFormSpecification = function(entity, html = '') { //, inherited = false
+	render_form_specification = function(entity, html = '') { //, inherited = false
 		/*
 		Currently this rendering of an ontology-driven data specification is
 		focused on ZURB Foundation engine.
@@ -375,7 +426,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				html += renderSpecification(entity)
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity.uiLabel != '[no label]')
-					return getModelWrapper(entity, labelHTML + '<div style="border-left:1px solid red">' + html+ '</div>')
+					return getModelWrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
 				break;
 
 			/*
@@ -456,14 +507,15 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		// Render each component
 		for (var entityId in entity.components) { 
-			html += this.renderFormSpecification(entity.components[entityId]) //, html
+			html += this.render_form_specification(entity.components[entityId]) //, html
 		}
-
+		/*
 		if ('choices' in entity) {
 			for (var entityId in entity.choices) { 
-				html += this.renderFormSpecification(entity.choices[entityId])
+				html += this.render_form_specification(entity.choices[entityId])
 			}
 		}
+		*/
 		return html	
 	}
 
@@ -589,7 +641,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
 			//htmlTabContent += 	this.render(entityId, entity.path, entity.depth+1) //, false, true 
 			// Issue: tab label repeated in child field wrapper.
-			htmlTabContent += this.renderFormSpecification(entity.components[entityId]) 
+			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
 			htmlTabContent += '</div>\n'		
 		}
 
@@ -642,7 +694,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		}
 
 		html = [labelHTML,
-			,'<div class="input-group">\n'
+			,'<div class="input-group" style="width:250px">\n'
 	 		,'	<input class="input-group-field ' + entity.id + '"'
 	 		,		' id="' + entity.domId + '"'
 	 		,		typeAttr
@@ -654,7 +706,6 @@ function OntologyForm(domId, resource, settings, callback) {
 			,		' data-validator="min_max"'
 			,	' />\n'
     		,	renderUnits(entity)
-			//,	renderHelp(entity)
 			,'</div>\n'
 		].join('')
 
@@ -977,6 +1028,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			return ['<div class="field-wrapper field'
 				,		dom_class ? ' ' + dom_class : ''
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
+				,		' depth' + entity.depth
 				,		'" '
 				,		getIdHTMLAttribute(entity.domId)
 				,		getHTMLAttribute(entity, 'minCardinality')
@@ -1039,7 +1091,14 @@ function OntologyForm(domId, resource, settings, callback) {
 	getStringConstraints = function(entity) {
 		// Encodes html input length limits on string.
 		var min = entity.minLength ? ' minLength="'+entity.minLength+'" ' : ''
-		var max = entity.maxLength ? ' maxLength="'+entity.maxLength+'" ' : ''
+		if (entity.maxLength) {
+			var max = ' maxLength="'+entity.maxLength+'" '
+			// Enables shorter fields to have appropriate field size
+			if (entity.maxLength < 40)
+				max += ' size="' + (entity.maxLength+2) + '" style="width:auto"'
+		}
+		else
+			var max = ''
 		//size 	= 'xmls:length' in constraints ? ' size="'+constraints['xmls:length']+'" ' : ''
 		return min + max + getPatternConstraint(entity)
 	}

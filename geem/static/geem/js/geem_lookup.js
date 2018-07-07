@@ -20,7 +20,7 @@ lookupOntologyChoices = function(helper, selectId) {
 	var select = $(helper).parent('div[class="input-group"]').find("select");
 	var value = select.val();
 
-	if (value.length == 0) {
+	if (value && value.length == 0) {
 		// Grabbing displayed label rather than top specification uiLabel since that doesn't reflect all customization.
 
 		var label = select.parents('div.field-wrapper').first().find(' > label')

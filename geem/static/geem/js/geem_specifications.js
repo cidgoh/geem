@@ -427,6 +427,16 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 	if (entityId === false) {
 		return {} //specification // Nothing selected yet.
 	}
+	/*
+	if (entityId.indexOf('/') > 0) {
+		// Issue: this trips up on any entityId that has an http URI that hasn't been recognized.
+		path = entityId.split('/')
+
+		entityId = path.pop()
+		alert(path.join('/'))
+		alert(entityId)
+	}
+	*/
 
 	console.log("Get Form Component Specification: ", path.join('/')+'/'+entityId, ' depth:', depth)
 
@@ -445,7 +455,7 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 
 	initializeEntity(entity, entityId, path, depth)
 
-	switch (entity['datatype']) {
+	switch (entity.datatype) {
 		case undefined:
 
 			console.log('This specification component needs a "value specification" so that it can be rendered: "' + entity['uiLabel'] + '" (' + entityId + ')')
@@ -534,7 +544,7 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 			break;
 
 		default:
-			console.log('UNRECOGNIZED: '+ entityId + ' [' + entity['datatype']  + ']' + entity['uiLabel']  )
+			console.log('UNRECOGNIZED: '+ entityId + ' [' + entity.datatype + ']' + entity.uiLabel)
 			break;
 	}
 
@@ -549,7 +559,7 @@ getEntitySpecFormNumber = function(entity) { //, minInclusive=undefined, maxIncl
 
 initializeEntity = function(entity, entityId, path, depth) {
 	// Initialize entity
-	entity['depth'] = depth
+	entity.depth = depth
 
 	// Created entity takes on whatever parent involks it.
 	if (depth > 0) {
@@ -568,15 +578,15 @@ initializeEntity = function(entity, entityId, path, depth) {
 	entity['uiDefinition'] = getDefinition(entity)
 
 	if (entity.features.help)
-		entity['help'] = entity.features.help.value
+		entity.help = entity.features.help.value
 
 	// Future: do only with some kinds of datatype
 	if (entity.features.preferred_unit) 
-		entity['preferred_unit'] = entity.features.preferred_unit.value
+		entity.preferred_unit = entity.features.preferred_unit.value
 
 	setEntityConstraints(entity)
 
-	if (entity['depth'] > 0) {
+	if (entity.depth > 0) {
 		// When this entity is displayed within context of parent entity, that entity will 
 		// indicate how many of this part are allowed.
 		getEntityCardinality(entity)
@@ -616,8 +626,8 @@ getEntityFeatures = function(entity, parentId = null) {
 			if (piecesArray) {
 				for (var ptr in piecesArray) {
 					var myobj = piecesArray[ptr]
-					if ('feature' in myobj) {
-						myFeatures[myobj['feature']] = $.extend({}, myobj)
+					if (myobj.feature) {
+						myFeatures[myobj.feature] = $.extend({}, myobj)
 					}
 				}
 			}
@@ -862,17 +872,17 @@ getEntitySpecFormChoices = function(entity) {
 		entity.multiple if appropriate
 	*/
 	if (entity.features.lookup) 
-		entity['lookup'] = true
+		entity.lookup = true
 	
 	if (entity.minCardinality > 1 || (entity.maxCardinality != 1))
-		entity['multiple'] = true
+		entity.multiple = true
 
 	getEntitySpecFormChoice(entity)
 	// entity.choices is now an array.
 	
 	// An entity might only have components:
-	if ('components' in entity) {
-		if ('choices' in entity) {} 
+	if (entity.components) {
+		if (entity.choices) {} 
 		else entity.choices = []
 
 		// The datatype of entity is xmls:anyURI, but if it has components, they will still
@@ -907,11 +917,11 @@ getEntitySpecFormChoice = function(entity, depth = 0) {
 			else {
 
 				// TESTING: Trim all definitions to first sentence
-				if ('definition' in part && part['definition'].indexOf('.') > 0) {
-					part['definition'] = part['definition'].split('.',1)[0] + '.'
+				if (part.definition && part.definition.indexOf('.') > 0) {
+					part.definition = part.definition.split('.',1)[0] + '.'
 				}
 
-				part['disabled'] = '';
+				part.disabled = '';
 
 				newChoices.push(getEntitySpecFormChoice(part , depth+1))
 			}
@@ -941,11 +951,25 @@ function getFormData(domId) {
 		var id = $(item).attr('id')
 		if (id) {
 			var path = id.split('/')
+			console.log(path)
+			// ISSUE: "Add Record" button should signal ARRAY of underlings.
+			// ANY TIME a path element has mincardinality=0 or maxcardinality > 1
+			// Then we need an array to incrementally capture the underlings.
 			for (var ptr in path) {
 				var item2 = path[ptr]
 				if (!(item2 in focus) ) 
 					focus[item2] = {}
-				if (ptr == path.length-1) //If at end of path, make assignment
+				// Item already found in focus - so this path 
+				else 
+					if (!focus.records)
+						focus.records = {}
+						
+					else
+						focus.records.push{item2:[]}
+					focus.records = 
+				if (ptr == path.length-1) 
+					// If at end of path, make assignment
+					// ISSUE: Should never be overwriting.
 					focus[item2] = $(item).val()
 				else
 					focus = focus[item2]
@@ -1022,47 +1046,3 @@ function downloadDataSpecification(contentObj) {
 		$("#view_spec_download")[0].click() // trigger download
 	}
 }
-
-
-
-
-
-		/*
-		if (inherited == false && entity.parent_id) { // aka member_of or subclass of
-			var parentId = entity.parent_id
-			if (parentId != 'OBI:0000658') {//Top level spec.
-				var parent = top.resource.specifications[parentId]
-				if (!parent) console.log("MISSING:", parentId)
-				if ('datatype' in parent && parent['datatype'] == 'model' && 'components' in parent) {
-					for (componentId in parent['components']) {
-						if (entity.id != componentId)
-							html += this.render(componentId, entity.path, depth+1)
-					}		
-				}
-			}
-		}	
-		*/
-
-		/*
-		// Here we go up the hierarchy to capture all inherited superclass 'has component' components.
-		// Will venture upward as long as each ancestor is a model and 'has component' X.
-		if (entity.parent_id) {
-			var parentId = entity['parent']
-			if (parentId != 'OBI:0000658') {//Top level spec.
-				var parent = top.resource.specifications[parentId]
-				if (!parent) console.log("MISSING:", parentId)
-
-				if (parent && parent['datatype'] == 'model' && 'components' in parent) {
-					for (componentId in parent['components']) {
-						if (entity.id != componentId) {
-							var component = top.resource.specifications[componentId]
-							// "true" prevents a parent's other is_a subclass models from being pursued.
-							//components.push ( this.getEntitySpecFormParts(component, depth + 1, true) )
-							components.push( this.getFormSpecificationComponent(componentId, entity.path, depth + 1) )
-						}
-					}	
-				}
-			}
-		}
-		*/
-

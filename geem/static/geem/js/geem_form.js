@@ -357,19 +357,26 @@ function OntologyForm(domId, resource, settings, callback) {
 
 				}
 
-				if (! $(this).is('.categorical'))
+				if (! $(this).is('.categorical')) {
+					/* Provides button for creation of given element up to max
+					cardinality. (Alternative would be to create max elements 
+					up-front.) Skips the button if min == max > 1, which means
+					that a fixed number of form elements should be visible.
+
+					Skips doing this though for <select> inputs, as selects 
+					already accomodates multiple selections.
+					*/
 					if (!max || (max > 1 && (!min || min < max ) ) ) {
-						/* Provides button for creation of given element up to max
-						cardinality. (Alternative would be to create max elements 
-						up-front.) Skips the button if min == max > 1, which means
-						that a fixed number of form elements should be visible.
-
-						Skips doing this though for <select> inputs, as selects 
-						already accomodates multiple selections.
-						*/
-
 						$(this).children('label').before('<button class="addInputElement">add record</button>')
 					}
+
+					// For X records of given entity type, need to mark the
+					// entity's div.field-wrapper as an array so that data 
+					// submission is given as array too.
+					// I.e. combination of min & max require more than 1 item.
+					if ( (!max && min) || (max && max > 1) )
+						$(this).addClass('array')
+				}
 
 				if (required == true) {
 					$(this).addClass('required')
@@ -426,6 +433,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				html += renderSpecification(entity)
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity.uiLabel != '[no label]')
+					//  data-ontology-id="'+entity.domId+'"
 					return getModelWrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
 				break;
 
@@ -567,7 +575,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'		>'
 			,'		<div class="input-group-label prefix"><i class="fi fi-calendar"></i></div>\n'
 			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
-			,		' id="'+entity.domId+'"'
+			,		' data-ontology-id="'+entity.domId+'"'
 			,		' type="text" style="width:200px" '
 			,		getHTMLInputPlaceholder(entity)
 			//,		getStringConstraints(entity)
@@ -589,7 +597,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		html = [label
 		,	'	<div class="input-group">\n'
 		,	'		<input class="input-group-field '+entity.id+'"'
-		,			' id="'+entity.domId+'"'
+		,			' data-ontology-id="'+entity.domId+'"'
 		, 			' type="text" '
 		,			 getStringConstraints(entity)
 		,			 entity.disabled
@@ -601,6 +609,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	} 
 
 	renderButton = function(text, buttonID) {
+		// Not an ontolog-driven specification.
 		return [
 			'<div>\n'
 		,	'	<input id="' + buttonID + '" class="button float-center" value="' + text + '">\n'
@@ -696,7 +705,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		html = [labelHTML,
 			,'<div class="input-group" style="width:250px">\n'
 	 		,'	<input class="input-group-field ' + entity.id + '"'
-	 		,		' id="' + entity.domId + '"'
+	 		,		' data-ontology-id="' + entity.domId + '"'
 	 		,		typeAttr
 			,		stepAttr
 			,		entity.disabled
@@ -717,7 +726,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		html = [
 			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
-			,'		<input id="'+entity.domId+'" class="switch-input" type="checkbox" name="' + entity.id+ '"'
+			,'		<input data-ontology-id="'+entity.domId+'" class="switch-input" type="checkbox" name="' + entity.id+ '"'
 			,		entity.disabled
 			,		' />\n'
 			,	'	<label class = "switch-paddle" for="'+entity.domId+'"></label>\n'
@@ -754,7 +763,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		var html = label
 		html +=	'	<div class="input-group">\n'
-		html +=	'		<select class="input-group-field '+ entity.id + ' regular" id="'+entity.domId+'"' + entity.disabled + multiple + '>\n'
+		html +=	'		<select class="input-group-field '+ entity.id + ' regular" data-ontology-id="'+entity.domId+'"' + entity.disabled + multiple + '>\n'
 		if (multiple.length == 0)
 			html +=	'<option value=""></option>'  //Enables no option to be selected.
 
@@ -913,7 +922,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			return [
 			'<div class="input-group-button" style="font-weight:700;">'
-			,	'<select class="units" id="' + entity.domId + '-IAO:0000039">'
+			,	'<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
 			,	optionsHTML	
 			,	'</select>'
 			,'</div>\n'].join('')

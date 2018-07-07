@@ -936,8 +936,8 @@ getEntitySpecFormChoice = function(entity, depth = 0) {
 
 
 function getFormData(domId) {
-	/* The hierarchic form data is converted into minimal JSON data 
-	   packet for transmission back to server.
+	/* The hierarchic form data is converted into a minimal JSON object for
+	   transmission back to server.
 
 	   OUTPUT
 	   	json string representation of html input and select values,
@@ -945,34 +945,76 @@ function getFormData(domId) {
 	   	input id attribute (separated by forward slashes)
 	*/
 	var obj = {}
-
-	$.each($(domId).find("input:not(.button), select"), function(i,item) {
+	/*
+	$.each($(domId).find(".field-wrapper.array"), function(i,item) {
+		var path = $(this).attr('data-ontology-id').split('/')
 		var focus = obj
-		var id = $(item).attr('id')
+		for (var ptr in path) {
+			if ()
+			var id = path[ptr]
+			focus[id] = {}
+			focus = focus[id]
+		}
+		if ($(item).is('.field-wrapper.array')) {
+						focus[item_id] = []
+	}
+	*/
+
+	// Provides linear list of inputs from top to bottom of form
+	$.each($(domId).find("input:not(.button), select, .field-wrapper.array, .field-wrapper.array > .inputBlock"), function(i,item) {
+
+		var focus = obj
+		var value = $(item).val() // Note: multi-select list returned as array
+		var id = $(item).attr('data-ontology-id')
+		if (!id) {
+			// inputBlock is associated with parent id
+			id = $(item).parent().attr('data-ontology-id') 
+		}
+
 		if (id) {
 			var path = id.split('/')
-			console.log(path)
 			// ISSUE: "Add Record" button should signal ARRAY of underlings.
 			// ANY TIME a path element has mincardinality=0 or maxcardinality > 1
-			// Then we need an array to incrementally capture the underlings.
+			// Then we need an array to incrementally capture the
 			for (var ptr in path) {
-				var item2 = path[ptr]
-				if (!(item2 in focus) ) 
-					focus[item2] = {}
-				// Item already found in focus - so this path 
-				else 
-					if (!focus.records)
-						focus.records = {}
-						
-					else
-						focus.records.push{item2:[]}
-					focus.records = 
-				if (ptr == path.length-1) 
-					// If at end of path, make assignment
-					// ISSUE: Should never be overwriting.
-					focus[item2] = $(item).val()
-				else
-					focus = focus[item2]
+				var item_id = path[ptr]
+
+				// If full path explored
+				if (ptr == path.length-1) {
+					// Set up array to catch multiple records
+					if ($(item).is('.field-wrapper.array')) {
+						//console.log('created array for', item_id)
+						focus[item_id] = []
+						continue
+					}
+					// input blocks gather their inputs.
+					// ASSUMES focus .array established/found by parent
+					if ($(item).is('.inputBlock')) {
+						//console.log('added input block object for', item_id)
+						focus[item_id].push({})
+						continue
+					}
+
+					if (Array.isArray(focus)) {
+						//console.log('writing array item', item_id, '=', value)
+						focus[focus.length-1][item_id] = value
+					}
+					else {
+						focus[item_id] = value
+					}
+
+					continue
+				}
+
+				// Further up in path here
+				if (Array.isArray(focus))
+					focus = focus[focus.length-1]
+				
+				if (!(item_id in focus) )
+					focus[item_id] = {}
+
+				focus = focus[item_id]
+
 			}
 		}
 	})
@@ -980,6 +1022,76 @@ function getFormData(domId) {
 	return JSON.stringify(obj, null, 2)
 
 }
+
+
+
+	function getFormData2(entity, focus = null, obj = {}) { //, inherited = false
+		/*
+		If an item is .array, then it is represented as such in its parent
+		parent: {item: []} 
+		*/
+		if (focus == null)
+		switch (entity.datatype) {
+			case undefined: // Shouldn't be possible
+				break;
+
+			case 'disjunction':
+			case 'model':
+
+				for (var entityId in entity.components) { 
+					//var childDomId = (domId + '_' + entityId).replace(/[^a-zA-Z0-9]/g,'_') //
+					var child = entity.components[entityId]
+					focus = getFormData2(child, focus)
+				}
+				break;
+
+			case 'xmls:date': //YYYY-MM-DD  and possibly time zone "Z" for UTC or +/-HH:MM
+			case 'xmls:time': //HH:MM:SS and possibly .DDDD  and time zone as above.
+			case 'xmls:dateTime': //YYYY-MM-DDTHH:MM:SS
+			case 'xmls:dateTimeStamp': //YYYY-MM-DDTHH:MM:SS  and required time zone as above.
+			case 'xmls:duration': //[-]P (period, required) + nYnMnD (years / months / days) T nHnMnS (hours / minuts / seconds)
+
+			case 'xmls:string':
+			case 'xmls:normalizedString':
+			case 'xmls:token':
+	 
+			case 'xmls:integer':			
+			case 'xmls:positiveInteger': 	
+			case 'xmls:nonNegativeInteger':	
+			case 'xmls:unsignedByte':		
+			case 'xmls:unsignedShort':		
+			case 'xmls:unsignedInt':				
+			case 'xmls:unsignedLong':		
+			case 'xmls:negativeInteger':	
+			case 'xmls:nonPositiveInteger':	
+			case 'xmls:byte': 	
+			case 'xmls:short': 	
+			case 'xmls:int': 	
+			case 'xmls:long': 
+
+			case 'xmls:decimal':
+			case 'xmls:float':  
+			case 'xmls:double': 
+
+			// Yes/No inputs
+			case 'xmls:boolean': 
+
+			// Categorical Picklists
+			case 'xmls:anyURI': 
+			case 'xmls:QName':
+				if (Array.isArray(focus))
+					focus.push(value)
+				else
+					focus[item_id] = value; 
+				break;
+
+			default:
+				break;
+		}
+		return focus
+
+	}
+
 
 function openModal(header, content) {
 	/* This displays given string content and header in popup. 

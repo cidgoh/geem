@@ -71,11 +71,11 @@ lookupOntologyChoices = function(helper, selectId) {
 			if (response._embedded)
 				setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
 			else
-				openModal(parent_label, "No subordinate choices found!")
+				open_modal(parent_label, "No subordinate choices found!")
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 
@@ -100,11 +100,11 @@ getOLSChoices = function(helper, parent_id, parent_label) {
 			if (response._embedded && response._embedded.terms)
 				setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
 			else
-				openModal(parent_label, "No subordinate choices found!")
+				open_modal(parent_label, "No subordinate choices found!")
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 
@@ -159,11 +159,11 @@ function getOLSSearch(helper, parent_id, text) {
 				setModalLookup(helper, response.response.docs, parent_id, parent_label)
 			}
 			else
-				openModal(parent_label, 'No results for "' + text + '"')
+				open_modal(parent_label, 'No results for "' + text + '"')
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 

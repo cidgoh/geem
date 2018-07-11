@@ -1,5 +1,5 @@
 
-function getdataSpecification(report_type) {
+function get_data_specification(report_type) {
 	/* 
 	In portal.html this is called each time a dataSpecification is loaded, 
 	and also when a	new specificationType is selected.
@@ -38,38 +38,38 @@ function getdataSpecification(report_type) {
 			// These are flat formats, i.e. each ontology element is in a top-level
 			// specification dictionary.
 			case 'raw.json':
-				content = JSON.stringify(getEntitySpecRoot(entityId), null, 2)
+				content = JSON.stringify(get_entity_spec_root(entityId), null, 2)
 				break; 
 			case 'raw.yml':
-				content = jsyaml.dump(getEntitySpecRoot(entityId), 4)  //indent of 4
+				content = jsyaml.dump(get_entity_spec_root(entityId), 4)  //indent of 4
 				break;
 			
 			// Provides only the @context JSON-LD RDF prefix list pertinent to given entity 
 			case 'context.json':
-				content = JSON.stringify(getEntitySpecContext(entityId), null, 2)
+				content = JSON.stringify(get_entity_spec_context(entityId), null, 2)
 				break; 
 
 			// FUTURE: These two could have all entity.path removed, as all info
 			// is already in entity.domID
 			case 'form.json':
-				content = JSON.stringify(getFormSpecification(entityId), null, 2)
+				content = JSON.stringify(get_form_specification(entityId), null, 2)
 				break; 
 			case 'form.yml':
-				content = jsyaml.dump(getFormSpecification(entityId), 4) //indent of 4
+				content = jsyaml.dump(get_form_specification(entityId), 4) //indent of 4
 				break; 
 
 			case 'form_all_nodes.tsv': // for all nodes
-				content = getTabularSpecification(getFormSpecification(entityId), true, true)
+				content = get_tabular_specification(get_form_specification(entityId), true, true)
 				break; 
 			case 'form_all_edges.tsv': //for all edges
-				content = getTabularSpecification(getFormSpecification(entityId), false, true) 
+				content = get_tabular_specification(get_form_specification(entityId), false, true) 
 				break; 
 			// "Core" version strips off all categorical choice nodes & edges
 			case 'form_core_nodes.tsv': // for core nodes
-				content = getTabularSpecification(getFormSpecification(entityId), true, false)
+				content = get_tabular_specification(get_form_specification(entityId), true, false)
 				break; 
 			case 'form_core_edges.tsv': //for core edges
-				content = getTabularSpecification(getFormSpecification(entityId), false, false)
+				content = get_tabular_specification(get_form_specification(entityId), false, false)
 				break;
 
 			case 'form.html':
@@ -78,7 +78,7 @@ function getdataSpecification(report_type) {
 
 			case 'form_submission.json':
 				// Provides a json structure of field identifiers and values that user has entered.
-				content = getFormData('form#mainForm')
+				content = get_form_data('form#mainForm')
 				break
 
 			case 'redcap.tsv':
@@ -111,7 +111,7 @@ function getdataSpecification(report_type) {
 }
 
 
-function getTabularSpecification(userSpecification, nodesFlag = true, choices = true) {
+function get_tabular_specification(userSpecification, nodesFlag = true, choices = true) {
 	/*
 	Using recursive form hierarchy.
 	Converts given flat table object of ontology entities, including each
@@ -127,8 +127,8 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 
 	*/
 
-	var nodeHeader = ['datatype', 'path', 'id', 'uiLabel', 'uiDefinition', 'help', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern', 'format', 'preferred_unit']
-	var edgeHeader = ['relation', 'path', 'child_id', 'minCardinality', 'maxCardinality']
+	var node_header = ['datatype', 'path', 'id', 'uiLabel', 'uiDefinition', 'help', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern', 'format', 'preferred_unit']
+	var edge_header = ['relation', 'path', 'child_id', 'minCardinality', 'maxCardinality']
 
 	var nodes = []
 	var edges = []
@@ -163,10 +163,10 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 						var parent_path = '/' + entity.path.slice(1,-1).join('/') 
 
 						var record = []
-						for (var fieldptr in nodeHeader) {
-							var field = nodeHeader[fieldptr]
+						for (var fieldptr in node_header) {
+							var field = node_header[fieldptr]
 
-							var value = getTextField(entity, field)
+							var value = get_text_field(entity, field)
 							// ADD datatype for choice
 							if (field == 'datatype' && value == '') //obsolete?
 								value = 'xmls:anyURI'
@@ -212,18 +212,18 @@ function getTabularSpecification(userSpecification, nodesFlag = true, choices = 
 	//nodes.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[2].localeCompare(b[2]) }) // datatype, label
 
 	// Then make header to 1st line
-	nodes.splice(0, 0, nodeHeader); 
+	nodes.splice(0, 0, node_header); 
 
 	// On hold, as above.
 	//edges.sort(function (a, b) {return a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) }) // 0=id, 1=relation
 	// Then make header to 1st line
-	edges.splice(0, 0, edgeHeader); 
+	edges.splice(0, 0, edge_header); 
 
-	return getTabularTable(nodesFlag ? nodes : edges)
+	return get_tabular_table(nodesFlag ? nodes : edges)
 }
 
 
-function getTextField (obj, field) {
+function get_text_field(obj, field) {
 	var text = obj[field]
 	if (text)
 		// convert numbers to text, and clean up carriage returns and tabs.
@@ -234,7 +234,7 @@ function getTextField (obj, field) {
 }
 
 
-function getTabularTable(dataArray) {
+function get_tabular_table(dataArray) {
 	// Convert given array to tabular text.
 	var data = ''
 	for (ptr in dataArray) {
@@ -245,13 +245,13 @@ function getTabularTable(dataArray) {
 }
 
 
-function getEntitySpecRoot(entityId = null) {
+function get_entity_spec_root(entityId = null) {
 
 	// Return only entityId specification from resource.specifications
 	if (entityId) {
-		spec = getEntitySpec(null, entityId)
+		spec = get_entity_spec(null, entityId)
 		return {
-			'@context': getEntitySpecContext(spec),
+			'@context': get_entity_spec_context(spec),
 			'specifications': spec,
 			'metadata': top.resource.metadata // Inherited from resource
 		 }
@@ -260,7 +260,7 @@ function getEntitySpecRoot(entityId = null) {
  	return top.resource
 }
 
-function getEntitySpecContext(entity_dict = null) {
+function get_entity_spec_context(entity_dict = null) {
 	/* A GEEM resource file has all the @context prefixes required for 
 	identifiers in its specifications
 	    "@context": {
@@ -282,22 +282,22 @@ function getEntitySpecContext(entity_dict = null) {
 		// Cycle through content, adding all pertinent prefixes.
 		for (var entity_id in entity_dict) {
 			var entity = entity_dict[entity_id]
-			setContext(entity_id, context, resContext)
+			set_specification_context(entity_id, context, resContext)
 			if (entity.datatype && entity.datatype.indexOf(':') > 0) // e.g. xsd:string 
-				setContext(entity.datatype, context, resContext)
+				set_specification_context(entity.datatype, context, resContext)
 
 			if ('components' in entity) 
-				for (entity_id in entity.components) setContext(entity_id, context, resContext) 
+				for (entity_id in entity.components) set_specification_context(entity_id, context, resContext) 
 			if ('models' in entity) 
-				for (entity_id in entity.models) setContext(entity_id, context, resContext)
+				for (entity_id in entity.models) set_specification_context(entity_id, context, resContext)
 			if ('choices' in entity) 
-				for (entity_id in entity.models) setContext(entity_id, context, resContext)
+				for (entity_id in entity.models) set_specification_context(entity_id, context, resContext)
 			if ('member_of' in entity) 
-				for (ptr in entity.member_of) setContext(entity.member_of[ptr], context, resContext)
+				for (ptr in entity.member_of) set_specification_context(entity.member_of[ptr], context, resContext)
 			if ('units' in entity) 
-				for (ptr in entity.units) setContext(entity.units[ptr], context, resContext)
+				for (ptr in entity.units) set_specification_context(entity.units[ptr], context, resContext)
 			if ('otherParent' in entity) 
-				for (ptr in entity.otherParent) setContext(entity.otherParent[ptr], context, resContext)
+				for (ptr in entity.otherParent) set_specification_context(entity.otherParent[ptr], context, resContext)
 		}
 
 		return context
@@ -306,7 +306,7 @@ function getEntitySpecContext(entity_dict = null) {
 	return top.resource['@context']
 }
 
-function setContext(ref, context, resContext) {
+function set_specification_context(ref, context, resContext) {
 	// If context doesn't have prefix, add it.
 
 	if (ref && ref.indexOf(':') > 0) {
@@ -319,10 +319,10 @@ function setContext(ref, context, resContext) {
 		console.log('No prefix for: ', ref) 
 }
 
-function getEntitySpec(spec, entityId = null, inherited = false) {
+function get_entity_spec(spec, entityId = null, inherited = false) {
 	/* Recursively copy the entityId specification element and all its
 	   underlings into a a single javascript object. This differs from
-	   getFormSpecification() in that entities are copied verbatim from
+	   get_form_specification() in that entities are copied verbatim from
 	   top.resource.specifications, and via reference, so no branch-specific
 	   processing goes on.
 	*/
@@ -341,21 +341,21 @@ function getEntitySpec(spec, entityId = null, inherited = false) {
 				var parentId = entity.parent_id
 				// Reach up to top level OBI "data representation model"
 				if (parentId && parentId != 'OBI:0000658') 
-					getEntitySpec(spec, parentId, true)
+					get_entity_spec(spec, parentId, true)
 			}
 			*/
 
-			getEntitySpecItems(spec, entity, 'components')
-			getEntitySpecItems(spec, entity, 'models') 
-			getEntitySpecItems(spec, entity, 'units')
-			getEntitySpecItems(spec, entity, 'choices')
+			get_entity_spec_items(spec, entity, 'components')
+			get_entity_spec_items(spec, entity, 'models') 
+			get_entity_spec_items(spec, entity, 'units')
+			get_entity_spec_items(spec, entity, 'choices')
 		}
 	}
 
 	return spec
 }
 
-function getEntitySpecItems(spec, entity, type) {
+function get_entity_spec_items(spec, entity, type) {
 	/*
 	FUTURE: units array will be ordered so that favoured unit is first.
 	Currently entity's preferred_unit field indicates preference.
@@ -366,13 +366,13 @@ function getEntitySpecItems(spec, entity, type) {
 			for (var ptr in entity['units']) { 
 				var partId = entity[type][ptr]
 				spec[partId] = top.resource.specifications[partId] // load object
-				getEntitySpec(spec, partId) // sub-units?
+				get_entity_spec(spec, partId) // sub-units?
 			}
 		else
 			// models, components, choices, which are dictionaries
 			for (var partId in entity[type]) { 
 				spec[partId] = top.resource.specifications[partId] // load object
-				getEntitySpec(spec, partId)
+				get_entity_spec(spec, partId)
 			} 
 	}
 }
@@ -380,7 +380,7 @@ function getEntitySpecItems(spec, entity, type) {
 
 /*********************** FORM SPECIFICATION BUILD **********************/
 
-getFormSpecification = function(entityId) {
+get_form_specification = function(entityId) {
 	/*
 	This is a simplified JSON-LD structure much like OntologyForm.render(),
 	this returns just the form specification object as it is "unwound" 
@@ -401,14 +401,14 @@ getFormSpecification = function(entityId) {
 	OUTPUT
 		specification: javascript object containing all form elements and JSON-LD @context
 	*/
-	var rootSpecification = {
+	var root_specification = {
 		'@context': self.context,
-		'specifications': {[entityId]: getFormSpecificationComponent(entityId) }
+		'specifications': {[entityId]: get_form_specification_component(entityId) }
 	}
-	return rootSpecification
+	return root_specification
 }
 
-getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, inherited = false
+get_form_specification_component = function(entityId, path = [], depth = 0) { //, inherited = false
 	/*
 	Modelled closely on OntologyForm.render(), this returns just the form 
 	specification object as it is "unwound" from pure JSON specification.
@@ -453,7 +453,7 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 	// deepcopy specification entity so we can change it.
 	var entity = $.extend(true, {}, top.resource.specifications[entityId]) 
 
-	initializeEntity(entity, entityId, path, depth)
+	initialize_entity(entity, entityId, path, depth)
 
 	switch (entity.datatype) {
 		case undefined:
@@ -472,7 +472,7 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 			// Catch is situation where M has component N, where N is a model that 
 			// inherits components from an is_a ancestor. Travel up the tree,
 			// incorporating ALL 'has component' Z items.
-			entity.components = getEntitySpecFormParts(entity, depth)
+			entity.components = get_entity_spec_form_parts(entity, depth)
 			break;
 
 		/* PRIMITIVE data types 
@@ -493,41 +493,41 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 		case 'xmls:string':
 		case 'xmls:normalizedString':
 		case 'xmls:token':
-			getEntitySpecFormUnits(entity)
+			get_entity_spec_form_units(entity)
 			break;
 
-		case 'xmls:integer':			//getEntitySpecFormNumber(entity);	break
-		case 'xmls:positiveInteger': 	//getEntitySpecFormNumber(entity, 1);	break
-		case 'xmls:nonNegativeInteger':	//getEntitySpecFormNumber(entity, 0);	break
-		case 'xmls:unsignedByte':		//getEntitySpecFormNumber(entity, 0, 255); break// (8-bit)	
-		case 'xmls:unsignedShort':		//getEntitySpecFormNumber(entity, 0, 65535); break// (16-bit) 
-		case 'xmls:unsignedInt':		//getEntitySpecFormNumber(entity, 0, 4294967295);	break// (32-bit)		
-		case 'xmls:unsignedLong':		//getEntitySpecFormNumber(entity, 0, 18446744073709551615); break// (64-bit) 
+		case 'xmls:integer':			//get_entity_spec_form_number(entity);	break
+		case 'xmls:positiveInteger': 	//get_entity_spec_form_number(entity, 1);	break
+		case 'xmls:nonNegativeInteger':	//get_entity_spec_form_number(entity, 0);	break
+		case 'xmls:unsignedByte':		//get_entity_spec_form_number(entity, 0, 255); break// (8-bit)	
+		case 'xmls:unsignedShort':		//get_entity_spec_form_number(entity, 0, 65535); break// (16-bit) 
+		case 'xmls:unsignedInt':		//get_entity_spec_form_number(entity, 0, 4294967295);	break// (32-bit)		
+		case 'xmls:unsignedLong':		//get_entity_spec_form_number(entity, 0, 18446744073709551615); break// (64-bit) 
 
-		case 'xmls:negativeInteger':	//getEntitySpecFormNumber(entity, null, -1); break
-		case 'xmls:nonPositiveInteger':	//getEntitySpecFormNumber(entity, null, 0); break
+		case 'xmls:negativeInteger':	//get_entity_spec_form_number(entity, null, -1); break
+		case 'xmls:nonPositiveInteger':	//get_entity_spec_form_number(entity, null, 0); break
 
-		case 'xmls:byte': 	//getEntitySpecFormNumber(entity, -128, 127);	break// (signed 8-bit)
-		case 'xmls:short': 	//getEntitySpecFormNumber(entity, -32768, 32767);	break// (signed 16-bit)
-		case 'xmls:int': 	//getEntitySpecFormNumber(entity, -2147483648, 2147483647);	break// (signed 32-bit)
-		case 'xmls:long': 	//getEntitySpecFormNumber(entity, -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
-			getEntitySpecFormUnits(entity)	
+		case 'xmls:byte': 	//get_entity_spec_form_number(entity, -128, 127);	break// (signed 8-bit)
+		case 'xmls:short': 	//get_entity_spec_form_number(entity, -32768, 32767);	break// (signed 16-bit)
+		case 'xmls:int': 	//get_entity_spec_form_number(entity, -2147483648, 2147483647);	break// (signed 32-bit)
+		case 'xmls:long': 	//get_entity_spec_form_number(entity, -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
+			get_entity_spec_form_units(entity)	
 			break
 
 		// Decimal, double and float numbers
 		case 'xmls:decimal':
-		 	getEntitySpecFormUnits(entity)
+		 	get_entity_spec_form_units(entity)
 		 	// Add maximum # of digits.
 			break;
 		// Size of float/double depends on precision sought, see
 		// https://stackoverflow.com/questions/872544/what-range-of-numbers-can-be-represented-in-a-16-32-and-64-bit-ieee-754-syste
 		case 'xmls:float':  
-			//getEntitySpecFormNumber(entity, - Math.pow(2, 23), Math.pow(2, 23) - 1 )
-			getEntitySpecFormUnits(entity)
+			//get_entity_spec_form_number(entity, - Math.pow(2, 23), Math.pow(2, 23) - 1 )
+			get_entity_spec_form_units(entity)
 			break; 
 		case 'xmls:double': 
-			//getEntitySpecFormNumber(entity, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) //-(Math.pow(2, 53) - 1) etc.
-			getEntitySpecFormUnits(entity)
+			//get_entity_spec_form_number(entity, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) //-(Math.pow(2, 53) - 1) etc.
+			get_entity_spec_form_units(entity)
 			break;
 
 
@@ -537,7 +537,7 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 
 		case 'xmls:anyURI': // Picklists are here
 			if (entityId in top.resource.specifications) {
-				getEntitySpecFormChoices(entity)
+				get_entity_spec_form_choices(entity)
 			}
 			else
 				console.log('ERROR: Categorical variable [', entityId, '] not marked as a "Categorical tree specification"')
@@ -549,15 +549,15 @@ getFormSpecificationComponent = function(entityId, path = [], depth = 0) { //, i
 	}
 
 	// Various fields that flat ontology has that simplified JSON or YAML form view don't need.
-	return getEntitySimplification(entity)
+	return get_entity_simplification(entity)
 }
 
-getEntitySpecFormNumber = function(entity) { //, minInclusive=undefined, maxInclusive=undefined
+get_entity_spec_form_number = function(entity) { //, minInclusive=undefined, maxInclusive=undefined
 	// Just ensure field has right unit list
-	getEntitySpecFormUnits(entity)
+	get_entity_spec_form_units(entity)
 }
 
-initializeEntity = function(entity, entityId, path, depth) {
+initialize_entity = function(entity, entityId, path, depth) {
 	// Initialize entity
 	entity.depth = depth
 
@@ -571,7 +571,7 @@ initializeEntity = function(entity, entityId, path, depth) {
 	// Create a unique domId out of all the levels 
 	entity.domId = entity.path.join('/')
 
-	getEntityFeatures(entity) // Guarantees that entity.features exists
+	get_entity_features(entity) // Guarantees that entity.features exists
 
 	// These may depend on above features fetch.
 	entity['uiLabel'] = getLabel(entity)
@@ -584,19 +584,19 @@ initializeEntity = function(entity, entityId, path, depth) {
 	if (entity.features.preferred_unit) 
 		entity.preferred_unit = entity.features.preferred_unit.value
 
-	setEntityConstraints(entity)
+	set_entity_constraints(entity)
 
 	if (entity.depth > 0) {
 		// When this entity is displayed within context of parent entity, that entity will 
 		// indicate how many of this part are allowed.
-		getEntityCardinality(entity)
+		get_entity_cardinality(entity)
 	}
 
 	entity.disabled = ''
 }
 
 
-getEntityFeatures = function(entity, parentId = null) {
+get_entity_features = function(entity, parentId = null) {
 	/* 
 	An instance of a form field that has entity.features should have those
 	enhanced by parent's route to this entity. But if entity doesn't have This is getting features ONLY
@@ -675,7 +675,7 @@ getEntityFeatures = function(entity, parentId = null) {
 
 
 
-setEntityConstraints = function(entity) {
+set_entity_constraints = function(entity) {
 	/* 
 	Adds axiom bracketed expressions of the form:
 		
@@ -736,7 +736,7 @@ setEntityConstraints = function(entity) {
 	}
 }
 
-getEntityCardinality = function(entity) {
+get_entity_cardinality = function(entity) {
 	/* Here we're given an entity with respect to some parent entity.  The 
 	parent has a cardinality qualifier relation between the two that indicates
 	how	many of	that entity can exist in it's parent entity's data structure
@@ -806,7 +806,7 @@ getEntityCardinality = function(entity) {
 }
 
 
-getEntitySimplification = function(entity) {
+get_entity_simplification = function(entity) {
 	/* Simple view of specification dispenses with cross-references and 
 	other aspects that have already been digested.
 	*/
@@ -823,7 +823,7 @@ getEntitySimplification = function(entity) {
 	return $.extend(true, freshEntity, entity) 
 }
 
-getEntitySpecFormParts = function(entity, depth) { //, inherited = false
+get_entity_spec_form_parts = function(entity, depth) { //, inherited = false
 	/*
 	Convert given "specification" entity's "parts" list into a list of 
 	processed entities.
@@ -833,14 +833,14 @@ getEntitySpecFormParts = function(entity, depth) { //, inherited = false
 	*/
 	var components = []
 	for (var entityId in entity.components ) { 
-		components.push( this.getFormSpecificationComponent(entityId, entity.path, depth + 1) )
+		components.push( this.get_form_specification_component(entityId, entity.path, depth + 1) )
 	}
 
 	return components
 }
 
 
-getEntitySpecFormUnits = function(entity) {
+get_entity_spec_form_units = function(entity) {
 	// Convert units array id references into reference to unit object
 	// itself.  Maintains order, and info like default unit.
 
@@ -857,7 +857,7 @@ getEntitySpecFormUnits = function(entity) {
 }
 
 
-getEntitySpecFormChoices = function(entity) {
+get_entity_spec_form_choices = function(entity) {
 	/* 
 	REPLACE entity.choices dictionary with ARRAY of choices.
 
@@ -877,7 +877,7 @@ getEntitySpecFormChoices = function(entity) {
 	if (entity.minCardinality > 1 || (entity.maxCardinality != 1))
 		entity.multiple = true
 
-	getEntitySpecFormChoice(entity)
+	get_entity_spec_form_choice(entity)
 	// entity.choices is now an array.
 	
 	// An entity might only have components:
@@ -891,13 +891,13 @@ getEntitySpecFormChoices = function(entity) {
 			// In path we silently skip name of component.
 			var part = $.extend(true, {path:entity.path}, top.resource.specifications[ontoID]) //deepcopy
 			 
-			entity.choices.push( getEntitySpecFormChoice(part) )				
+			entity.choices.push( get_entity_spec_form_choice(part) )				
 		}
 	}
 	
 }
 
-getEntitySpecFormChoice = function(entity, depth = 0) { 
+get_entity_spec_form_choice = function(entity, depth = 0) { 
 	/* Convert entity.choices{dictionary} into entity.choices[array]
 
 	OUTPUT
@@ -923,19 +923,19 @@ getEntitySpecFormChoice = function(entity, depth = 0) {
 
 				part.disabled = '';
 
-				newChoices.push(getEntitySpecFormChoice(part , depth+1))
+				newChoices.push(get_entity_spec_form_choice(part , depth+1))
 			}
 		}
 		// Convert entity.choices{} to array.
 		entity.choices = newChoices
 	}
 
-	getEntitySimplification(entity)
+	get_entity_simplification(entity)
 	return entity
 }
 
 
-function getFormData(domId) {
+function get_form_data(domId) {
 	/* The hierarchic form data is converted into a minimal JSON object for
 	   transmission back to server.
 
@@ -1024,12 +1024,12 @@ function getFormData(domId) {
 }
 
 
-
+/*
 	function getFormData2(entity, focus = null, obj = {}) { //, inherited = false
-		/*
-		If an item is .array, then it is represented as such in its parent
-		parent: {item: []} 
-		*/
+		//
+		//If an item is .array, then it is represented as such in its parent
+		//parent: {item: []} 
+		//
 		if (focus == null)
 		switch (entity.datatype) {
 			case undefined: // Shouldn't be possible
@@ -1091,9 +1091,9 @@ function getFormData(domId) {
 		return focus
 
 	}
+*/
 
-
-function openModal(header, content) {
+function open_modal(header, content) {
 	/* This displays given string content and header in popup. 
 	Usually called by getChoices()
 	*/
@@ -1105,7 +1105,7 @@ function openModal(header, content) {
 
 
 
-function setModalDownload(contentObj) {
+function set_modal_download(contentObj) {
 	/* Used on form.html to download stuff.
 	*/
 	$("#modalEntityHeaderContent").hide()
@@ -1114,21 +1114,21 @@ function setModalDownload(contentObj) {
 	$("#modalEntity").foundation('open')
 	$("#spec_download")
     	.off()
-    	.on('click', function() { downloadDataSpecification(contentObj) })
+    	.on('click', function() { download_data_specification(contentObj) })
     	.show()
 }
 
-function setDataSpecification(contentObj) {
+function set_data_specification(contentObj) {
 	// Used on portal.html page, not as popup.
 	$('#dataSpecification').removeClass('hide').show().html(contentObj.content) 
 	$("#spec_download")
     	.off()
-    	.on('click', function() { downloadDataSpecification(contentObj) })
+    	.on('click', function() { download_data_specification(contentObj) })
 		.removeAttr('disabled').removeClass('disabled')
 }
 
 
-function downloadDataSpecification(contentObj) {
+function download_data_specification(contentObj) {
 	/* This creates dynamic file download link for a given ontology entity. 
 	File generated from contentObj contents directly.
 	It fires when user clicks download button (#spec_download) of 

@@ -30,7 +30,8 @@ function OntologyForm(domId, resource, settings, callback) {
 	self.settings = {}
 	self.formDomId = $(domId)
 	self.context = resource.context
-	self.formCallback = callback
+	self.set_form_callback = callback
+	self.uniqueDomId = 0
 
 	// Some of these defaults can be overridden by particular fields via ui_feature specification
 	if (settings) self.settings = settings
@@ -56,13 +57,13 @@ function OntologyForm(domId, resource, settings, callback) {
 		// changes form display setting.)
 		if (self.entityId) {
 
-			formDelete()
+			form_delete()
 
 			// Highlight any menu item that is this entity
 			// FUTURE: Ideally open menu to this item if not already.
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
-			var entity = getFormSpecificationComponent(self.entityId)
+			var entity = get_form_specification_component(self.entityId)
 			var form_html = render_form_specification(entity)
 
 			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
@@ -88,7 +89,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		 	//loadFormData()
 
 		 	if (self.settings.minimalForm) 
-		 		setMinimalForm(self.formDomId) // Hides empty optional field content.
+		 		set_minimal_form(self.formDomId) // Hides empty optional field content.
 
 		 	
 		 	// Reinitialize form since it was deleted above.
@@ -96,8 +97,8 @@ function OntologyForm(domId, resource, settings, callback) {
 			self.formDomId.foundation()
 
 			//Setup of this class enables callback function to be supplied.  Could make an event instead.
-			if (self.formCallback)
-				self.formCallback(self)
+			if (self.set_form_callback)
+				self.set_form_callback(self)
 
 
 			// Enable page annotation by 3rd party tools by kicking browser to 
@@ -124,7 +125,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 
-	formDelete = function() {
+	form_delete = function() {
 		if (self.formDomId) {
 			self.formDomId.off().empty()
 		}
@@ -192,7 +193,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				var kid_count = element.children('div.inputBlock').length
 
 				// NEED TO PROVIDE THIS WITH PATH + UNIQUE ID?
-				var fieldspec = getFormSpecificationComponent(element_id, element_path, element_path.length) // A path
+				var fieldspec = get_form_specification_component(element_id, element_path, element_path.length) // A path
 
 				// Skip selection lists as they already accomodate min/max selections.
 				if (fieldspec.datatype != 'xmls:anyURI') {
@@ -212,7 +213,7 @@ function OntologyForm(domId, resource, settings, callback) {
 					initialize_date_inputs(new_element) 
 					new_element.foundation()
 
-		 			if (self.settings.minimalForm) setMinimalForm(new_element) 
+		 			if (self.settings.minimalForm) set_minimal_form(new_element) 
 
 		 			// Bring user's attention to new field they requested
 		 			// Using built-in fn until can figure out jquery .scrollTo(...)
@@ -634,8 +635,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		// Could externalize this
 		var activeDone = false // Flag to activate first tab
 		for (var entityId in entity.components) { 
-			var childDomId = (domId + '_' + entityId).replace(/[^a-zA-Z0-9]/g,'_') //
-			var child = entity.components[entityId]
+			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
+			self.uniqueDomId += 1
+
+			var label = renderLabel(entity.components[entityId])
 			if (activeDone == false) {
 				activeDone = true
 				tab_active = ' is-active '
@@ -646,7 +649,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				aria = ''
 			}
 
-			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + renderLabel(child) + '</a></li>'
+			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
 			//htmlTabContent += 	this.render(entityId, entity.path, entity.depth+1) //, false, true 
 			// Issue: tab label repeated in child field wrapper.
@@ -703,7 +706,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		}
 
 		html = [labelHTML,
-			,'<div class="input-group" style="width:250px">\n'
+			,'<div class="input-group">\n'
 	 		,'	<input class="input-group-field ' + entity.id + '"'
 	 		,		' data-ontology-id="' + entity.domId + '"'
 	 		,		typeAttr
@@ -1039,7 +1042,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 				,		' depth' + entity.depth
 				,		'" '
-				,		getIdHTMLAttribute(entity.domId)
+				,		get_ontology_id_attr(entity.domId)
 				,		getHTMLAttribute(entity, 'minCardinality')
 				,		getHTMLAttribute(entity, 'maxCardinality')
 				,		'>\n'
@@ -1056,7 +1059,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			return [
 				'<a name="' + entity.domId + '"/>'
 				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-				,	getIdHTMLAttribute(entity.domId)
+				,	get_ontology_id_attr(entity.domId)
 				,	getHTMLAttribute(entity, 'minCardinality')
 				,	getHTMLAttribute(entity, 'maxCardinality')
 				,	'>\n'
@@ -1065,7 +1068,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			].join('')
 	}
 
-	getIdHTMLAttribute = function(domId) {
+	get_ontology_id = function(domId) {
 		return 'data-ontology-id="' + domId + '" '
 	}
 
@@ -1115,7 +1118,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	getPatternConstraint = function(entity) {
 		/* Render specific regular expression "pattern" that is used to
 		validate data entry. Zurb Foundation accepts some preset 
-		expression names - see initFoundation()
+		expression names - see init_foundation()
 		*/
 		var pattern = ''
 		if (entity.pattern) {
@@ -1136,7 +1139,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 // Implementing a static method for default zurb Foundation settings:
-OntologyForm.initFoundation = function() {
+OntologyForm.init_foundation = function() {
 
 	Foundation.Abide.defaults.live_validate = true // validate the form as you go
 	Foundation.Abide.defaults.validate_on_blur = true // validate whenever you focus/blur on an input field

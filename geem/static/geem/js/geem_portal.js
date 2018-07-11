@@ -56,7 +56,7 @@ ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
 $( document ).ready(function() {
 
 	// Initializes Zurb Foundation settings (but not foundation itself)
-	OntologyForm.initFoundation()
+	OntologyForm.init_foundation()
 
 	/**************** LOAD SHARED TEMPLATES ****************/
 	$.ajax('templates/modal_lookup.html').done(function(response){
@@ -64,26 +64,26 @@ $( document ).ready(function() {
 	});
 
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
-	$(window).on('hashchange', checkForHashEntity);
+	$(window).on('hashchange', check_for_hash_entity);
 
 	/********* Specification resource selection area ********/
-	initResourceSelect(top.resources) // will come from API fetch.
-	initSummaryTab()
-	initBrowseTab()
-	initSearchTab()
+	init_resource_select(top.resources) // will come from API fetch.
+	init_summary_tab()
+	init_browse_tab()
+	init_search_tab()
 
 	/********* Specification focus area *********************/
 
-	$("#tabsContent").on('mouseenter','i.fi-magnifying-glass', displayContext)
+	$("#tabsContent").on('mouseenter','i.fi-magnifying-glass', render_display_context)
 
-	initFormTab()
-	initSpecificationTab()
+	init_form_tab()
+	init_specification_tab()
 	// initDiscussTab()
-	initCartTab()
+	init_cart_tab()
 
 	$(document).foundation()
 
-	checkForHashEntity()  // If there's a #ONTOLOGY:ID hash in url
+	check_for_hash_entity()  // If there's a #ONTOLOGY:ID hash in url
 
 });
 
@@ -92,12 +92,12 @@ $( document ).ready(function() {
 // FUTURE: convert into class
 
 
-function getIdHTMLAttribute(id) {
+function get_ontology_id_attr(id) {
 	return 'data-ontology-id="' + id + '" '
 }
 
 
-function navigateToForm(ontologyId) {
+function navigate_to_form(ontologyId) {
 
 	if (window.location.href.indexOf(ontologyId) == -1) {
 		// not found
@@ -112,21 +112,21 @@ function navigateToForm(ontologyId) {
 }
 
 
-function getEntity(ontologyId) {
+function get_entity(ontologyId) {
 	var entity = top.resource.specifications[ontologyId]
 	//if (!entity)
 	//	entity = top.resource.specifications['units'][ontologyId]
 	return entity
 }
 
-function getEntityId(item) {
+function get_ontology_id(item) {
 	// Determine relevant ontology ID for given entity
 	if ($(item).is('i.fi-shopping-cart.option')) 
 		return $(item).prev().attr('data-ontology-id')
 	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
 }
 
-function itemAnimate(item, effectClass) {
+function dom_item_animate(item, effectClass) {
 	// Apply given css effectClass to given DOM item for 1 second
 	$(item).addClass(effectClass)
 	setTimeout('$("'+item+'").removeClass("'+effectClass+'")', 1000)
@@ -143,7 +143,7 @@ function itemAnimate(item, effectClass) {
 */
 
 
-function doResourceSelection() {
+function do_resource_selection() {
 
 	resource_URL = $('#selectResource').val()
 
@@ -154,7 +154,7 @@ function doResourceSelection() {
 	after filling shopping cart, to fill it up (though this can be done with 
 	shopping cart selection pulldown too).
 
-	if (top.form.formDelete) top.form.formDelete()
+	if (top.form.formDelete) top.form.form_delete()
 	$('#resourceTabs,#content').addClass('disabled')
 	$('#shoppingCart').empty()
 	*/
@@ -188,16 +188,16 @@ function doResourceSelection() {
 		$('#tabsSpecification').show()
 		$('#specificationSummaryTabLink').click()
 
-		doResourceForm(data, 'templates/resource_summary_form.html', true) // true=new form
+		do_resource_form(data, 'templates/resource_summary_form.html', true) // true=new form
 	}
 	else {
-		loadResource(resource_URL) 
+		load_resource(resource_URL) 
 
 	}
 }
 
 
-function loadResource(resource_URL) { //, resource_type
+function load_resource(resource_URL) { //, resource_type
 	$.ajax({
 		type: 'GET',
 		url: resource_URL,
@@ -205,17 +205,17 @@ function loadResource(resource_URL) { //, resource_type
 		success: function(resource) {
 
 			top.resource = resource;
-			doResourceMetadata(top.resource)
+			do_resource_metadata(top.resource)
 			// Prepare browsable top-level list of ontology items
-			doResourceBrowseMenu()
+			do_resource_browse_menu()
 
 			$('#resourceTabs').removeClass('disabled')
 			$('#tabsSpecification').show()
 			$('#specificationSummaryTabLink').click()
 
-			// loadResource() triggered if hash entity id detected 
+			// load_resource() triggered if hash entity id detected 
 			// but no top.resource loaded. 
-			checkForHashEntity()
+			check_for_hash_entity()
 		},
 		error:function(XMLHttpRequest, textStatus, errorThrown) {
 			alert('Given resource could not be found: \n\n\t' + resource_URL) 
@@ -225,17 +225,17 @@ function loadResource(resource_URL) { //, resource_type
 
 
 
-function formCallback(formObj) {
+function set_form_callback(formObj) {
 	//This is executed whenever a new form is rendered.
-	if (window.setShoppingCart) {
-		setShoppingCart(formObj) 
-		setFormSelectOptionsCart(formObj)
+	if (window.set_shopping_cart) {
+		set_shopping_cart(formObj) 
+		set_form_select_options_cart(formObj)
 	}
 
 	$('#specificationSourceInfoBox').hide()
 
 	// Clear out specification tab.
- 	if (window.getdataSpecification) {
+ 	if (window.get_data_specification) {
 
  		// Deselect specification menu.
  		$('#specificationType')[0].selectedIndex = 0
@@ -253,7 +253,7 @@ function formCallback(formObj) {
 }
 
 
-function doResourceMetadata(resource) { //, resource_type
+function do_resource_metadata(resource) { //, resource_type
 	// Currently resource_type is provided as parameter but it
 	// should be within specification itself. Determines which
 	// fields are editable/visible.
@@ -263,11 +263,11 @@ function doResourceMetadata(resource) { //, resource_type
 	//	top.resource.metadata.date = top.resource.metadata.date.value
 
 	// Render display form appropriate to spec type:
-	doResourceForm(top.resource.metadata, 'templates/resource_summary_form.html')
+	do_resource_form(top.resource.metadata, 'templates/resource_summary_form.html')
 }
 
 
-function doResourceForm(data, form_URL, new_flag = false) {
+function do_resource_form(data, form_URL, new_flag = false) {
 	// Feeds specification.metadata variables to copy of template
 
 	$.ajax(form_URL).done(function(response) {
@@ -327,7 +327,7 @@ function doResourceForm(data, form_URL, new_flag = false) {
 				report_type: 'geem.json',
 				id: top.resource.metadata.prefix.toLowerCase()
 			}
-			downloadDataSpecification(content)
+			download_data_specification(content)
 			return false
 		})
 
@@ -348,9 +348,9 @@ function doResourceForm(data, form_URL, new_flag = false) {
 
 			// USE API To send into server
 			top.resources.push(content)
-			initResourceSelect(top.resources)
+			init_resource_select(top.resources)
 			$('#specificationType').val(path)
-			//doResourceForm(data, form_URL, new_flag = false) {
+			//do_resource_form(data, form_URL, new_flag = false) {
 			$('#summary_delete,#summary_download,#summary_copy').show()
 			return false
 		})
@@ -360,9 +360,9 @@ function doResourceForm(data, form_URL, new_flag = false) {
 }
 
 
-function doResourceBrowseMenu() {
+function do_resource_browse_menu() {
 	/* Prepare browsable top-level list of ontology items
-	Provide context of form to populate. Passes formCallback, name of function in this module for OntologyForm to return to when complete.
+	Provide context of form to populate. Passes set_form_callback, name of function in this module for OntologyForm to return to when complete.
 	*/
 
 	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
@@ -371,9 +371,9 @@ function doResourceBrowseMenu() {
 	// If it is an ontology, render its data representation model tree:
 	var root_id = 'OBI:0000658'
 	if (root_id in top.resource.specifications)
-		$("#entityMenu").html(renderMenu(root_id))
+		$("#entityMenu").html(render_menu(root_id))
 	else
-		$("#entityMenu").html(renderMenu())
+		$("#entityMenu").html(render_menu())
 
 	$("#entityMenu").foundation();
 
@@ -383,22 +383,22 @@ function doResourceBrowseMenu() {
 
 
 
-function checkForHashEntity() {
+function check_for_hash_entity() {
 	/* GEEM focuses on entities by way of a URL with hash GENEPIO:[entityId]
-	CURRENTLY: HARD WIRED TO JUST BE GENEPIO.
+	CURRENTLY: HARD WIRED TO JUST BE GENEPIO OR FOODON.
 	FUTURE: CHECK FOR VALID ENTITY REFERENCE IN SOME ONTOLOGY.
 			PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
 	*/
     if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
 		top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 
-		if (!checkEntityResource(top.focusEntityId)) return
+		if (!check_entity_resource(top.focusEntityId)) return
 
 		$('#specificationSourceInfoBox').hide()
 		$('#content').removeClass('disabled')
 
-		// Providing formCallback to add shopping cart to form items.
-		top.form = new OntologyForm("#mainForm", top.resource, top.formSettings, formCallback) 
+		// Providing set_form_callback to add shopping cart to form items.
+		top.form = new OntologyForm("#mainForm", top.resource, top.formSettings, set_form_callback) 
 
 		top.form.renderEntity(top.focusEntityId)
 
@@ -407,20 +407,20 @@ function checkForHashEntity() {
 
 		// Wire form's submit button to show GEEM example form submit contents in popup.
 		$('#buttonFormSubmit').on('click', function () {  
-			setModalDownload(getdataSpecification('form_submission.json'))
+			set_modal_download(get_data_specification('form_submission.json'))
 		})
 
 	}
 }
 
 
-function getOntologyDetailHTML(ontologyId) {
+function get_ontology_detail_html(ontologyId) {
 
 	// This links directly to form for this entity.  Not in context of larger form.
 	// Problem is that recursion to fetch parts from parent runs into parents that 
 	// have no further path.
 	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
-	var entity = getEntity(ontologyId)
+	var entity = get_entity(ontologyId)
 	var entityIdParts = entity['id'].split(':')
 	var idPrefix = entityIdParts[0]
 	if (idPrefix in top.resource['@context']) {
@@ -467,11 +467,11 @@ function getOntologyDetailHTML(ontologyId) {
 }
 
 
-function displayContext(event) {
-	/* Provide mouseover function to see dropdown menu that shows given item
-	as well as any parent items that link to it via "has member" and "has part"
-	and "is a" relations. Parents can be navigated to.
-	*/
+function render_display_context(event) {
+	// Provide mouseover function to see dropdown menu that shows given item
+	//as well as any parent items that link to it via "has member" and "has part"
+	//and "is a" relations. Parents can be navigated to.
+	//
 	parent = $('#displayContext')
 	if (parent.length) {
 		$('#displayContext').foundation('destroy') // or else subsequent dropdown position is fixed.
@@ -488,10 +488,10 @@ function displayContext(event) {
 
 	var content = '<div id="displayContext" class="dropdown-pane"><ul>'
 	if ($(this).is('.fi-magnifying-glass')) {
-		content += getOntologyDetailHTML(ontologyId) 
+		content += get_ontology_detail_html(ontologyId) 
 	}
 	else //'.fi-arrow-up'
-		content += '<ul>' + getRelationsHTML(ontologyId) + '</ul>'
+		content += '<ul>' + get_relations_html(ontologyId) + '</ul>'
 
 	// Though it is hidden, have to include button or else Foundation throws error.
 	content = '<button id="displayContextButton" data-toggle="displayContext">&nbsp; &nbsp;</button>' + content // style="position:absolute"
@@ -520,48 +520,48 @@ function displayContext(event) {
 			// DETECT IF ITEM HAS ALREADY HAD PARENTS ADDED?
 			if ($('#displayContext ul[data-ontology-id="'+targetId+'"]').length == 0 ) {
 				target.parent().wrap('<ul data-ontology-id="'+targetId+'">')
-				target.parent().before(getRelationsHTML(targetId))
+				target.parent().before(get_relations_html(targetId))
 			}
 		})
 
 }
 
 
-function getRelationsHTML(ontologyId) {
+function get_relations_html(ontologyId) {
 	// Finds and draws relations as li links for given entity
-	var entity = getEntity(ontologyId) 
+	var entity = get_entity(ontologyId) 
 
 	var filling = ''
 	if ('parent' in entity) {
-		filling += getRelationLink('parent', getEntity(entity['parent']))
+		filling += get_relation_link('parent', get_entity(entity['parent']))
 	}
 	// Possibly organize each entity's relations under a "relations" section?
 	for (const relation of ['member_of','otherParent']) {
 		if (relation in entity) {
 			for (const targetId of entity[relation]) {
-				filling += getRelationLink(relation, getEntity(targetId))
+				filling += get_relation_link(relation, get_entity(targetId))
 			}
 		}
 	}
 	return filling
 }
 
-function getRelationLink(relation, entity) {
+function get_relation_link(relation, entity) {
 	// Used in search results
 	// Usually but not always there are links.  Performance boost if we drop this test.
 	var links = ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
-	return ['<li data-ontology-id="' + entity['id'] + '">', relation, ': ',
-		links ? '<i class="fi-arrow-up large"></i> ' : '',
-		' <a href="#', entity['id'], '">' + entity['uiLabel'] + ' <i class="fi-magnifying-glass large"></i></a>',
-
-		'</li>'].join('')
+	return ['<li data-ontology-id="' + entity['id'] + '">'
+		,	relation, ': ', links ? '<i class="fi-arrow-up large"></i> ' : ''
+		,	' <a href="#', entity['id'], '">' + entity['uiLabel'] + ' <i class="fi-magnifying-glass large"></i></a>'
+		,'</li>'
+	].join('')
 }
 
 
 
 
 /*********** ENTITY MENU RENDERER *************************/
-function renderMenu(entityId = null, depth = 0 ) {
+function render_menu(entityId = null, depth = 0 ) {
 	// If entityId not given, display all top-level 'datatype:"model"' 
 	// items in resource
 
@@ -612,7 +612,7 @@ function renderMenu(entityId = null, depth = 0 ) {
 	if (children) {
 		for (var memberId in children) {
 			// Top level menu items
-			if (depth == 0) html += renderMenu(memberId, depth + 1)
+			if (depth == 0) html += render_menu(memberId, depth + 1)
 			// Deeper menu items
 			else {
 				// Only list item if it has components or models
@@ -620,7 +620,7 @@ function renderMenu(entityId = null, depth = 0 ) {
 				if (child && ('models' in child || 'components' in child))
 					html += [
 					'<ul class="menu vertical nested">',
-						renderMenu(memberId, depth + 1),
+						render_menu(memberId, depth + 1),
 					'</ul>'
 					].join('')
 			}
@@ -655,24 +655,24 @@ function renderMenu(entityId = null, depth = 0 ) {
 
 /************************ TAB INITIALIZATION *******************/
 
-function initResourceSelect(resources) {
+function init_resource_select(resources) {
 	// Assumes resources sorted.
 	stack = resources.slice(0)
 
 	html = ['<option value="">Select a specification resource ...</option>']
-	initResourceSelectItem(stack, 'ontology', html, '<optgroup label="Ontologies">')
-	initResourceSelectItem(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">')
-	initResourceSelectItem(stack, 'private', html, '</optgroup>\n<optgroup label="My Packages (login required)">')
+	init_resource_select_item(stack, 'ontology', html, '<optgroup label="Ontologies">')
+	init_resource_select_item(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">')
+	init_resource_select_item(stack, 'private', html, '</optgroup>\n<optgroup label="My Packages (login required)">')
 
 	html.push('\n<option value="new">Add new package ...</option>\n</optgroup>')
 	html = html.join('\n')
 
 	// When a new ontology is selected:
-	$('#selectResource').html(html).on('change', doResourceSelection)
+	$('#selectResource').html(html).on('change', do_resource_selection)
 
 }
 
-function initResourceSelectItem(stack, type, html, header, manager_filter=false) {
+function init_resource_select_item(stack, type, html, header, manager_filter=false) {
 	/* Provide sections to display of Resource types.
 	Filter options if manager_filter supplied to just those user manages
 	which are in draft mode.
@@ -684,21 +684,21 @@ function initResourceSelectItem(stack, type, html, header, manager_filter=false)
 	}
 }
 
-function initSummaryTab() {
+function init_summary_tab() {
 
 }
 
-function initBrowseTab() {
+function init_browse_tab() {
 	// On Browse Specifications tab, enables eye icon click to show form without opening/closing the accordion.
 	$('#panelEntities').on('click', 'i', function(event) { 
 		event.stopPropagation();
 		if ($(event.target).is('i.fi-magnifying-glass') ) {
-			top.form.renderEntity(getEntityId(event.target))
+			top.form.renderEntity(get_ontology_id(event.target))
 		}
 	});
 }
 
-function initFormTab() {
+function init_form_tab() {
 
 	// This control toggles the visibility of ontology ID's in the given 
 	// form content (for reference during content review)
@@ -718,13 +718,13 @@ function initFormTab() {
 
 
 
-function initSpecificationTab() {
+function init_specification_tab() {
 
 	// Trigger popup JSON / EXCELL / YAML view of specification
 	$('#specificationType').on('change', function() {
-		setDataSpecification(getdataSpecification( $(this).val() )) 
+		set_data_specification(get_data_specification( $(this).val() )) 
 	}) 
 
-	$('#spec_download').on('click', downloadDataSpecification) // the button, not the surrounding link.
+	$('#spec_download').on('click', download_data_specification) // the button, not the surrounding link.
 	
 }

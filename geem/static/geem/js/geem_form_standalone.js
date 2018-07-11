@@ -9,7 +9,7 @@ ontologyLookupService = 'http://purl.obolibrary.org/obo/'
 
 $( document ).ready(function() {
 
-  OntologyForm.initFoundation()
+  OntologyForm.init_foundation()
 
   // Bring in shared templates
   $.ajax('templates/modal_lookup.html').done(function(response) {
@@ -17,7 +17,7 @@ $( document ).ready(function() {
   });
 
   $('#specificationType').on('change', function() {
-    setModalDownload(getdataSpecification( $(this).val() )) 
+    set_modal_download(get_data_specification( $(this).val() )) 
   }) 
 
   // Toggle to hide all optional empty input content for concise display.
@@ -28,17 +28,17 @@ $( document ).ready(function() {
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
-  $(window).on('hashchange', checkForHashEntity);
+  $(window).on('hashchange', check_for_hash_entity);
 
   $('#modalEntity').foundation()
   $('#rightbar').foundation()
 
-  checkForHashEntity()
+  check_for_hash_entity()
 
 });
 
 
-function loadResource(resource_URL) { //, resource_type
+function load_resource(resource_URL) { //, resource_type
   $.ajax({
     type: 'GET',
     url: resource_URL,
@@ -47,9 +47,9 @@ function loadResource(resource_URL) { //, resource_type
 
       top.resource = resource;
 
-      // loadResource() triggered if hash entity id detected 
+      // load_resource() triggered if hash entity id detected 
       // but no top.resource loaded. 
-      checkForHashEntity()
+      check_for_hash_entity()
     },
     error:function(XMLHttpRequest, textStatus, errorThrown) {
       alert('Given resource could not be found: \n\n\t' + resource_URL) 
@@ -57,13 +57,13 @@ function loadResource(resource_URL) { //, resource_type
   });
 }
 
-function checkForHashEntity() {
+function check_for_hash_entity() {
 
  if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
     top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
 
     // Returns if loading resource or if no appropriate resource found
-    if (!checkEntityResource(top.focusEntityId) ) return
+    if (!check_entity_resource(top.focusEntityId) ) return
 
     loadForm()
 
@@ -82,7 +82,7 @@ function loadForm() {
   $('#specificationType')[0].selectedIndex = 0
 
   $('#buttonFormSubmit').on('click', function () {    
-    setModalDownload(getdataSpecification('form_submission.json'))
+    set_modal_download(get_data_specification('form_submission.json'))
   })
 
 }

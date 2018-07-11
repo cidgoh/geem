@@ -1,5 +1,5 @@
 
-function checkEntityResource(entityId) {
+function check_entity_resource(entityId) {
 	// Ensure appropriate resource is loaded for given entity id 
 	// FUTURE - make this an API call.
 
@@ -12,13 +12,13 @@ function checkEntityResource(entityId) {
 		// If no resource loaded, or resource ontology prefix doesn't match given URL prefix ...
 		if (!top.resource.specifications || top.resource.metadata.prefix.toLowerCase() != prefix) {
 			if (prefix == 'genepio') {
-				loadResource('data/ontology/genepio-merged.json')
+				load_resource('data/ontology/genepio-merged.json')
 				// rechecks hash
 				return false
 			}
 
 			else if (prefix == 'foodon') {
-				loadResource('data/ontology/foodon-merged.json')
+				load_resource('data/ontology/foodon-merged.json')
 				// rechecks hash
 				return false
 			}

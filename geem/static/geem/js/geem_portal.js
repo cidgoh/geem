@@ -92,7 +92,7 @@ $( document ).ready(function() {
 // FUTURE: convert into class
 
 
-function get_ontology_id_attr(id) {
+function render_attr_ontology_id_attr(id) {
 	return 'data-ontology-id="' + id + '" '
 }
 
@@ -119,7 +119,7 @@ function get_entity(ontologyId) {
 	return entity
 }
 
-function get_ontology_id(item) {
+function render_attr_ontology_id(item) {
 	// Determine relevant ontology ID for given entity
 	if ($(item).is('i.fi-shopping-cart.option')) 
 		return $(item).prev().attr('data-ontology-id')
@@ -400,9 +400,9 @@ function check_for_hash_entity() {
 		// Providing set_form_callback to add shopping cart to form items.
 		top.form = new OntologyForm("#mainForm", top.resource, top.formSettings, set_form_callback) 
 
-		top.form.renderEntity(top.focusEntityId)
+		top.form.render_entity(top.focusEntityId)
 
-		// When renderEntity is called, activate its tab
+		// When render_entity is called, activate its tab
 		$('#content-tabs').foundation('selectTab', '#panelContent'); 
 
 		// Wire form's submit button to show GEEM example form submit contents in popup.
@@ -693,7 +693,7 @@ function init_browse_tab() {
 	$('#panelEntities').on('click', 'i', function(event) { 
 		event.stopPropagation();
 		if ($(event.target).is('i.fi-magnifying-glass') ) {
-			top.form.renderEntity(get_ontology_id(event.target))
+			top.form.render_entity(render_attr_ontology_id(event.target))
 		}
 	});
 }
@@ -704,13 +704,13 @@ function init_form_tab() {
 	// form content (for reference during content review)
 	$('input#toggleIdVisibility').on('change', function() {
 		top.formSettings.ontologyDetails = $(this).is(':checked')
-		top.form.renderEntity()
+		top.form.render_entity()
 	})
 
 	// Display all optional elements as label [+] for concise display.
 	$('input#toggleMinimalForm').on('change', function() {
 		top.formSettings.minimalForm = $(this).is(':checked')
-		top.form.renderEntity()
+		top.form.render_entity()
 	})
 
 

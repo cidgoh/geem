@@ -7,7 +7,8 @@ lookupOntologyChoices = function(helper, selectId) {
 	selected is performed.  A user can then select one of the given items, if
 	any, and it will be inserted into existing selection list below parent.
 
-	If select is a multi-select, just do last term.
+	If select is a multi-select, use last term in selected items as seed for
+	OLS lookup.
 
 	ISSUE: Search for children of a term, if parent is top-level root borrowed
 	from another ontology, won't return the GenEpiO coded-children. EG. NCIT Province.

@@ -23,7 +23,7 @@ $( document ).ready(function() {
   // Toggle to hide all optional empty input content for concise display.
   $('input#toggleMinimalForm').on('change', function() {
     top.formSettings.minimalForm = $(this).is(':checked')
-    top.form.renderEntity()
+    top.form.render_entity()
   })
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
@@ -75,8 +75,8 @@ function loadForm() {
 
   top.form = new OntologyForm("#mainForm", top.resource, top.formSettings)
 
-  top.form.renderEntity(top.focusEntityId)
-  doSectionMenu()
+  top.form.render_entity(top.focusEntityId)
+  render_section_menu()
 
   // Deselect specification menu.
   $('#specificationType')[0].selectedIndex = 0
@@ -88,8 +88,9 @@ function loadForm() {
 }
 
 
-function doSectionMenu() {
-  // Provide form menu that echoes form structure to two levels down of "model"
+function render_section_menu() {
+  // Provide form menu that echoes form specification to two levels down of
+  // model
   $('#formSections').empty()
   var sections = 0
   var sectionHTML = ''

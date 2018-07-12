@@ -73,7 +73,8 @@ function get_data_specification(report_type) {
 				break;
 
 			case 'form.html':
-				content = render(entityId);
+				var entity = get_form_specification_component(entityId)
+				var content = render_form_specification(entity)
 				break
 
 			case 'form_submission.json':
@@ -574,8 +575,8 @@ initialize_entity = function(entity, entityId, path, depth) {
 	get_entity_features(entity) // Guarantees that entity.features exists
 
 	// These may depend on above features fetch.
-	entity['uiLabel'] = getLabel(entity)
-	entity['uiDefinition'] = getDefinition(entity)
+	entity['uiLabel'] = get_label(entity)
+	entity['uiDefinition'] = get_definition(entity)
 
 	if (entity.features.help)
 		entity.help = entity.features.help.value

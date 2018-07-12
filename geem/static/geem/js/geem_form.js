@@ -40,7 +40,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 	/*********** FORM RENDERER *************************/
-	this.renderEntity = function(entityId) {
+	this.render_entity = function(entityId) {
 
 		// Deselect any other form menu item that might be open.
 		$('li.active[role="menuitem"]').removeClass('active')
@@ -72,7 +72,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				form_html += '<br/><p>This item has no field specification.</p>'
 			}
 			else {
-				form_html += renderButton('View Form Submission', 'buttonFormSubmit') 
+				form_html += render_button('View Form Submission', 'buttonFormSubmit') 
 			}
 
 			// Place new form html into page
@@ -131,14 +131,14 @@ function OntologyForm(domId, resource, settings, callback) {
 		}
 	}
 
-	setOptionalHidden = function() {
+	set_optional_hidden = function() {
 		/* Displays form with only required fields visible.
 		
 		*/
 		self.formDomId.find('div:not(.tabs-panel) > div.field-wrapper.optional').hide()
 	}
 
-	setMinimalForm = function(dom_element) {
+	set_minimal_form = function(dom_element) {
 		/* The minimal display of a form provides users with a display of 
 		required fields ready for data input, and optional fields are shown
 		only as labels with the css input-group part hidden. When a user mouses
@@ -419,23 +419,23 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		var	labelHTML = ''
 		if (entity.datatype != 'disjunction' && !entity.input_group)
-			labelHTML = renderLabel(entity)
+			labelHTML = render_label(entity)
 
 		switch (entity.datatype) {
 			case undefined: // Anonymous node
-				html += renderSection(entity, labelHTML, '<span class="small"><i>This specification component needs a "value specification" so that it can be rendered.</i></span>')
+				html += render_section(entity, labelHTML, '<span class="small"><i>This specification component needs a "value specification" so that it can be rendered.</i></span>')
 				break;
 
 			case 'disjunction':
-				html += renderDisjunction(entity, labelHTML)
+				html += render_disjunction(entity, labelHTML)
 				break;
 
 			case 'model':
-				html += renderSpecification(entity)
+				html += render_specification(entity)
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity.uiLabel != '[no label]')
 					//  data-ontology-id="'+entity.domId+'"
-					return getModelWrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
+					return get_model_wrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
 				break;
 
 			/*
@@ -448,57 +448,57 @@ function OntologyForm(domId, resource, settings, callback) {
 			case 'xmls:dateTime': //YYYY-MM-DDTHH:MM:SS
 			case 'xmls:dateTimeStamp': //YYYY-MM-DDTHH:MM:SS  and required time zone as above.
 			case 'xmls:duration': //[-]P (period, required) + nYnMnD (years / months / days) T nHnMnS (hours / minuts / seconds)
-				html += renderDateTime(entity, labelHTML)
+				html += render_datetime(entity, labelHTML)
 				break;
 
 			// Applicable restrictions : enumeration length maxLength minLength pattern whiteSpace
 			case 'xmls:string':
 			case 'xmls:normalizedString':
 			case 'xmls:token':
-				html += renderInput(entity, labelHTML)
+				html += render_input(entity, labelHTML)
 				break;
 	 
-			case 'xmls:integer':			html += renderNumber(entity, labelHTML, 'integer');	break
-			case 'xmls:positiveInteger': 	html += renderNumber(entity, labelHTML, 'integer', 1);	break
-			case 'xmls:nonNegativeInteger':	html += renderNumber(entity, labelHTML, 'integer', 0);	break
-			case 'xmls:unsignedByte':		html += renderNumber(entity, labelHTML, 'integer', 0, 255); break// (8-bit)	
-			case 'xmls:unsignedShort':		html += renderNumber(entity, labelHTML, 'integer', 0, 65535); break// (16-bit) 
-			case 'xmls:unsignedInt':		html += renderNumber(entity, labelHTML, 'integer', 0, 4294967295);	break// (32-bit)		
-			case 'xmls:unsignedLong':		html += renderNumber(entity, labelHTML, 'integer', 0, 18446744073709551615); break// (64-bit) 
+			case 'xmls:integer':			html += render_number(entity, labelHTML, 'integer');	break
+			case 'xmls:positiveInteger': 	html += render_number(entity, labelHTML, 'integer', 1);	break
+			case 'xmls:nonNegativeInteger':	html += render_number(entity, labelHTML, 'integer', 0);	break
+			case 'xmls:unsignedByte':		html += render_number(entity, labelHTML, 'integer', 0, 255); break// (8-bit)	
+			case 'xmls:unsignedShort':		html += render_number(entity, labelHTML, 'integer', 0, 65535); break// (16-bit) 
+			case 'xmls:unsignedInt':		html += render_number(entity, labelHTML, 'integer', 0, 4294967295);	break// (32-bit)		
+			case 'xmls:unsignedLong':		html += render_number(entity, labelHTML, 'integer', 0, 18446744073709551615); break// (64-bit) 
 
-			case 'xmls:negativeInteger':	html += renderNumber(entity, labelHTML, 'integer', null, -1); break
-			case 'xmls:nonPositiveInteger':	html += renderNumber(entity, labelHTML, 'integer', null, 0); break
+			case 'xmls:negativeInteger':	html += render_number(entity, labelHTML, 'integer', null, -1); break
+			case 'xmls:nonPositiveInteger':	html += render_number(entity, labelHTML, 'integer', null, 0); break
 
-			case 'xmls:byte': 	html += renderNumber(entity, labelHTML, 'integer', -128, 127);	break// (signed 8-bit)
-			case 'xmls:short': 	html += renderNumber(entity, labelHTML, 'integer', -32768, 32767);	break// (signed 16-bit)
-			case 'xmls:int': 	html += renderNumber(entity, labelHTML, 'integer', -2147483648, 2147483647);	break// (signed 32-bit)
-			case 'xmls:long': 	html += renderNumber(entity, labelHTML, 'integer', -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
+			case 'xmls:byte': 	html += render_number(entity, labelHTML, 'integer', -128, 127);	break// (signed 8-bit)
+			case 'xmls:short': 	html += render_number(entity, labelHTML, 'integer', -32768, 32767);	break// (signed 16-bit)
+			case 'xmls:int': 	html += render_number(entity, labelHTML, 'integer', -2147483648, 2147483647);	break// (signed 32-bit)
+			case 'xmls:long': 	html += render_number(entity, labelHTML, 'integer', -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
 
 			// Re. OWL/RDF storage: Note: All "minimally conforming" processors
 			// "must" support decimal numbers with a minimum of 18 decimal
 			// digits (i.e., with a "totalDigits" of 18).
 			case 'xmls:decimal':
-				html += renderNumber(entity, labelHTML, 'decimal'); break;
+				html += render_number(entity, labelHTML, 'decimal'); break;
 
 			// Size of float/double depends on precision sought, see
 			// https://stackoverflow.com/questions/872544/what-range-of-numbers-can-be-represented-in-a-16-32-and-64-bit-ieee-754-syste
 			case 'xmls:float':  
-				html += renderNumber(entity, labelHTML, 'float', - Math.pow(2, 23), Math.pow(2, 23) - 1 ); break;
+				html += render_number(entity, labelHTML, 'float', - Math.pow(2, 23), Math.pow(2, 23) - 1 ); break;
 
 			case 'xmls:double': 
-				html += renderNumber(entity, labelHTML, 'double', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER); break;
+				html += render_number(entity, labelHTML, 'double', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER); break;
 
 			// Yes/No inputs
 			case 'xmls:boolean': 
-				html += renderBoolean(entity, labelHTML); break;
+				html += render_boolean(entity, labelHTML); break;
 
 			// Categorical Picklists
 			case 'xmls:anyURI': 
 			case 'xmls:QName':
-				html += renderChoices(entity, labelHTML); break;
+				html += render_choices(entity, labelHTML); break;
 
 			default:
-				html += renderSection(entity, labelHTML, 'UNRECOGNIZED: '+ entity.id + ' [' + entity.datatype  + ']'); break;
+				html += render_section(entity, labelHTML, 'UNRECOGNIZED: '+ entity.id + ' [' + entity.datatype  + ']'); break;
 		}
 		return html
 
@@ -506,7 +506,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 
-	renderSpecification = function(entity) {
+	render_specification = function(entity) {
 		/*
 	
 		INPUTS
@@ -528,17 +528,17 @@ function OntologyForm(domId, resource, settings, callback) {
 		return html	
 	}
 
-	renderSection = function(entity, labelHTML, text) {
+	render_section = function(entity, labelHTML, text) {
 		html = [
 		labelHTML
 		,	'	<div class="input-group">\n'
 		,			text
 		,	'	</div>\n'
 		].join('')
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderDateTime = function(entity, label) {
+	render_datetime = function(entity, label) {
 		/*
 		Provide datepicker with ISO 8601 date/time format which can be
 		overrided by other formats via entity feature "format_..."
@@ -578,18 +578,18 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
 			,		' data-ontology-id="'+entity.domId+'"'
 			,		' type="text" style="width:200px" '
-			,		getHTMLInputPlaceholder(entity)
-			//,		getStringConstraints(entity)
+			,		get_input_placeholder(entity)
+			//,		render_attr_string(entity)
 			,		entity.disabled
 			,		'/>\n'
-	    	,		renderUnits(entity)
+	    	,		render_units(entity)
 			,'	</div></div>\n'
 		].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderInput = function(entity, label) {
+	render_input = function(entity, label) {
 		/*
 		Add case for paragraph / textarea?
 		 <textarea placeholder="None"></textarea>
@@ -600,16 +600,16 @@ function OntologyForm(domId, resource, settings, callback) {
 		,	'		<input class="input-group-field '+entity.id+'"'
 		,			' data-ontology-id="'+entity.domId+'"'
 		, 			' type="text" '
-		,			 getStringConstraints(entity)
+		,			 render_attr_string(entity)
 		,			 entity.disabled
-		,			 getHTMLInputPlaceholder(entity)
+		,			 get_input_placeholder(entity)
 		,			 '/>\n'
-    	, 			renderUnits(entity)
+    	, 			render_units(entity)
 		,	'	</div>\n'].join('')
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	} 
 
-	renderButton = function(text, buttonID) {
+	render_button = function(text, buttonID) {
 		// Not an ontolog-driven specification.
 		return [
 			'<div>\n'
@@ -618,7 +618,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		].join('')
 	}
 
-	renderDisjunction = function(entity, labelHTML) {
+	render_disjunction = function(entity, labelHTML) {
 		/* This entity was made up of 'has component some (X or Y or Z ...) 
 		At least one of the disjunction parts needs to be filled in.  More are
 		allowed at moment. A tabbed interface is used for each component to 
@@ -638,7 +638,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
 			self.uniqueDomId += 1
 
-			var label = renderLabel(entity.components[entityId])
+			var label = render_label(entity.components[entityId])
 			if (activeDone == false) {
 				activeDone = true
 				tab_active = ' is-active '
@@ -673,7 +673,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 	/* NUMERIC DATATYPES HANDLED HERE */
-	renderNumber = function(entity, labelHTML, type, minInclusive=undefined, maxInclusive=undefined) {
+	render_number = function(entity, labelHTML, type, minInclusive=undefined, maxInclusive=undefined) {
 		/*
 		A general number input renderer that handles integer, decimal, double and float.
 		Issue is that foundation zurb styles "type=number" and "type=text" inputs but 
@@ -712,20 +712,20 @@ function OntologyForm(domId, resource, settings, callback) {
 	 		,		typeAttr
 			,		stepAttr
 			,		entity.disabled
-			,		getNumericConstraintHTML(entity, minInclusive, maxInclusive)
+			,		render_attr_numeric(entity, minInclusive, maxInclusive)
 			,		' placeholder="' + type + '"'
 			,		' pattern="' + type + '"'
 			,		' data-validator="min_max"'
 			,	' />\n'
-    		,	renderUnits(entity)
+    		,	render_units(entity)
 			,'</div>\n'
 		].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
 
-	renderBoolean = function(entity, labelHTML) {
+	render_boolean = function(entity, labelHTML) {
 
 		html = [
 			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
@@ -737,10 +737,10 @@ function OntologyForm(domId, resource, settings, callback) {
 			,	labelHTML
 			].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderChoices = function(entity, label) {
+	render_choices = function(entity, label) {
 		/* FUTURE: OPTION FOR RENDERING AS SELECT OPTIONS, RADIOBUTTONS OR CHECKBOXES ...
 			ISSUE: An entity may be marked as a choice but take on the values of another categorical 
 			list via its "components" part. What depth cutoff feature should be allowed?
@@ -774,7 +774,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		// confronted with required selection list where 1st item is 
 		html +=	'	<option value="" disabled>Select ...</option>'
 		//console.log(entity)
-		html +=			renderChoice(entity, 'choices', 0, cutDepth, 'select')
+		html +=			render_choice(entity, 'choices', 0, cutDepth, 'select')
 		
 		// Check components list as well, as long as each item is an xmls:anyURI
 		// Note: this is not recursive, i.e. no has_component some has_component ...
@@ -786,7 +786,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		ARCHAIC???????????
 		if ('components' in entity)
 			for (var ontoID in entity.components) {
-				html +=	renderChoice(entity.components[ontoID], 'choices', 0, cutDepth, 'select')
+				html +=	render_choice(entity.components[ontoID], 'choices', 0, cutDepth, 'select')
 			}
 		*/
 		html +=	'	</select>\n'
@@ -797,11 +797,11 @@ function OntologyForm(domId, resource, settings, callback) {
 		html +=	'	</div>\n'
 
 
-		return getFieldWrapper(entity, html, 'categorical')
+		return get_field_wrapper(entity, html, 'categorical')
 	}
 
 
-	renderChoice = function(entity, table='choices', depth, cutDepth, inputType='select') { 
+	render_choice = function(entity, table='choices', depth, cutDepth, inputType='select') { 
 		/* 
 		
 		ISSUE: currently the ontologyID for each item does not include path
@@ -833,14 +833,14 @@ function OntologyForm(domId, resource, settings, callback) {
 
 				part.disabled = '';
 
-				var label = getLabel(part)
+				var label = get_label(part)
 				if (!label) {
 					label = ''
 					console.log['Error: picklist item has no label: ' + memberId]
 				}
 				
 				// See if this option has any child options
-				kid_html += renderChoice(part, table, depth+1, cutDepth, inputType)
+				kid_html += render_choice(part, table, depth+1, cutDepth, inputType)
 				if (kid_html && depth == cutDepth - 1)
 					label += kid_html
 
@@ -855,7 +855,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 					default:
 
-						html += '<option value="' + part.id + '" class="depth' + depth + '" ' + part.disabled + getSynonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
+						html += '<option value="' + part.id + '" class="depth' + depth + '" ' + part.disabled + get_synonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
 				}
 
 				html += kid_html
@@ -867,7 +867,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return html
 	}
 
-	getSynonyms = function(part) {
+	get_synonyms = function(part) {
 
 		var synonymArray = []
 
@@ -888,7 +888,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 
-	renderUnits = function(entity) {
+	render_units = function(entity) {
 		/* User is presented with choice of data-entry units if available.
 		Default unit/scale (cm, mm, m, km etc.) is achieved by the 
 		"preferred_unit" user interface feature which ensures that the given
@@ -907,7 +907,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			// If only one unit to choose from then we're done.
 			if (entity.units.length == 1) 
-				return '<span class="input-group-label small">'+ renderLabel(entity.units[0]) + '</span>\n'
+				return '<span class="input-group-label small">'+ render_label(entity.units[0]) + '</span>\n'
 
 			var preferred = entity.features.preferred_unit 
 			var optionsHTML = ''
@@ -933,7 +933,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	   	return ''
 	}
 
-	renderLabel = function(entity) {
+	render_label = function(entity) {
 		/* 
 		
 		Note definition is normalized to put into tooltip string.
@@ -969,13 +969,13 @@ function OntologyForm(domId, resource, settings, callback) {
 			else
 				html += labelURL
 
-		html += renderHelp(entity)
+		html += render_help(entity)
 		html +=  '</label>\n'
 
 		return html
 	}
 
-	renderHelp = function(entity) {
+	render_help = function(entity) {
 		// Only entities that have been initialized have 'help' attribute.
 		if (entity.help)
 			return '<span data-tooltip class="has-tip float-right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + entity.help + '"> <i class="fi-info blue"></i></span>'
@@ -984,7 +984,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	/************************** UTILITIES ************************/
 
-	getLabel = function(entity) {
+	get_label = function(entity) {
 		// Label listed an entity's features label overrides uiLabel
 		if (entity.features && entity.features.label)
 			//return entity.features.label.value
@@ -996,7 +996,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return entity.label
 	}
 
-	getDefinition = function(entity) {
+	get_definition = function(entity) {
 		/* If an entity has a features.definition - coming from 3rd party 
 		specification, then use that. Otherwise if it has a general ontology
 		driven uiDefinition, use that. Otherwise use entity's IAO_0000115 definition annotation.
@@ -1024,12 +1024,12 @@ function OntologyForm(domId, resource, settings, callback) {
 		return definition
 	}
 
-	getHTMLInputPlaceholder = function(entity,type) {
+	get_input_placeholder = function(entity,type) {
 		// Given entity's xml datatype, return the word part for use in the form field placeholder
 		return (' placeholder="'+ entity.datatype.substr(entity.datatype.indexOf(':') + 1 )+ '"' ) 
 	}
 
-	getFieldWrapper = function(entity, html, dom_class = false) {
+	get_field_wrapper = function(entity, html, dom_class = false) {
 		/* Surrounds given field element with general DOM id, css and cardinality controls
 			If the given entity has model or choice components, this adds a
 			'chindren' CSS class.
@@ -1042,16 +1042,16 @@ function OntologyForm(domId, resource, settings, callback) {
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 				,		' depth' + entity.depth
 				,		'" '
-				,		get_ontology_id_attr(entity.domId)
-				,		getHTMLAttribute(entity, 'minCardinality')
-				,		getHTMLAttribute(entity, 'maxCardinality')
+				,		render_attr_ontology_id_attr(entity.domId)
+				,		render_attr(entity, 'minCardinality')
+				,		render_attr(entity, 'maxCardinality')
 				,		'>\n'
 				,		html
 				,	'</div>\n'
 			].join('')
 	}
 
-	getModelWrapper = function(entity, html) {
+	get_model_wrapper = function(entity, html) {
 		// verify if we still need this as opposed to above?
 		if (entity.input_group == true)
 			return html
@@ -1059,24 +1059,24 @@ function OntologyForm(domId, resource, settings, callback) {
 			return [
 				'<a name="' + entity.domId + '"/>'
 				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-				,	get_ontology_id_attr(entity.domId)
-				,	getHTMLAttribute(entity, 'minCardinality')
-				,	getHTMLAttribute(entity, 'maxCardinality')
+				,	render_attr_ontology_id_attr(entity.domId)
+				,	render_attr(entity, 'minCardinality')
+				,	render_attr(entity, 'maxCardinality')
 				,	'>\n'
 				,	html
 				,	'</div>\n'
 			].join('')
 	}
 
-	get_ontology_id = function(domId) {
+	render_attr_ontology_id = function(domId) {
 		return 'data-ontology-id="' + domId + '" '
 	}
 
-	getHTMLAttribute = function(entity, attribute) {
+	render_attr = function(entity, attribute) {
 		return (attribute in entity) ? attribute +'="' + entity[attribute] + '" ' : ''
 	}
 
-	getNumericConstraintHTML = function(entity, minInclusive, maxInclusive) {
+	render_attr_numeric = function(entity, minInclusive, maxInclusive) {
 		/*
 		Adds numeric upper and lower tests if appropriate.
 		RegEx pattern is also allowed.
@@ -1096,11 +1096,11 @@ function OntologyForm(domId, resource, settings, callback) {
 		var min = (minInclusive === undefined) ? '' : ' min='+minInclusive+' ' 
 		var max = (maxInclusive === undefined) ? '' : ' max='+maxInclusive+' ' 
 
-		return min + max + getPatternConstraint(entity)
+		return min + max + render_attr_pattern(entity)
 	}
 
 
-	getStringConstraints = function(entity) {
+	render_attr_string = function(entity) {
 		// Encodes html input length limits on string.
 		var min = entity.minLength ? ' minLength="'+entity.minLength+'" ' : ''
 		if (entity.maxLength) {
@@ -1112,10 +1112,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		else
 			var max = ''
 		//size 	= 'xmls:length' in constraints ? ' size="'+constraints['xmls:length']+'" ' : ''
-		return min + max + getPatternConstraint(entity)
+		return min + max + render_attr_pattern(entity)
 	}
 
-	getPatternConstraint = function(entity) {
+	render_attr_pattern = function(entity) {
 		/* Render specific regular expression "pattern" that is used to
 		validate data entry. Zurb Foundation accepts some preset 
 		expression names - see init_foundation()

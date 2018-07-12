@@ -45,7 +45,7 @@ function init_cart_tab() {
 	$("#tabsContent").on('click', "i.fi-shopping-cart", function(event){
 
 		event.stopPropagation(); // otherwise parent cart items catch same click
-		cart_check(get_ontology_id(this))
+		cart_check(render_attr_ontology_id(this))
 		return false
 	})
 
@@ -106,7 +106,7 @@ function cart_check(ontologyId) {
 	if ($('#shoppingCart div.cart-item').length == 0)
 		$("#panelCart > div.infoBox").remove()
 
-	var dataId = '[' + get_ontology_id_attr(ontologyId) +']'
+	var dataId = '[' + render_attr_ontology_id_attr(ontologyId) +']'
 	var items = $('.cart-item' + dataId)
 	var formItem = $('#mainForm .cart-item' + dataId) // CONGLOMERATE?
 	var cartItem = $('#shoppingCart .cart-item' + dataId)
@@ -188,7 +188,7 @@ function cart_check(ontologyId) {
 
 
 function set_shopping_cart(formObj) {
-	// UPDATE SHOPPING CART STATUS in renderEntity()
+	// UPDATE SHOPPING CART STATUS in render_entity()
 	// ISSUE is foundation zurb selection lists redrawn each time, so need statuses added in that code.
 	$('#tabsContent div.field-wrapper')
 		.addClass('cart-item')
@@ -199,7 +199,7 @@ function set_shopping_cart(formObj) {
 		if ($(this).is('.include') ) status = 'include'
 		if ($(this).is('.exclude') ) status = 'exclude'
 
-		$('#tabsContent div.field-wrapper[' + get_ontology_id_attr($(this)[0].dataset.ontologyId) + ']').addClass(status)
+		$('#tabsContent div.field-wrapper[' + render_attr_ontology_id_attr($(this)[0].dataset.ontologyId) + ']').addClass(status)
 	})
 }
 
@@ -258,7 +258,7 @@ function render_cart_item(ontologyId) {
 	var entity = top.resource.specifications[entityId]
 	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED]'}
 	return [
-		'<div class="cart-item" ', get_ontology_id_attr(ontologyId), '>'
+		'<div class="cart-item" ', render_attr_ontology_id_attr(ontologyId), '>'
 		,	'<i class="fi-shopping-cart"></i>'
 		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
 		,'</div>'
@@ -279,7 +279,7 @@ function render_cart_obj(ontologyId) {
 		content = '<i class="fi-arrow-up dropdown member"></i>'
 	var html = [
 		'<div class="cart-item" '
-		, 	get_ontology_id_attr(ontologyId)
+		, 	render_attr_ontology_id_attr(ontologyId)
 		, '>'
 		, '<i class="fi-shopping-cart"></i>'
 		, content

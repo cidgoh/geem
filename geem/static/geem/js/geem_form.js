@@ -657,7 +657,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			htmlTabContent += '</div>\n'		
 		}
 
-		return [
+		return [ // A variation on get_field_wrapper()
 			,	'<div class="field-wrapper input-tabs">'
 			,		'<ul class="tabs" data-tabs id="' + domId + '">'
 			,			htmlTabs
@@ -1042,7 +1042,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 				,		' depth' + entity.depth
 				,		'" '
-				,		render_attr_ontology_id_attr(entity.domId)
+				,		render_attr_ontology_id(entity.domId)
 				,		render_attr(entity, 'minCardinality')
 				,		render_attr(entity, 'maxCardinality')
 				,		'>\n'
@@ -1059,7 +1059,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			return [
 				'<a name="' + entity.domId + '"/>'
 				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-				,	render_attr_ontology_id_attr(entity.domId)
+				,	render_attr_ontology_id(entity.domId)
 				,	render_attr(entity, 'minCardinality')
 				,	render_attr(entity, 'maxCardinality')
 				,	'>\n'

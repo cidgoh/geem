@@ -6,8 +6,10 @@ function init_cart_tab() {
 	ontology curators or shared by other users. These items can then be placed
 	into a single package that a user can keep private, or share.
 
-	The current solution below perhaps relies too heavily on the DOM itself to
-	keep track of the necessary information for each cart item, and the status
+	Currently revising the code below to support a shopping list data structure
+	that is not held in the dom. 
+
+	Old solution keeps track of the necessary information for each cart item, and the status
 	of each shopping cart icon.  The icon state indicates whether user wants
 	to include or exclude item from their cart.
 
@@ -44,8 +46,8 @@ function init_cart_tab() {
 	// Check and update shopping cart include/exclude status of this item
 	$("#tabsContent").on('click', "i.fi-shopping-cart", function(event){
 
-		event.stopPropagation(); // otherwise parent cart items catch same click
-		cart_check(render_attr_ontology_id(this))
+		event.stopPropagation(); // Otherwise parent cart items catch same click
+		cart_check(get_attr_ontology_id(this))
 		return false
 	})
 
@@ -58,7 +60,9 @@ function init_cart_tab() {
 		stack = top.resources.slice(0)
 
 		html = ['<option value="">Select a package ...</option>']
+		// Skip display of ontologies and packages user doesn't manage
 		while (stack.length && stack[0].type == 'ontology') stack.shift()
+
 		// manager_filter turned on so only those items user manages are shown.
 		init_resource_select_item(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
 		init_resource_select_item(stack, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
@@ -75,6 +79,15 @@ function init_cart_tab() {
 
 }
 
+
+function get_attr_ontology_id(item) {
+	// Determine relevant ontology ID for given entity
+	// Here ontology id is listed inside a select <option>
+	if ($(item).is('i.fi-shopping-cart.option')) 
+		return $(item).prev().attr('data-ontology-id')
+
+	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
+}
 
 function shopping_list_status() {
 	if ($('form#shoppingCart > div.cart-item').length >0) {
@@ -106,7 +119,7 @@ function cart_check(ontologyId) {
 	if ($('#shoppingCart div.cart-item').length == 0)
 		$("#panelCart > div.infoBox").remove()
 
-	var dataId = '[' + render_attr_ontology_id_attr(ontologyId) +']'
+	var dataId = '[' + render_attr_ontology_id(ontologyId) +']'
 	var items = $('.cart-item' + dataId)
 	var formItem = $('#mainForm .cart-item' + dataId) // CONGLOMERATE?
 	var cartItem = $('#shoppingCart .cart-item' + dataId)
@@ -116,6 +129,7 @@ function cart_check(ontologyId) {
 
 		// Place this new item under parent in cart if it exists
 		var path = ontologyId.substr(0, ontologyId.lastIndexOf('/'))
+		alert(path)
 		while (path.length) {
 			var item = $('#shoppingCart div.cart-item[data-ontology-id="' + path+ '"]')
 			if (item.length) {
@@ -199,7 +213,7 @@ function set_shopping_cart(formObj) {
 		if ($(this).is('.include') ) status = 'include'
 		if ($(this).is('.exclude') ) status = 'exclude'
 
-		$('#tabsContent div.field-wrapper[' + render_attr_ontology_id_attr($(this)[0].dataset.ontologyId) + ']').addClass(status)
+		$('#tabsContent div.field-wrapper[' + render_attr_ontology_id( $(this)[0].dataset.ontologyId ) + ']').addClass(status)
 	})
 }
 
@@ -258,7 +272,7 @@ function render_cart_item(ontologyId) {
 	var entity = top.resource.specifications[entityId]
 	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED]'}
 	return [
-		'<div class="cart-item" ', render_attr_ontology_id_attr(ontologyId), '>'
+		'<div class="cart-item" ', render_attr_ontology_id(ontologyId), '>'
 		,	'<i class="fi-shopping-cart"></i>'
 		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
 		,'</div>'
@@ -278,14 +292,11 @@ function render_cart_obj(ontologyId) {
 	if ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
 		content = '<i class="fi-arrow-up dropdown member"></i>'
 	var html = [
-		'<div class="cart-item" '
-		, 	render_attr_ontology_id_attr(ontologyId)
-		, '>'
-		, '<i class="fi-shopping-cart"></i>'
-		, content
-		, '<a href="#', ontologyId, '">'
-		,	entity['uiLabel']
-		, '</a></div>'
+		'<div class="cart-item" ', 	render_attr_ontology_id(ontologyId), '>'
+		,	'<i class="fi-shopping-cart"></i>'
+		,	content
+		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
+		,'</div>'
 		].join('')
 	
 	return [entity['uiLabel'].toLowerCase(), html]

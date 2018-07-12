@@ -15,24 +15,30 @@
 
     Author: Damion Dooley
 	Project: genepio.org/geem
-	Updated: Apr 10, 2018
+	Updated: July 15, 2018
 
 	Note: we can get a dynamic list of OBOFoundry ontologies via: 
-	http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json   //&timeout=0&debug=on
-
+	http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json
+	In the future these could be candidates for GEEM-driven standards to be
+	encoded in
+	
 	TO DO:
 
 	// FUTURE: SWITCH TO GEEM FORM RENDERING FOR RESOURCE SUMMARY FORM
 
 	 - Disjunction tabbed interface has wrong required status shown when
 	 ontology detail switch is on?
-	 - FIX: contact specification - physician inherits first name, last name etc from person, but cardinality not shown.
+	 - FIX: contact specification - physician not inheriting first name, last
+	   name etc. from person (and check cardinality).
 	 - How to handle items that are not marked as datums?
 	 - possibly try: http://knockoutjs.com/index.html
-	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to be recognized. using "min 1" instead of "some" is the workaround.
+	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to
+	   be recognized. using "min 1" instead of "some" is the workaround.
 	 - API: should provide content type of resource being requested: 
 		GEEM ontology, shared or private package.
-	 - Ontology ID provided in URL: CHECK FOR VALID ENTITY REFERENCE IN SOME (PREFERRED?) ONTOLOGY. PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE TO LOAD?
+	 - Ontology ID provided in URL: CHECK FOR VALID ENTITY REFERENCE IN SOME
+	  (PREFERRED?) ONTOLOGY. PREFIX SHOULD INDICATE WHICH ONTOLOGY SPEC FILE
+	  TO LOAD?
 
 */
 
@@ -41,12 +47,7 @@
 // Lists all the ontology, shared, and private packages available to user
 // Hardcoded for testing until API operational.
 // path is used as unique id of resource.
-resources = [
-	{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
-	{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
-	{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
-	{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
-]	
+resources = []
 resource = {} 	// Current specification database being browsed and searched
 focusEntityId = null
 formSettings = {}
@@ -58,21 +59,21 @@ $( document ).ready(function() {
 	// Initializes Zurb Foundation settings (but not foundation itself)
 	OntologyForm.init_foundation()
 
-	/**************** LOAD SHARED TEMPLATES ****************/
+	api = new GeemAPI()
+
+	/************************* LOAD SHARED TEMPLATES ************************/
 	$.ajax('templates/modal_lookup.html').done(function(response){
 		$('#template_area').append(response)
 	});
 
-	// GEEM focuses on entities by way of a URL with hash #[entityId]
-	$(window).on('hashchange', check_for_hash_entity);
-
-	/********* Specification resource selection area ********/
-	init_resource_select(top.resources) // will come from API fetch.
+	/*************** Specification resource selection area ******************/
+	top.resources = api.get_resources()
+	init_resource_select(top.resources)
 	init_summary_tab()
 	init_browse_tab()
 	init_search_tab()
 
-	/********* Specification focus area *********************/
+	/*********************** Specification focus area ***********************/
 
 	$("#tabsContent").on('mouseenter','i.fi-magnifying-glass', render_display_context)
 
@@ -83,18 +84,16 @@ $( document ).ready(function() {
 
 	$(document).foundation()
 
-	check_for_hash_entity()  // If there's a #ONTOLOGY:ID hash in url
+	// GEEM focuses on entities by way of a URL with hash #[entityId]
+	$(window).on('hashchange', check_for_hash_entity);
+
+	// If there's a #ONTOLOGY:ID hash in URL then render that form
+	check_for_hash_entity()  
 
 });
 
 
-/******************** UTILITY FUNCTIONS ********************/
-// FUTURE: convert into class
-
-
-function render_attr_ontology_id_attr(id) {
-	return 'data-ontology-id="' + id + '" '
-}
+/******************************** UTILITY FUNCTIONS *************************/
 
 
 function navigate_to_form(ontologyId) {
@@ -113,18 +112,9 @@ function navigate_to_form(ontologyId) {
 
 
 function get_entity(ontologyId) {
-	var entity = top.resource.specifications[ontologyId]
-	//if (!entity)
-	//	entity = top.resource.specifications['units'][ontologyId]
-	return entity
+	return top.resource.specifications[ontologyId]
 }
 
-function render_attr_ontology_id(item) {
-	// Determine relevant ontology ID for given entity
-	if ($(item).is('i.fi-shopping-cart.option')) 
-		return $(item).prev().attr('data-ontology-id')
-	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
-}
 
 function dom_item_animate(item, effectClass) {
 	// Apply given css effectClass to given DOM item for 1 second
@@ -133,7 +123,7 @@ function dom_item_animate(item, effectClass) {
 }
 
 
-/*********** ACTION *****************************************************
+/******************************* ACTION **************************************
 	This loads the json user interface oriented version of an ontology
 	After ajax load of ontology_ui.json, top.resource.specifications contains:
 	{
@@ -150,9 +140,9 @@ function do_resource_selection() {
 	// This wasn't URL triggered, so clear out existing form
 	location.hash = ''
 	
-	/* Not clearing out right panel so that user can switch to their package
-	after filling shopping cart, to fill it up (though this can be done with 
-	shopping cart selection pulldown too).
+	/* Not clearing out rightside panel so that user can switch to their 
+	package after filling shopping cart, to fill it up (though this can be
+	done with shopping cart selection pulldown too).
 
 	if (top.form.formDelete) top.form.form_delete()
 	$('#resourceTabs,#content').addClass('disabled')
@@ -165,24 +155,11 @@ function do_resource_selection() {
 		$('#tabsSpecification').hide()
 		$('#formEntityLabel').html('')
 		$('#resourceTabs').foundation('_collapseTab', $('#panelLibrary'));
-
-
 	}
+
 	else if (resource_URL == 'new') {
 
-		var today = new Date();
-		today = today.toISOString().substring(0, 10);
-		var data = {
-			title:'New private specification package',
-			date: today,
-			type:'private',
-			status:'draft',
-			resource:'',  // General link to resource separate from version IRI??
-			description:'',
-			prefix:'',
-			versionIRI:'data/private_packages/[your acct id]/package_[id]_'+today+'.json',
-			license:''
-		}
+		data = api.get_new_resource()
 
 		$('#resourceTabs').removeClass('disabled')
 		$('#tabsSpecification').show()
@@ -593,16 +570,11 @@ function render_menu(entityId = null, depth = 0 ) {
 		
 		if (depth > 0) {
 			html = [
-				'<li class="cart-item" data-ontology-id="',	
-				entityId,'">',
-				//hasChildren ? '<a href="#">' : '<a href="#'+entityId+'">',
-			 	'<a href="#'+entityId+'">',
-				entity['uiLabel'],
-
-
-				// ISSUE: children is dict with keys in it...
-				children.length ? ' <i class="fi-magnifying-glass"></i>' : '',
-			'</a>'
+				'<li class="cart-item" data-ontology-id="',	entityId,'">'
+			 	,	'<a href="#'+entityId+'">'
+				,		entity['uiLabel']
+				,		children.length ? ' <i class="fi-magnifying-glass"></i>' : ''
+				,	'</a>'
 			].join('')
 		}
 
@@ -619,9 +591,9 @@ function render_menu(entityId = null, depth = 0 ) {
 				var child = top.resource.specifications[memberId]
 				if (child && ('models' in child || 'components' in child))
 					html += [
-					'<ul class="menu vertical nested">',
-						render_menu(memberId, depth + 1),
-					'</ul>'
+					'<ul class="menu vertical nested">'
+					,	render_menu(memberId, depth + 1)
+					,'</ul>'
 					].join('')
 			}
 		}
@@ -689,13 +661,17 @@ function init_summary_tab() {
 }
 
 function init_browse_tab() {
-	// On Browse Specifications tab, enables eye icon click to show form without opening/closing the accordion.
+	// On Browse Specifications tab, enables eye icon click to show form 
+	// without opening/closing the accordion.
+	// ARCHAIC: menu parent never rendered, only leafs are rendered.
+	/*
 	$('#panelEntities').on('click', 'i', function(event) { 
 		event.stopPropagation();
 		if ($(event.target).is('i.fi-magnifying-glass') ) {
-			top.form.render_entity(render_attr_ontology_id(event.target))
+			top.form.render_entity(get_attr_ontology_id(event.target))
 		}
 	});
+	*/
 }
 
 function init_form_tab() {

@@ -1,7 +1,7 @@
 
 function GeemAPI() {
 
-	this.init = function() {}
+	//this.init = function() {}
 
 	this.get_resources = function() {
 		/* 
@@ -17,7 +17,11 @@ function GeemAPI() {
 		]	
 	}
 
-	this.get_new_resources = function() {
+	this.get_resource = function(path) {
+
+	}
+
+	this.get_new_resource = function() {
 		/* 
 			Retrieves new private package record for logged-in user.
 		*/

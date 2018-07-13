@@ -38,25 +38,6 @@ $( document ).ready(function() {
 });
 
 
-function load_resource(resource_URL) { //, resource_type
-  $.ajax({
-    type: 'GET',
-    url: resource_URL,
-    timeout: 30000, //30 sec timeout
-    success: function(resource) {
-
-      top.resource = resource;
-
-      // load_resource() triggered if hash entity id detected 
-      // but no top.resource loaded. 
-      check_for_hash_entity()
-    },
-    error:function(XMLHttpRequest, textStatus, errorThrown) {
-      alert('Given resource could not be found: \n\n\t' + resource_URL) 
-    }
-  });
-}
-
 function check_for_hash_entity() {
 
  if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
@@ -65,13 +46,13 @@ function check_for_hash_entity() {
     // Returns if loading resource or if no appropriate resource found
     if (!check_entity_resource(top.focusEntityId) ) return
 
-    loadForm()
+    load_standalone_form()
 
   }
 
 }
 
-function loadForm() {
+function load_standalone_form() {
 
   top.form = new OntologyForm("#mainForm", top.resource, top.formSettings)
 

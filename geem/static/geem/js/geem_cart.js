@@ -19,6 +19,8 @@ function init_cart_tab() {
 
 	*/
 
+	top.cart = {}
+	
 	// If user clicks on Shopping Cart tab, disable buttons for empty cart.
 	$('#tabPanelCartLink').on('click', shopping_list_status)
 
@@ -129,7 +131,7 @@ function cart_check(ontologyId) {
 
 		// Place this new item under parent in cart if it exists
 		var path = ontologyId.substr(0, ontologyId.lastIndexOf('/'))
-		alert(path)
+
 		while (path.length) {
 			var item = $('#shoppingCart div.cart-item[data-ontology-id="' + path+ '"]')
 			if (item.length) {

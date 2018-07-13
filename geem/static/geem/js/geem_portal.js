@@ -118,6 +118,7 @@ function get_entity(ontologyId) {
 
 function dom_item_animate(item, effectClass) {
 	// Apply given css effectClass to given DOM item for 1 second
+	// Enables shopping cart tab icon to flicker when new item added
 	$(item).addClass(effectClass)
 	setTimeout('$("'+item+'").removeClass("'+effectClass+'")', 1000)
 }
@@ -168,38 +169,42 @@ function do_resource_selection() {
 		do_resource_form(data, 'templates/resource_summary_form.html', true) // true=new form
 	}
 	else {
-		load_resource(resource_URL) 
+		load_resource(resource_URL)
+			.then(function(resource) {render(resource)})
 
 	}
 }
 
 
-function load_resource(resource_URL) { //, resource_type
-	$.ajax({
-		type: 'GET',
-		url: resource_URL,
-		timeout: 30000, //30 sec timeout
-		success: function(resource) {
 
-			top.resource = resource;
-			do_resource_metadata(top.resource)
-			// Prepare browsable top-level list of ontology items
-			do_resource_browse_menu()
+function render_resource(resource) {
 
-			$('#resourceTabs').removeClass('disabled')
-			$('#tabsSpecification').show()
-			$('#specificationSummaryTabLink').click()
+	// Currently resource_type is provided as parameter but it
+	// should be within specification itself. Determines which
+	// fields are editable/visible.
 
-			// load_resource() triggered if hash entity id detected 
-			// but no top.resource loaded. 
-			check_for_hash_entity()
-		},
-		error:function(XMLHttpRequest, textStatus, errorThrown) {
-			alert('Given resource could not be found: \n\n\t' + resource_URL) 
-		}
-	});
+	// Temporary correction until SPARQL query can be revised.
+	//if ('value' in top.resource.metadata.date)
+	//	top.resource.metadata.date = top.resource.metadata.date.value
+
+	top.resource = resource;
+
+	do_resource_metadata(top.resource)
+	// Prepare browsable top-level list of ontology items
+	do_resource_browse_menu()
+
+	$('#resourceTabs').removeClass('disabled')
+	$('#tabsSpecification').show()
+	$('#specificationSummaryTabLink').click()
+
+	// load_resource() triggered if hash entity id detected 
+	// but no top.resource loaded. 
+	check_for_hash_entity()
+
+	// Render display form appropriate to spec type:
+	do_resource_form(top.resource.metadata, 'templates/resource_summary_form.html')
+
 }
-
 
 
 function set_form_callback(formObj) {
@@ -229,19 +234,6 @@ function set_form_callback(formObj) {
 
 }
 
-
-function do_resource_metadata(resource) { //, resource_type
-	// Currently resource_type is provided as parameter but it
-	// should be within specification itself. Determines which
-	// fields are editable/visible.
-
-	// Temporary correction until SPARQL query can be revised.
-	//if ('value' in top.resource.metadata.date)
-	//	top.resource.metadata.date = top.resource.metadata.date.value
-
-	// Render display form appropriate to spec type:
-	do_resource_form(top.resource.metadata, 'templates/resource_summary_form.html')
-}
 
 
 function do_resource_form(data, form_URL, new_flag = false) {
@@ -371,25 +363,29 @@ function check_for_hash_entity() {
 
 		if (!check_entity_resource(top.focusEntityId)) return
 
-		$('#specificationSourceInfoBox').hide()
-		$('#content').removeClass('disabled')
-
-		// Providing set_form_callback to add shopping cart to form items.
-		top.form = new OntologyForm("#mainForm", top.resource, top.formSettings, set_form_callback) 
-
-		top.form.render_entity(top.focusEntityId)
-
-		// When render_entity is called, activate its tab
-		$('#content-tabs').foundation('selectTab', '#panelContent'); 
-
-		// Wire form's submit button to show GEEM example form submit contents in popup.
-		$('#buttonFormSubmit').on('click', function () {  
-			set_modal_download(get_data_specification('form_submission.json'))
-		})
-
+		render_portal_form()
 	}
 }
 
+function render_portal_form() {
+
+	$('#specificationSourceInfoBox').hide()
+	$('#content').removeClass('disabled')
+
+	// Providing set_form_callback to add shopping cart to form items.
+	top.form = new OntologyForm("#mainForm", top.resource, top.formSettings, set_form_callback) 
+
+	top.form.render_entity(top.focusEntityId)
+
+	// When render_entity is called, activate its tab
+	$('#content-tabs').foundation('selectTab', '#panelContent'); 
+
+	// Wire form's submit button to show GEEM example form submit contents in popup.
+	$('#buttonFormSubmit').on('click', function () {  
+		set_modal_download(get_data_specification('form_submission.json'))
+	})
+
+}
 
 function get_ontology_detail_html(ontologyId) {
 
@@ -625,10 +621,12 @@ function render_menu(entityId = null, depth = 0 ) {
 
 */
 
-/************************ TAB INITIALIZATION *******************/
+/***************************** TAB INITIALIZATION ***************************/
 
 function init_resource_select(resources) {
-	// Assumes resources sorted.
+	/* Populates resource selection list. Assumes resources are sorted.
+
+	*/
 	stack = resources.slice(0)
 
 	html = ['<option value="">Select a specification resource ...</option>']

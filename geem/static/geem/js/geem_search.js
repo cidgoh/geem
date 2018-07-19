@@ -77,7 +77,6 @@ function render_search_result_item(ontologyId) {
 		content = '<i class="fi-arrow-up dropdown member"></i>'
 	var html = [
 		'<div class="cart-item" ', 	render_attr_ontology_id(ontologyId), '>'
-		//,	'<i class="fi-shopping-cart"></i>'
 		,	content
 		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
 		,'</div>'

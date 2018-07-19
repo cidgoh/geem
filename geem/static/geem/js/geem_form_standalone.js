@@ -11,6 +11,8 @@ $( document ).ready(function() {
 
   OntologyForm.init_foundation()
 
+  api = new GeemAPI()
+
   // Bring in shared templates
   $.ajax('templates/modal_lookup.html').done(function(response) {
     $('body').append(response)
@@ -28,38 +30,28 @@ $( document ).ready(function() {
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
-  $(window).on('hashchange', check_for_hash_entity);
+  $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
 
   $('#modalEntity').foundation()
   $('#rightbar').foundation()
 
-  check_for_hash_entity()
+  // Not sure why we don't need this
+  //check_entity_id_change(render_standalone_form)
 
 });
 
 
-function check_for_hash_entity() {
 
- if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
-    top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
+function render_standalone_form() {
 
-    // Returns if loading resource or if no appropriate resource found
-    if (!check_entity_resource(top.focusEntityId) ) return
+  // No form callback currently needed
+  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings) 
 
-    load_standalone_form()
+  top.form.render_entity(top.focusEntityId, form_standalone_callback)
 
-  }
-
-}
-
-function load_standalone_form() {
-
-  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings)
-
-  top.form.render_entity(top.focusEntityId)
   render_section_menu()
 
-  // Deselect specification menu.
+  // Clear any previous specification menu selection.
   $('#specificationType')[0].selectedIndex = 0
 
   $('#buttonFormSubmit').on('click', function () {    
@@ -68,6 +60,12 @@ function load_standalone_form() {
 
 }
 
+function form_standalone_callback(form){
+  const entity = get_form_specification_component(form.entityId)
+  $('#mainForm > div.field-wrapper > label')
+    .attr('id','formEntityLabel')
+    .after('<p>' + (entity.definition  || '') + '</p>') 
+}
 
 function render_section_menu() {
   // Provide form menu that echoes form specification to two levels down of

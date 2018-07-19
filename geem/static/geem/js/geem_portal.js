@@ -21,12 +21,9 @@
 
 /*********** ALL THE SETUP ***************************************************/
 
-// Lists all the ontology, shared, and private packages available to user
-// Hardcoded for testing until API operational.
-// path is used as unique id of resource.
-resources = []
+resources = []	// Ontologies and shared/private packages available to user
 resource = {} 	// Current specification database being browsed and searched
-focusEntityId = null
+focusEntityId = null // path contains unique id of resource.
 formSettings = {}
 form = {}
 cart = []

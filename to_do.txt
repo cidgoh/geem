@@ -1,40 +1,22 @@
-EBI Taxonomy or Organism.  Requires “OTHER” plain text.
 
-hasDbXref: INSDC countries for ontofetch.py
-ISSUE: looks like ISO3166 standard variant needs to be included in hasDbXref annotation.
-"hasDbXref": [
-                    "ISO3166-1:BE",
-                    "ISO3166-2:BE",
-                    "INSDC:country:belgium",
-                    "ISO3166-1:BEL",
-                    "ISO3166-1:056"
+	TO DO:
 
-Lets adjust the reference to work with namespaces precisely:
-	https://en.wikipedia.org/wiki/ISO_3166
-	https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
-
-so, following: https://arxiv.org/pdf/0801.3908.pdf
-https://www.slideshare.net/nichtich/encoding-changing-country-codes-in-rdf-with-iso-3166-and-skos
-
-hasDbXref 
-	https://www.iso.org/obp/ui/#iso:code:3166:BE
-	wiki:ISO_3166-1_alpha-2:BE
-	wiki:ISO_3166-1_alpha-3:BEL
-	wiki:ISO_3166-1_numeric:056
-	wiki:ISO_3166-2:BE
-
-Lat_lon or country: 
-- country GAZ or ISO Country field annex B? 
-- lat/long +/- in DECIMAL so that numeric fields are supported.  Conversion can go in NCBI N/S format.
-
-Date formats, esp. permitting year only, combination incorporating unit selection?
-
-FIX has_component FEATURE not getting DESCRIPTION override.
-
-
-NIAID: Need "N/A" or "Unknown" as accepted value
-Example Values:	+15.871732; +37.2556; unknown; censored
-with unknown, not applicable and censored as an allowed values
-
-
-
+	 - Disjunction tabbed interface has wrong required status shown when
+	 ontology detail switch is on?
+	 - FIX: contact specification - physician not inheriting first name, last
+	   name etc. from person (and check cardinality).
+	 - How to handle items that are not marked as datums?
+	 - possibly try: http://knockoutjs.com/index.html
+	 - FIX: "has component some XYZ" where XYZ is a composite entity fails to
+	   be recognized. using "min 1" instead of "some" is the workaround.
+	 - accomodate "other" or "missing" etc. option directly in form data?
+	 	EBI Taxonomy or Organism.  Requires “OTHER” plain text.
+	    NIAID: Need "N/A" or "Unknown", "censored" as accepted value.
+		Example Values:	+15.871732; +37.2556; unknown; censored
+	 - Some specs like NCBI "Lat_lon or country" need to accomodate country 
+	   GAZ or ISO Country field annex B? 
+	 - lat/long +/- in DECIMAL so that numeric fields are supported.  
+	   Conversion can go in NCBI N/S format.
+	 - Date formats, esp. permitting year only, combination incorporating unit
+	   selection?
+	 - Future: convert Chosen <select> to ag-grid.com?

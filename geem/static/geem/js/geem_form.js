@@ -4,9 +4,9 @@ The OntologyForm class provides all functions needed (using jquery, Zurb
 Foundation and app.css) to render and populate an ontology-driven form.
 
 WISHLIST:
-	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be generic
-	  and have a Foundation additional rendering pass.
-	- Allow xml datatype formats for date&time to be inherited from parent model
+	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be
+	  generic and have a Foundation additional rendering pass?
+	- Allow xml datatype formats for date&time to be inherited from parent model?
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
 	- Also option for 3rd party database field name for form storage
 	- Select list values: enable to be other than ontology id.
@@ -30,10 +30,11 @@ function OntologyForm(domId, resource, settings, callback) {
 	self.settings = {}
 	self.formDomId = $(domId)
 	self.context = resource.context
-	self.set_form_callback = callback
+	self.form_callback = callback
 	self.uniqueDomId = 0
 
-	// Some of these defaults can be overridden by particular fields via ui_feature specification
+	// Some of these defaults can be overridden by particular fields via
+	// ui_feature specification
 	if (settings) self.settings = settings
 	if (! 'ontologyDetails' in self.settings) self.settings.ontologyDetails = false
 	if (! 'minimalForm' in self.settings) self.settings.minimalForm = false
@@ -66,7 +67,8 @@ function OntologyForm(domId, resource, settings, callback) {
 			var entity = get_form_specification_component(self.entityId)
 			var form_html = render_form_specification(entity)
 
-			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
+			// "buttonFormSubmit" is id created for submit button, which other
+			// processes can trigger on. Could turn into event.
 			if (form_html == '') {
 				// A given element might not be a field.
 				form_html += '<br/><p>This item has no field specification.</p>'
@@ -78,7 +80,8 @@ function OntologyForm(domId, resource, settings, callback) {
 			// Place new form html into page
 			self.formDomId.html(form_html)
 
-			// Set required/optional status of fields and controls for adding more elements.
+			// Set required/optional status of fields and controls for adding
+			// more elements.
 			initialize_input_cardinality(self.formDomId) 
 			initialize_add_inputs(self.formDomId)
 
@@ -89,36 +92,21 @@ function OntologyForm(domId, resource, settings, callback) {
 		 	//loadFormData()
 
 		 	if (self.settings.minimalForm) 
-		 		set_minimal_form(self.formDomId) // Hides empty optional field content.
+		 		set_minimal_form(self.formDomId) // Hide empty optional field content.
 
-		 	
-		 	// Reinitialize form since it was deleted above.
-		 	// FUTURE: UPGRADE FOUNDATION, use reInit()
+		 	// Reinitialize form since deleted above. FUTURE: use reInit()
 			self.formDomId.foundation()
 
-			//Setup of this class enables callback function to be supplied.  Could make an event instead.
-			if (self.set_form_callback)
-				self.set_form_callback(self)
-
+			// Setup of this class enables callback function to be supplied.
+			// Make event?
+			if (self.form_callback)
+				self.form_callback(self)
 
 			// Enable page annotation by 3rd party tools by kicking browser to 
 			// understand that a #anchor and page title are different.
 			window.document.title = 'GEEM: ' + self.entityId + ':' + entity.uiLabel
-
-			// A hack that provides more styled info about form in portal.html
-			if ($('#formEntityLabel').length) {
-
-				$('#formEntityLabel')
-					.html(entity.uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
-				$('#mainForm > div.field-wrapper > label')
-					.html(entity.definition || '<span class="small float-right">(select all)</span>')
-			}
-			else {
-				$('#mainForm > div.field-wrapper > label')
-					.attr('id','formEntityLabel')
-					.after('<p>' + (entity.definition  || '') + '</p>') 
-			}
-
+			
+			return entity
 
 		 }
 		return false
@@ -163,10 +151,10 @@ function OntologyForm(domId, resource, settings, callback) {
 			.on('mouseleave', 'div.field-wrapper.optional.open', function(event) {
 				clearTimeout(timer);
 				event.stopPropagation();
-				// Keep open inputs that DO have content. Close other optional inputs
+				// Keep open inputs that have content. Close optional inputs
 				var inputGroup = $(this).children('div.input-group')
-				var someContent = inputGroup.children('input, select') // IMMEDIATE CHILDREN
-					.filter(function() {return ! !this.value;}) // double negative yeilds boolean.
+				var someContent = inputGroup.children('input, select')
+					.filter(function() {return ! !this.value}) // !!x->boolean
 
 				if (someContent.length == 0) { // Ok to hide.
 					$(this).removeClass('open')
@@ -174,13 +162,21 @@ function OntologyForm(domId, resource, settings, callback) {
 				}
 			})
 
-			// By default, hide all optional section .input-group that has EMPTY content.
-			// except if an input field is a .tabs-panel field its got another hiding system.
+			// By default, hide all optional section .input-group that has
+			// EMPTY content except if an input field is a .tabs-panel field
+			// its got another hiding system.
 			.find('div:not(.tabs-panel) > div.field-wrapper.optional > div.input-group').hide()
 
 	}
 
 	initialize_add_inputs = function(dom_element) {
+		/* Some specifications allow more than 1 record to be created. This 
+		script provides an "Add record" button to right side of spec. label
+		which when clicked creates a new record within that section of form
+		and scrolls to it for data entry.  GEEM currently doesn't 
+		include server side code to save data but this function provides
+		the browser side code to do so.
+		*/
 		dom_element
 			.on('click', '.addInputElement', function() {
 
@@ -224,25 +220,27 @@ function OntologyForm(domId, resource, settings, callback) {
 					if (element.attr('maxcardinality')) {
 						if (kid_count >= parseInt( element.attr('maxcardinality') )) 
 							element.find('button.addInputElement').first().attr('disabled','disabled')
-							//alert(element.find('button.addInputElement').first().attr('disabled'))
 					}
 
 				}
 				return false
 			})
+
+			// A delete function which gets rid of displayed record.
+			// ISSUE: Numbering - remaining items have "Record XYZ" not in sequence
 			.on('click', '.removeInputElement', function() {
 
-				// ISSUE: Numbering - remaining items have "Record XYZ" not in sequence
+				// API call to delete DATA record server side (if it exists)
+				// api.delete_data(...)
 
 				$(this).parents('div.inputBlock').first().slideUp(400, function(){$(this).remove()} )
 
-				// Enable "Add Record" button.
-				var element = $(this).parents('div.field-wrapper').first()
-				//if (element.attr('mincardinality')) {
-				var kid_count = element.children('div.inputBlock').length
+				const element = $(this).parents('div.field-wrapper').first()
+				const kid_count = element.children('div.inputBlock').length
+
+				// Enable "Add Record" button if < maximum records shown
 				if (kid_count <= parseInt( element.attr('maxcardinality') )) 
 					element.find('button.addInputElement').first().removeAttr('disabled')
-				//}
 
 			})
 	}
@@ -388,7 +386,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 				// Show optional and required information.
 				if (self.settings.ontologyDetails && cardinalityLabel.length > 0 ) 
-					$(this).children('label') //children(".fi-shopping-cart")
+					$(this).children('label')
 						.before('<span class="info label float-right">' + cardinalityLabel + '</span>')
 			}
 				
@@ -1137,6 +1135,53 @@ function OntologyForm(domId, resource, settings, callback) {
 
 }
 
+
+function check_entity_id_change(resource_callback = null, entity_callback = null, entityId = null) {
+	/* If given entity id, or one given in browser URL is different from the
+	current top.focusEntityId, then a) see if its available in top
+	specification, and if so, switch, and if not, load appropriate resource
+	and then switch to it.
+	*/
+
+	if (entityId == null)
+		if (location.hash.length > 0 && location.hash.indexOf(':') != -1)
+			// Set entity id to be first item in path of entities. #x/y/z -> x
+			entityId = document.location.hash.substr(1).split('/',1)[0]
+
+
+	if (top.focusEntityId && entityId == top.focusEntityId)	// No work to do here
+		return false
+
+	// Returns if loading resource or if no appropriate resource found
+	// Ensure appropriate resource is loaded for given entity id 
+	if (!top.resource.specifications || ! entityId in top.resource.specifications) {
+
+		resource_URL = api.get_resource_URL(entityId) // Selects favoured resource
+
+		if (top.resource.metadata && top.resource.metadata.resource == resource_URL) {// Should never happen.
+			Error('check_entity_id_change() problem: canonical resource doesn\'t have term')
+			return false
+		}
+
+		top.focusEntityId = entityId
+		api.get_resource(resource_URL)
+			.then(resource_callback)
+			.then(entity_callback)
+
+		return true
+	}
+
+	// At this point a change in entity_id has occured, so check current
+	// resource and then render form.
+	if (top.resource.specifications && entityId in top.resource.specifications) {
+		top.focusEntityId = entityId
+		entity_callback()
+		return true
+	}
+
+	return false
+
+}
 
 // Implementing a static method for default zurb Foundation settings:
 OntologyForm.init_foundation = function() {

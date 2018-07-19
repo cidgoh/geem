@@ -27,7 +27,7 @@ function search_as_you_type(collection, text) {
 	if (text.length > 2) {
 		var ontology_ids = search_text_filter(collection, text)
 		for (id in ontology_ids) {
-			results.push(render_cart_obj(ontology_ids[id]))
+			results.push(render_search_result_item(ontology_ids[id]))
 		}
 		// Sort results alphabetically.  
 		// Consider other sort metrics?
@@ -61,4 +61,28 @@ function search_text_filter(collection, searchKey) {
       		return collection[key][key2].toLowerCase().includes(searchKey);
       })
     })
+}
+
+
+function render_search_result_item(ontologyId) {
+	// This version of render_cart_item is optimized for sorting, and is used in
+	// search results page.  It also provides icons for navigating to an item's parent.
+	var ptr = ontologyId.lastIndexOf('/')
+	// Get last path item id.
+	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
+	var entity = top.resource.specifications[entityId]
+	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
+	content = ''
+	if ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
+		content = '<i class="fi-arrow-up dropdown member"></i>'
+	var html = [
+		'<div class="cart-item" ', 	render_attr_ontology_id(ontologyId), '>'
+		//,	'<i class="fi-shopping-cart"></i>'
+		,	content
+		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
+		,'</div>'
+		].join('')
+	
+	return [entity['uiLabel'].toLowerCase(), html]
+
 }

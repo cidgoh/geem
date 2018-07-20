@@ -280,17 +280,15 @@ function OntologyForm(domId, resource, settings, callback) {
 	 			inherit_select_classes: true // inherits <select class=""> css
 	 		})
 
-	 		// But using this doesn't allow us to keep selection list open:
+	 		// Using this doesn't allow us to keep selection list open:
 	 		//.on('chosen:showing_dropdown',function(event) {
 	 		//	console.log('showing')
 	 		//})
 
-	 		// Other options:
-	 		// width: xyz pixels.
-	 		// max_shown_results: only show the first (n) matching options...
-	 		// <option selected> , <option disabled> 
-	 	
 	 	})
+
+	 	dom_element.on('click', '.select_lookup', function () {render_select_lookup_modal(this)})
+
  	}
 
 
@@ -739,67 +737,44 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 	render_choices = function(entity, label) {
-		/* FUTURE: OPTION FOR RENDERING AS SELECT OPTIONS, RADIOBUTTONS OR CHECKBOXES ...
-			ISSUE: An entity may be marked as a choice but take on the values of another categorical 
-			list via its "components" part. What depth cutoff feature should be allowed?
+		/* 
+		Categorical choices are made by way of radio, checkbox or selection lists.
+		Checkbox and selection lists can be made to provide multiple selections.
 
-			"components": {
-                "DOID:4": [
-                    {
-                        "cardinality": "owl:someValuesFrom"
-                    }
-                ]
-            },
-
+		CURRENTLY: All cases rendered as <select> inputs.
+		FUTURE: OPTION FOR RENDERING AS RADIO BUTTONS OR CHECKBOXES
 		*/
-		picklistId = entity.id
+
 		var multiple = entity.minCardinality > 1 || (entity.maxCardinality != 1) ? ' multiple' : ''
 
-		var cutDepth = entity.features.depth ? entity.features.depth : undefined //getFeature(entity, 'depth') // a numeric depth or null.
+		var cutDepth = entity.features.depth ? entity.features.depth : undefined // a numeric depth or null.
 		if (cutDepth !== undefined) {
 			cutDepth = cutDepth.value
 		}
 		else
 			cutDepth == 20 // Its greater than max depth test below.
 
-		var html = label
-		html +=	'	<div class="input-group">\n'
-		html +=	'		<select class="input-group-field '+ entity.id + ' regular" data-ontology-id="'+entity.domId+'"' + entity.disabled + multiple + '>\n'
-		if (multiple.length == 0)
-			html +=	'<option value=""></option>'  //Enables no option to be selected.
+		const ontology_id_attr = render_attr_ontology_id(entity.domId)
 
-		// Because one should deliberately make a selection ... esp. when 
-		// confronted with required selection list where 1st item is 
-		html +=	'	<option value="" disabled>Select ...</option>'
-		//console.log(entity)
-		html +=			render_choice(entity, 'choices', 0, cutDepth, 'select')
-		
-		// Check components list as well, as long as each item is an xmls:anyURI
-		// Note: this is not recursive, i.e. no has_component some has_component ...
-		// ISSUE: component can get 'feature' item 
-
-		// ISSUE: if a categorical choice item is marked as having a datatype other than anyURI,
-		// (e.g. "other material" might have a string value) Then wierd display of IAO_0000119 occurs?
-		/*
-		ARCHAIC???????????
-		if ('components' in entity)
-			for (var ontoID in entity.components) {
-				html +=	render_choice(entity.components[ontoID], 'choices', 0, cutDepth, 'select')
-			}
-		*/
-		html +=	'	</select>\n'
-
-		if ('features' in entity && 'lookup' in entity.features) 
-			html += '		<a class="input-group-label" onclick="lookupOntologyChoices(this,\''+entity.id+'\')">lookup choices</a>\n'
-	
-		html +=	'	</div>\n'
-
+		var html = [label
+			,'	<div class="input-group">\n'
+			,'		<select class="input-group-field '+ entity.id + ' regular" ' + ontology_id_attr + entity.disabled + multiple + '>\n'
+						// Enables no option to be selected:
+			,			(multiple.length == 0) ? '<option value=""></option>' : ''
+						// Because one should deliberately make a selection ... esp. when 
+						// confronted with required selection list
+			,'			<option value="" disabled>Select ...</option>'
+			,			render_choice(entity, 0, cutDepth, 'select')
+			,'		</select>\n'
+			,			entity.features.lookup ? '<a class="input-group-label select_lookup" ' + ontology_id_attr + '>lookup choices</a>\n' : ''
+			,'	</div>\n'
+		].join('')
 
 		return get_field_wrapper(entity, html, 'categorical')
 	}
 
 
-	render_choice = function(entity, table='choices', depth, cutDepth, inputType='select') { 
+	render_choice = function(entity, depth, cutDepth, inputType = 'select') { 
 		/* 
 		
 		ISSUE: currently the ontologyID for each item does not include path
@@ -817,16 +792,16 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		var html = ''
 
-		if (table in entity) {
+		if (entity.choices) {
 
 			// FUTURE: Adapt this so that only shown if it has been clipped.
 			// ALSO: A given term has subordinate items in its NATIVE ontology.
 			// Would be great to have a count of those.
 			if (depth == cutDepth)
-				return ' (' + Object.keys(entity[table]).length + ')'
+				return ' (' + Object.keys(entity.choices).length + ')'
 
-			for (var memberId in entity[table]) {
-				var part = entity[table][memberId]
+			for (var memberId in entity.choices) {
+				var part = entity.choices[memberId]
 				var kid_html = ''
 
 				part.disabled = '';
@@ -838,7 +813,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				}
 				
 				// See if this option has any child options
-				kid_html += render_choice(part, table, depth+1, cutDepth, inputType)
+				kid_html += render_choice(part, depth+1, cutDepth, inputType)
 				if (kid_html && depth == cutDepth - 1)
 					label += kid_html
 
@@ -853,7 +828,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 					default:
 
-						html += '<option value="' + part.id + '" class="depth' + depth + '" ' + part.disabled + get_synonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
+						html += '<option value="' + part.path.join('/') + '" class="depth' + depth + '" ' + part.disabled + get_synonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
 				}
 
 				html += kid_html
@@ -1066,8 +1041,8 @@ function OntologyForm(domId, resource, settings, callback) {
 			].join('')
 	}
 
-	render_attr_ontology_id = function(domId) {
-		return 'data-ontology-id="' + domId + '" '
+	render_attr_ontology_id = function(ontology_path) {
+		return 'data-ontology-id="' + ontology_path + '" '
 	}
 
 	render_attr = function(entity, attribute) {

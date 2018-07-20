@@ -428,16 +428,6 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 	if (entityId === false) {
 		return {} //specification // Nothing selected yet.
 	}
-	/*
-	if (entityId.indexOf('/') > 0) {
-		// Issue: this trips up on any entityId that has an http URI that hasn't been recognized.
-		path = entityId.split('/')
-
-		entityId = path.pop()
-		alert(path.join('/'))
-		alert(entityId)
-	}
-	*/
 
 	console.log("Get Form Component Specification: ", path.join('/')+'/'+entityId, ' depth:', depth)
 
@@ -472,17 +462,22 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 
 			// Catch is situation where M has component N, where N is a model that 
 			// inherits components from an is_a ancestor. Travel up the tree,
-			// incorporating ALL 'has component' Z items.
+			// incorporating ALL 'has component' Z items????
 			entity.components = get_entity_spec_form_parts(entity, depth)
 			break;
 
 		/* PRIMITIVE data types 
-		Inputs as sepecified in an OWL Ontology file can have all the standard xmls data types and restrictions.
-		Potentially create ZURB Foundation fields: text, date, datetime, datetime-local, email, month, number, password, search, tel, time, url, and week
+		Inputs as sepecified in an OWL Ontology file can have all the standard
+		xmls data types and restrictions.
+		Potentially create ZURB Foundation fields: text, date, datetime,
+		datetime-local, email, month, number, password, search, tel, time, url
+		and week
 		*/
 
 		/*
-		DATE DATATYPES: date dateTime duration gDay (just DD day) gMonth (the month MM) gMonthDay	(MM-DD) gYear (YYYY) gYearMonth (YYYY-MM) time
+		DATE DATATYPES: date dateTime duration gDay (just DD day) 
+		gMonth (the month MM) gMonthDay	(MM-DD) gYear (YYYY) 
+		gYearMonth (YYYY-MM) time
 		*/
 		case 'xmls:date': //YYYY-MM-DD  and possibly time zone "Z" for UTC or +/-HH:MM
 		case 'xmls:time': //HH:MM:SS and possibly .DDDD  and time zone as above.
@@ -640,40 +635,6 @@ get_entity_features = function(entity, parentId = null) {
 	else
 		entity.features = myFeatures
 }
-
-/*
-	getFeature = function(entity, feature, referrerId=undefined) {
-		// A feature exists in either entity.features or 
-		entity.components[referrerId] or entity['models'][referrerId]
-
-		if (referrerId) {
-
-			var referrer = top.resource.specifications[referrerId]
-			var parts = ['models', 'components']
-			if (referrer) {
-				for (ptr in parts) {
-					var myList = parts[ptr]
-					if (myList in referrer) {
-						var pieceArray = referrer[myList][entity.id]
-						if (pieceArray) {
-							for (var ptr in pieceArray) {
-								if ('feature' in pieceArray[ptr] && pieceArray[ptr]['feature'] == feature) {
-									return pieceArray[ptr]
-								}
-							}
-						}
-					}
-				}
-			}
-
-			return false
-		}
-		else if ('features' in entity && feature in entity.features) 
-			return entity.features[feature]
-
-	}
-*/
-
 
 
 set_entity_constraints = function(entity) {
@@ -888,10 +849,10 @@ get_entity_spec_form_choices = function(entity) {
 
 		// The datatype of entity is xmls:anyURI, but if it has components, they will still
 		// be as key-value of ontology_id-entity
-		for (var ontoID in entity.components) {
+		for (var entity_id in entity.components) {
 			// In path we silently skip name of component.
-			var part = $.extend(true, {path:entity.path}, top.resource.specifications[ontoID]) //deepcopy
-			 
+
+			var part = $.extend(true, {path: entity.path.concat([entity_id])}, top.resource.specifications[entity_id] ) //deepcopy
 			entity.choices.push( get_entity_spec_form_choice(part) )				
 		}
 	}
@@ -910,14 +871,16 @@ get_entity_spec_form_choice = function(entity, depth = 0) {
 
 	if ('choices' in entity) {
 		var newChoices = [] // Array to preserve order
-		for (var choiceId in entity.choices) {
-			var part_path = entity.path.concat([choiceId])
-			var part = $.extend(true, {'path' : part_path }, top.resource.specifications[choiceId]) //deepcopy
+		for (var choice_entity_id in entity.choices) {
+			//var part_path = [choice_entity_id] // entity.path.concat( {'path' : part_path} 
+			// Tricky? Looks like path is getting prefixed via top res spec entity path
+			var path = entity.path.concat([choice_entity_id])
+			var part = $.extend(true, {'path' : path} , top.resource.specifications[choice_entity_id]) //deepcopy
 			if (!part) // Should never happen.
-				console.log("Error: picklist choice not available: ", choiceId, " for list ", entity.id)
+				console.log("Error: picklist choice not available: ", choice_entity_id, " for list ", entity.id)
 			else {
 
-				// TESTING: Trim all definitions to first sentence
+				// For selection list items only: trim definition to first sentence
 				if (part.definition && part.definition.indexOf('.') > 0) {
 					part.definition = part.definition.split('.',1)[0] + '.'
 				}
@@ -946,7 +909,7 @@ function get_form_data(domId) {
 	   	input id attribute (separated by forward slashes)
 	*/
 	var obj = {}
-	/*
+	/* OLD CODE:
 	$.each($(domId).find(".field-wrapper.array"), function(i,item) {
 		var path = $(this).attr('data-ontology-id').split('/')
 		var focus = obj
@@ -974,9 +937,9 @@ function get_form_data(domId) {
 
 		if (id) {
 			var path = id.split('/')
-			// ISSUE: "Add Record" button should signal ARRAY of underlings.
-			// ANY TIME a path element has mincardinality=0 or maxcardinality > 1
-			// Then we need an array to incrementally capture the
+			// Possibility of more than one record (via "Add Record" button)
+			// should signal ARRAY of underlings. ANY TIME a path element has
+			// mincardinality=0 or maxcardinality > 1
 			for (var ptr in path) {
 				var item_id = path[ptr]
 
@@ -1105,7 +1068,6 @@ function open_modal(header, content) {
 }
 
 
-
 function set_modal_download(contentObj) {
 	/* Used on form.html to download stuff.
 	*/
@@ -1118,6 +1080,7 @@ function set_modal_download(contentObj) {
     	.on('click', function() { download_data_specification(contentObj) })
     	.show()
 }
+
 
 function set_data_specification(contentObj) {
 	// Used on portal.html page, not as popup.

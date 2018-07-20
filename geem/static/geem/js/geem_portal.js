@@ -28,7 +28,7 @@ formSettings = {}
 form = {}
 cart = []
 
-ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
+ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
 
 $( document ).ready(function() {
 
@@ -37,27 +37,25 @@ $( document ).ready(function() {
 
 	api = new GeemAPI()
 
-	/************************* LOAD SHARED TEMPLATES ************************/
+	/************************* Load Shared Templates ************************/
 	// Modal_lookup is form for looking up an ontology term's underlying items
  	$.ajax('templates/modal_lookup.html').done(function(response){
 		$('#template_area').append(response)
 	});
 
 	/*************** Specification resource selection area ******************/
-	top.resources = api.get_resources()
-	init_resource_select(top.resources)
+	api.get_resources().then(init_resource_select)
 
 	init_summary_tab()
 	init_browse_tab()
 	init_search_tab()
 
 	/*********************** Specification focus area ***********************/
-	// In form display area, provides hover view of item's ontology details
-	$("#tabsContent").on('mouseenter','i.fi-magnifying-glass', render_display_context)
 
 	init_form_tab()
 	init_specification_tab()
-	// initDiscussTab()
+	// init_discuss_tab()
+	// init_validation_tab()
 	init_cart_tab()
 
 	$(document).foundation()
@@ -236,12 +234,12 @@ function render_entity_detail(ontologyId) {
 	var entityIdParts = entity['id'].split(':')
 	var idPrefix = entityIdParts[0]
 	if (idPrefix in top.resource['@context']) {
-		entityId = top.resource['@context'][idPrefix] + entityIdParts[1]
+		entity_url = top.resource['@context'][idPrefix] + entityIdParts[1]
 	}
 	else
-		entityId = top.ontologyLookupService + entity['id']
+		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
 
-	var labelURL = '<a href="' + entityId + '" target="_blank">' + entity.uiLabel + '</a>' 
+	var labelURL = '<a href="' + entity_url + '" target="_blank">' + entity.uiLabel + '</a>' 
 
 	/* Provide a label mouseover display of underlying ontology details
 	like original ontology definition, term id, synonyms, etc.
@@ -398,6 +396,10 @@ function init_browse_tab() {
 }
 
 function init_form_tab() {
+
+	// In form display area, provides hover view of item's ontology details
+	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)
+
 	// chosen <select> event triggers cart icons to be drawn in <options>
 	render_entity_form_select_cart_icons()
 
@@ -406,7 +408,7 @@ function init_form_tab() {
 		// Prevents parent cart items from getting same click event
 		event.stopPropagation(); 
 		cart_check(get_attr_ontology_id(this))
-		return false
+		//return false
 	})
 
 	// This control toggles the visibility of ontology ID's in the given 

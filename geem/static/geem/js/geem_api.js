@@ -8,14 +8,19 @@ function GeemAPI() {
 		/* 
 			Retrieves available resources for logged-in or public user to browse.
 		*/
+		return new Promise(function(resolve, reject) {
 
-		// CANNED DUMMY DATA
-		return [
-			{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
-			{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
-			{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
-			{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
-		]	
+			// AJAX FUNCTION HERE
+			top.resources =	[
+				{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
+				{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
+				{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
+				{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
+			]
+
+			// CANNED DUMMY DATA
+			resolve(top.resources)
+		})
 	}
 
 	this.get_resource_URL = function(entityId) {
@@ -71,7 +76,7 @@ function GeemAPI() {
 					top.resource = resource
 					resolve(resource);
 				},
-				
+
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 					reject(Error('Given resource could not be found: \n\n\t' + resource_URL))
 					//alert('Given resource could not be found: \n\n\t' + resource_URL) 

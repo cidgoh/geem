@@ -4,8 +4,8 @@ focusEntityId = null
 formSettings = {}
 form = {}
 
-//ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
-ontologyLookupService = 'http://purl.obolibrary.org/obo/'
+//ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+ONTOLOGY_LOOKUP_SERVICE_URL = 'http://purl.obolibrary.org/obo/'
 
 $( document ).ready(function() {
 
@@ -46,15 +46,14 @@ function render_standalone_form() {
 
   // No form callback currently needed
   top.form = new OntologyForm("#mainForm", top.resource, top.formSettings) 
-
   top.form.render_entity(top.focusEntityId, form_standalone_callback)
-
   render_section_menu()
 
   // Clear any previous specification menu selection.
   $('#specificationType')[0].selectedIndex = 0
 
-  $('#buttonFormSubmit').on('click', function () {    
+  $('#buttonFormSubmit').on('click', function () {
+    // Submit button on form triggers download of user's sample data entry.
     set_modal_download(get_data_specification('form_submission.json'))
   })
 

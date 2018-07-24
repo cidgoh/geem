@@ -58,8 +58,9 @@
         <!-- data-options="scroll_to_content: false" data-options="deep_linking:true" -->
         <ul id="resourceTabs" class="tabs disabled" data-tabs>
           <li class="tabs-title"><a id="specificationSummaryTabLink" href="#panelLibrary">Summary</a></li>
-          <li class="tabs-title"><a href="#panelEntities">Browse Specifications</a></li>
-          <li class="tabs-title"><a href="#panelSearch">Search</a></li>
+          <li class="tabs-title"><a href="#panelEntities">Browse Specs</a></li>
+          <li class="tabs-title"><a href="#panelSearch">Search&nbsp;<i class="fi-magnifying-glass"></i></a></li>
+          <li class="tabs-title" id="tabPanelCartLink"><a href="#panelCart">Cart&nbsp;<i class="fi-shopping-cart" id="shoppingCartIcon"></i> </a></li>
         </ul>
 
 
@@ -95,6 +96,30 @@
 
           </div>
 
+
+          <!-- ********************** SHOPPING CART ******************* -->
+          <div class="tabs-panel" id="panelCart">
+            <div style="padding-right:16px;margin-top:0">
+              <a href="#" id="shoppingCartTrash" class="icon fi-trash" title="empty the cart"></a>
+              <button class="button" id="addToPackageButton" data-toggle="makePackageForm">Add to package</button>
+            </div>
+
+            <form id="shoppingCart" class="callout" style="clear:both;border-left:0; border-right:0"></form>
+            
+            <div style="font-size:.8rem;clear:both">
+              <i>Click on an item to see its form view. Click on an item's cart to filter or remove it.</i>
+              <br/>
+              Legend: <div style="display:inline-block;vertical-align:top">
+                <i class="fi-shopping-cart include"></i> item and its descendants are included<br/>
+                <i class="fi-shopping-cart exclude"></i> descendant is filtered out<br/>
+              </div>
+            </div>
+
+            <div class="infoBox">Your entity shopping cart is displayed above. 
+            You can add its items to a package.</div>
+
+          </div>
+
         </div>
 
         <br/>
@@ -120,7 +145,7 @@
           <li class="tabs-title"><a href="#panelContent">Form View</a></li>
           <li class="tabs-title"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tabs-title" id="tabPanelCartLink"><a href="#panelCart">Cart<i class="fi-shopping-cart" id="shoppingCartIcon"></i> &nbsp; </a></li>
+          <li class="tabs-title"><a href="#panelValidation">Validator</a></li>
         </ul>
 
         <div id="tabsContent" class="tabs-content" data-tabs-content="content-tabs"> 
@@ -222,28 +247,6 @@
 
         </div>
 
-        <!-- ********************** SHOPPING CART ******************* -->
-        <div class="tabs-panel" id="panelCart">
-          <div style="padding-right:16px;margin-top:0">
-            <a href="#" id="shoppingCartTrash" class="icon fi-trash" title="empty the cart"></a>
-            <button class="button" id="addToPackageButton" data-toggle="makePackageForm">Add to package</button>
-          </div>
-
-          <form id="shoppingCart" class="callout" style="clear:both;border-left:0; border-right:0"></form>
-          
-          <div style="font-size:.8rem;clear:both">
-            <i>Click on an item to see its form view. Click on an item's cart to filter or remove it.</i>
-            <br/>
-            Legend: <div style="display:inline-block;vertical-align:top">
-              <i class="fi-shopping-cart include"></i> item and its descendants are included<br/>
-              <i class="fi-shopping-cart exclude"></i> descendant is filtered out<br/>
-            </div>
-          </div>
-
-          <div class="infoBox">Your entity shopping cart is displayed above. 
-          You can add its items to a package.</div>
-
-        </div>
       </div>
     </div>
 

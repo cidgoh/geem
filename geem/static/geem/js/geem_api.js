@@ -137,17 +137,37 @@ function GeemAPI() {
 	*/
 
 
-	this.cart_change_item = function(entity_path, action) {
-
+	this.cart_change_item = function(entity_path, action, versionIRI = null) {
+		/* Sends in given specification entity path, an action to include
+		or exclude it from cart, and associated version, if any. If no version
+		then latest version is assumed. 
+		*/
 		// Add call to server if cart should be managed server side.
 
 		return new Promise(function(resolve, reject) {
+			/*
+			switch (action) {
+				case 'include': status = 'include'; break;
+				case 'exclude': status = 'exclude'; break;
+				case 'remove': status = 'remove'; break;
+				case 'error': status = 'error'; break;
+			}
+			*/
 
-			resolve({
-				entity_path: entity_path, 
-				action: action,
-				success: true
-			})
+			var ptr = entity_path.lastIndexOf('/')
+			// Get last path item id.
+			var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
+			var entity = top.resource.specifications[entity_id]
+			
+			result = {
+				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
+				id: entity_id,
+				path: entity_path, //Ontology id is last item in path
+				status: action,
+				version: versionIRI
+			}
+
+			resolve(result)
 
 			// reject()
 		})

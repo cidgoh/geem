@@ -13,10 +13,10 @@ function init_cart_tab() {
 	section, but exclude particular underlying terms from that section.
 	*/
 
-	top.cart = {}
+	top.cart = makeOrderedHash()
 
 	// If user clicks on Cart tab, update tab elements that depend on cart items.
-	$('#tabPanelCartLink').on('click', render_cart_controls)
+	//$('#tabPanelCartLink').on('click', render_cart_controls)
 
 	$("#shoppingCart")
 		.on("click", 'div.cart-item', function(event) {
@@ -33,9 +33,9 @@ function init_cart_tab() {
 		})
 
 	$("#shoppingCartTrash").on('click', function() {
-		$('form#mainForm div[data-ontology-id]')
+		$('#mainForm div[data-ontology-id]')
 			.removeClass('include exclude')
-		top.cart = []
+		top.cart.reset()
 		$('#shoppingCart').empty()
 		render_cart_controls()
 	})
@@ -46,30 +46,6 @@ function init_cart_tab() {
 		alert('Shopping cart package update coming soon!')
 	})
 
-}
-
-
-function navigate_to_form(ontologyId) {
-	/* Load and/or navigate to given ontology item
-	*/
-	if (window.location.href.indexOf(ontologyId) == -1)
-		// Triggers form load.
-		window.location.replace('#' + ontologyId);
-	else
-		// form already displayed, ensure tab is activated
-		$('#content-tabs').foundation('selectTab', '#panelContent'); 
-
-	return false
-}
-
-
-function get_attr_ontology_id(item) {
-	// Determine relevant ontology ID for given entity
-	// Case: ontology id is listed inside a select <option>
-	if ($(item).is('i.fi-shopping-cart.option')) 
-		return $(item).prev().attr('data-ontology-id')
-
-	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
 }
 
 
@@ -88,144 +64,279 @@ function render_cart_controls() {
 }
 
 
+function makeOrderedHash() {
+	/* Customized from https://stackoverflow.com/questions/2798893/ordered-hash-in-javascript
+	Here keys exist in a sorted array. This is important visually because
+	
+	*/
+    var keys = [];
+    var values = {};
+    return {
+    	/*
+        push: function(k,v) { // not used
+            if (!values[k]) keys.push(k);
+            values[k] = v;
+        },
+        insert: function(pos,k,v) { // not used
+            if (!values[k]) {
+                values[k] = v;
+                keys.splice(pos,0,k);
+            }
+        },
+        */
+        order: function(k,v) {
+        	// Future: sort function could be a bit more sophisticated - 
+        	// factoring in parent, but then alpha sort among siblings.
+        	if (!values[k]) {
+        		keys.push(k);
+        		keys.sort(function(a,b) {return a.localeCompare(b)});
+        		console.log('KEYS' + '\n' + keys.join('\n'))
+        		values[k] = v
+        	}
+        	else
+            	if (!(values[k] == v)) values[k] = v;
+        },
+        remove: function(k) {
+        	const ptr = keys.indexOf(k)
+        	if (ptr > -1) {
+        		keys.splice(ptr,1)
+        		delete(values[k]) // works?
+        	}
+        },
+        get: function(k) {return values[k]},
+        get_index: function(k) {return keys.indexOf(k)},
+        get_parent: function (entity_path) {
+			// Return first parent in cart, if any
+			var path_parent = entity_path.split('/')
+			path_parent.pop()
+			while (path_parent.length) {
+				var path_string = path_parent.join('/')
+				var parent = this.get(path_string)
+				if (parent)
+					return parent
+				path_parent.pop()
+			}
+			return false
+		},
+        length: function(){return keys.length},
+        keys: function(){return keys},
+        values: function(){return values},
+        reset: function() {keys=[];values={}}
+    };
+};
+
+
+function navigate_to_form(ontologyId) {
+	/* Load and/or navigate to given ontology item
+	*/
+	if (window.location.href.indexOf(ontologyId) == -1)
+		// Triggers form load.
+		window.location.replace('#' + ontologyId);
+	else
+		// form already displayed, ensure tab is activated
+		$('#content-tabs').foundation('selectTab', '#panelContent'); 
+
+	return false
+}
+
+
+function get_attr_ontology_id(item) {
+	/* Determine relevant ontology ID for given entity from UI element.
+	Relies upon the 'data-ontology-id' attribute.
+	*/
+	// case: ontology id is listed inside a select <option>
+	if ($(item).is('i.fi-shopping-cart.option')) 
+		return $(item).prev().attr('data-ontology-id')
+	// case: ontology item is given by first .cart-item parent
+	return $(item).parents('.cart-item,.field-wrapper').first()[0].dataset.ontologyId
+}
+
+
 function cart_check(entity_path) {
 	/* A user can select as many entities as they like, but may find that 
 	some components of some entities are undesirable.  This script enables
 	the shopping list to be maintained with the ability to select entities,
 	and also select underlying entities or fields to omit. 
 	*/
-	
-	// Code assumes top.cart state is current, but if it is out of sync then
-	// api call should at least get it back into sync. 
-	const entity_path_status = top.cart[entity_path]
+	const cart_item = top.cart.get(entity_path)
+	const cart_parent = top.cart.get_parent(entity_path)
 	var action = null
-	var path_parent = entity_path.split('/')
-	path_parent.pop()
 
-	switch (entity_path_status) {
-		case undefined: 	// If item doesn't exist in cart, add it.
-			action = 'add'; 	
-			break
-		case 'include': 	
-			// Normally include -> exclude
-			// If shopping list has no parent then -> remove
-			found = true
-			/*while (path_parent.length) {
-				if (top.cart[path_parent]) {
-					found = true; break
-				}
-				path_parent.pop()
-			}*/
-			action = found ? 'exclude' : 'remove'
-			break
-		case 'exclude': 	// exclude -> remove
-			action = 'remove'; 	
-			break
-		default: break
+	if (!cart_item) {// or undefined
+		// If item doesn't exist in cart, include it. UNLESS its parent is
+		// already in cart as 'included', in which case set it to be excluded.
+		if (cart_parent) {
+			if (cart_parent.status == 'include') action = 'exclude'
+			else action = 'include'
+		}
+		else action = 'include'
 	}
+	else
+		switch (cart_item.status) {
+			// Normally include -> exclude, but if item is top level 
+			// already then -> remove
+			case 'include': 	
+				action = cart_parent ? 'exclude' : 'remove'; break;
+			// exclude -> remove
+			case 'exclude': action = 'remove'; break;
+		}
 
 	if (action)
-		api.cart_change_item(entity_path, action)
-			.then(render_cart_change)
+		api.cart_change_item(entity_path, action, top.resource.metadata.versionIRI)
+			.then(cart_change)
 
 }
 
 
-function render_cart_change(result) {
-	/*
-	When an entity is selected, all underlying entities are selected visually
-	via CSS.  In that case, when an underlying entity is selected that is
-	interpreted as a request to exclude that item AND its underlings.
+function cart_change(result) {
+	if (result) {
+		switch (result.status) {
+			case 'include':	top.cart.order(result.path, result); break;
+			case 'exclude':	top.cart.order(result.path, result); break;
+			case 'remove': top.cart.remove(result.path); break;
+		}
+		render_cart(result)
+	}
+}
 
-	DOM Attribures:
-		.cart-item 			: a cart item
-		.data-ontology-id 	: id, including path of given cart item
+
+function render_cart(result) {
+	/* Adjusts visual display of cart, taking into account change in top.cart
+	structure. Positions new cart item such that it is tucked between any 
+	existing superior or subordinate paths. Removal of a cart item causes
+	subordinate item indentation to be adjusted appropriately.
+
+	Note that an item may be marked as included simply to have other custom
+	annotations set by user.
+
+	DOM CSS class for a cart item mirrors its status states:
 		.include			: item will be marked active in user package.
 		.exclude			: item will be marked inactive in user package.
-
+	Other CSS or data attribute
+		.data-ontology-id 	: attribute: cart entity id, includes path
+		.cart-item 			: a cart item
 	*/
+	
+	// Cart icon on tab flickers to indicate shopping cart action occured
+	dom_item_animate('#shoppingCartIcon', 'attention')
 
-	if (result.success) {
+	// Cursor at first shopping cart item, if any
+	var item = null // top.cart item
+	var cart_item = null
+	var cart_path = null
+	var keyPtr = 0
+	var cartPtr = 0
+	const keys = top.cart.keys()
 
-		// Cart icon on tab flickers to indicate shopping cart action occured
-		dom_item_animate('#shoppingCartIcon', 'attention')
+	while (keyPtr == cartPtr) {
+		// Ensure that top.cart and #shoppingCart are synchronized line-for-line.
 
-		const entity_path = result.entity_path
-		const dom_entity_path_selector = '[' + render_attr_ontology_id(entity_path) +']'
-		const dom_form_item = $('#mainForm .cart-item' + dom_entity_path_selector) // li, div
-		const dom_cart_item = $('#shoppingCart .cart-item' + dom_entity_path_selector)
+		item = top.cart.get(keys[keyPtr])
+		cart_item = $('#shoppingCart > .cart-item:eq('+cartPtr+')')
+		console.log('testing ' + item + ':' + cart_item)
+		//if (item == 'undefined' && cart_item == 'undefined') {
+		//	break
+		//}
 
-		switch (result.action) {
-			case 'add':
-				top.cart[result.entity_path] = 'include' 
-				new_item = render_cart_add_item(entity_path)
-				new_item.addClass('include')
-				dom_form_item.removeClass('exclude').addClass('include')
-				break;
+		if (item && cart_item && cart_item.length > 0) {
 
-			case 'exclude':
-				top.cart[result.entity_path] = 'exclude'
-				dom_form_item.removeClass('include').addClass('exclude')
-				dom_cart_item.removeClass('include').addClass('exclude')
-				break;
+			var cart_path = cart_item.attr('data-ontology-id')
 
-			case 'remove':
-				var stuff = $.extend({}, top.cart)
-				$.each(stuff,function(entity_path2) {
-					// The item and all its subordinate items should be removed.
-					if (entity_path2.indexOf(result.entity_path) === 0) {
-						delete(top.cart[entity_path2])
-						$('#shoppingCart .cart-item[' + render_attr_ontology_id(entity_path2) + ']').remove()
-						$('#mainForm .cart-item[' + render_attr_ontology_id(entity_path2) + ']').removeClass('include exclude')
+ 			switch (item.path.localeCompare(cart_path)) {
+
+ 				case -1:
+ 					cart_item.before(render_cart_item(item))
+ 					render_cart_css(cart_item.prev(), item.path, 'exclude', 'include')
+ 					keyPtr += 1
+ 					cartPtr = keyPtr
+					break
+
+ 				case 0:
+					switch (item.status) {
+						case 'include':
+							render_cart_css(cart_item, cart_path, 'exclude', 'include')
+							break;
+					
+						case 'exclude':
+							render_cart_css(cart_item, cart_path, 'include', 'exclude')
+							break;	
 					}
-				})
-				break;
+ 					// Advance both
+ 					keyPtr += 1
+ 					cartPtr = keyPtr
+ 					break
+
+ 				case 1:
+ 					remove_cart_item(cart_item)
+					break
+			}
+
+		}
+		else {
+			if (item) {
+				// append item to cart since no cart spot for it
+				cart_item = $(render_cart_item(item))
+				$('#shoppingCart').append(cart_item)
+				render_cart_css(cart_item, item.path, 'exclude', 'include')
+			 	keyPtr += 1
+				cartPtr += 1
+				continue
+			}
+
+			if (cart_item && cart_item.length > 0) { // cart item only
+				remove_cart_item(cart_item)
+				continue
+			}
+
+			break // nothing more to process so exit completely
 
 		}
 	}
+
+	render_cart_controls()
 }
 
 
-function render_cart_add_item(entity_path) {
-	/* Adds new entity_path into cart such that it is tucked between any 
-	existing superior or subordinate paths.
+function render_cart_css(cart_item, cart_path, style1, style2) {
+	// Content area form cart item
+	var form_item = $('#mainForm .cart-item[data-ontology-id="' + cart_path + '"]')
+	form_item.removeClass(style1).addClass(style2);
+	cart_item.removeClass(style1).addClass(style2);
+}
+
+function remove_cart_item (cart_item) {
+	var cart_path = cart_item.attr('data-ontology-id')
+	var form_item = $('#mainForm .cart-item[data-ontology-id="' + cart_path + '"]')
+	form_item.removeClass('include exclude')
+	var next_cart_item = cart_item.next()
+	cart_item.remove()
+	// animation breaks cartPtr test
+	//cart_item.slideUp().promise().done(function() {$(this).remove()})
+	//return next_cart_item
+}
+
+function character_count(string, char, ptr = 0, count = 0) {
+	while (ptr = string.indexOf(char, ptr) + 1) {count ++}
+	return count
+}
+
+function render_cart_item(entity) {
+	/* 
 	*/
-
-	// Place this new item under parent in cart if it exists
-	var parent_path = entity_path.substr(0, entity_path.lastIndexOf('/'))
-	while (parent_path.length) {
-		var item = $('#shoppingCart div.cart-item[data-ontology-id="' + parent_path + '"]')
-		if (item.length) {
-			$(item).append(render_cart_item(entity_path))
-			break;
-		}
-		parent_path = parent_path.substr(0, parent_path.lastIndexOf('/'))
-	}
-
-	// Here item parent wasn't found, so render item at top level of cart.
-	if (parent_path == '') {
-		$("#shoppingCart").prepend(render_cart_item(entity_path))
-	}
-
-	var dom_cart_item = $('#shoppingCart div.cart-item[' + render_attr_ontology_id(entity_path) + ']')
-
-	// See if any existing item paths fit UNDER new item
-	$('#shoppingCart div.cart-item').each(function() {
-		var id = $(this).attr('data-ontology-id')
-		if (id != entity_path) {
-			if (id.substr(0, entity_path.length) == entity_path) 
-				$(dom_cart_item).append(this)
-		}
-	})
-
-	return dom_cart_item
-
+	var version = entity.version.substr(entity.version.indexOf('releases/')+9)
+	var depth = character_count(entity.path, '/')
+	return [
+		'<div class="cart-item depth', depth, '" ', render_attr_ontology_id(entity.path), '>'
+		,	'<i class="fi-shopping-cart"></i>'
+		,	'<a href="#', entity.path, '">', entity.label, '</a><br/> <span class="small">( ... /' + version + ' )</span>'
+		,'</div>'
+	].join('')
 }
 
 
 function render_entity_form_cart_icons(formObj) {
 	/* Add shopping cart icon to each content form field with appropriate
-	include/exclude status
+	include/exclude status.  
 
 	Is there an advantage to loading dom with icons first, then setting their
 	status, or should status be done within loop?
@@ -236,16 +347,10 @@ function render_entity_form_cart_icons(formObj) {
 		.addClass('cart-item') // Just for styling
 		.prepend('<i class="fi-shopping-cart"></i>')
 
-	$.each(top.cart, function(entity_path) {
-		var status = null
-		switch (top.cart[entity_path]) {
-			case 'include': status = 'include'; break
-			case 'exclude': status = 'exclude'; break
-		}
-		if (status) {
-			const attr_id = render_attr_ontology_id(entity_path)
-			$('#tabsContent div.field-wrapper[' + attr_id + ']').addClass(status)
-		}
+	top.cart.keys().forEach(function(item_path) {
+		const item = top.cart.get(item_path)
+		const attr_id = render_attr_ontology_id(item_path)
+		$('#tabsContent div.field-wrapper[' + attr_id + ']').addClass(item.status)
 	})
 
 }
@@ -274,27 +379,21 @@ function render_entity_form_select_cart_icons() {
 				// into the data-ontology-id for this <li>.
 				// Chosen.js options have extra item at beginning?
 				// Get corresponding option value:
-				var option_id = select_options.eq(index+1).attr('value') 
+				var entity_path = select_options.eq(index+1).attr('value') 
 				// Originally hierarchy within select was not being represented
 				// But having value contain full path is wiser?
 				// var entity_path = select_path + '/' + option_id
-				var entity_path = option_id
 
 				$(this).attr('data-ontology-id', entity_path)
 				$(this).addClass('cart-item')
 
 				var cart_icon = $('<i class="fi-shopping-cart option"></i>')
 				$(this).after(cart_icon) //awkward, cart requires margin-top:-30px in stylesheet.
-
-				switch (top.cart[entity_path]) {
-					case 'include': 
-						cart_icon.addClass('include'); 
-						break
-					case 'exclude':	
-						cart_icon.addClass('exclude');
-						break
-					default:
-				}
+				
+				// Reflect current shopping cart status of item
+				cart_item = top.cart.get(entity_path)
+				if (cart_item)
+					cart_icon.addClass(cart_item.status); 
 
 				// Piggybacking ability to display ontology details for an <option>
 				if (top.form.settings.ontologyDetails)
@@ -306,22 +405,6 @@ function render_entity_form_select_cart_icons() {
 
 }
 
-
-function render_cart_item(entity_path) {
-	/* 
-	*/
-	var ptr = entity_path.lastIndexOf('/')
-	// Get last path item id.
-	var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
-	var entity = top.resource.specifications[entity_id]
-	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED]'}
-	return [
-		'<div class="cart-item" ', render_attr_ontology_id(entity_path), '>'
-		,	'<i class="fi-shopping-cart"></i>'
-		,	'<a href="#', entity_path, '">', entity['uiLabel'], '</a>'
-		,'</div>'
-	].join('')
-}
 
 function render_cart_package_selection_modal() {
 	/* Provides a menu of packages in 'draft' mode that user manages that

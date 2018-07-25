@@ -25,8 +25,23 @@ form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.
 #mainForm li.cart-item.exclude {background-color:silver;}
 #mainForm li.cart-item.include {background-color:green;color:white;}
 
-.include i.fi-shopping-cart, i.fi-shopping-cart.include ,.include+i.fi-shopping-cart {color:green} /* ,.include+i.fi-shopping-cart */
-.exclude i.fi-shopping-cart, i.fi-shopping-cart.exclude,.exclude+i.fi-shopping-cart {color:red} /* ,.exclude+i.fi-shopping-cart */
+#shoppingCart div.cart-item.depth1 {margin-left:10px;}
+#shoppingCart div.cart-item.depth2 {margin-left:20px;}
+#shoppingCart div.cart-item.depth3 {margin-left:30px;}
+#shoppingCart div.cart-item.depth4 {margin-left:40px;}
+#shoppingCart div.cart-item.depth5 {margin-left:50px;}
+#shoppingCart div.cart-item.depth6 {margin-left:60px;}
+#shoppingCart div.cart-item.depth7 {margin-left:70px;}
+#shoppingCart div.cart-item.depth8 {margin-left:80px;}
+#shoppingCart div.cart-item.depth9 {margin-left:90px;}
+
+/*
+Display of inheritance a bit confusing*/
+.include>i.fi-shopping-cart, i.fi-shopping-cart.include, .include+i.fi-shopping-cart {color:green} 
+.exclude>i.fi-shopping-cart, i.fi-shopping-cart.exclude, .exclude+i.fi-shopping-cart {color:red} 
+
+
+
 
 
 a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#2199e8;cursor:pointer;}

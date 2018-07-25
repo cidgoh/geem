@@ -104,19 +104,24 @@
               <button class="button" id="addToPackageButton" data-toggle="makePackageForm">Add to package</button>
             </div>
 
-            <form id="shoppingCart" class="callout" style="clear:both;border-left:0; border-right:0"></form>
+            <form id="shoppingCart" class="callout" style="clear:both;border-left:0; border-right:0; border-bottom:0"></form>
             
-            <div style="font-size:.8rem;clear:both">
-              <i>Click on an item to see its form view. Click on an item's cart to filter or remove it.</i>
-              <br/>
-              Legend: <div style="display:inline-block;vertical-align:top">
-                <i class="fi-shopping-cart include"></i> item and its descendants are included<br/>
-                <i class="fi-shopping-cart exclude"></i> descendant is filtered out<br/>
-              </div>
-            </div>
 
-            <div class="infoBox">Your entity shopping cart is displayed above. 
-            You can add its items to a package.</div>
+            <div id="cartInfoBox" class="infoBox">
+              <p>Your entity shopping cart is displayed above. 
+              You can add its items to a package.</p>
+
+              <div style="font-size:.8rem;clear:both">
+                <i>Click on an item to see its form view. Click on an item's cart to filter or remove it.</i>
+                <br/>
+                <br/>
+                Legend: <div style="display:inline-block;vertical-align:top">
+                  <i class="fi-shopping-cart include"></i> item and its descendants are included<br/>
+                  <i class="fi-shopping-cart exclude"></i> descendant is filtered out<br/>
+                </div>
+              </div>
+
+            </div>
 
           </div>
 

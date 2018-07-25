@@ -52,14 +52,16 @@ function init_cart_tab() {
 function render_cart_controls() {
 	/* Enables/disables shopping cart controls based on empty cart state
 	*/
-	if ($('form#shoppingCart > div.cart-item').length >0) {
+	if ($('form#shoppingCart > div.cart-item').length > 0) {
 		// note 'disabled' property can't be removed from button.
 		$("#addToPackageButton").prop('disabled', false)
 		$("#shoppingCartTrash").removeClass('disabled')
+		$('#cartInfoBox').hide()
 	}
 	else { 
 		$("#addToPackageButton").prop('disabled', 'disabled')
 		$("#shoppingCartTrash").addClass('disabled')
+		$('#cartInfoBox').show()
 	}
 }
 
@@ -90,7 +92,6 @@ function makeOrderedHash() {
         	if (!values[k]) {
         		keys.push(k);
         		keys.sort(function(a,b) {return a.localeCompare(b)});
-        		console.log('KEYS' + '\n' + keys.join('\n'))
         		values[k] = v
         	}
         	else
@@ -112,8 +113,9 @@ function makeOrderedHash() {
 			while (path_parent.length) {
 				var path_string = path_parent.join('/')
 				var parent = this.get(path_string)
-				if (parent)
+				if (parent) {
 					return parent
+				}
 				path_parent.pop()
 			}
 			return false
@@ -162,23 +164,18 @@ function cart_check(entity_path) {
 	const cart_parent = top.cart.get_parent(entity_path)
 	var action = null
 
-	if (!cart_item) {// or undefined
-		// If item doesn't exist in cart, include it. UNLESS its parent is
-		// already in cart as 'included', in which case set it to be excluded.
-		if (cart_parent) {
-			if (cart_parent.status == 'include') action = 'exclude'
-			else action = 'include'
-		}
-		else action = 'include'
+	if (!cart_item) { // If item doesn't exist in cart, include it. 
+		action = 'include'
 	}
 	else
-		switch (cart_item.status) {
-			// Normally include -> exclude, but if item is top level 
-			// already then -> remove
-			case 'include': 	
-				action = cart_parent ? 'exclude' : 'remove'; break;
-			// exclude -> remove
-			case 'exclude': action = 'remove'; break;
+		switch (cart_item.status) {  
+			case 'include': //  include -> exclude
+				// But if item is top level already then include -> remove
+				action = cart_parent ? 'exclude' : 'remove'; 
+				break;
+			case 'exclude': // exclude -> remove
+				action = 'remove'; 
+				break; 
 		}
 
 	if (action)
@@ -233,10 +230,6 @@ function render_cart(result) {
 
 		item = top.cart.get(keys[keyPtr])
 		cart_item = $('#shoppingCart > .cart-item:eq('+cartPtr+')')
-		console.log('testing ' + item + ':' + cart_item)
-		//if (item == 'undefined' && cart_item == 'undefined') {
-		//	break
-		//}
 
 		if (item && cart_item && cart_item.length > 0) {
 

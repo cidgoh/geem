@@ -16,7 +16,8 @@ ul#content-tabs > li.tabs-title i {font-size:1.5rem;position:absolute;margin-top
 #tabsSpecification {height:500px; overflow:scroll; border:0;}
 #resourceForm input, #resourceForm select {margin-bottom:.5rem;}
 
-form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.5rem; margin-left:5px;cursor:pointer;margin-top:-.4rem;}
+form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.5rem;margin-left:5px;cursor:pointer;margin-top:-.4rem;}
+
 #shoppingCart div.cart-item {clear:both; border-top:1px dotted silver;padding-top:.5rem;}
 #shoppingCart div.cart-item:first-child {border-top:0;}
 #shoppingCart div.cart-item > div.cart-item {margin-left:10px;}

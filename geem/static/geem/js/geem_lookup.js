@@ -27,8 +27,11 @@ render_select_lookup_modal = function(helper, selectId) {
 	// for multi-select
 	var parent_id = Array.isArray(value) ? value[0] : value
 	var parent =  top.resource.specifications[parent_id]
-	var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
-
+	if (parent)
+		var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
+	else
+		var parent_label = 'Selections'
+	
 	var lookupURL = modal_lookup_get_api_url(parent_id)
 
 	$.ajax({

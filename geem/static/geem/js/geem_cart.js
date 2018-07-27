@@ -321,7 +321,7 @@ function render_cart_item(entity) {
 	return [
 		'<div class="cart-item depth', depth, '" ', render_attr_ontology_id(entity.path), '>'
 		,	'<i class="fi-shopping-cart"></i>'
-		,	'<a href="#', entity.path, '">', entity.label, '</a><br/> <span class="small">( ... /' + version + ' )</span>'
+		,	'<a href="#', entity.path, '">', entity.label, '</a><div class="small">/' + version + '</div>'
 		,'</div>'
 	].join('')
 }

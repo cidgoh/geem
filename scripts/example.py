@@ -44,8 +44,10 @@ class MyParser(optparse.OptionParser):
 
 class Ontology(object):
 	"""
-	Read in an ontology and its include files. Run Sparql 1.1 queries which retrieve:
-	- ontology defined fields, including preferred label and definition 
+	Read in an ontology and its include files. Run Sparql 1.1 queries which
+	retrieve:
+	- for example tree query: ontology defined fields, including preferred
+	  label and definition 
 
 	"""
 	CODE_VERSION = '0.0.2'
@@ -56,8 +58,7 @@ class Ontology(object):
 
 		self.queries = {
 			##################################################################
-			# Generic TREE "is a" hierarchy from given root.
-			# FUTURE: ADD SORTING OPTIONS, CUSTOM ORDER.
+			# Generic TREE returns "is a" term hierarchy from given root.
 			#
 			'tree': rdflib.plugins.sparql.prepareQuery("""
 				SELECT DISTINCT ?id ?parent ?label ?ui_label ?definition
@@ -76,6 +77,7 @@ class Ontology(object):
 			# including a unique name like 'tree'
 
 		}
+
 
 	def __main__(self): #, main_ontology_file
 
@@ -96,7 +98,7 @@ class Ontology(object):
 		try:
 			# ISSUE: ontology file taken in as ascii; rdflib doesn't accept
 			# utf-8 characters so can experience conversion issues in string
-			# conversion stuff like .replace() below
+			# conversion
 			self.onto_helper.graph.parse(main_ontology_file, format='xml')
 
 		except URLError as e:
@@ -106,19 +108,18 @@ class Ontology(object):
 		# Add each ontology include file (must be in OWL RDF format)
 		self.onto_helper.do_ontology_includes(main_ontology_file)
 
-		# Get stuff under OBI data_representational_model
+		# Get stuff under main owl:Thing entity (or supply some other ontology term id)
 		print 'Doing term hierarchy query'
 		specBinding = {'root': rdflib.URIRef(self.onto_helper.get_expanded_id('owl:Thing'))} 
 		struct = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
 
+		# Deliver above struct into an output file
 		self.onto_helper.do_output_json(struct, output_file_basename)
 
-	
-	############################## UTILITIES ###########################
 
 	def get_command_line(self):
 		"""
-		*************************** Parse Command Line *****************************
+		*************************** Parse Command Line ***********************
 		"""
 		parser = MyParser(
 			description = 'GenEpiO JSON field specification generator.  See https://github.com/GenEpiO/genepio',

@@ -615,6 +615,7 @@ class Ontology(object):
 		uriID = rdflib.URIRef(self.get_expanded_id(id))
 		dbreferences = self.onto_helper.graph.query(self.queries['dbreferences'], initBindings = {'datum': uriID })
 		if len(dbreferences):
+			# Establish hasDbXref list for given entity
 			dbxrefList = self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, 'hasDbXref', [])		
 			for row in dbreferences:
 				dbxrefList.append(row['dbXref'])
@@ -694,6 +695,8 @@ class Ontology(object):
 			This is tricky because Cardinality and limit must be transferred to parent's children list.
 			A field's parent might not be in fields yet, so have to initialise it.
 
+			# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'SIO:000661', u'SIO:000662', u'SIO:000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent_id': u'GENEPIO:0001623'}
+
 			INPUTS
 				?parent ?id ?cardinality ?limit
 
@@ -731,7 +734,6 @@ class Ontology(object):
 					# BNodes have no name but have expression.
 					if 'expression' in myDict: 
 
-						# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'SIO:000661', u'SIO:000662', u'SIO:000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent_id': u'GENEPIO:0001623'}
 						print "HAS EXPRESSION: ", myDict['expression']
 
 						expression = myDict['expression']

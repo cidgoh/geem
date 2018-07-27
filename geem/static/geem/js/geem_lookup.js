@@ -1,5 +1,5 @@
 
-lookupOntologyChoices = function(helper, selectId) {
+render_select_lookup_modal = function(helper, selectId) {
 	/*
 	We can set some picklists to have a dynamic lookup feature, indicated by
 	a "lookup choices" button next to the picklist.  When this button is 
@@ -7,7 +7,8 @@ lookupOntologyChoices = function(helper, selectId) {
 	selected is performed.  A user can then select one of the given items, if
 	any, and it will be inserted into existing selection list below parent.
 
-	If select is a multi-select, just do last term.
+	If select is a multi-select, use last term in selected items as seed for
+	OLS lookup.
 
 	ISSUE: Search for children of a term, if parent is top-level root borrowed
 	from another ontology, won't return the GenEpiO coded-children. EG. NCIT Province.
@@ -19,48 +20,19 @@ lookupOntologyChoices = function(helper, selectId) {
 	// Houses both <select> and <div.chosen-container>
 	var select = $(helper).parent('div[class="input-group"]').find("select");
 	var value = select.val();
-
-	if (value.length == 0) {
-		// Grabbing displayed label rather than top specification uiLabel since that doesn't reflect all customization.
-
-		var label = select.parents('div.field-wrapper').first().find(' > label')
-		var title = label.text()
-		// Grab top-level selection(s) from input itself
-		var selections = ''
-		select.find('option.depth0').each(function(){
-			// Asterisk signals its something that can be explored
-			selections += '<option value="'+ $(this).attr('value') +'">' + $(this).text() + '* </option>\n' 
-
-		}) 
-
-		openModalLookup(title, selections)
-
-		// openModalLookup creates options to add dblclick to
-		$("#modalLookupSelections option").off('dblclick')
-			.on('dblclick', function(){ //
-			// reusing given helper reference
-			select.find('option[value="' + $(this).attr('value') + '"]').prop('selected', true)
-			$(select).trigger("chosen:updated");
-			lookupOntologyChoices(helper, $(this).attr('value'))
-		})
-
-		$("#modalChoiceSearchButton").off('click')
-		.on('click', function(){
-			var parent_id = select.attr('id').split('/').pop()
-			getOLSSearch(helper, parent_id, $('#modalChoiceSearchText').val() )
-		})
-
-		return
-	}
-
+	if (!value || value.length == 0)
+		return render_select_root_search(select, helper)
 
 	// select.val() is either a string, for a single-select, or an array
 	// for multi-select
 	var parent_id = Array.isArray(value) ? value[0] : value
 	var parent =  top.resource.specifications[parent_id]
-	var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
-
-	var lookupURL = getLookupURL(parent_id)
+	if (parent)
+		var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
+	else
+		var parent_label = 'Selections'
+	
+	var lookupURL = modal_lookup_get_api_url(parent_id)
 
 	$.ajax({
 		type: 'GET',
@@ -69,27 +41,60 @@ lookupOntologyChoices = function(helper, selectId) {
 		success: function( response ) {
 			// We have an OLS data packet in data._embedded
 			if (response._embedded)
-				setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
+				render_modal_lookup_form(helper, response._embedded.terms, parent_id, parent_label)
 			else
-				openModal(parent_label, "No subordinate choices found!")
+				open_modal(parent_label, "No subordinate choices found!")
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 
-	return false
+}
 
+function render_select_root_search(select, helper) {
+	/* Grabbing displayed label rather than top specification uiLabel since
+	that doesn't reflect all customization. 
+
+	FUTURE: A purer form of this would examine form specification directly.
+	*/
+	var label = select.parents('div.field-wrapper').first().find(' > label')
+	var title = label.text()
+	// Grab top-level selection(s) from input itself
+	var selection_html = ''
+	select.find('option.depth0').each(function(){
+		// Asterisk signals its something that can be explored
+		selection_html += '<option value="'+ $(this).attr('value') +'">' + $(this).text() + '* </option>\n' 
+	}) 
+
+	open_modal_lookup(title, selection_html)
+
+	// open_modal_lookup creates options to add dblclick to
+	$("#modalLookupSelections option").off('dblclick')
+		.on('dblclick', function(){ //
+		// reusing given helper reference
+		select.find('option[value="' + $(this).attr('value') + '"]').prop('selected', true)
+		$(select).trigger("chosen:updated");
+		render_select_lookup_modal(helper, $(this).attr('value'))
+	})
+
+	$("#modalChoiceSearchButton").off('click')
+	.on('click', function(){
+		var parent_id = select.attr('id').split('/').pop()
+		getOLSSearch(helper, parent_id, $('#modalChoiceSearchText').val() )
+	})
+
+	return
 }
 
 getOLSChoices = function(helper, parent_id, parent_label) {
-	/* Like above lookupOntologyChoices(), but parent_id may not be in top specification
+	/* Like above render_select_lookup_modal(), but parent_id may not be in top specification
 	since user is browsing down via external OLS ontology.
 	*/
 
 	var parent_label = 'Selections for "' + parent_label + '"[' + parent_id + ']'
-	var lookupURL = getLookupURL(parent_id)
+	var lookupURL = modal_lookup_get_api_url(parent_id)
 
 	$.ajax({
 		type: 'GET',
@@ -98,13 +103,13 @@ getOLSChoices = function(helper, parent_id, parent_label) {
 		success: function( response ) {
 			// We have an OLS data packet in data._embedded
 			if (response._embedded && response._embedded.terms)
-				setModalLookup(helper, response._embedded.terms, parent_id, parent_label)
+				render_modal_lookup_form(helper, response._embedded.terms, parent_id, parent_label)
 			else
-				openModal(parent_label, "No subordinate choices found!")
+				open_modal(parent_label, "No subordinate choices found!")
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 
@@ -156,14 +161,14 @@ function getOLSSearch(helper, parent_id, text) {
 
 			// We have an OLS data packet in data._embedded
 			if (response.response && response.response.numFound > 0) {
-				setModalLookup(helper, response.response.docs, parent_id, parent_label)
+				render_modal_lookup_form(helper, response.response.docs, parent_id, parent_label)
 			}
 			else
-				openModal(parent_label, 'No results for "' + text + '"')
+				open_modal(parent_label, 'No results for "' + text + '"')
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			var message = 'Dynamic Lookup is not currently available.  Either your internet connection is broken or the https://www.ebi.ac.uk/ols/ service is unavailable.'
-			openModal(parent_label, message)
+			open_modal(parent_label, message)
 		}
 	})
 
@@ -173,7 +178,7 @@ function getOLSSearch(helper, parent_id, text) {
 }
 
 
-function setModalLookup(helper, content, parent_id, parent_label) {
+function render_modal_lookup_form(helper, content, parent_id, parent_label) {
 
 	var select = $(helper).parent('div[class="input-group"]').find("select");
 
@@ -205,13 +210,13 @@ function setModalLookup(helper, content, parent_id, parent_label) {
 		}
 	}
 
-	openModalLookup(parent_label, selections)
+	open_modal_lookup(parent_label, selections)
 	
 	// "Select" button ensures calling select list has given item
 	$("#modalLookupSelect").off('click')
 		.on('click',function(){
 			if ($("#modalLookupSelections").prop('selectedIndex') > -1)
-				doSelections(select, options, parent_id)						
+				modal_lookup_do_selection(select, options, parent_id)						
 	})
 
 	// Provide definition when user clicks on given item.
@@ -243,14 +248,14 @@ function setModalLookup(helper, content, parent_id, parent_label) {
 			}
 			// Select
 			else 
-				doSelections(select, options, parent_id)
+				modal_lookup_do_selection(select, options, parent_id)
 	})
 
 	return false
 
 }
 
-function doSelections(select, options, parent_id) {
+function modal_lookup_do_selection(select, options, parent_id) {
 	/*
 	INPUT
 		select: existing <select> list
@@ -319,7 +324,7 @@ function doSelections(select, options, parent_id) {
 	}
 }
 
-function getLookupURL(entity_id) {
+function modal_lookup_get_api_url(entity_id) {
 	/* See https://www.ebi.ac.uk/ols/docs/api for URL commands
 
 	e.g. https://www.ebi.ac.uk/ols/api/ontologies/doid/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FDOID_0050589/children
@@ -336,9 +341,9 @@ function getLookupURL(entity_id) {
 }
 
 
-function openModalLookup(header, content) {
+function open_modal_lookup(header, content) {
 	/* This displays given string content and header in popup. 
-	Usually called by lookupOntologyChoices()
+	Usually called by render_select_lookup_modal()
 	*/
 	$('#modalChoiceSelectAll').off('click').on('click', function(){
 		$(this).parent().find('option').attr('selected','selected')

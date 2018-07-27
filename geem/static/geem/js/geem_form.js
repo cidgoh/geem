@@ -4,9 +4,9 @@ The OntologyForm class provides all functions needed (using jquery, Zurb
 Foundation and app.css) to render and populate an ontology-driven form.
 
 WISHLIST:
-	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be generic
-	  and have a Foundation additional rendering pass.
-	- Allow xml datatype formats for date&time to be inherited from parent model
+	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be
+	  generic and have a Foundation additional rendering pass?
+	- Allow xml datatype formats for date&time to be inherited from parent model?
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
 	- Also option for 3rd party database field name for form storage
 	- Select list values: enable to be other than ontology id.
@@ -30,18 +30,18 @@ function OntologyForm(domId, resource, settings, callback) {
 	self.settings = {}
 	self.formDomId = $(domId)
 	self.context = resource.context
-	self.formCallback = callback
+	self.form_callback = callback
+	self.uniqueDomId = 0
 
-	// Some of these defaults can be overridden by particular fields via ui_feature specification
+	// Some of these defaults can be overridden by particular fields via
+	// ui_feature specification
 	if (settings) self.settings = settings
 	if (! 'ontologyDetails' in self.settings) self.settings.ontologyDetails = false
 	if (! 'minimalForm' in self.settings) self.settings.minimalForm = false
 
 
 	/*********** FORM RENDERER *************************/
-	this.renderEntity = function(entityId) {
-
-		formDelete()
+	this.render_entity = function(entityId) {
 
 		// Deselect any other form menu item that might be open.
 		$('li.active[role="menuitem"]').removeClass('active')
@@ -53,95 +53,80 @@ function OntologyForm(domId, resource, settings, callback) {
 			self.entityId = entityId
 		}
 
-
 		// If entityId wasn't passed, then reverts to self.entityId
-		// to enable re-rendering of existing object.
+		// to enable re-rendering of existing object (can happen after user
+		// changes form display setting.)
 		if (self.entityId) {
+
+			form_delete()
 
 			// Highlight any menu item that is this entity
 			// FUTURE: Ideally open menu to this item if not already.
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
-			var entity = getFormSpecificationComponent(self.entityId)
-			var form_html = renderFormSpecification(entity)
+			var entity = get_form_specification_component(self.entityId)
+			var form_html = render_form_specification(entity)
 
-			// "buttonFormSubmit" is id created for submit button, which other processes can trigger on. Could turn into event.
+			// "buttonFormSubmit" is id created for submit button, which other
+			// processes can trigger on. Could turn into event.
 			if (form_html == '') {
-				// Sometimes given element is not a field and has no parts.
+				// A given element might not be a field.
 				form_html += '<br/><p>This item has no field specification.</p>'
 			}
 			else {
-				form_html += renderButton('View Form Submission', 'buttonFormSubmit') 
+				form_html += render_button('View Form Submission', 'buttonFormSubmit') 
 			}
 
 			// Place new form html into page
 			self.formDomId.html(form_html)
 
-			// Set up UI widget for all date inputs; 
-			// Using http://foundation-datepicker.peterbeno.com/example.html
-			$('div[data-date-format]').fdatepicker({disableDblClickSelection: true}).find('input').off()
+			// Set required/optional status of fields and controls for adding
+			// more elements.
+			initialize_input_cardinality(self.formDomId) 
+			initialize_add_inputs(self.formDomId)
 
-			var title = 'GEEM: ' + self.entityId
-			var uiLabel = entity.uiLabel
-
-			// Enable page annotation by 3rd party tools by kicking browser to 
-			// understand that a #anchor and page title are different.
-			title += ':' + uiLabel
-	
-			// A hack that provides more styled info about form in portal.html
-			if ($('#formEntityLabel').length) {
-
-				$('#formEntityLabel')
-					.html(uiLabel + ' &nbsp; <span class="medium">(' + self.entityId + ')</span>')
-				$('#mainForm > div.field-wrapper > label')
-					.html(entity.definition || '<span class="small float-right">(select all)</span>')
-			}
-			else {
-				$('#mainForm > div.field-wrapper > label')
-					.attr('id','formEntityLabel')
-					.after('<p>' + (entity.definition  || '') + '</p>') 
-			}
-
-			window.document.title = title
+			initialize_date_inputs(self.formDomId)
+		 	initialize_select_inputs(self.formDomId) 
 
 		 	// Load an existing data record
 		 	//loadFormData()
 
-			// Set required/optional status of fields and controls for adding more elements.
-			setFormCardinality() 
+		 	if (self.settings.minimalForm) 
+		 		set_minimal_form(self.formDomId) // Hide empty optional field content.
 
-		 	if (self.settings.minimalForm) setMinimalForm() // Hides empty optional field content.
-
-		 	// All of form's regular <select> inputs (e.g. NOT the ones for picking units)
-		 	// get some extra smarts for type-as-you-go filtering.
-		 	initializeSelectInputs($('#mainForm select.regular')) 
-		 	
-		 	// Reinitialize form since it was deleted above.
-		 	// FUTURE: UPGRADE FOUNDATION, use reInit()
+		 	// Reinitialize form since deleted above. FUTURE: use reInit()
 			self.formDomId.foundation()
 
-			//Setup of this class enables callback function to be supplied.  Could make an event instead.
-			if (self.formCallback)
-				self.formCallback(self)
+			// Setup of this class enables callback function to be supplied.
+			// Make event?
+			if (self.form_callback)
+				self.form_callback(self)
+
+			// Enable page annotation by 3rd party tools by kicking browser to 
+			// understand that a #anchor and page title are different.
+			window.document.title = 'GEEM: ' + self.entityId + ':' + entity.uiLabel
+			
+			return entity
+
 		 }
 		return false
 	}
 
 
-	formDelete = function() {
+	form_delete = function() {
 		if (self.formDomId) {
 			self.formDomId.off().empty()
 		}
 	}
 
-	setOptionalHidden = function() {
+	set_optional_hidden = function() {
 		/* Displays form with only required fields visible.
 		
 		*/
 		self.formDomId.find('div:not(.tabs-panel) > div.field-wrapper.optional').hide()
 	}
 
-	setMinimalForm = function() {
+	set_minimal_form = function(dom_element) {
 		/* The minimal display of a form provides users with a display of 
 		required fields ready for data input, and optional fields are shown
 		only as labels with the css input-group part hidden. When a user mouses
@@ -152,7 +137,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			All optional fields are shown minimized.
 		*/
 
-		self.formDomId
+		dom_element
 			// EXPERIMENTAL Added .5 second delay to :hover state action
 			.on('mouseenter', 'div.field-wrapper.optional:not(.open)', function(event) {
 				domItem = $(this)
@@ -166,10 +151,10 @@ function OntologyForm(domId, resource, settings, callback) {
 			.on('mouseleave', 'div.field-wrapper.optional.open', function(event) {
 				clearTimeout(timer);
 				event.stopPropagation();
-				// Keep open inputs that DO have content. Close other optional inputs
+				// Keep open inputs that have content. Close optional inputs
 				var inputGroup = $(this).children('div.input-group')
-				var someContent = inputGroup.children('input, select') // IMMEDIATE CHILDREN
-					.filter(function() {return ! !this.value;}) // double negative yeilds boolean.
+				var someContent = inputGroup.children('input, select')
+					.filter(function() {return ! !this.value}) // !!x->boolean
 
 				if (someContent.length == 0) { // Ok to hide.
 					$(this).removeClass('open')
@@ -177,22 +162,112 @@ function OntologyForm(domId, resource, settings, callback) {
 				}
 			})
 
-			// By default, hide all optional section .input-group that has EMPTY content.
-			// except if an input field is a .tabs-panel field its got another hiding system.
+			// By default, hide all optional section .input-group that has
+			// EMPTY content except if an input field is a .tabs-panel field
+			// its got another hiding system.
 			.find('div:not(.tabs-panel) > div.field-wrapper.optional > div.input-group').hide()
 
 	}
 
-	initializeSelectInputs = function(select_inputs) {
-		select_inputs.each( function() {
+	initialize_add_inputs = function(dom_element) {
+		/* Some specifications allow more than 1 record to be created. This 
+		script provides an "Add record" button to right side of spec. label
+		which when clicked creates a new record within that section of form
+		and scrolls to it for data entry.  GEEM currently doesn't 
+		include server side code to save data but this function provides
+		the browser side code to do so.
+		*/
+		dom_element
+			.on('click', '.addInputElement', function() {
+
+				// Command to add rendering of new field-wrapper element
+				var element = $(this).parents('div.field-wrapper').first()
+				var element_path = element.attr('data-ontology-id').split('/')
+				var element_id = element_path.pop()
+
+				// Compare with maxValues to see if add button should be disabled
+				var kid_count = element.children('div.inputBlock').length
+
+				// NEED TO PROVIDE THIS WITH PATH + UNIQUE ID?
+				var fieldspec = get_form_specification_component(element_id, element_path, element_path.length) // A path
+
+				// Skip selection lists as they already accomodate min/max selections.
+				if (fieldspec.datatype != 'xmls:anyURI') {
+
+					// Prevent lable and wrapper from being drawn on field content
+					fieldspec.input_group = true 
+
+					var header = '<div class="inputBlockSeparator"><i class="removeInputElement fi-x-circle"></i><label>Record ' + (kid_count + 1) + '</label></div>'
+					var html = render_form_specification(fieldspec, header, true)
+					element.append(html)
+
+					var new_element = element.children().last()
+					initialize_input_cardinality(new_element)
+
+					// If new content has any select inputs, set them up
+					initialize_select_inputs(new_element)
+					initialize_date_inputs(new_element) 
+					new_element.foundation()
+
+		 			if (self.settings.minimalForm) set_minimal_form(new_element) 
+
+		 			// Bring user's attention to new field they requested
+		 			// Using built-in fn until can figure out jquery .scrollTo(...)
+		 			new_element[0].scrollIntoView({ behavior: 'smooth', block:'start' })
+		 			new_element.fadeOut(0).fadeIn(2000)
+
+		 			// Disable "Add Record" button if maxcardinality exceeded
+					if (element.attr('maxcardinality')) {
+						if (kid_count >= parseInt( element.attr('maxcardinality') )) 
+							element.find('button.addInputElement').first().attr('disabled','disabled')
+					}
+
+				}
+				return false
+			})
+
+			// A delete function which gets rid of displayed record.
+			// ISSUE: Numbering - remaining items have "Record XYZ" not in sequence
+			.on('click', '.removeInputElement', function() {
+
+				// API call to delete DATA record server side (if it exists)
+				// api.delete_data(...)
+
+				$(this).parents('div.inputBlock').first().slideUp(400, function(){$(this).remove()} )
+
+				const element = $(this).parents('div.field-wrapper').first()
+				const kid_count = element.children('div.inputBlock').length
+
+				// Enable "Add Record" button if < maximum records shown
+				if (kid_count <= parseInt( element.attr('maxcardinality') )) 
+					element.find('button.addInputElement').first().removeAttr('disabled')
+
+			})
+	}
+
+	initialize_date_inputs = function(dom_element) {
+		/* Set up UI widget for all date inputs; 
+		Using http://foundation-datepicker.peterbeno.com/example.html
+		The '.find('input').off() disables a click on the date text	field
+		itself, so that users can cut/paste or manually modify date info.
+		*/
+		dom_element.find('div[data-date-format]')
+			.fdatepicker({disableDblClickSelection: true}).find('input').off()
+	}
+
+	initialize_select_inputs = function(dom_element) {
+	 	/* All of form's regular <select> inputs (e.g. NOT the ones for picking
+	 	units) get some extra smarts for type-as-you-go filtering.
+	 	*/
+		dom_element.find('select.regular').each( function() {
 
 			// Applies jQuery chosen() 
 	 		var fieldWrapper = $(this).parents("div.field-wrapper").first()
 	 		var min = fieldWrapper.attr("minCardinality")
 			var max = fieldWrapper.attr("maxCardinality")
 			var required = fieldWrapper.is('.required')
-			if (required) $(this).prop('required',true); //Should do this in setFormCardinality() instead?
-	 		singleDeselect = (!min || min == 0) ? true : false
+			if (required) $(this).prop('required', true); //Should do this in initialize_input_cardinality() instead?
+	 		var singleDeselect = (!min || min == 0) ? true : false
 
 	 		$(this).chosen({
 	 			placeholder_text_multiple: 'Select items ...',
@@ -205,21 +280,19 @@ function OntologyForm(domId, resource, settings, callback) {
 	 			inherit_select_classes: true // inherits <select class=""> css
 	 		})
 
-	 		// But using this doesn't allow us to keep selection list open:
+	 		// Using this doesn't allow us to keep selection list open:
 	 		//.on('chosen:showing_dropdown',function(event) {
 	 		//	console.log('showing')
 	 		//})
 
-	 		// Other options:
-	 		// width: xyz pixels.
-	 		// max_shown_results: only show the first (n) matching options...
-	 		// <option selected> , <option disabled> 
-	 	
 	 	})
+
+	 	dom_element.on('click', '.select_lookup', function () {render_select_lookup_modal(this)})
+
  	}
 
 
-	setFormCardinality = function() {
+	initialize_input_cardinality = function(domObject) {
 		/* This renders each form element's HTML required attribute via 
 		javascript.	It also adds attributes for minCardinality and 
 		maxCardinality.  
@@ -233,7 +306,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		*/
 		var cardinalityLabel = ''
 
-		self.formDomId.find('div.field-wrapper').each(function(index) {
+		domObject.find('div.field-wrapper').each(function(index) {
 			var min = $(this).attr("minCardinality")
 			var max = $(this).attr("maxCardinality")
 			var required = false
@@ -275,9 +348,31 @@ function OntologyForm(domId, resource, settings, callback) {
 
 					if (max == 1)
 						cardinalityLabel = 'optional' // no max
-					else
+					else {
 						cardinalityLabel = '<' + (parseInt(max) + 1) + ' items'
+					}
 
+				}
+
+				if (! $(this).is('.categorical')) {
+					/* Provides button for creation of given element up to max
+					cardinality. (Alternative would be to create max elements 
+					up-front.) Skips the button if min == max > 1, which means
+					that a fixed number of form elements should be visible.
+
+					Skips doing this though for <select> inputs, as selects 
+					already accomodates multiple selections.
+					*/
+					if (!max || (max > 1 && (!min || min < max ) ) ) {
+						$(this).children('label').before('<button class="addInputElement">add record</button>')
+					}
+
+					// For X records of given entity type, need to mark the
+					// entity's div.field-wrapper as an array so that data 
+					// submission is given as array too.
+					// I.e. combination of min & max require more than 1 item.
+					if ( (!max && min) || (max && max > 1) )
+						$(this).addClass('array')
 				}
 
 				if (required == true) {
@@ -289,7 +384,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 				// Show optional and required information.
 				if (self.settings.ontologyDetails && cardinalityLabel.length > 0 ) 
-					$(this).children('label') //children(".fi-shopping-cart")
+					$(this).children('label')
 						.before('<span class="info label float-right">' + cardinalityLabel + '</span>')
 			}
 				
@@ -300,37 +395,43 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	/*********************** FORM PART RENDERING **********************/
 
-	renderFormSpecification = function(entity, html = '') { //, inherited = false
+	render_form_specification = function(entity, html = '') { //, inherited = false
 		/*
+		Currently this rendering of an ontology-driven data specification is
+		focused on ZURB Foundation engine.
+
+		Inputs as sepecified in an OWL Ontology file can have all the 
+		standard xmls data types and restrictions. 	
 		See https://www.w3.org/TR/2005/WD-swbp-xsch-datatypes-20050427/
 		about XML/RDF/OWL numeric representation.
 
-		PRIMITIVE data types 
-		Inputs as sepecified in an OWL Ontology file can have all the 
-		standard xmls data types and restrictions.
-		Potentially create ZURB Foundation fields: text, date, datetime, 
+		FUTURE: 
+			- Provide engines for rendering using ANT, Google Material, etc.
+			- Potentially create ZURB Foundation fields: text, date, datetime, 
 		datetime-local, email, month, number, password, search, tel, 
 		time, url, and week
+
 		*/
 
 		var	labelHTML = ''
-		if (entity.datatype != 'disjunction')
-			labelHTML = renderLabel(entity)
+		if (entity.datatype != 'disjunction' && !entity.input_group)
+			labelHTML = render_label(entity)
 
 		switch (entity.datatype) {
 			case undefined: // Anonymous node
-				html += renderSection(entity, labelHTML, '<span class="small"><i>This specification component needs a "value specification" so that it can be rendered.</i></span>')
+				html += render_section(entity, labelHTML, '<span class="small"><i>This specification component needs a "value specification" so that it can be rendered.</i></span>')
 				break;
 
 			case 'disjunction':
-				html += renderDisjunction(entity, labelHTML)
+				html += render_disjunction(entity, labelHTML)
 				break;
 
 			case 'model':
-				html += renderSpecification(entity)
+				html += render_specification(entity)
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity.uiLabel != '[no label]')
-					return getModelWrapper(entity, labelHTML + html)
+					//  data-ontology-id="'+entity.domId+'"
+					return get_model_wrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
 				break;
 
 			/*
@@ -343,57 +444,57 @@ function OntologyForm(domId, resource, settings, callback) {
 			case 'xmls:dateTime': //YYYY-MM-DDTHH:MM:SS
 			case 'xmls:dateTimeStamp': //YYYY-MM-DDTHH:MM:SS  and required time zone as above.
 			case 'xmls:duration': //[-]P (period, required) + nYnMnD (years / months / days) T nHnMnS (hours / minuts / seconds)
-				html += renderDateTime(entity, labelHTML)
+				html += render_datetime(entity, labelHTML)
 				break;
 
 			// Applicable restrictions : enumeration length maxLength minLength pattern whiteSpace
 			case 'xmls:string':
 			case 'xmls:normalizedString':
 			case 'xmls:token':
-				html += renderInput(entity, labelHTML)
+				html += render_input(entity, labelHTML)
 				break;
 	 
-			case 'xmls:integer':			html += renderNumber(entity, labelHTML, 'integer');	break
-			case 'xmls:positiveInteger': 	html += renderNumber(entity, labelHTML, 'integer', 1);	break
-			case 'xmls:nonNegativeInteger':	html += renderNumber(entity, labelHTML, 'integer', 0);	break
-			case 'xmls:unsignedByte':		html += renderNumber(entity, labelHTML, 'integer', 0, 255); break// (8-bit)	
-			case 'xmls:unsignedShort':		html += renderNumber(entity, labelHTML, 'integer', 0, 65535); break// (16-bit) 
-			case 'xmls:unsignedInt':		html += renderNumber(entity, labelHTML, 'integer', 0, 4294967295);	break// (32-bit)		
-			case 'xmls:unsignedLong':		html += renderNumber(entity, labelHTML, 'integer', 0, 18446744073709551615); break// (64-bit) 
+			case 'xmls:integer':			html += render_number(entity, labelHTML, 'integer');	break
+			case 'xmls:positiveInteger': 	html += render_number(entity, labelHTML, 'integer', 1);	break
+			case 'xmls:nonNegativeInteger':	html += render_number(entity, labelHTML, 'integer', 0);	break
+			case 'xmls:unsignedByte':		html += render_number(entity, labelHTML, 'integer', 0, 255); break// (8-bit)	
+			case 'xmls:unsignedShort':		html += render_number(entity, labelHTML, 'integer', 0, 65535); break// (16-bit) 
+			case 'xmls:unsignedInt':		html += render_number(entity, labelHTML, 'integer', 0, 4294967295);	break// (32-bit)		
+			case 'xmls:unsignedLong':		html += render_number(entity, labelHTML, 'integer', 0, 18446744073709551615); break// (64-bit) 
 
-			case 'xmls:negativeInteger':	html += renderNumber(entity, labelHTML, 'integer', null, -1); break
-			case 'xmls:nonPositiveInteger':	html += renderNumber(entity, labelHTML, 'integer', null, 0); break
+			case 'xmls:negativeInteger':	html += render_number(entity, labelHTML, 'integer', null, -1); break
+			case 'xmls:nonPositiveInteger':	html += render_number(entity, labelHTML, 'integer', null, 0); break
 
-			case 'xmls:byte': 	html += renderNumber(entity, labelHTML, 'integer', -128, 127);	break// (signed 8-bit)
-			case 'xmls:short': 	html += renderNumber(entity, labelHTML, 'integer', -32768, 32767);	break// (signed 16-bit)
-			case 'xmls:int': 	html += renderNumber(entity, labelHTML, 'integer', -2147483648, 2147483647);	break// (signed 32-bit)
-			case 'xmls:long': 	html += renderNumber(entity, labelHTML, 'integer', -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
+			case 'xmls:byte': 	html += render_number(entity, labelHTML, 'integer', -128, 127);	break// (signed 8-bit)
+			case 'xmls:short': 	html += render_number(entity, labelHTML, 'integer', -32768, 32767);	break// (signed 16-bit)
+			case 'xmls:int': 	html += render_number(entity, labelHTML, 'integer', -2147483648, 2147483647);	break// (signed 32-bit)
+			case 'xmls:long': 	html += render_number(entity, labelHTML, 'integer', -9223372036854775808, 9223372036854775807); break // (signed 64-bit)
 
 			// Re. OWL/RDF storage: Note: All "minimally conforming" processors
 			// "must" support decimal numbers with a minimum of 18 decimal
 			// digits (i.e., with a "totalDigits" of 18).
 			case 'xmls:decimal':
-				html += renderNumber(entity, labelHTML, 'decimal'); break;
+				html += render_number(entity, labelHTML, 'decimal'); break;
 
 			// Size of float/double depends on precision sought, see
 			// https://stackoverflow.com/questions/872544/what-range-of-numbers-can-be-represented-in-a-16-32-and-64-bit-ieee-754-syste
 			case 'xmls:float':  
-				html += renderNumber(entity, labelHTML, 'float', - Math.pow(2, 23), Math.pow(2, 23) - 1 ); break;
+				html += render_number(entity, labelHTML, 'float', - Math.pow(2, 23), Math.pow(2, 23) - 1 ); break;
 
 			case 'xmls:double': 
-				html += renderNumber(entity, labelHTML, 'double', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER); break;
+				html += render_number(entity, labelHTML, 'double', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER); break;
 
 			// Yes/No inputs
 			case 'xmls:boolean': 
-				html += renderBoolean(entity, labelHTML); break;
+				html += render_boolean(entity, labelHTML); break;
 
 			// Categorical Picklists
 			case 'xmls:anyURI': 
 			case 'xmls:QName':
-				html += renderChoices(entity, labelHTML); break;
+				html += render_choices(entity, labelHTML); break;
 
 			default:
-				html += renderSection(entity, labelHTML, 'UNRECOGNIZED: '+ entity.id + ' [' + entity.datatype  + ']'); break;
+				html += render_section(entity, labelHTML, 'UNRECOGNIZED: '+ entity.id + ' [' + entity.datatype  + ']'); break;
 		}
 		return html
 
@@ -401,7 +502,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 
-	renderSpecification = function(entity) {
+	render_specification = function(entity) {
 		/*
 	
 		INPUTS
@@ -411,28 +512,29 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		// Render each component
 		for (var entityId in entity.components) { 
-			html += this.renderFormSpecification(entity.components[entityId]) //, html
+			html += this.render_form_specification(entity.components[entityId]) //, html
 		}
-
+		/*
 		if ('choices' in entity) {
 			for (var entityId in entity.choices) { 
-				html += this.renderFormSpecification(entity.choices[entityId])
+				html += this.render_form_specification(entity.choices[entityId])
 			}
 		}
+		*/
 		return html	
 	}
 
-	renderSection = function(entity, labelHTML, text) {
+	render_section = function(entity, labelHTML, text) {
 		html = [
 		labelHTML
 		,	'	<div class="input-group">\n'
 		,			text
 		,	'	</div>\n'
 		].join('')
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderDateTime = function(entity, label) {
+	render_datetime = function(entity, label) {
 		/*
 		Provide datepicker with ISO 8601 date/time format which can be
 		overrided by other formats via entity feature "format_..."
@@ -470,20 +572,20 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'		>'
 			,'		<div class="input-group-label prefix"><i class="fi fi-calendar"></i></div>\n'
 			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
-			,		' id="'+entity.domId+'"'
-			,		' type="text"'
-			,		getHTMLInputPlaceholder(entity)
-			//,		getStringConstraints(entity)
+			,		' data-ontology-id="'+entity.domId+'"'
+			,		' type="text" style="width:200px" '
+			,		get_input_placeholder(entity)
+			//,		render_attr_string(entity)
 			,		entity.disabled
 			,		'/>\n'
-	    	,		renderUnits(entity)
+	    	,		render_units(entity)
 			,'	</div></div>\n'
 		].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderInput = function(entity, label) {
+	render_input = function(entity, label) {
 		/*
 		Add case for paragraph / textarea?
 		 <textarea placeholder="None"></textarea>
@@ -492,18 +594,19 @@ function OntologyForm(domId, resource, settings, callback) {
 		html = [label
 		,	'	<div class="input-group">\n'
 		,	'		<input class="input-group-field '+entity.id+'"'
-		,			' id="'+entity.domId+'"'
+		,			' data-ontology-id="'+entity.domId+'"'
 		, 			' type="text" '
-		,			 getStringConstraints(entity)
+		,			 render_attr_string(entity)
 		,			 entity.disabled
-		,			 getHTMLInputPlaceholder(entity)
+		,			 get_input_placeholder(entity)
 		,			 '/>\n'
-    	, 			renderUnits(entity)
+    	, 			render_units(entity)
 		,	'	</div>\n'].join('')
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	} 
 
-	renderButton = function(text, buttonID) {
+	render_button = function(text, buttonID) {
+		// Not an ontolog-driven specification.
 		return [
 			'<div>\n'
 		,	'	<input id="' + buttonID + '" class="button float-center" value="' + text + '">\n'
@@ -511,7 +614,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		].join('')
 	}
 
-	renderDisjunction = function(entity, labelHTML) {
+	render_disjunction = function(entity, labelHTML) {
 		/* This entity was made up of 'has component some (X or Y or Z ...) 
 		At least one of the disjunction parts needs to be filled in.  More are
 		allowed at moment. A tabbed interface is used for each component to 
@@ -528,8 +631,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		// Could externalize this
 		var activeDone = false // Flag to activate first tab
 		for (var entityId in entity.components) { 
-			var childDomId = (domId + '_' + entityId).replace(/[^a-zA-Z0-9]/g,'_') //
-			var child = entity.components[entityId]
+			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
+			self.uniqueDomId += 1
+
+			var label = render_label(entity.components[entityId])
 			if (activeDone == false) {
 				activeDone = true
 				tab_active = ' is-active '
@@ -540,15 +645,15 @@ function OntologyForm(domId, resource, settings, callback) {
 				aria = ''
 			}
 
-			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + renderLabel(child) + '</a></li>'
+			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
 			//htmlTabContent += 	this.render(entityId, entity.path, entity.depth+1) //, false, true 
 			// Issue: tab label repeated in child field wrapper.
-			htmlTabContent += this.renderFormSpecification(entity.components[entityId]) 
+			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
 			htmlTabContent += '</div>\n'		
 		}
 
-		return [
+		return [ // A variation on get_field_wrapper()
 			,	'<div class="field-wrapper input-tabs">'
 			,		'<ul class="tabs" data-tabs id="' + domId + '">'
 			,			htmlTabs
@@ -564,7 +669,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 	/* NUMERIC DATATYPES HANDLED HERE */
-	renderNumber = function(entity, labelHTML, type, minInclusive=undefined, maxInclusive=undefined) {
+	render_number = function(entity, labelHTML, type, minInclusive=undefined, maxInclusive=undefined) {
 		/*
 		A general number input renderer that handles integer, decimal, double and float.
 		Issue is that foundation zurb styles "type=number" and "type=text" inputs but 
@@ -599,29 +704,28 @@ function OntologyForm(domId, resource, settings, callback) {
 		html = [labelHTML,
 			,'<div class="input-group">\n'
 	 		,'	<input class="input-group-field ' + entity.id + '"'
-	 		,		' id="' + entity.domId + '"'
+	 		,		' data-ontology-id="' + entity.domId + '"'
 	 		,		typeAttr
 			,		stepAttr
 			,		entity.disabled
-			,		getNumericConstraintHTML(entity, minInclusive, maxInclusive)
+			,		render_attr_numeric(entity, minInclusive, maxInclusive)
 			,		' placeholder="' + type + '"'
 			,		' pattern="' + type + '"'
 			,		' data-validator="min_max"'
 			,	' />\n'
-    		,	renderUnits(entity)
-			//,	renderHelp(entity)
+    		,	render_units(entity)
 			,'</div>\n'
 		].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
 
-	renderBoolean = function(entity, labelHTML) {
+	render_boolean = function(entity, labelHTML) {
 
 		html = [
 			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
-			,'		<input id="'+entity.domId+'" class="switch-input" type="checkbox" name="' + entity.id+ '"'
+			,'		<input data-ontology-id="'+entity.domId+'" class="switch-input" type="checkbox" name="' + entity.id+ '"'
 			,		entity.disabled
 			,		' />\n'
 			,	'	<label class = "switch-paddle" for="'+entity.domId+'"></label>\n'
@@ -629,71 +733,48 @@ function OntologyForm(domId, resource, settings, callback) {
 			,	labelHTML
 			].join('')
 
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html)
 	}
 
-	renderChoices = function(entity, label) {
-		/* FUTURE: OPTION FOR RENDERING AS SELECT OPTIONS, RADIOBUTTONS OR CHECKBOXES ...
-			ISSUE: An entity may be marked as a choice but take on the values of another categorical 
-			list via its "components" part. What depth cutoff feature should be allowed?
+	render_choices = function(entity, label) {
+		/* 
+		Categorical choices are made by way of radio, checkbox or selection lists.
+		Checkbox and selection lists can be made to provide multiple selections.
 
-			"components": {
-                "DOID:4": [
-                    {
-                        "cardinality": "owl:someValuesFrom"
-                    }
-                ]
-            },
-
+		CURRENTLY: All cases rendered as <select> inputs.
+		FUTURE: OPTION FOR RENDERING AS RADIO BUTTONS OR CHECKBOXES
 		*/
-		picklistId = entity.id
+
 		var multiple = entity.minCardinality > 1 || (entity.maxCardinality != 1) ? ' multiple' : ''
 
-		var cutDepth = entity.features.depth ? entity.features.depth : undefined //getFeature(entity, 'depth') // a numeric depth or null.
+		var cutDepth = entity.features.depth ? entity.features.depth : undefined // a numeric depth or null.
 		if (cutDepth !== undefined) {
 			cutDepth = cutDepth.value
 		}
 		else
 			cutDepth == 20 // Its greater than max depth test below.
 
-		var html = label
-		html +=	'	<div class="input-group">\n'
-		html +=	'		<select class="input-group-field '+ entity.id + ' regular" id="'+entity.domId+'"' + entity.disabled + multiple + '>\n'
-		if (multiple.length == 0)
-			html +=	'<option value=""></option>'  //Enables no option to be selected.
+		const ontology_id_attr = render_attr_ontology_id(entity.domId)
 
-		// Because one should deliberately make a selection ... esp. when 
-		// confronted with required selection list where 1st item is 
-		html +=	'	<option value="" disabled>Select ...</option>'
-		//console.log(entity)
-		html +=			renderChoice(entity, 'choices', 0, cutDepth, 'select')
-		
-		// Check components list as well, as long as each item is an xmls:anyURI
-		// Note: this is not recursive, i.e. no has_component some has_component ...
-		// ISSUE: component can get 'feature' item 
+		var html = [label
+			,'	<div class="input-group">\n'
+			,'		<select class="input-group-field '+ entity.id + ' regular" ' + ontology_id_attr + entity.disabled + multiple + '>\n'
+						// Enables no option to be selected:
+			,			(multiple.length == 0) ? '<option value=""></option>' : ''
+						// Because one should deliberately make a selection ... esp. when 
+						// confronted with required selection list
+			,'			<option value="" disabled>Select ...</option>'
+			,			render_choice(entity, 0, cutDepth, 'select')
+			,'		</select>\n'
+			,			entity.features.lookup ? '<a class="input-group-label select_lookup" ' + ontology_id_attr + '>lookup choices</a>\n' : ''
+			,'	</div>\n'
+		].join('')
 
-		// ISSUE: if a categorical choice item is marked as having a datatype other than anyURI,
-		// (e.g. "other material" might have a string value) Then wierd display of IAO_0000119 occurs?
-		/*
-		ARCHAIC???????????
-		if ('components' in entity)
-			for (var ontoID in entity.components) {
-				html +=	renderChoice(entity.components[ontoID], 'choices', 0, cutDepth, 'select')
-			}
-		*/
-		html +=	'	</select>\n'
-
-		if ('features' in entity && 'lookup' in entity.features) 
-			html += '		<a class="input-group-label" onclick="lookupOntologyChoices(this,\''+entity.id+'\')">lookup choices</a>\n'
-	
-		html +=	'	</div>\n'
-
-
-		return getFieldWrapper(entity, html)
+		return get_field_wrapper(entity, html, 'categorical')
 	}
 
 
-	renderChoice = function(entity, table='choices', depth, cutDepth, inputType='select') { 
+	render_choice = function(entity, depth, cutDepth, inputType = 'select') { 
 		/* 
 		
 		ISSUE: currently the ontologyID for each item does not include path
@@ -711,28 +792,28 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		var html = ''
 
-		if (table in entity) {
+		if (entity.choices) {
 
 			// FUTURE: Adapt this so that only shown if it has been clipped.
 			// ALSO: A given term has subordinate items in its NATIVE ontology.
 			// Would be great to have a count of those.
 			if (depth == cutDepth)
-				return ' (' + Object.keys(entity[table]).length + ')'
+				return ' (' + Object.keys(entity.choices).length + ')'
 
-			for (var memberId in entity[table]) {
-				var part = entity[table][memberId]
+			for (var memberId in entity.choices) {
+				var part = entity.choices[memberId]
 				var kid_html = ''
 
 				part.disabled = '';
 
-				var label = getLabel(part)
+				var label = get_label(part)
 				if (!label) {
 					label = ''
 					console.log['Error: picklist item has no label: ' + memberId]
 				}
 				
 				// See if this option has any child options
-				kid_html += renderChoice(part, table, depth+1, cutDepth, inputType)
+				kid_html += render_choice(part, depth+1, cutDepth, inputType)
 				if (kid_html && depth == cutDepth - 1)
 					label += kid_html
 
@@ -747,7 +828,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 					default:
 
-						html += '<option value="' + part.id + '" class="depth' + depth + '" ' + part.disabled + getSynonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
+						html += '<option value="' + part.path.join('/') + '" class="depth' + depth + '" ' + part.disabled + get_synonyms(part) + '>' + ' '.repeat(depth) + label + '</option>\n'  
 				}
 
 				html += kid_html
@@ -759,7 +840,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return html
 	}
 
-	getSynonyms = function(part) {
+	get_synonyms = function(part) {
 
 		var synonymArray = []
 
@@ -780,7 +861,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	}
 
 
-	renderUnits = function(entity) {
+	render_units = function(entity) {
 		/* User is presented with choice of data-entry units if available.
 		Default unit/scale (cm, mm, m, km etc.) is achieved by the 
 		"preferred_unit" user interface feature which ensures that the given
@@ -799,7 +880,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			// If only one unit to choose from then we're done.
 			if (entity.units.length == 1) 
-				return '<span class="input-group-label small">'+ renderLabel(entity.units[0]) + '</span>\n'
+				return '<span class="input-group-label small">'+ render_label(entity.units[0]) + '</span>\n'
 
 			var preferred = entity.features.preferred_unit 
 			var optionsHTML = ''
@@ -817,7 +898,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			return [
 			'<div class="input-group-button" style="font-weight:700;">'
-			,	'<select class="units" id="' + entity.domId + '-IAO:0000039">'
+			,	'<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
 			,	optionsHTML	
 			,	'</select>'
 			,'</div>\n'].join('')
@@ -825,7 +906,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	   	return ''
 	}
 
-	renderLabel = function(entity) {
+	render_label = function(entity) {
 		/* 
 		
 		Note definition is normalized to put into tooltip string.
@@ -861,13 +942,13 @@ function OntologyForm(domId, resource, settings, callback) {
 			else
 				html += labelURL
 
-		html += renderHelp(entity)
+		html += render_help(entity)
 		html +=  '</label>\n'
 
 		return html
 	}
 
-	renderHelp = function(entity) {
+	render_help = function(entity) {
 		// Only entities that have been initialized have 'help' attribute.
 		if (entity.help)
 			return '<span data-tooltip class="has-tip float-right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + entity.help + '"> <i class="fi-info blue"></i></span>'
@@ -876,7 +957,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	/************************** UTILITIES ************************/
 
-	getLabel = function(entity) {
+	get_label = function(entity) {
 		// Label listed an entity's features label overrides uiLabel
 		if (entity.features && entity.features.label)
 			//return entity.features.label.value
@@ -888,7 +969,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		return entity.label
 	}
 
-	getDefinition = function(entity) {
+	get_definition = function(entity) {
 		/* If an entity has a features.definition - coming from 3rd party 
 		specification, then use that. Otherwise if it has a general ontology
 		driven uiDefinition, use that. Otherwise use entity's IAO_0000115 definition annotation.
@@ -916,51 +997,59 @@ function OntologyForm(domId, resource, settings, callback) {
 		return definition
 	}
 
-	getHTMLInputPlaceholder = function(entity,type) {
+	get_input_placeholder = function(entity,type) {
 		// Given entity's xml datatype, return the word part for use in the form field placeholder
 		return (' placeholder="'+ entity.datatype.substr(entity.datatype.indexOf(':') + 1 )+ '"' ) 
 	}
 
-	getFieldWrapper = function(entity, html) {
+	get_field_wrapper = function(entity, html, dom_class = false) {
 		/* Surrounds given field element with general DOM id, css and cardinality controls
 			If the given entity has model or choice components, this adds a
 			'chindren' CSS class.
 		*/ 
-		return ['<div class="field-wrapper field'
-			,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
-			,		'" '
-			,		getIdHTMLAttribute(entity.domId)
-			,		getHTMLAttribute(entity, 'minCardinality')
-			,		getHTMLAttribute(entity, 'maxCardinality')
-			,		'>\n'
-			,		html
-			,	'</div>\n'
-		].join('')
+		if (entity.input_group == true)
+			return html
+		else
+			return ['<div class="field-wrapper field'
+				,		dom_class ? ' ' + dom_class : ''
+				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
+				,		' depth' + entity.depth
+				,		'" '
+				,		render_attr_ontology_id(entity.domId)
+				,		render_attr(entity, 'minCardinality')
+				,		render_attr(entity, 'maxCardinality')
+				,		'>\n'
+				,		html
+				,	'</div>\n'
+			].join('')
 	}
 
-	getModelWrapper = function(entity, html) {
-
-		return [
-			'<a name="' + entity.domId + '"/>'
-			,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-			,	getIdHTMLAttribute(entity.domId)
-			,	getHTMLAttribute(entity, 'minCardinality')
-			,	getHTMLAttribute(entity, 'maxCardinality')
-			,	'>\n'
-			,	html
-			,	'</div>\n'
-		].join('')
+	get_model_wrapper = function(entity, html) {
+		// verify if we still need this as opposed to above?
+		if (entity.input_group == true)
+			return html
+		else
+			return [
+				'<a name="' + entity.domId + '"/>'
+				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
+				,	render_attr_ontology_id(entity.domId)
+				,	render_attr(entity, 'minCardinality')
+				,	render_attr(entity, 'maxCardinality')
+				,	'>\n'
+				,	html
+				,	'</div>\n'
+			].join('')
 	}
 
-	getIdHTMLAttribute = function(domId) {
-		return 'data-ontology-id="' + domId + '" '
+	render_attr_ontology_id = function(ontology_path) {
+		return 'data-ontology-id="' + ontology_path + '" '
 	}
 
-	getHTMLAttribute = function(entity, attribute) {
+	render_attr = function(entity, attribute) {
 		return (attribute in entity) ? attribute +'="' + entity[attribute] + '" ' : ''
 	}
 
-	getNumericConstraintHTML = function(entity, minInclusive, maxInclusive) {
+	render_attr_numeric = function(entity, minInclusive, maxInclusive) {
 		/*
 		Adds numeric upper and lower tests if appropriate.
 		RegEx pattern is also allowed.
@@ -980,22 +1069,29 @@ function OntologyForm(domId, resource, settings, callback) {
 		var min = (minInclusive === undefined) ? '' : ' min='+minInclusive+' ' 
 		var max = (maxInclusive === undefined) ? '' : ' max='+maxInclusive+' ' 
 
-		return min + max + getPatternConstraint(entity)
+		return min + max + render_attr_pattern(entity)
 	}
 
 
-	getStringConstraints = function(entity) {
+	render_attr_string = function(entity) {
 		// Encodes html input length limits on string.
 		var min = entity.minLength ? ' minLength="'+entity.minLength+'" ' : ''
-		var max = entity.maxLength ? ' maxLength="'+entity.maxLength+'" ' : ''
+		if (entity.maxLength) {
+			var max = ' maxLength="'+entity.maxLength+'" '
+			// Enables shorter fields to have appropriate field size
+			if (entity.maxLength < 40)
+				max += ' size="' + (entity.maxLength+2) + '" style="width:auto"'
+		}
+		else
+			var max = ''
 		//size 	= 'xmls:length' in constraints ? ' size="'+constraints['xmls:length']+'" ' : ''
-		return min + max + getPatternConstraint(entity)
+		return min + max + render_attr_pattern(entity)
 	}
 
-	getPatternConstraint = function(entity) {
+	render_attr_pattern = function(entity) {
 		/* Render specific regular expression "pattern" that is used to
 		validate data entry. Zurb Foundation accepts some preset 
-		expression names - see initFoundation()
+		expression names - see init_foundation()
 		*/
 		var pattern = ''
 		if (entity.pattern) {
@@ -1015,8 +1111,55 @@ function OntologyForm(domId, resource, settings, callback) {
 }
 
 
+function check_entity_id_change(resource_callback = null, entity_callback = null, entityId = null) {
+	/* If given entity id, or one given in browser URL is different from the
+	current top.focusEntityId, then a) see if its available in top
+	specification, and if so, switch, and if not, load appropriate resource
+	and then switch to it.
+	*/
+
+	if (entityId == null)
+		if (location.hash.length > 0 && location.hash.indexOf(':') != -1)
+			// Set entity id to be first item in path of entities. #x/y/z -> x
+			entityId = document.location.hash.substr(1).split('/',1)[0]
+
+
+	if (top.focusEntityId && entityId == top.focusEntityId)	// No work to do here
+		return false
+
+	// Returns if loading resource or if no appropriate resource found
+	// Ensure appropriate resource is loaded for given entity id 
+	if (!top.resource.specifications || ! entityId in top.resource.specifications) {
+
+		resource_URL = api.get_resource_URL(entityId) // Selects favoured resource
+
+		if (top.resource.metadata && top.resource.metadata.resource == resource_URL) {// Should never happen.
+			Error('check_entity_id_change() problem: canonical resource doesn\'t have term')
+			return false
+		}
+
+		top.focusEntityId = entityId
+		api.get_resource(resource_URL)
+			.then(resource_callback)
+			.then(entity_callback)
+
+		return true
+	}
+
+	// At this point a change in entity_id has occured, so check current
+	// resource and then render form.
+	if (top.resource.specifications && entityId in top.resource.specifications) {
+		top.focusEntityId = entityId
+		entity_callback()
+		return true
+	}
+
+	return false
+
+}
+
 // Implementing a static method for default zurb Foundation settings:
-OntologyForm.initFoundation = function() {
+OntologyForm.init_foundation = function() {
 
 	Foundation.Abide.defaults.live_validate = true // validate the form as you go
 	Foundation.Abide.defaults.validate_on_blur = true // validate whenever you focus/blur on an input field

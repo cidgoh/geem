@@ -1,22 +1,22 @@
 
 /*********** SEARCH AND RESULTS *************************/
-function initSearchTab() {
+function init_search_tab() {
 
 	// Provide type-as-you-go searching
 	$("#searchField").on('keyup', function() {
 		var text = $(this).val().toLowerCase()
-		searchAsYouType(top.resource.specifications, text)
+		search_as_you_type(top.resource.specifications, text)
 	})
 
 	$('#toggleSearchDefinition').on('change', function() {
-		searchAsYouType(top.resource.specifications, $("#searchField").val().toLowerCase())
+		search_as_you_type(top.resource.specifications, $("#searchField").val().toLowerCase())
 	})
 
-	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', displayContext)
+	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', render_display_context)
 }
 
 
-function searchAsYouType(collection, text) {
+function search_as_you_type(collection, text) {
 	/* As user types text (more than 2 characters) into searchField, exact
 	 substring search is conducted through top.resource.specifications entities (all
 	 of their numeric or textual attributes)
@@ -25,9 +25,9 @@ function searchAsYouType(collection, text) {
 	$("#searchResults").empty()
 	var results = []
 	if (text.length > 2) {
-		var ontology_ids = filterIt(collection, text)
+		var ontology_ids = search_text_filter(collection, text)
 		for (id in ontology_ids) {
-			results.push(renderCartObj(ontology_ids[id]))
+			results.push(render_search_result_item(ontology_ids[id]))
 		}
 		// Sort results alphabetically.  
 		// Consider other sort metrics?
@@ -39,7 +39,7 @@ function searchAsYouType(collection, text) {
 }
 
 
-function filterIt(collection, searchKey) {
+function search_text_filter(collection, searchKey) {
 	/* Text Search of ontology contents via JSON specification.
 	This looks at each "specification" entry's main fields, e.g.: label, 
 	uiLabel, definition, uiDefinition, hasSynonym, hasNarrowSynonym, 
@@ -61,4 +61,27 @@ function filterIt(collection, searchKey) {
       		return collection[key][key2].toLowerCase().includes(searchKey);
       })
     })
+}
+
+
+function render_search_result_item(ontologyId) {
+	// This version of render_cart_item is optimized for sorting, and is used in
+	// search results page.  It also provides icons for navigating to an item's parent.
+	var ptr = ontologyId.lastIndexOf('/')
+	// Get last path item id.
+	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
+	var entity = top.resource.specifications[entityId]
+	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
+	content = ''
+	if ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
+		content = '<i class="fi-arrow-up dropdown member"></i>'
+	var html = [
+		'<div class="cart-item" ', 	render_attr_ontology_id(ontologyId), '>'
+		,	content
+		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
+		,'</div>'
+		].join('')
+	
+	return [entity['uiLabel'].toLowerCase(), html]
+
 }

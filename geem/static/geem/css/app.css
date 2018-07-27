@@ -17,6 +17,7 @@ ul#content-tabs > li.tabs-title i {font-size:1.5rem;position:absolute;margin-top
 #resourceForm input, #resourceForm select {margin-bottom:.5rem;}
 
 form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.5rem;margin-left:5px;cursor:pointer;margin-top:-.4rem;}
+
 #shoppingCart div.cart-item {clear:both; border-top:1px dotted silver;padding-top:.5rem;}
 #shoppingCart div.cart-item:first-child {border-top:0;}
 #shoppingCart div.cart-item > div.cart-item {margin-left:10px;}
@@ -25,8 +26,21 @@ form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.
 #mainForm li.cart-item.exclude {background-color:silver;}
 #mainForm li.cart-item.include {background-color:green;color:white;}
 
-.include i.fi-shopping-cart, i.fi-shopping-cart.include ,.include+i.fi-shopping-cart {color:green} /* ,.include+i.fi-shopping-cart */
-.exclude i.fi-shopping-cart, i.fi-shopping-cart.exclude,.exclude+i.fi-shopping-cart {color:red} /* ,.exclude+i.fi-shopping-cart */
+#shoppingCart div.cart-item.depth1 {margin-left:10px;}
+#shoppingCart div.cart-item.depth2 {margin-left:20px;}
+#shoppingCart div.cart-item.depth3 {margin-left:30px;}
+#shoppingCart div.cart-item.depth4 {margin-left:40px;}
+#shoppingCart div.cart-item.depth5 {margin-left:50px;}
+#shoppingCart div.cart-item.depth6 {margin-left:60px;}
+#shoppingCart div.cart-item.depth7 {margin-left:70px;}
+#shoppingCart div.cart-item.depth8 {margin-left:80px;}
+#shoppingCart div.cart-item.depth9 {margin-left:90px;}
+
+.include>i.fi-shopping-cart, i.fi-shopping-cart.include, .include+i.fi-shopping-cart {color:green} 
+.exclude>i.fi-shopping-cart, i.fi-shopping-cart.exclude, .exclude+i.fi-shopping-cart {color:red} 
+
+
+
 
 
 a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#2199e8;cursor:pointer;}
@@ -91,8 +105,8 @@ div.callout.footer a:hover {color:navy}
 
 div.parental {padding-left:15px;}
 
+/* Chosen input select item indentation controlled here */
 .chosen-container {width:inherit !important}
-
 li.depth0 {padding-left:0px !important;}
 li.depth1 {padding-left:15px !important;}
 li.depth2 {padding-left:30px !important;}
@@ -108,9 +122,12 @@ li.depthReset {padding-left:0px !important;}
 
 select.units {width:auto;cursor:pointer} 
 
-div.model.depth1 {margin-top:10px; margin-bottom:20px; border-top:2px solid grey; padding-top:10px; border-left:0px !important;}
-div.model.depth1 > label {}
-
+div.model.depth1, div.model.depth2 {margin-left:0px; margin-bottom:15px; margin-top:10px!important; border-top:1px solid grey !important;} /*border-left:0px !important; */
+div.model.depth1 > label, div.model.depth2 > label {background-color:#F0F0F0;padding-left:5px;}
+div.field-wrapper.depth2 {margin-left:10px} 
+div.field-wrapper.depth3 {margin-left:10px} 
+div.field-wrapper.depth4 {margin-left:10px} 
+div.field-wrapper.depth5 {margin-left:10px} 
 
 div#modalEntity {}
 div#modalEntityHeader {color:white;background-color:gray;padding:10px;margin:0;}
@@ -206,3 +223,9 @@ i.fi-x  {color:white;background-color:#2199e8;cursor:pointer;width:auto;}
 /* TO DO: make styling nicer for main ontology optgroup */
 
 ul.disabled li a {opacity:0.3;}
+
+#contentArea{position:relative;}
+.inputBlock {}
+.inputBlockSeparator {padding-left:5px;margin-top:10px;background-color:#F0F0F0;}
+.addInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;padding:5px;}
+.removeInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;width:2rem;text-align:center;}

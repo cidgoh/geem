@@ -4,12 +4,14 @@ focusEntityId = null
 formSettings = {}
 form = {}
 
-//ontologyLookupService = 'https://www.ebi.ac.uk/ols/search?q='
-ontologyLookupService = 'http://purl.obolibrary.org/obo/'
+//ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+ONTOLOGY_LOOKUP_SERVICE_URL = 'http://purl.obolibrary.org/obo/'
 
 $( document ).ready(function() {
 
-  OntologyForm.initFoundation()
+  OntologyForm.init_foundation()
+
+  api = new GeemAPI()
 
   // Bring in shared templates
   $.ajax('templates/modal_lookup.html').done(function(response) {
@@ -17,79 +19,56 @@ $( document ).ready(function() {
   });
 
   $('#specificationType').on('change', function() {
-    setModalDownload(getdataSpecification( $(this).val() )) 
+    set_modal_download(get_data_specification( $(this).val() )) 
   }) 
 
   // Toggle to hide all optional empty input content for concise display.
   $('input#toggleMinimalForm').on('change', function() {
     top.formSettings.minimalForm = $(this).is(':checked')
-    top.form.renderEntity()
+    top.form.render_entity()
   })
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
-  $(window).on('hashchange', checkForHashEntity);
+  $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
 
   $('#modalEntity').foundation()
   $('#rightbar').foundation()
 
-  checkForHashEntity()
+  // Not sure why we don't need this
+  //check_entity_id_change(render_standalone_form)
 
 });
 
 
-function loadResource(resource_URL) { //, resource_type
-  $.ajax({
-    type: 'GET',
-    url: resource_URL,
-    timeout: 30000, //30 sec timeout
-    success: function(resource) {
 
-      top.resource = resource;
+function render_standalone_form() {
 
-      // loadResource() triggered if hash entity id detected 
-      // but no top.resource loaded. 
-      checkForHashEntity()
-    },
-    error:function(XMLHttpRequest, textStatus, errorThrown) {
-      alert('Given resource could not be found: \n\n\t' + resource_URL) 
-    }
-  });
-}
+  // No form callback currently needed
+  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings) 
+  top.form.render_entity(top.focusEntityId, form_standalone_callback)
+  render_section_menu()
 
-function checkForHashEntity() {
-
- if (location.hash.length > 0 && location.hash.indexOf(':') != -1) { 
-    top.focusEntityId = document.location.hash.substr(1).split('/',1)[0]
-
-    // Returns if loading resource or if no appropriate resource found
-    if (!checkEntityResource(top.focusEntityId) ) return
-
-    loadForm()
-
-  }
-
-}
-
-function loadForm() {
-
-  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings)
-
-  top.form.renderEntity(top.focusEntityId)
-  doSectionMenu()
-
-  // Deselect specification menu.
+  // Clear any previous specification menu selection.
   $('#specificationType')[0].selectedIndex = 0
 
-  $('#buttonFormSubmit').on('click', function () {    
-    setModalDownload(getdataSpecification('form_submission.json'))
+  $('#buttonFormSubmit').on('click', function () {
+    // Submit button on form triggers download of user's sample data entry.
+    set_modal_download(get_data_specification('form_submission.json'))
   })
 
 }
 
+function form_standalone_callback(form){
+  const entity = get_form_specification_component(form.entityId)
+  $('#mainForm > div.field-wrapper > label')
+    .attr('id','formEntityLabel')
+    .after('<p>' + (entity.definition  || '') + '</p>') 
+}
 
-function doSectionMenu() {
-  // Provide form menu to two levels down.
+function render_section_menu() {
+  // Provide form menu that echoes form specification to two levels down of
+  // model
   $('#formSections').empty()
   var sections = 0
   var sectionHTML = ''

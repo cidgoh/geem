@@ -36,7 +36,7 @@ import optparse
 import python.ontohelper as oh
 
 import rdflib
-import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
+from rdflib.plugins.sparql import prepareQuery
 
 # Do this, otherwise a warning appears on stdout: No handlers could be 
 #found for logger "rdflib.term"
@@ -64,7 +64,7 @@ class Ontology(object):
 
 	"""
 
-	CODE_VERSION = '0.0.2'
+	CODE_VERSION = '0.0.3'
 
 	def __init__(self):
 
@@ -84,7 +84,7 @@ class Ontology(object):
 			##################################################################
 			# Generic TREE "is a" hierarchy from given root.
 			#
-			'tree': rdflib.plugins.sparql.prepareQuery("""
+			'tree': prepareQuery("""
 				SELECT DISTINCT ?id ?label ?parent_id ?deprecated ?replaced_by
 				WHERE {	
 					?parent_id rdfs:subClassOf* ?root.
@@ -108,7 +108,7 @@ class Ontology(object):
 			# that ui_label and ui_definition should really operate. Every entity
 			# in OWL file is retrieved for their rdfs:label, IAO definition etc.
 			# FUTURE: ADD SORTING OPTIONS, CUSTOM ORDER.
-			'entity_text': rdflib.plugins.sparql.prepareQuery("""
+			'entity_text': prepareQuery("""
 
 				SELECT DISTINCT ?label ?definition ?ui_label ?ui_definition
 				WHERE {  
@@ -132,7 +132,7 @@ class Ontology(object):
 			# OUTPUT
 			#   ?Synonym ?ExactSynonym ?NarrowSynonym
 			#
-			'entity_synonyms': rdflib.plugins.sparql.prepareQuery("""
+			'entity_synonyms': prepareQuery("""
 
 				SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 				WHERE {  
@@ -196,8 +196,8 @@ class Ontology(object):
 		print 'Doing terms', len(entities)
 		self.do_entities(entities)
 		
-		self.onto_helper.do_output_json(self.struct, output_file_basename)
-		self.onto_helper.do_output_tsv(self.struct, output_file_basename, self.fields)
+		self.onto_helper.do_output_json(self.onto_helper.struct, output_file_basename)
+		self.onto_helper.do_output_tsv(self.onto_helper.struct, output_file_basename, self.fields)
 
 
 	def do_entities(self, table):

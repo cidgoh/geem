@@ -9,7 +9,8 @@ import os
 import json
 import sys
 import rdflib
-import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
+from rdflib.plugins.sparql import prepareQuery
+
 # Do this, otherwise a warning appears on stdout: No handlers could be 
 #found for logger "rdflib.term"
 import logging; logging.basicConfig(level=logging.ERROR) 
@@ -26,7 +27,7 @@ def stop_err(msg, exit_code = 1):
 
 class OntoHelper(object):
 
-	CODE_VERSION = '0.0.2'
+	CODE_VERSION = '0.0.3'
 
 	def __init__(self):
 
@@ -90,7 +91,7 @@ class OntoHelper(object):
 		    #		<dc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
 		    #		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-02-28</dc:date>
 
-			'ontology_metadata': rdflib.plugins.sparql.prepareQuery("""
+			'ontology_metadata': prepareQuery("""
 			SELECT DISTINCT ?resource ?title ?description ?versionIRI ?prefix ?license ?date 
 			WHERE {
 				?resource rdf:type owl:Ontology.

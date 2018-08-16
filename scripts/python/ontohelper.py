@@ -62,6 +62,7 @@ class OntoHelper(object):
 		# Holds term details or other derived datastructures
 		self.struct['specifications'] = {}
 
+		# Namespace is for rdflib sparql querries
 		self.namespace = { 
 			'owl': rdflib.URIRef('http://www.w3.org/2002/07/owl#'),
 			'rdfs': rdflib.URIRef('http://www.w3.org/2000/01/rdf-schema#'),
@@ -486,7 +487,9 @@ class OntoHelper(object):
 			row = []
 			for field in fields:
 				value = entity[field] if field in entity else ''
-				row.append(value.replace('\t',' ').encode('utf-8'))  #
+				if isinstance(value, list): # Constructed parent_id list.
+					value = ','.join(value)
+				row.append(value.replace('\t',' ').encode('utf-8'))  # str() handles other_parents array
 
 			output.append('\t'.join(row))
 

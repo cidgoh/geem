@@ -210,7 +210,7 @@ class Ontology(object):
 		specBinding = {'root': rdflib.URIRef(self.onto_helper.get_expanded_id('owl:Thing'))} 
 		entities = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
 
-		print ('Doing terms: ' + len(entities) )
+		print ('Doing terms: ' + str(len(entities)) )
 		self.do_entities(entities)
 		
 		self.onto_helper.do_output_json(self.onto_helper.struct, output_file_basename)

@@ -142,7 +142,7 @@ class OntoHelper(object):
 			for arg in args:
 				focus = focus[arg]
 		except:
-			print "ERROR: in get_struct(), couldn't find '%s' key or struct in %s" % (str(arg), str(args) )
+			print ("ERROR: in get_struct(), couldn't find '%s' key or struct in %s" % (str(arg), str(args) ) )
 			return None
 		return focus
 
@@ -215,7 +215,7 @@ class OntoHelper(object):
 			
 			full_path = path + separator
 
-			for prefix, context_prefix in self.struct['@context'].iteritems():
+			for prefix, context_prefix in self.struct['@context'].items():
 				# Snips last separation character 
 				if full_path == context_prefix: 
 					return prefix + ":" + fragment
@@ -241,7 +241,7 @@ class OntoHelper(object):
 		# If a URI has a recognized prefix, create full version
 		if ':' in myURI: 
 			(prefix, myid) = myURI.rsplit(':',1)
-			for key, value in self.struct['@context'].iteritems():
+			for key, value in self.struct['@context'].items():
 				if key == prefix: return value + myid
 			
 		return myURI 
@@ -275,7 +275,7 @@ class OntoHelper(object):
 			ORDER BY (?import_file)
 		""")		
 
-		print("It has %s import files ..." % len(imports))
+		print ("It has %s import files ..." % len(imports))
 
 		for result_row in imports:
 
@@ -284,7 +284,7 @@ class OntoHelper(object):
 			# If main file supplied as a URI, then process imports likewise
 			if main_ontology_file[0:4] == 'http':
 				try:
-					self.graph.parse(import_file)	
+					self.graph.parse(import_file, format='xml')	
 				except rdflib.exceptions.ParserError as e:
 					print ('WARNING:' + import_file + " could not be loaded!\n")		
 
@@ -294,14 +294,14 @@ class OntoHelper(object):
 
 				file_path = os.path.dirname(main_ontology_file) + '/imports/' + import_file.rsplit('/',1)[1]
 
-			try:
-				if os.path.isfile( file_path):
-					self.graph.parse(file_path)	
-				else:
-					print ('WARNING:' + file_path + " could not be loaded!  Does its ontology include purl have a corresponding local file? \n")
+				try:
+					if os.path.isfile( file_path):
+						self.graph.parse(file_path)	
+					else:
+						print ('WARNING:' + file_path + " could not be loaded!  Does its ontology include purl have a corresponding local file? \n")
 
-			except rdflib.exceptions.ParserError as e:
-				print (file_path + " needs to be in RDF OWL format!")			
+				except rdflib.exceptions.ParserError as e:
+					print (file_path + " needs to be in RDF OWL format!")			
 
 
 	def set_ontology_metadata(self, query):
@@ -351,7 +351,7 @@ class OntoHelper(object):
 		try:
 			result = self.graph.query(query, initBindings=initBinds)
 		except Exception as e:
-			print ("\nSparql query [%s] parsing problem: %s \n" % (query_name, str(e) ))
+			print ("\nSparql query [%s] parsing problem: %s \n" % (query, str(e) ))
 			return None
 
 		# Can't get columns by row.asdict().keys() because columns with null results won't be included in a row.

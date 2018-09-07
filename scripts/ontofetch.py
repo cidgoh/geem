@@ -33,6 +33,7 @@ import json
 import sys
 import os
 import optparse
+import urllib2
 import python.ontohelper as oh
 
 import rdflib
@@ -191,7 +192,7 @@ class Ontology(object):
 			# conversion stuff like .replace() below
 			self.onto_helper.graph.parse(main_ontology_file, format='xml')
 
-		except URLError as e:
+		except urllib2.URLError as e:
 			#urllib2.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
 			stop_err('WARNING:' + main_ontology_file + " could not be loaded!\n")
 
@@ -202,13 +203,13 @@ class Ontology(object):
 		self.onto_helper.set_ontology_metadata(self.onto_helper.queries['ontology_metadata'])
 		print ('Metadata: ' + json.dumps(self.onto_helper.struct['metadata'],  sort_keys=False, indent=4, separators=(',', ': ')) )
 
-		# Retrieve all subclasses of 'owl:Thing' in given ontology
-		# and place in self.onto_helper.struct.specifications
-		# To retrieve just a given term like BFO:entity
-		# specBinding = {'root': rdflib.URIRef(self.get_expanded_id('BFO:0000001'))}  
-		print ('Doing term hierarchy query')
-		specBinding = {'root': rdflib.URIRef(self.onto_helper.get_expanded_id('owl:Thing'))} 
-		entities = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
+		# By default, retrieve all subclasses of 'owl:Thing' in given ontology
+		# and place in self.onto_helper.struct.specifications. To retrieve a 
+		# branch like BFO:entity (BFO:0000001), add command line option:
+		# -r http://purl.obolibrary.org/obo/BFO_0000001  
+		print ('Doing term hierarchy query starting at:' + options.root_uri)
+		specBinding = {'root': rdflib.URIRef(options.root_uri)} 
+		entities = self.onto_helper.do_query_table(self.queries['tree'], specBinding)
 
 		print ('Doing terms: ' + str(len(entities)) )
 		self.do_entities(entities)
@@ -376,9 +377,9 @@ class Ontology(object):
 		parser.add_option('-v', '--version', dest='code_version', default=False, action='store_true', help='Return version of this code.')
 
 		parser.add_option('-o', '--output', dest='output_folder', type='string', help='Path of output file to create')
-
+		
+		parser.add_option('-r', '--root', dest='root_uri', type='string', help='Root term to fetch underlying terms from (full URI)', default='http://www.w3.org/2002/07/owl#Thing')
 		return parser.parse_args()
-
 
 
 if __name__ == '__main__':

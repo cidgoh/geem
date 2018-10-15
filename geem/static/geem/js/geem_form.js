@@ -198,7 +198,7 @@ function OntologyForm(domId, resource, settings, callback) {
 					fieldspec.input_group = true 
 
 					var header = '<div class="inputBlockSeparator"><i class="removeInputElement fi-x-circle"></i><label>Record ' + (kid_count + 1) + '</label></div>'
-					var html = render_form_specification(fieldspec, header, true)
+					var html = render_form_specification(fieldspec, header)
 					element.append(html)
 
 					var new_element = element.children().last()
@@ -512,7 +512,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		// Render each component
 		for (var entityId in entity.components) { 
-			html += this.render_form_specification(entity.components[entityId]) //, html
+			html += this.render_form_specification(entity.components[entityId]) 
 		}
 		/*
 		if ('choices' in entity) {
@@ -627,7 +627,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		var domId = entity.domId
 		var htmlTabs = ''
 		var htmlTabContent = ''
-
+		console.log(entity)
 		// Could externalize this
 		var activeDone = false // Flag to activate first tab
 		for (var entityId in entity.components) { 
@@ -647,14 +647,14 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
-			//htmlTabContent += 	this.render(entityId, entity.path, entity.depth+1) //, false, true 
-			// Issue: tab label repeated in child field wrapper.
+			// Cosmetic issue: tab label repeated in child field wrapper.
 			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
 			htmlTabContent += '</div>\n'		
 		}
 
+		// Currently can't select component by disjunction because of disjunction's anonymous tab id.
 		return [ // A variation on get_field_wrapper()
-			,	'<div class="field-wrapper input-tabs">'
+			,	'<div class="field-wrapper input-tabs disjunction">'
 			,		'<ul class="tabs" data-tabs id="' + domId + '">'
 			,			htmlTabs
 			,		'</ul>\n' 
@@ -1124,6 +1124,9 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			entityId = document.location.hash.substr(1).split('/',1)[0]
 
 
+	if (!entityId)
+		return false
+
 	if (top.focusEntityId && entityId == top.focusEntityId)	// No work to do here
 		return false
 
@@ -1132,11 +1135,14 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 	if (!top.resource.specifications || ! entityId in top.resource.specifications) {
 
 		resource_URL = api.get_resource_URL(entityId) // Selects favoured resource
+		//if (resource_URL)
 
 		if (top.resource.metadata && top.resource.metadata.resource == resource_URL) {// Should never happen.
 			Error('check_entity_id_change() problem: canonical resource doesn\'t have term')
 			return false
 		}
+		
+		console.log('we got', entityId, resource_URL)
 
 		top.focusEntityId = entityId
 		api.get_resource(resource_URL)

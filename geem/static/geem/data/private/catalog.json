@@ -1,0 +1,17 @@
+{
+    "new": {
+        "2018-04-16": {
+            "versionIRI": "data/private_packages/new_2018-04-16.json",
+            "description": "A GEEM draft package",
+            "license": "http://creativecommons.org/licenses/by/3.0/",
+            "title": "Draft package that you can add shopping cart items to.",
+            "prefix": "",
+            "date": "2018-04-16",
+            "resource": "data/private_packages/new.json",
+            "type": "private",
+            "status": "draft",
+            "local_URL": "data/private/new.2018-04-16.json",
+            "timestamp": 1530659091.0
+        }
+    }
+}

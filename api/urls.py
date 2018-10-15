@@ -4,6 +4,7 @@ from django.urls import include, path
 from . import views
 
 router = routers.DefaultRouter()
+# These are lisated at top level for /api/ call
 router.register('users', views.UserViewSet)
 router.register('packages', views.PackageViewSet, base_name="Package")
 

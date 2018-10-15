@@ -336,7 +336,7 @@ function render_entity_form_cart_icons(formObj) {
 
 	*/
 
-	$('#tabsContent div.field-wrapper')
+	$('#tabsContent div.field-wrapper:not(.disjunction)')
 		.addClass('cart-item') // Just for styling
 		.prepend('<i class="fi-shopping-cart"></i>')
 
@@ -405,16 +405,11 @@ function render_cart_package_selection_modal() {
 	 Couldn't figure out foundation event for this
 	 A lot like init_resource_select()
 	*/
-	stack = top.resources.slice(0)
 
 	html = ['<option value="">Select a package ...</option>']
-	// Skip display of ontologies and packages user doesn't manage
-	while (stack.length && stack[0].type == 'ontology') 
-		stack.shift()
-
 	// manager_filter turned on so only those items user manages are shown.
-	init_resource_select_item(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
-	init_resource_select_item(stack, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
+	init_resource_select_item(top.resources, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
+	init_resource_select_item(top.resources, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
 	html = html.join('\n')
 
 	// Load menu selection

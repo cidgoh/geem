@@ -110,15 +110,14 @@ function do_template_fill(template_html, data) {
 
 
 function init_resource_select(resources) {
-	/* Populates resource selection list. Assumes resources are sorted.
+	/* Populates resource selection list.
 
 	*/
-	stack = resources.slice(0)
 
 	html = ['<option value="">Select a specification resource ...</option>']
-	init_resource_select_item(stack, 'ontology', html, '<optgroup label="Ontologies">')
-	init_resource_select_item(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">')
-	init_resource_select_item(stack, 'private', html, '</optgroup>\n<optgroup label="My Packages (login required)">')
+	init_resource_select_item(resources, 'ontology', html, '<optgroup label="Ontologies">')
+	init_resource_select_item(resources, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">')
+	init_resource_select_item(resources, 'private', html, '</optgroup>\n<optgroup label="My Packages (login required)">')
 
 	html.push('\n<option value="new">Add new package ...</option>\n</optgroup>')
 	html = html.join('\n')
@@ -128,15 +127,35 @@ function init_resource_select(resources) {
 
 }
 
-function init_resource_select_item(stack, type, html, header, manager_filter=false) {
+function init_resource_select_item(resources, type, html, header, manager_filter=false) {
 	/* Provide sections to display of Resource types.
+	resources = {
+        'ontology': {
+            'genepio-merged.json': {
+                '2018-04-24': {# version id (relative to GEEM or ontology last publish date)
+                    'type':'ontology',
+                    'name':'Genomic Epidemiology Ontology (GenEpiO)',
+                    'path': 'data/ontology/genepio-merged.json'
+                },
+                # next version ...
+            },
+			...
+
 	Filter options if manager_filter supplied to just those user manages
 	which are in draft mode.
 	*/
+	var resource_list = resources[type]
 	html.push('\n' + header)
-	while (stack.length && stack[0].type == type && ((manager_filter && stack[0].manager && stack[0].status=='draft') || true)) {
-		html.push('\n<option value="' + stack[0].path + '">' + stack[0].name + '</option>')
-		stack.shift()
+	for (file_name in resource_list) {
+		var resource = resource_list[file_name]
+		// SORT OUT PERMISSIONS MECHANISM
+		if ((manager_filter && resource.manager && resource.status == 'draft') || true) {
+			// RESOURCE STATUS WOULD BE IN VERSION.
+			for (versionId in resource) { 
+				version = resource[versionId]
+				html.push('\n<option value="' + version.local_URL + '">' + version.title + '(' + versionId + ')</option>')
+			}
+		}
 	}
 }
 

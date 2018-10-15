@@ -8,6 +8,25 @@ function GeemAPI() {
 		/* 
 			Retrieves available resources for logged-in or public user to browse.
 		*/
+		resource_URL = 'data/resource'
+
+		return new Promise(function(resolve, reject) {
+			$.ajax({
+				type: 'GET',
+				url: resource_URL,
+				timeout: 30000, //30 sec timeout
+				success: function(resources) {
+					
+					top.resources = resources
+					resolve(resources);
+				},
+
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be found: \n\n\t' + resource_URL))
+					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
+				}
+			});
+		/*
 		return new Promise(function(resolve, reject) {
 
 			// AJAX FUNCTION HERE
@@ -20,6 +39,7 @@ function GeemAPI() {
 
 			// CANNED DUMMY DATA
 			resolve(top.resources)
+		*/
 		})
 	}
 
@@ -78,7 +98,7 @@ function GeemAPI() {
 				},
 
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
-					reject(Error('Given resource could not be found: \n\n\t' + resource_URL))
+					reject(Error('Given resource could not be found: \n\n\t' + resource_URL + ":" + textStatus))
 					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
 				}
 			});

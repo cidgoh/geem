@@ -2,6 +2,7 @@
 function GeemAPI() {
 
 	//https://developers.google.com/web/fundamentals/primers/promises
+
 	//this.init = function() {}
 
 	this.get_resources = function() {
@@ -26,20 +27,7 @@ function GeemAPI() {
 					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
 				}
 			});
-		/*
-		return new Promise(function(resolve, reject) {
 
-			// AJAX FUNCTION HERE
-			top.resources =	[
-				{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
-				{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
-				{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
-				{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
-			]
-
-			// CANNED DUMMY DATA
-			resolve(top.resources)
-		*/
 		})
 	}
 
@@ -89,16 +77,12 @@ function GeemAPI() {
 				timeout: 30000, //30 sec timeout
 				success: function(resource) {
 					
-					// Temporary correction until SPARQL query can be revised.
-					//if ('value' in top.resource.metadata.date)
-					//	top.resource.metadata.date = top.resource.metadata.date.value
-
 					top.resource = resource
 					resolve(resource);
 				},
 
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
-					reject(Error('Given resource could not be found: \n\n\t' + resource_URL + ":" + textStatus))
+					reject(Error('Given resource could not be found: \n\n\t' + resource_URL))
 					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
 				}
 			});

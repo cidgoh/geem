@@ -9,6 +9,11 @@ class PackageSerializer(serializers.HyperlinkedModelSerializer):
             'owner',
             'created',
             'updated',
+            'root_name',
+            'version',
+            'ontology',
+            'public',
+            'curation',
             'contents'
         )
 

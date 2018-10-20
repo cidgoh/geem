@@ -1132,12 +1132,11 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 
 	// Returns if loading resource or if no appropriate resource found
 	// Ensure appropriate resource is loaded for given entity id 
-	if (!top.resource.specifications || ! entityId in top.resource.specifications) {
+	if (!top.resource.contents || ! entityId in top.resource.contents.specifications) {
 
 		resource_URL = api.get_resource_URL(entityId) // Selects favoured resource
-		//if (resource_URL)
 
-		if (top.resource.metadata && top.resource.metadata.resource == resource_URL) {// Should never happen.
+		if (top.resource.contents && top.resource.contents.metadata.resource == resource_URL) {// Should never happen.
 			Error('check_entity_id_change() problem: canonical resource doesn\'t have term')
 			return false
 		}
@@ -1154,7 +1153,7 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 
 	// At this point a change in entity_id has occured, so check current
 	// resource and then render form.
-	if (top.resource.specifications && entityId in top.resource.specifications) {
+	if (top.resource.contents && entityId in top.resource.contents.specifications) {
 		top.focusEntityId = entityId
 		entity_callback()
 		return true

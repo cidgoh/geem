@@ -25,9 +25,9 @@ class Package(models.Model):
     CURATION_CHOICES = (
         (DRAFT, 'draft'),
         (REVIEW, 'under review'),
-        (RELEASE, 'released'),
+        (RELEASE, 'release'),
     )
-
+#owner = models.ForeignKey('auth.User', related_name='snippets', on_delete=models.CASCADE)
     owner = models.ForeignKey(
         User,
         related_name='packages',
@@ -38,11 +38,11 @@ class Package(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    root_name = models.CharField(
+    file_base_name = models.CharField(
         max_length=20,
-        #unique=True, Enforce this by code between shared/private, since ontology name can match package if added after package.
+        #unique=True. Ontology and non-ontology might share name since ontology name can match package if added after package.
         blank=False,
-        default="new package"
+        default="resource"
     )
     version = models.CharField(
         max_length=10,
@@ -56,7 +56,21 @@ class Package(models.Model):
         default=DRAFT
     ) 
 
-    contents = JSONField() # Only stores metadata for now.
+    # Mirrored up from resource metadata. If user is owner, they can modify.
+    name = models.CharField(
+        max_length=60,
+        blank=False,
+        default="New Resource"
+    )
+
+    # Mirrored up from resource metadata. If user is owner, they can modify.
+    description = models.CharField(
+        max_length=255,
+        blank=False,
+        default="New resource description"
+    )
+
+    contents = JSONField() # Note, this takes a while to save because postgres creates queryable structure of contents?
 
     def __str__(self):
         owner = self.owner

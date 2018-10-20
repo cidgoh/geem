@@ -5,11 +5,11 @@ function init_search_tab() {
 	// Provide type-as-you-go searching
 	$("#searchField").on('keyup', function() {
 		var text = $(this).val().toLowerCase()
-		search_as_you_type(top.resource.specifications, text)
+		search_as_you_type(top.resource.contents.specifications, text)
 	})
 
 	$('#toggleSearchDefinition').on('change', function() {
-		search_as_you_type(top.resource.specifications, $("#searchField").val().toLowerCase())
+		search_as_you_type(top.resource.contents.specifications, $("#searchField").val().toLowerCase())
 	})
 
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', render_display_context)
@@ -18,7 +18,7 @@ function init_search_tab() {
 
 function search_as_you_type(collection, text) {
 	/* As user types text (more than 2 characters) into searchField, exact
-	 substring search is conducted through top.resource.specifications entities (all
+	 substring search is conducted through top.resource.contents.specifications entities (all
 	 of their numeric or textual attributes)
 	*/
 	text = text.toLowerCase()
@@ -70,7 +70,7 @@ function render_search_result_item(ontologyId) {
 	var ptr = ontologyId.lastIndexOf('/')
 	// Get last path item id.
 	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
-	var entity = top.resource.specifications[entityId]
+	var entity = top.resource.contents.specifications[entityId]
 	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
 	content = ''
 	if ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)

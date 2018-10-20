@@ -1,169 +1,187 @@
-/* contains functions needed for portal.html resource selection and reporting section */
+/* Contains functions needed for portal.html resource selection and reporting section 
+	- Render resource form
+	- Create new resource
+	- Update existing resource
+	- Delete resource
+
+*/
 
 function render_resource_form() {
 	// Feeds specification.metadata variables to copy of template
 
 	$.ajax('templates/resource_summary_form.html').done(function(response) {
 
-		const metadata = top.resource.metadata
-		$('#resourceForm').html( do_template_fill(response, metadata) )
+		const resource = top.resource //top.resource.metadata
+		$('#resourceForm').html( do_template_fill(response, resource) )
 
 		// 2 select lists to select options in:
-		$('#summary_type option[value="' + metadata.type + '"]').prop('selected', true)
-		$('#summary_status option[value="' + metadata.status + '"]').prop('selected', true)
+		//alert(resource.public)
+		$('#summary_public option[value="' + resource.public + '"]').prop('selected', true)
+		$('#summary_ontology option[value="' + resource.ontology + '"]').prop('selected', true)
+		$('#summary_curation option[value="' + resource.curation + '"]').prop('selected', true)
 
-		// If loaded data is direct from ontology, hide certain buttons. 
-		var onto_fields = $('#summary_title, #summary_resource, #summary_description, #summary_prefix')
+		// If loaded data is direct from ontology, hide/disable certain buttons/fields. 
+		var onto_fields = $('#summary_name, #summary_version, #summary_resource, #summary_description, #summary_prefix')
 
-		if (metadata.type != 'ontology')
-			$('.summary_prefix').hide()
+		if (!resource.ontology)
+			$('.summary_prefix').hide() // Packages don't have prefixes.
 
-		if (metadata.type == 'private') {
-
-			$("#summary_license").removeAttr('readonly')
-
-			if (metadata.new) {
-				// new records are always private, draft packages.
-				$('.summary_resource, .summary_prefix').hide()
-				$('#summary_delete, #summary_download, #summary_copy').hide()
-			}
-			else //
-				$("#summary_status, #summary_type").prop('disabled', false)
+		// Public resources can't be deleted or updated.
+		if (resource.public || resource.curation != 'draft') {
 			
+			$('#summary_delete, #summary_update').hide()
+			onto_fields.attr('readonly','readonly')
 		}
 		else {
-			// FUTURE: User may own a shared package, therefore can edit.
-			$('#summary_delete, #summary_update').hide()
-			
-			onto_fields.attr('readonly','readonly')
+			$("#summary_license").removeAttr('readonly')
 
+			if (resource.new) {
+				// new records are always private, draft packages.
+				$('.summary_resource, .summary_prefix').hide()
+				$('#summary_delete, #summary_download, #summary_copy, #summary_update').hide()
+			}
+			else {//
+				$('#summary_create').hide()
+				$("#summary_public, #summary_ontology, #summary_curation").prop('disabled', false)
+			}
 		}
 
-		$('#resourceForm').foundation()
-
-
-
-		// Deals with #summary_delete, #summary_download, #summary_update
-		$('#resourceForm').on('click','#summary_delete', function() {
-			// API DELETE RESOURCE.
-			alert('Coming soon!')
-		})
-
-		$('#resourceForm').on('click','#summary_download', function() {
-			/* Currently this function is downloading client-side 
-			representation of package or ontology json.
-			*/
-			var content =  {
-				content: JSON.stringify(top.resource),
-				report_type: 'geem.json',
-				id: top.resource.metadata.prefix.toLowerCase()
-			}
-			download_data_specification(content)
-			return false
-		})
-
-		$('#resourceForm').on('click', '#summary_update', function() {
-			alert('Coming soon!')
-			return
-
-
-			var path = $('#resourceForm #summary_path').val()
-			var content =  {
-				type: 'private',
-				name: $('#resourceForm #summary_title').val(),
-				path: path
-				
-				//...
-
-			}
-
-			// USE API To send into server
-			top.resources.push(content)
-			init_resource_select(top.resources)
-			$('#specificationType').val(path)
-			//render_resource_form(data, form_URL, new_flag = false) {
-			$('#summary_delete,#summary_download,#summary_copy').show()
-			return false
-		})
-
-
-
+		//$('#resourceForm').foundation()
 
 	});
 
 }
 
-function do_template_fill(template_html, data) {
-	/* Currently template has a primitive key value substitution scheme.
+function get_form_data(domId) {
 
-	*/
-	Object.keys(data).forEach(function(key) {
-		value = data[key]
-		// Search and replace signalled by @[variable name]
-		var re = new RegExp('@' + key ,"g");
-		template_html = template_html.replace(re, value)
-	}) 
+	var data = {
+		'contents': {
+			'@context': 		{},
+			'specifications': 	{},
+			'metadata': 		{}
+		}
+	}
 
-	return template_html
+	domId.find('input,select,textarea').each(function() {
+		var field = $(this).attr('name')
+		if (field.indexOf('.') > 0) {
+			var dotted_reference = field.split('.')
+			var focus = data;
+			while (dotted_reference.length) {
+				key = dotted_reference.shift()
+				if (dotted_reference.length) {
+					if (!key in focus) {
+						focus[key] = {}
+					}
+					focus = focus[key]
+				}
+				else {
+					if ($(this).is('textarea'))
+						focus[key] = $(this).text()
+					else
+						focus[key] = $(this).val()
+				}
+			}
+		}
+		else 
+			data[field] = $(this).val()
+	})
+
+	return data
 }
 
-
+function do_template_fill(template_html, data) {
+	/* Currently template has a primitive key value substitution scheme.
+	If substituted key's value has "@..." these are ignored.
+	*/
+	return template_html.replace(/@([a-zA-Z_0-9\.]+)(["<])/g,  
+		function(match, parenth_1, parenth_2, offset, value) {
+			var focus = data
+			var dotted_reference = parenth_1.split('.')
+			while (dotted_reference.length) {
+				key = dotted_reference.shift()
+				if (key in focus) {
+					focus = focus[key]
+					if (dotted_reference.length && typeof focus !== 'object')
+						return 'unmatched reference: @' + parenth_1 + parenth_2	
+				}
+				else {
+					return 'unmatched reference: @' + parenth_1 + parenth_2
+				}
+			}
+			return focus + parenth_2
+		} 
+	)
+}
 
 function init_resource_select(resources) {
 	/* Populates resource selection list.
-
+	This can be switched to agGrid for better usability as more items exist in database.
 	*/
 
 	html = ['<option value="">Select a specification resource ...</option>']
-	init_resource_select_item(resources, 'ontology', html, '<optgroup label="Ontologies">')
-	init_resource_select_item(resources, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">')
-	init_resource_select_item(resources, 'private', html, '</optgroup>\n<optgroup label="My Packages (login required)">')
+	init_resource_select_item(resources, html, '<optgroup label="Ontologies">', true)
+	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="Public Packages">', false, true)
+	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="My Private Packages (login required)">', false, false)
 
-	html.push('\n<option value="new">Add new package ...</option>\n</optgroup>')
+	html.push('\n<option value="5">Add new package ...</option>\n</optgroup>') // Resource #5 is template for package
 	html = html.join('\n')
 
 	// When a new ontology is selected:
 	$('#selectResource').html(html).on('change', do_resource_selection)
 
+	clear_resource_summary()
+
 }
 
-function init_resource_select_item(resources, type, html, header, manager_filter=false) {
-	/* Provide sections to display of Resource types.
-	resources = {
-        'ontology': {
-            'genepio-merged.json': {
-                '2018-04-24': {# version id (relative to GEEM or ontology last publish date)
-                    'type':'ontology',
-                    'name':'Genomic Epidemiology Ontology (GenEpiO)',
-                    'path': 'data/ontology/genepio-merged.json'
-                },
-                # next version ...
-            },
-			...
-
-	Filter options if manager_filter supplied to just those user manages
-	which are in draft mode.
+function init_resource_select_item(resources, html, header, ontology=null, public=null, draft=null) {
+	/* Provide select input of Resource types.
+	resources = [
+		{
+			"id":3,
+			"owner":null,
+			"created":"2018-10-17T17:45:35.561474Z",
+			"updated":"2018-10-17T17:45:35.561509Z",
+			"name":"New Resource",
+			"file_base_name":"new_resource",
+			"version":"2018-04-17",
+			"ontology":true,
+			"public":false,
+			"curation":"draft"
+		},
+		{"id":1,"owner":"http://localhost:8000/api/2"},
+		...
+		]
 	*/
-	var resource_list = resources[type]
 	html.push('\n' + header)
-	for (file_name in resource_list) {
-		var resource = resource_list[file_name]
-		// SORT OUT PERMISSIONS MECHANISM
-		if ((manager_filter && resource.manager && resource.status == 'draft') || true) {
-			// RESOURCE STATUS WOULD BE IN VERSION.
-			for (versionId in resource) { 
-				version = resource[versionId]
-				html.push('\n<option value="' + version.local_URL + '">' + version.title + '(' + versionId + ')</option>')
-			}
-		}
+
+	var resource_list = resources
+	if (ontology != null)
+		resource_list = resource_list.filter(resource => resource.ontology == ontology)
+	if (public != null)
+		resource_list = resource_list.filter(resource => resource.public == public)
+	if (draft == true)
+		resource_list = resource_list.filter(resource => resource.curation == 'draft')
+
+	for (ptr in resource_list) {
+		var resource = resource_list[ptr]
+		// FUTURE: With agGrid, show draft/public, etc.
+		html.push('\n<option value="' + resource.id + '">' + resource.name + ' (' + resource.version + ')</option>')
 	}
 }
 
+function clear_resource_summary() {
+	$('#resourceTabs, #content').addClass('disabled')
+	$('#specificationSourceInfoBox').show()
+	$('#tabsSpecification').hide()
+	$('#formEntityLabel').html('')
+	$('#resourceTabs').foundation('_collapseTab', $('#panelLibrary'));
+}
 
 function do_resource_selection() {
 	/* Fetch user's chosen ontology or package for display
 	*/
-	resource_URL = $('#selectResource').val()
+	const resource_id = $('#selectResource').val()
 
 	// This wasn't URL triggered, so clear out existing form
 	location.hash = ''
@@ -177,21 +195,30 @@ function do_resource_selection() {
 	$('#shoppingCart').empty()
 	*/
 
-	if (resource_URL.length == 0) {
-		$('#resourceTabs, #content').addClass('disabled')
-		$('#specificationSourceInfoBox').show()
-		$('#tabsSpecification').hide()
-		$('#formEntityLabel').html('')
-		$('#resourceTabs').foundation('_collapseTab', $('#panelLibrary'));
+	if (resource_id.length == 0) {
+		clear_resource_summary()
 		return
 	}
 
-	if (resource_URL == 'new')
+	if (resource_id == 5) { //Special package id for template
 		// User requesting to make a new package
-		resource_callback(api.get_new_resource())
+		api.get_resource(5)
+			.then(init_new_resource)
+			.then(resource_callback)
+	}
 	else {
-		api.get_resource(resource_URL).then(resource_callback)
+		api.get_resource(resource_id)
+			.then(resource_callback)
 	}
 
+
+}
+
+function init_new_resource(resource) {
+
+	var today = new Date();
+	resource.new = true
+	resource.contents.metadata.date = today.toISOString().substring(0, 10);
+	return resource
 
 }

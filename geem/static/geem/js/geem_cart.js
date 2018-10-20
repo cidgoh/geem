@@ -179,7 +179,7 @@ function cart_check(entity_path) {
 		}
 
 	if (action)
-		api.cart_change_item(entity_path, action, top.resource.metadata.versionIRI)
+		api.cart_change_item(entity_path, action, top.resource.contents.metadata.versionIRI)
 			.then(cart_change)
 
 }
@@ -408,8 +408,7 @@ function render_cart_package_selection_modal() {
 
 	html = ['<option value="">Select a package ...</option>']
 	// manager_filter turned on so only those items user manages are shown.
-	init_resource_select_item(top.resources, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
-	init_resource_select_item(top.resources, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
+	init_resource_select_item(top.resources, html, '</optgroup>\n<optgroup label="Draft Packages">', null, null, true)
 	html = html.join('\n')
 
 	// Load menu selection

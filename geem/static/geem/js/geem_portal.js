@@ -72,9 +72,11 @@ $( document ).ready(function() {
 
 
 function resource_callback(resource) {
+	/* This function is triggered after a fetch for a particular resource by id.
 
+	*/
 	$('#resourceTabs').removeClass('disabled')
-	$('#tabsSpecification').show()
+	$('#tabsSpecification, #panelLibrary').show()
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
 
 	// Prepare browsable top-level list of ontology items
@@ -90,7 +92,7 @@ function render_entity_form() {
 	$('#content').removeClass('disabled')
 
 	// Providing form_callback to add shopping cart to form items.
-	top.form = new OntologyForm('#mainForm', top.resource, top.formSettings, portal_entity_form_callback) 
+	top.form = new OntologyForm('#mainForm', top.resource.contents, top.formSettings, portal_entity_form_callback) 
 
 	top.form.render_entity(top.focusEntityId)
 
@@ -137,7 +139,7 @@ function render_resource_menu_init() {
 	/* Prepare browsable top-level list of ontology items
 	Provide context of form to populate. Passes form_callback, name of function in this module for OntologyForm to return to when complete.
 
-	If it is a package ... what is the top level menu id?
+	If it is a package then we must find top-level term ids.
 	*/
 
 	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
@@ -145,7 +147,7 @@ function render_resource_menu_init() {
 
 	// If it is an ontology, render its data representation model tree:
 	var root_id = 'OBI:0000658'
-	if (root_id in top.resource.specifications)
+	if (top.resource.contents && top.resource.contents.specifications && root_id in top.resource.contents.specifications)
 		$("#entityMenu").html(render_resource_menu(root_id))
 	else
 		$("#entityMenu").html(render_resource_menu())
@@ -163,17 +165,17 @@ function render_resource_menu(entityId = null, depth = 0 ) {
 	if (!entityId) {
 		// Ordered at all?
 		
-		for (entity_id in top.resource.specifications) {
+		for (entity_id in top.resource.contents.specifications) {
 
-			entity = top.resource.specifications[entity_id]
+			entity = top.resource.contents.specifications[entity_id]
 			// If a model, and not subordinate to some other model
-			if (entity.datatype == 'model' && (! (  'parent' in entity) || !( entity['parent'] in top.resource.specifications))) {
+			if (entity.datatype == 'model' && (! (  'parent' in entity) || !( entity['parent'] in top.resource.contents.specifications))) {
 				children[entity_id] = []
 			}
 		}
 	}
 	else {
-		var entity = top.resource.specifications[entityId]
+		var entity = top.resource.contents.specifications[entityId]
 		if (entity) {
 			// Ran into this once ...
 			if ('parent' in entity && parent['id'] == entityId) {
@@ -204,7 +206,7 @@ function render_resource_menu(entityId = null, depth = 0 ) {
 			// Deeper menu items
 			else {
 				// Only list item if it has components or models
-				var child = top.resource.specifications[memberId]
+				var child = top.resource.contents.specifications[memberId]
 				if (child && ('models' in child || 'components' in child))
 					html += [
 					'<ul class="menu vertical nested">'
@@ -219,7 +221,7 @@ function render_resource_menu(entityId = null, depth = 0 ) {
 		html +=	'</li>'
 
 	if (html == '') 
-		html = '<div class="infoBox">This package does not contain any specifications.</div>'
+		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
 	return html
 }
 
@@ -233,8 +235,8 @@ function render_entity_detail(ontologyId) {
 	var entity = get_entity(ontologyId)
 	var entityIdParts = entity['id'].split(':')
 	var idPrefix = entityIdParts[0]
-	if (idPrefix in top.resource['@context']) {
-		entity_url = top.resource['@context'][idPrefix] + entityIdParts[1]
+	if (idPrefix in top.resource.contents['@context']) {
+		entity_url = top.resource.contents['@context'][idPrefix] + entityIdParts[1]
 	}
 	else
 		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
@@ -379,6 +381,72 @@ function render_relation_link(relation, entity) {
 
 function init_summary_tab() {
 
+
+	$('#resourceForm').on('click','#summary_create', function() {
+		// Get all form fields and pass to api.create_resource()
+		var data = get_form_data($('#resourceForm'))
+		// #Django expecting flat format with contents 
+		data.contents = JSON.stringify(data.contents)
+		api.create_resource(data)
+			.then(function(resource) {
+				api.get_resources()
+				.then(init_resource_select)
+				.then(function(){
+					$('#specificationType').val(resource.id) // select given resource to load it
+				})
+
+				//init_resource_select(top.resources)
+				//$('#specificationType').val(resource.id) // select given resource to load it
+				//return resource
+			})
+			//.then(resource_callback)
+
+		return false
+	})
+
+
+	// Deals with #summary_delete, #summary_download, #summary_update
+	$('#resourceForm').on('click','#summary_delete', function() {
+		// API DELETE RESOURCE.
+		var id = parseInt($('#resourceForm input[name="id"]').val())
+		if (id && id != 5) {
+			api.delete_resource(id)
+				.then(function(){
+					api.get_resources()
+					.then(init_resource_select)
+				})
+	
+			alert("deleted " + id)
+		}		
+	})
+
+	$('#resourceForm').on('click','#summary_download', function() {
+		/* Currently this function is downloading client-side 
+		representation of package or ontology json.
+		*/
+		var content =  {
+			content: JSON.stringify(top.resource.contents),
+			report_type: 'geem.json',
+			id: top.resource.metadata.prefix.toLowerCase()
+		}
+		download_data_specification(content)
+		return false
+	})
+
+	$('#resourceForm').on('click', '#summary_update', function() {
+
+		var data = get_form_data($('#resourceForm'))
+		data.contents = JSON.stringify(data.contents)
+		api.update_resource(data)
+			.then(resource_callback)
+
+		existing_resource = top.resources.filter(record => record.id = data.id)
+		//init_resource_select(top.resources)
+		//$('#specificationType').val(resources.id)
+		return false
+	})
+
+
 }
 
 function init_browse_tab() {
@@ -444,7 +512,7 @@ function init_specification_tab() {
 /******************************** UTILITY FUNCTIONS *************************/
 
 function get_entity(ontologyId) {
-	return top.resource.specifications[ontologyId]
+	return top.resource.contents.specifications[ontologyId]
 }
 
 function dom_item_animate(item, effectClass) {

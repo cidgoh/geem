@@ -11,7 +11,7 @@ function get_data_specification(report_type) {
 	report_type: 	Desired report type, see below; also supplied by 
 					#specificationType select
 	top.focusEntityId: The current entity being focused on, looked up in
-                       top.resource.specifications components: specification, picklists and units 
+                       top.resource.contents.specifications components: specification, picklists and units 
     OUTPUT
     content:		textual representation.
     report_type:	As above
@@ -79,7 +79,7 @@ function get_data_specification(report_type) {
 
 			case 'form_submission.json':
 				// Provides a json structure of field identifiers and values that user has entered.
-				content = get_form_data('form#mainForm')
+				content = get_specification_form_data('form#mainForm')
 				break
 
 			case 'redcap.tsv':
@@ -254,11 +254,11 @@ function get_entity_spec_root(entityId = null) {
 		return {
 			'@context': get_entity_spec_context(spec),
 			'specifications': spec,
-			'metadata': top.resource.metadata // Inherited from resource
+			'metadata': top.resource.contents.metadata // Inherited from resource
 		 }
 	}
-	// Return everything in top.resource - @context, specifications, and metadata
- 	return top.resource
+	// Return everything in top.resource.contents - @context, specifications, and metadata
+ 	return top.resource.contents
 }
 
 function get_entity_spec_context(entity_dict = null) {
@@ -279,7 +279,7 @@ function get_entity_spec_context(entity_dict = null) {
 
 	if (entity_dict) {
 		var context = {'owl':'http://www.w3.org/2002/07/owl/'} // 'owl:' shows up in cardinality statements
-		var resContext = top.resource['@context']
+		var resContext = top.resource.contents['@context']
 		// Cycle through content, adding all pertinent prefixes.
 		for (var entity_id in entity_dict) {
 			var entity = entity_dict[entity_id]
@@ -304,7 +304,7 @@ function get_entity_spec_context(entity_dict = null) {
 		return context
 	}
 
-	return top.resource['@context']
+	return top.resource.contents['@context']
 }
 
 function set_specification_context(ref, context, resContext) {
@@ -324,14 +324,14 @@ function get_entity_spec(spec, entityId = null, inherited = false) {
 	/* Recursively copy the entityId specification element and all its
 	   underlings into a a single javascript object. This differs from
 	   get_form_specification() in that entities are copied verbatim from
-	   top.resource.specifications, and via reference, so no branch-specific
+	   top.resource.contents.specifications, and via reference, so no branch-specific
 	   processing goes on.
 	*/
 	if (spec == null)
 		spec = {}
 
-	if (entityId in top.resource.specifications) {
-		var entity = top.resource.specifications[entityId]
+	if (entityId in top.resource.contents.specifications) {
+		var entity = top.resource.contents.specifications[entityId]
 		if (entity) {
 			spec[entityId] = entity // reference entity directly - flat list
 			
@@ -366,13 +366,13 @@ function get_entity_spec_items(spec, entity, type) {
 			// units is an array; 
 			for (var ptr in entity['units']) { 
 				var partId = entity[type][ptr]
-				spec[partId] = top.resource.specifications[partId] // load object
+				spec[partId] = top.resource.contents.specifications[partId] // load object
 				get_entity_spec(spec, partId) // sub-units?
 			}
 		else
 			// models, components, choices, which are dictionaries
 			for (var partId in entity[type]) { 
-				spec[partId] = top.resource.specifications[partId] // load object
+				spec[partId] = top.resource.contents.specifications[partId] // load object
 				get_entity_spec(spec, partId)
 			} 
 	}
@@ -388,7 +388,7 @@ get_form_specification = function(entityId) {
 	from pure JSON specification. At the top level it is an array of form
 	elements. The first element is the form item itself, and it contains 
 	a components [] array, a choices [] array and a units [] array.
-	Each item in these arrays are copies of the top.resource.specifications object,
+	Each item in these arrays are copies of the top.resource.contents.specifications object,
 	trimmed down.
 
 	The complexity occurs in that some form elements may inherit components
@@ -436,13 +436,13 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 		return {} //specification
 	}
 
-	if (! (entityId in top.resource.specifications)) {
+	if (! (entityId in top.resource.contents.specifications)) {
 		console.log("Node: " + entityId + " has no specification entry.")
 		return {} //specification
 	}
 
 	// deepcopy specification entity so we can change it.
-	var entity = $.extend(true, {}, top.resource.specifications[entityId]) 
+	var entity = $.extend(true, {}, top.resource.contents.specifications[entityId]) 
 
 	initialize_entity(entity, entityId, path, depth)
 
@@ -532,7 +532,7 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 			break;
 
 		case 'xmls:anyURI': // Picklists are here
-			if (entityId in top.resource.specifications) {
+			if (entityId in top.resource.contents.specifications) {
 				get_entity_spec_form_choices(entity)
 			}
 			else
@@ -606,7 +606,7 @@ get_entity_features = function(entity, parentId = null) {
 	else
 		var referrerId = entity.parent_id
 
-	var referrer = top.resource.specifications[referrerId]
+	var referrer = top.resource.contents.specifications[referrerId]
 
 	if (!referrer) {
 		console.log("ERROR: can't find entity ", referrerId, " to get feature for." ); 
@@ -736,7 +736,7 @@ get_entity_cardinality = function(entity) {
 	var referrerId = entity.path.slice(-2)[0]
 	var constraints = []
 	var id = entity.id
-	var referrer = top.resource.specifications[referrerId]
+	var referrer = top.resource.contents.specifications[referrerId]
 	if (referrer.components) {
 		// Find given entity in parent (referrer) list of parts
 		for (var cptr in referrer.components[id]) {
@@ -811,7 +811,7 @@ get_entity_spec_form_units = function(entity) {
 		var units = entity['units']
 		for (var ptr in units) {
 			// Make deep copy of unit
-			unitsArray.push( $.extend(true, {path:entity.path}, top.resource.specifications[units[ptr]] ) )
+			unitsArray.push( $.extend(true, {path:entity.path}, top.resource.contents.specifications[units[ptr]] ) )
 		}
 		entity['units'] = unitsArray
    	}
@@ -852,7 +852,7 @@ get_entity_spec_form_choices = function(entity) {
 		for (var entity_id in entity.components) {
 			// In path we silently skip name of component.
 
-			var part = $.extend(true, {path: entity.path.concat([entity_id])}, top.resource.specifications[entity_id] ) //deepcopy
+			var part = $.extend(true, {path: entity.path.concat([entity_id])}, top.resource.contents.specifications[entity_id] ) //deepcopy
 			entity.choices.push( get_entity_spec_form_choice(part) )				
 		}
 	}
@@ -875,7 +875,7 @@ get_entity_spec_form_choice = function(entity, depth = 0) {
 			//var part_path = [choice_entity_id] // entity.path.concat( {'path' : part_path} 
 			// Tricky? Looks like path is getting prefixed via top res spec entity path
 			var path = entity.path.concat([choice_entity_id])
-			var part = $.extend(true, {'path' : path} , top.resource.specifications[choice_entity_id]) //deepcopy
+			var part = $.extend(true, {'path' : path} , top.resource.contents.specifications[choice_entity_id]) //deepcopy
 			if (!part) // Should never happen.
 				console.log("Error: picklist choice not available: ", choice_entity_id, " for list ", entity.id)
 			else {
@@ -899,7 +899,7 @@ get_entity_spec_form_choice = function(entity, depth = 0) {
 }
 
 
-function get_form_data(domId) {
+function get_specification_form_data(domId) {
 	/* The hierarchic form data is converted into a minimal JSON object for
 	   transmission back to server.
 

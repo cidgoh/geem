@@ -1,7 +1,19 @@
+API_RESOURCES_URL = 'api/resources/' 
+
 
 function GeemAPI() {
 
-	//https://developers.google.com/web/fundamentals/primers/promises
+	// non-anonymous user GET and POST methods depend on Django csrftoken.
+	// May have to check logged-in status.
+	// See https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+	$.ajaxSetup({
+	    beforeSend: function(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+	        }
+	    }
+	});
+
 
 	//this.init = function() {}
 
@@ -9,12 +21,12 @@ function GeemAPI() {
 		/* 
 			Retrieves available resources for logged-in or public user to browse.
 		*/
-		resource_URL = 'data/resource'
 
+		//https://developers.google.com/web/fundamentals/primers/promises
 		return new Promise(function(resolve, reject) {
 			$.ajax({
 				type: 'GET',
-				url: resource_URL,
+				url: API_RESOURCES_URL + '?format=json',
 				timeout: 30000, //30 sec timeout
 				success: function(resources) {
 					
@@ -23,8 +35,8 @@ function GeemAPI() {
 				},
 
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
-					reject(Error('Given resource could not be found: \n\n\t' + resource_URL))
-					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
+					reject(Error('Given resources list could not be loaded: \n\n\t' + API_RESOURCES_URL))
+					return false
 				}
 			});
 
@@ -55,11 +67,11 @@ function GeemAPI() {
 
 	}
 
-	this.get_resource = function(resource_URL) {
+	this.get_resource = function(resource_id) {
 		/*
 
 		This loads the json user interface oriented version of an ontology
-		returned resource  top.resource.specifications contains:
+		returned resource  top.resource.contents contains:
 		{
 			@context: {}
 			metadata: {}
@@ -73,7 +85,7 @@ function GeemAPI() {
 		return new Promise(function(resolve, reject) {
 			$.ajax({
 				type: 'GET',
-				url: resource_URL,
+				url: API_RESOURCES_URL + resource_id + '?format=json',
 				timeout: 30000, //30 sec timeout
 				success: function(resource) {
 					
@@ -92,61 +104,82 @@ function GeemAPI() {
 
 	}
 
-	this.get_new_resource = function() {
-		/* 
-			Retrieves new private package record for logged-in user.
+	this.create_resource = function(data) {
+		/*
 		*/
+		return new Promise(function(resolve, reject) {
+			console.log("creating record:",data);
+	 		$.ajax({
+	            type: "POST",
+	            url: API_RESOURCES_URL,
+	            data: data,
+	            success: function (response) {
+	                console.log(response);
+	                if (! ('id' in response)) {
+	                	alert(JSON.stringify(response))
+	                	reject(Error(JSON.stringify(response)))
+	                }
+	                else
+	                	resolve(response);
+	            },
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be created: \n\n\t' + data))
+				}
+	        });
+	    });
+	 }
 
-		var today = new Date();
-		today = today.toISOString().substring(0, 10);
+	this.delete_resource = function(resource_id) {
+		/*
+		*/
+		return new Promise(function(resolve, reject) {
 
-		// DUMMY DATA / TEMPLATE
-		return {
-			title:			'New private specification package',
-			date:			today,
-			type:			'private',
-			status:			'draft',
-			new: 			true, 
-			resource: 		'',  // General link to resource separate from version IRI??
-			description:	'',
-			prefix:			'',
-			versionIRI:		'data/private_packages/[your acct id]/package_[id]_'+today+'.json',
-			license:		''
-		}
-
+			$.ajax({
+				type: "DELETE",
+				url: API_RESOURCES_URL + resource_id,
+				success: function(response){
+				    resolve(response);
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be deleted: \n\n\t' + resource_id))
+					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
+				}
+			});
+		})
 	}
 
-	this.delete_resource = function(path) {
+	// NEED PARTIAL UPDATE CALL.
+	this.update_resource = function(data) {
+		/*
 
+		*/
+		return new Promise(function(resolve, reject) {
+
+	 		$.ajax({
+	            type: "POST",
+	            url: API_RESOURCES_URL + data.id + '/', // Record id to be updated
+	            data: data,
+	            success: function (response) {
+	                console.log('Updated' , response);
+	                top.resource = response;
+	                resolve(response);
+	            },
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be updated: \n\n\t' + JSON.stringify(data) ))
+				}
+	        });
+	    });
 	}
-
-	this.update_resource = function(path) {
-
-	}
-
-	/* A package consists of 
-	{
-		name: string
-		description: string
-		version: int //auto-increment per update function.
-		ontologies:	[
-			{prefix: string // "genepio"; OBOFoundry ontology lower case name.
-			version: string // identifier or if none, GEEM download date.
-			}
-		] 
-		specifications:
-			{}
-
-	}
-	*/
 
 
 	this.cart_change_item = function(entity_path, action, versionIRI = null) {
-		/* Sends in given specification entity path, an action to include
+		/* 
+		FUTURE: Add call to server if cart should be managed server side.
+
+		Sends in given specification entity path, an action to include
 		or exclude it from cart, and associated version, if any. If no version
 		then latest version is assumed. 
 		*/
-		// Add call to server if cart should be managed server side.
 
 		return new Promise(function(resolve, reject) {
 			/*
@@ -161,7 +194,7 @@ function GeemAPI() {
 			var ptr = entity_path.lastIndexOf('/')
 			// Get last path item id.
 			var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
-			var entity = top.resource.specifications[entity_id]
+			var entity = top.resource.contents.specifications[entity_id]
 			
 			result = {
 				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
@@ -177,6 +210,29 @@ function GeemAPI() {
 		})
 	}
 
+
+	function csrfSafeMethod(method) {
+	    // These HTTP methods do not require Django CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+
+
+	function getCookie(name) {
+		// From https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie !== '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
 
 }
 

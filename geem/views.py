@@ -1,72 +1,27 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.template import Context
+#from django.template import Context
 from oauth2_provider.models import Application
+from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
 
 import re, os
 
+from rest_framework import mixins
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
+from rest_framework import viewsets, permissions
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from django.db.models import Q
+
+from geem.models import Package
+from geem.forms import PackageForm
+
 ROOT_PATH     = 'geem/static/geem/'
-ONTOLOGY_PATH = 'data/ontology/'
-SHARED_PATH   = 'data/shared/'
-PRIVATE_PATH  = 'data/private/'
 
-package_regex = re.compile(r'\.(json)') # |owl
-
-def package_listing(path, type, owner = None):
-    """
-    Return catalog.json as cached listing of folder's .json file metadata.
-    Test datestamp change in any relevant .owl or .json file and compare
-    against cached display file timestamp, which should be = or > any one
-    of the files. If cache is behind folder file timestamp, read metadata
-    for that file into cached listing. If file not in cache, add listing. 
-    Operates on file name only. Use 'touch' command on a file to force 
-    update.
-    If owner provided, filter files by owner.
-
-    """
-
-    catalog_file = ROOT_PATH + path + 'catalog.json'
-    if (os.path.isfile(catalog_file)):
-        catalog = json.load(open(catalog_file))
-        catalog_timestamp = os.path.getmtime(catalog_file)
-    else:
-        catalog = {}
-        catalog_timestamp = 0
-
-    #file_names = [x for x in os.listdir(path) if package_regex.search(x)]
-    # Check if any file listing needs updating in catalog
-    # Would OS sort by file date be even faster? or skip this and do manual 
-    # refresh of catalog.json?
-    refresh = False
-    for file_name in sorted(os.listdir(ROOT_PATH + path)):
-        if file_name != 'catalog.json' and package_regex.search(file_name):
-            file_timestamp = os.path.getmtime(ROOT_PATH + path + file_name)
-
-            # File name is [ontology/package].[version].[suffix], with version
-            # possibly missing
-            file_name_array = file_name.split('.')
-            if (len(file_name_array) == 3):
-                (root_name, version, suffix) = file_name_array
-            else:
-                (root_name, suffix) = file_name_array
-                version = ''
-
-            if not root_name in catalog or file_timestamp > catalog_timestamp:
-                # Item timestamp triggers update in catalog.json
-                package = json.load(open(ROOT_PATH + path + file_name))
-                if not root_name in catalog:
-                    catalog[root_name] = {'versions': {}}
-                catalog[root_name]['versions'][version] = package['metadata']
-                catalog[root_name]['versions'][version]['local_URL'] = path + file_name
-
-                refresh = True
-
-    if refresh == True:
-        with (open(catalog_file, 'w')) as output_handle:
-            output_handle.write(json.dumps(catalog,  sort_keys=False, indent=4, separators=(',', ': ')))
-
-    return catalog
+"Method \"POST\" not allowed."
 
 # Create your views here.
 def index(request):
@@ -89,51 +44,108 @@ def modal_lookup(request):
 def resource_summary_form(request):
     return render(request, 'geem/templates/resource_summary_form.html', context={})
 
-# Names should never conflict, regardless of "type"
+class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin): # mixins.UpdateModelMixin, 
+    """
+    API endpoint that lists packages.
+    See: https://www.django-rest-framework.org/api-guide/viewsets/#viewset-actions
+    Serializer differs based on list or individual record view.
+    """
+    authentication_classes = [OAuth2Authentication, SessionAuthentication]
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ResourceDetailSerializer
+    queryset = Package.objects.all() # USED AS DUMMY. Ok? Ignored in favor of methods below
+    #queryset = [] 
 
-def resources(request):
-    data = {
-        'ontology': package_listing(ONTOLOGY_PATH, 'ontology'),
-        'shared': package_listing(SHARED_PATH, 'shared'),
-        'private': package_listing(PRIVATE_PATH, 'private')
-    }
+    def list(self, request, pk=None):
 
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
-
-def ontologies(request):
-    data = package_listing(ONTOLOGY_PATH, 'ontology')
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
-def ontology(request, file_name):
-    data = json.load(open(ROOT_PATH + ONTOLOGY_PATH + file_name))
-    return HttpResponse(json.dumps(data), content_type='application/json')
+        queryset= self._get_resource_queryset(request)
+        return Response(ResourceSummarySerializer(queryset, context={'request': request}, many=True).data)
 
 
-def shared_packages(request):
-    data = package_listing(SHARED_PATH, 'shared')
-    return HttpResponse(json.dumps(data), content_type='application/json')
+    def retrieve(self, request, pk=None):
 
-def shared_package(request, file_name):
-    data = json.load(open(ROOT_PATH + SHARED_PATH + file_name))
-    return HttpResponse(json.dumps(data), content_type='application/json')
+        queryset= self._get_resource_queryset(request)
+        package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
+        return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
 
-def private_packages(request):
-    # Need security check here
-    if request.user.is_authenticated:
-        data = package_listing(PRIVATE_PATH, 'private', request.user.username)
-    else:
-        data = {}
-    return HttpResponse(json.dumps(data), content_type='application/json')
+    def create(self, request, pk=None):
 
-def private_package(request, file_name):
-    # Need security check here
+        form = PackageForm(request.POST or None) #or request.data
+        if form.is_valid():
+            package = form.save(commit=False)
+            package.owner = self.request.user # couldn't/shouldn't pass right parammeter from client side.
+            package.save()
+            return Response(ResourceDetailSerializer(package, context={'request': request}).data)
+        else:
+            return Response(form.errors)
+            """
+            if pk is not None:
+                pass #complaint = get_object_or_404(Complaint, id=id)
+            else:
+                pass #complaint = None 
+            """
 
-    if request.user.is_authenticated:
-        data = json.load(open(ROOT_PATH + PRIVATE_PATH + file_name))
-        if (data.metadata.owner == request.user.username):
-            data = {}
-    else:
-        data = {}
-    return HttpResponse(json.dumps(data), content_type='application/json')
+
+    def post(self, request, pk=None, format=None):
+        package = get_object_or_404(Package, pk=pk) 
+        #if request.method == 'POST':
+        form = PackageForm(request.POST or None, instance=package)
+        if form.is_valid():
+            package = form.save(commit=False)
+            #package.owner = self.request.user
+            package.save()
+
+            return Response(ResourceDetailSerializer(package, context={'request': request}).data)
+
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        """
+        serializer = ResourceDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        """
+
+    """
+    def post(self, request, pk=None): # no 'post':'update' mapping?
+        #instance = self.get_object()
+        form = PackageForm(request.POST or None) #or request.data
+        if form.is_valid():
+            package = form.save(commit=False)
+            #package.owner = self.request.user
+            package.save()
+            return Response(ResourceDetailSerializer(package, context={'request': request}).data)
+        else:
+            return Response(form.errors)
+    """
+        # So we don't get back a giant file ...
+        #response_obj = {'response': 'success'}
+        #return Response(response_obj, status=status.HTTP_200_OK)
+
+
+    def partial_update(self, request, pk=None):
+        pass
+
+    """
+    def destroy(self, request, pk=None):
+        pass
+    """
+
+    def _get_resource_queryset(self, request, ontology=None, public=None):
+
+        user = self.request.user
+
+        if user.is_authenticated:
+            queryset = Package.objects.filter(Q(owner=user) | Q(owner=None) | Q(public=True, curation='release'))
+        else:
+            queryset = Package.objects.filter(owner=None | Q(public=True, curation='release'))  
+
+        if ontology != None:
+            queryset = queryset.filter(ontology=ontology)
+
+        if public != None:
+            queryset = queryset.filter(public=public)
+
+        return queryset.order_by('-ontology', 'public')

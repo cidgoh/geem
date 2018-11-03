@@ -7,15 +7,22 @@
 */
 
 function render_resource_form() {
-	// Feeds specification.metadata variables to copy of template
-
+	/* 
+	Populates resource form template with a resource record which user *may*
+	be the owner of. Implements various view/edit/hide field logic depending
+	on status of record.
+		
+	*/
 	$.ajax('templates/resource_summary_form.html').done(function(response) {
 
-		const resource = top.resource //top.resource.metadata
+		const resource = top.resource
 		$('#resourceForm').html( do_template_fill(response, resource) )
 
+		// By default, all form elements are disabled / read-only
+		$('#resourceForm select').prop('disabled', true)
+		$('#resourceForm input').attr('readonly','readonly')
+
 		// 2 select lists to select options in:
-		//alert(resource.public)
 		$('#summary_public option[value="' + resource.public + '"]').prop('selected', true)
 		$('#summary_ontology option[value="' + resource.ontology + '"]').prop('selected', true)
 		$('#summary_curation option[value="' + resource.curation + '"]').prop('selected', true)
@@ -23,14 +30,21 @@ function render_resource_form() {
 		// If loaded data is direct from ontology, hide/disable certain buttons/fields. 
 		var onto_fields = $('#summary_name, #summary_version, #summary_resource, #summary_description, #summary_prefix')
 
+		// Packages don't have prefixes.
 		if (!resource.ontology)
-			$('.summary_prefix').hide() // Packages don't have prefixes.
+			$('.summary_prefix').hide() 
+
+		const resource_owner = get_owner_status(resource)
+
+		if (resource_owner) {
+			$('#summary_curation, #summary_public').prop('disabled', false)
+		}
 
 		// Public resources can't be deleted or updated.
-		if (resource.public || resource.curation != 'draft') {
+		if (resource.public && resource.curation != 'draft') {
 			
-			$('#summary_delete, #summary_update').hide()
-			onto_fields.attr('readonly','readonly')
+			$('#summary_delete, #summary_update, #summary_create').hide()
+
 		}
 		else {
 			$("#summary_license").removeAttr('readonly')
@@ -40,20 +54,46 @@ function render_resource_form() {
 				$('.summary_resource, .summary_prefix').hide()
 				$('#summary_delete, #summary_download, #summary_copy, #summary_update').hide()
 			}
-			else {//
+			else {// Existing record can be copied
 				$('#summary_create').hide()
 				$("#summary_public, #summary_ontology, #summary_curation").prop('disabled', false)
 			}
 		}
 
-		//$('#resourceForm').foundation()
+		$('#resourceForm').foundation() // Enables tool tips 
 
 	});
 
 }
 
-function get_form_data(domId) {
+function get_owner_status(resource) {
 
+	// Move this over to geem_portal.js ?
+	var current_user_id = $('#userInfo').data('userId')
+
+	var resource_user_id = 0
+	if (resource.owner) {
+		// Django delivers resource owner formatted as '.../api/users/[digits]/?format=json'
+		resource_user_id = resource.owner.match(/\/api\/users\/(\d+)/)
+		if (resource_user_id) 
+			resource_user_id = resource_user_id[1]
+	}
+
+	return (resource_user_id == current_user_id)
+
+}
+
+
+function get_form_data(domId) {
+	/*
+	A GEEM resource record has top level fields id, name, description, created,
+	updated, etc., some of which are used just in the Django context of
+	managing the record, and a "contents" field that holds the entire JSON 
+	dictionary structure, that holds the specifications derived from ontology
+	or composed by the user.
+	ISSUE: 
+
+	*/
 	var data = {
 		'contents': {
 			'@context': 		{},
@@ -130,6 +170,7 @@ function init_resource_select(resources) {
 	// When a new ontology is selected:
 	$('#selectResource').html(html).on('change', do_resource_selection)
 
+/*************** PROBLEM??? **************/
 	clear_resource_summary()
 
 }

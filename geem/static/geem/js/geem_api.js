@@ -49,22 +49,19 @@ function GeemAPI() {
 
 		Ontology term prefix crudely determines resource at moment
 		CURRENTLY: HARD WIRED TO JUST BE GENEPIO or FOODON
-		Ontology ID provided in URL: CHECK FOR VALID ENTITY REFERENCE IN SOME
-		(PREFERRED?) ONTOLOGY.
-	
+		FUTURE: LOOKUP APPROPRIATE ONTOLOGY FOR ENTITY REFERENCE.
 	  	Note: we can get a dynamic list of OBOFoundry ontologies via: 
 		http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json
 		In the future these could be candidates for GEEM-driven standards to
 		be encoded in.
 
 		*/
-		const prefix = entityId.split(':')[0].toLowerCase()
 
-		if (prefix == 'foodon')
-			return 'data/ontology/foodon-merged.json'
-
-		return 'data/ontology/genepio-merged.json'
-
+		switch (entityId.split(':')[0].toLowerCase()) {
+			case 'foodon': return '6'
+			case 'genepio': return '3'
+			default: return '3'
+		}
 	}
 
 	this.get_resource = function(resource_id) {
@@ -83,9 +80,10 @@ function GeemAPI() {
 
 		*/
 		return new Promise(function(resolve, reject) {
+			var resource_URL = API_RESOURCES_URL + resource_id + '?format=json'
 			$.ajax({
 				type: 'GET',
-				url: API_RESOURCES_URL + resource_id + '?format=json',
+				url: resource_URL,
 				timeout: 30000, //30 sec timeout
 				success: function(resource) {
 					

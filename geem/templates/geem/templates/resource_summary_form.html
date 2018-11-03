@@ -1,8 +1,5 @@
-{% load static %}
-<form class="grid-x grid-padding-x" data-abide style="padding-right:10px">
+<form class="grid-x grid-padding-x" data-abide style="padding-right:10px" id="resourceFormTag">
 
-  <!-- input type="hidden" name="owner" id="summary_owner" readonly value="{{user.id}}" required>  -->
- 
   <div class="small-2 cell summary_name">
     <label for="middle-label" class="text-right middle">name</label>
   </div>
@@ -38,7 +35,7 @@
   <div class="small-4 cell summary_status" style="float:left">
     <select name="curation" id="summary_curation" disabled required>
       <option value="draft">draft</option>
-      <option value="under review">under review</option>
+      <option value="review">under review</option>
       <option value="release">release</option>
     </select>
   </div>
@@ -58,7 +55,7 @@
     <label for="middle-label" class="text-right middle">desc.</label>
   </div>
   <div class="small-10 cell summary_description">
-    <textarea name="description" placeholder="" id="summary_description" rows="3">@description</textarea>
+    <textarea name="description" id="summary_description" rows="3">@description</textarea>
   </div>
 
 
@@ -66,7 +63,7 @@
     <label for="middle-label" class="text-right middle">resource id</label>
   </div>
   <div class="small-1 cell summary_id" style="float:left;clear:none">
-    <input type="text" name="id" id="summary_id" readonly value="@id">
+    <input type="text" name="id" id="summary_id" value="@id">
   </div>
 
 
@@ -74,7 +71,7 @@
     <label for="middle-label" class="text-right middle">file base name</label>
   </div>
   <div class="small-4 cell summary_file_base_name" style="float:left;clear:none">
-    <input type="text" name="file_base_name" id="summary_file_base_name" placeholder="" readonly value="@file_base_name" pattern="[A-Za-z0-9_-]+">
+    <input type="text" name="file_base_name" id="summary_file_base_name" value="@file_base_name" pattern="[A-Za-z0-9_-]+">
   </div>
   <div class="small-1 cell" style="float:left;clear:none">
     <span data-tooltip class="right" title="FUTURE: This resource can be accessed using a data/[user id]/[base file name].[version].json URL. Provide the alphanumeric base file name here (it may include dash or underscore)."><i class="fi-info blue" style="font-size:1.5rem;padding-left:5px">&nbsp;</i></span>
@@ -83,6 +80,7 @@
 
 
   <hr size = "1"/>
+  <!-- Following content comes from resource's contents.X.Y JSON metadata -->
 
   <div class="small-2 cell summary_resource">
     <label for="middle-label" class="text-right middle">URL</label>
@@ -102,7 +100,7 @@
     <a href="@contents.metadata.license" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
   </div>
   <div class="small-9 cell summary_license">
-    <input type="text" name="contents.metadata.license" id="summary_license" readonly placeholder="license" value="@contents.metadata.license">
+    <input type="text" name="contents.metadata.license" id="summary_license" placeholder="license" value="@contents.metadata.license">
   </div>
 
   <div class="small-2 cell summary_version_iri">
@@ -112,7 +110,7 @@
     <a href="@contents.metadata.versionIRI" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
   </div>
   <div class="small-9 cell summary_version_iri">
-    <input type="text" name="contents.metadata.versionIRI" id="summary_version_iri" placeholder="version URI" readonly value="@contents.metadata.versionIRI">
+    <input type="text" name="contents.metadata.versionIRI" id="summary_version_iri" placeholder="version URI" value="@contents.metadata.versionIRI">
   </div>
 
 
@@ -127,7 +125,7 @@
     <label for="middle-label" class="text-right middle">updated</label>
   </div>
   <div class="small-4 cell summary_date" style="float:left">
-    <input type="text" name="contents.metadata.date" id="summary_date" readonly placeholder="publication date" value="@contents.metadata.date">
+    <input type="text" name="contents.metadata.date" id="summary_date" placeholder="publication date" value="@contents.metadata.date">
   </div>
 
 
@@ -139,10 +137,10 @@
 
     <button class="button" data-tooltip data-click-open="false" id="summary_download" title="Download this entire GEEM resource file of specifications in JSON format.">Download</button>
 
-    <!-- <button class="button" data-tooltip data-click-open="false" id="summary_copy" title="Copy this ontology or package's specifications">Copy</button> -->
+    <!-- <button class="button" data-tooltip data-click-open="false" id="summary_copy">Copy</button> -->
 
     <button class="button" id="summary_update">Update</button>
-
+    <button class="button" id="summary_copy" title="Copy this ontology or package's specifications">Copy</button>
     <button class="button" id="summary_create">Create</button>
   </div>
 

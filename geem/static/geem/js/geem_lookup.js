@@ -26,7 +26,7 @@ render_select_lookup_modal = function(helper, selectId) {
 	// select.val() is either a string, for a single-select, or an array
 	// for multi-select
 	var parent_id = Array.isArray(value) ? value[0] : value
-	var parent =  top.resource.specifications[parent_id]
+	var parent =  top.resource.contents.specifications[parent_id]
 	if (parent)
 		var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
 	else
@@ -130,7 +130,7 @@ function getOLSSearch(helper, parent_id, text) {
 	// kludge to get feature value if exists; it will have an ontology id
 	// to search within.
 	var entity_id = getSelectId(select) 
-	var selectEntity = top.resource.specifications[entity_id]
+	var selectEntity = top.resource.contents.specifications[entity_id]
 	if (selectEntity.features && selectEntity.features.lookup.value)
 		var root_ids = '&allChildrenOf=' + [selectEntity.features.lookup.value].join(',')
 	else
@@ -301,7 +301,7 @@ function modal_lookup_do_selection(select, options, parent_id) {
 			// New entry in top specification.
 			// ADD SYNONYMS????
 			// POSSIBLY ALREADY THERE?
-			top.resource.specifications[option.id] = {
+			top.resource.contents.specifications[option.id] = {
 				'datatype': "xmls:anyURI",
 				'uiLabel': option.label,
 				'id': option.id,
@@ -309,10 +309,10 @@ function modal_lookup_do_selection(select, options, parent_id) {
 				'parent': parent_id
 			}
 
-			var parent = top.resource.specifications[parent_id]
-			// ISSUE: parent may not be in top.resource.specifications if user has
+			var parent = top.resource.contents.specifications[parent_id]
+			// ISSUE: parent may not be in top.resource.contents.specifications if user has
 			// browsed down a few levels on OLS
-			if (!parent) parent = top.resource.specifications[ getSelectId(select) ]
+			if (!parent) parent = top.resource.contents.specifications[ getSelectId(select) ]
 			if (!parent.choices) parent.choices = {}
 			parent.choices[option.id] = []
 

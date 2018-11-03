@@ -229,3 +229,5 @@ ul.disabled li a {opacity:0.3;}
 .inputBlockSeparator {padding-left:5px;margin-top:10px;background-color:#F0F0F0;}
 .addInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;padding:5px;}
 .removeInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;width:2rem;text-align:center;}
+
+label.error small.error {display:inline !important;margin-left:10px;}

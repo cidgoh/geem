@@ -7,10 +7,11 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genomic Epidemiology Entity Mart Form Viewer</title>
-    <link rel="stylesheet" href="{% static "geem/css/foundation-5.0.min.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-docs-5.5.3.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-icons/foundation-icons.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-datepicker.min.css" %}">
     <link rel="stylesheet" href="{% static "geem/js/chosen/chosen.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/normalize-5.5.3.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/app.css" %}">
 
     <script src="{% static "geem/js/vendor-5.5.3/modernizr.js" %}"></script>
@@ -45,7 +46,7 @@
       <!-- ************************ CONTENT AREA ********************* -->
       <div class="large-6 medium-6 columns" id="content" style="margin-top:25px;position:relative;border:1px solid silver; background:#F8F8F8  !important; max-height: 620px;overflow:scroll;padding-top:15px">
 
-        <form id="mainForm" data-abide novalidate> <!-- data-abide="ajax" -->
+        <form id="mainForm" data-abide>
 
           <p>This GEEM form viewer can render the HTML form for a given ontology identifier (assuming it has been annotated as a GEEM specification). Simply include the identifier of the desired form, for example:</p>
 
@@ -139,9 +140,9 @@
       </div>
     </div>
 
-
-    <script src="{% static "geem/js/vendor-5.0/jquery.js" %}"></script>
-    <script src="{% static "geem/js/foundation-5.0/foundation.min.js" %}"></script>
+    <!-- Issue: Jquery for 5.5.3 triggering "TypeError: a.getAttribute is not a function" -->
+    <script src="{% static "geem/js/vendor-5.5.3/jquery.js" %}"></script>
+    <script src="{% static "geem/js/foundation-5.5.3/foundation.min.js" %}"></script>
 
     <script src="{% static "geem/js/vendor/foundation-datepicker.min.js" %}"></script>
     <script src="{% static "geem/js/vendor/what-input.js" %}"></script>

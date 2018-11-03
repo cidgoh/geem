@@ -30,10 +30,12 @@ cart = []
 
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
 
-$( document ).ready(function() {
-
-	// Initializes Zurb Foundation settings (but not foundation itself)
-	OntologyForm.init_foundation()
+$( document ).ready(function($) {
+	
+	// Done early because form rendering (before application of foundation()
+	// may reference top.settings.patterns, etc.
+	OntologyForm.init_foundation_settings()
+	//Foundation.Abide.defaults = top.settings
 
 	api = new GeemAPI()
 
@@ -58,7 +60,18 @@ $( document ).ready(function() {
 	// init_validation_tab()
 	init_cart_tab()
 
+	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
+	// Initializes Zurb Foundation settings (but not foundation itself)
+
 	$(document).foundation()
+	
+
+	// ISSUE IS ABIDE ISN'T VALIDATING
+	if (Foundation.Abide)
+		Foundation.Abide.defaults = top.settings
+	else
+		$(document).foundation({'abide': top.settings})
+	//$("#mainForm").foundation({'abide': top.settings})
 
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
@@ -75,10 +88,10 @@ function resource_callback(resource) {
 	/* This function is triggered after a fetch for a particular resource by id.
 
 	*/
+	
 	$('#resourceTabs').removeClass('disabled')
-	$('#tabsSpecification, #panelLibrary').show()
+	$('#tabsSpecification').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
-
 	// Prepare browsable top-level list of ontology items
 	render_resource_form()
 	render_resource_menu_init()
@@ -99,10 +112,8 @@ function render_entity_form() {
 	// When render_entity is called, activate its (form) tab
 	$('#content-tabs').foundation('selectTab', '#panelContent'); 
 
-	// Wire form's submit button to show GEEM example form submit contents in popup.
-	$('#buttonFormSubmit').on('click', function () {  
-		set_modal_download(get_data_specification('form_submission.json'))
-	})
+	//$('#mainForm').foundation('abide','events');
+	// See init_form_tab() for validation, submit setup.
 
 }
 
@@ -112,7 +123,6 @@ function portal_entity_form_callback(form) {
 	render_entity_form_cart_icons(form) 
 
 	$('#specificationSourceInfoBox').hide()
-
 	// Clear out specification tab. Deselect specification menu.
 	$('#specificationType')[0].selectedIndex = 0
 	$('#dataSpecification').empty()
@@ -346,7 +356,7 @@ function render_entity_relations(ontologyId) {
 
 	var filling = ''
 	if ('parent' in entity) {
-		filling += get_relation_link('parent', get_entity(entity['parent']))
+		filling += render_relation_link('parent', get_entity(entity['parent']))
 	}
 	// Possibly organize each entity's relations under a "relations" section?
 	for (const relation of ['member_of','otherParent']) {
@@ -382,9 +392,11 @@ function render_relation_link(relation, entity) {
 function init_summary_tab() {
 
 
-	$('#resourceForm').on('click','#summary_create', function() {
+	$('#resourceForm').on('click','#summary_create,#summary_copy', function() {
 		// Get all form fields and pass to api.create_resource()
 		var data = get_form_data($('#resourceForm'))
+		if ($(this).is('#summary_copy'))
+			data.name = data.name + ' - COPY'
 		// #Django expecting flat format with contents 
 		data.contents = JSON.stringify(data.contents)
 		api.create_resource(data)
@@ -464,6 +476,47 @@ function init_browse_tab() {
 }
 
 function init_form_tab() {
+
+	/* Wire form's submit button to show GEEM example form submit contents in popup.*/
+	$('#mainForm').on('click', '.buttonFormSubmit', function (e) {  
+		//e.preventDefault();
+		console.log($('#mainForm').foundation("validateForm"))
+		//set_modal_download(get_data_specification('form_submission.json'))
+	})
+
+	// Form validation triggers constructed once, not every time its rendered
+	$('#mainForm').on('forminvalid.zf.abide,invalid,invalid.fndtn.abide', function(e) {
+		e.preventDefault();
+		console.log("invalid trigger"); 
+		alert("invalid trigger")
+	});
+	$('#mainForm').on('valid,valid.fndtn.abide', function(e) {
+		e.preventDefault();
+		console.log("valid trigger"); 
+		alert("valid trigger")
+	});
+	$('#mainForm').on('submit', function(e) {
+		//e.preventDefault();
+		console.log("submit triggered");
+		// NOW VALIDATE
+		$('#mainForm').foundation("validateForm")
+	});
+
+	$(document).bind('invalid.zf.abide',function(e) {
+  		console.log("Sorry, "+e.target.id+" is not valid");
+	});
+	// to submit via ajax, add the 2 bindings below.  
+	/*
+	$(document)
+	.bind("submit", function(e) {
+	  e.preventDefault();
+	  console.log("submit intercepted");
+	  $('#mainForm').foundation("validateForm")
+	})
+	.bind("formvalid.zf.abide", function(e,$form) {
+	  // ajax submit
+	});
+	*/
 
 	// In form display area, provides hover view of item's ontology details
 	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)

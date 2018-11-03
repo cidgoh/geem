@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import include, path, reverse_lazy
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import RedirectView
+
+favicon_view = RedirectView.as_view(url='/static/geem/favicon.ico', permanent=True)
 
 from . import views
 
@@ -8,6 +11,12 @@ urlpatterns = [
     path('index.html', views.index, name='index'),
     path('portal.html', views.portal, name='portal'),
     path('form.html', views.form),
+
+    path('portal.5.5.html', views.portal55), # CSS TESTING    
+    path('form.5.5.html', views.form55), # CSS TESTING
+    path('foundation.5.5.html', views.foundation55), # CSS TESTING
+
+    path('favicon.ico', favicon_view),
     path('templates/modal_lookup.html', views.modal_lookup),
     path('templates/resource_summary_form.html', views.resource_summary_form),
 

@@ -12,7 +12,7 @@ urlpatterns = [
     path('portal.html', views.portal, name='portal'),
     path('form.html', views.form),
 
-    path('portal.5.5.html', views.portal55), # CSS TESTING    
+    path('portal.5.5.html', views.portal55, name='portal55'), # CSS TESTING    
     path('form.5.5.html', views.form55), # CSS TESTING
     path('foundation.5.5.html', views.foundation55), # CSS TESTING
 
@@ -31,5 +31,5 @@ urlpatterns = [
     #path('data/private/<file_name>/', views.private_package),
 
     path('accounts/login', auth_views.login, name='login', kwargs={'template_name': 'geem/login.html'}),
-    path('accounts/logout', auth_views.logout, name='logout', kwargs={'next_page': reverse_lazy('portal')}),
+    path('accounts/logout', auth_views.logout, name='logout', kwargs={'next_page': reverse_lazy('portal55')}),
 ]

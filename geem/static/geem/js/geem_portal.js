@@ -35,7 +35,6 @@ $( document ).ready(function($) {
 	// Done early because form rendering (before application of foundation()
 	// may reference top.settings.patterns, etc.
 	OntologyForm.init_foundation_settings()
-	//Foundation.Abide.defaults = top.settings
 
 	api = new GeemAPI()
 
@@ -51,27 +50,22 @@ $( document ).ready(function($) {
 	init_summary_tab()
 	init_browse_tab()
 	init_search_tab()
+	init_cart_tab()
 
 	/*********************** Specification focus area ***********************/
 
 	init_form_tab()
 	init_specification_tab()
 	// init_discuss_tab()
-	// init_validation_tab()
-	init_cart_tab()
+	init_validation_tab()
+
 
 	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
 	// Initializes Zurb Foundation settings (but not foundation itself)
 
 	$(document).foundation()
 	
-
-	// ISSUE IS ABIDE ISN'T VALIDATING
-	if (Foundation.Abide)
-		Foundation.Abide.defaults = top.settings
-	else
-		$(document).foundation({'abide': top.settings})
-	//$("#mainForm").foundation({'abide': top.settings})
+	//$(document).foundation({'abide': top.settings})
 
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
@@ -90,7 +84,7 @@ function resource_callback(resource) {
 	*/
 	
 	$('#resourceTabs').removeClass('disabled')
-	$('#tabsSpecification').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
+	//$('#resourceTabContent').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
 	// Prepare browsable top-level list of ontology items
 	render_resource_form()
@@ -102,15 +96,17 @@ function resource_callback(resource) {
 function render_entity_form() {
 
 	$('#specificationSourceInfoBox').hide()
-	$('#content').removeClass('disabled')
+	//$('#content').removeClass('disabled')
 
 	// Providing form_callback to add shopping cart to form items.
 	top.form = new OntologyForm('#mainForm', top.resource.contents, top.formSettings, portal_entity_form_callback) 
 
 	top.form.render_entity(top.focusEntityId)
 
+	$(document).foundation()
+
 	// When render_entity is called, activate its (form) tab
-	$('#content-tabs').foundation('selectTab', '#panelContent'); 
+	//$('#content-tabs').foundation('selectTab', '#panelContent'); 
 
 	//$('#mainForm').foundation('abide','events');
 	// See init_form_tab() for validation, submit setup.
@@ -138,7 +134,7 @@ function portal_entity_form_callback(form) {
 		.html(entity.definition || '<span class="small float-right">(select all)</span>')
 
 	// Content area functionality is blocked until form loaded
-	$('#content').removeClass('disabled')
+	//$('#content').removeClass('disabled')
 
 }
 
@@ -147,92 +143,102 @@ function portal_entity_form_callback(form) {
 
 function render_resource_menu_init() {
 	/* Prepare browsable top-level list of ontology items
-	Provide context of form to populate. Passes form_callback, name of function in this module for OntologyForm to return to when complete.
+	Provide context of form to populate. Passes form_callback, name of 
+	function in this module for OntologyForm to return to when complete.
 
-	If it is a package then we must find top-level term ids.
+	If loaded resource has a "data representation model" then display kids.
+	Usually this means its an ontology.
+	Otherwise display any top-level model.
 	*/
 
 	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-	$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+	//$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+	//$('#panelEntities').html('<ul class="vertical menu drilldown" data-drilldown id="entityMenu"></ul>')
 
-	// If it is an ontology, render its data representation model tree:
-	var root_id = 'OBI:0000658'
-	if (top.resource.contents && top.resource.contents.specifications && root_id in top.resource.contents.specifications)
-		$("#entityMenu").html(render_resource_menu(root_id))
-	else
-		$("#entityMenu").html(render_resource_menu())
+	var entities = {}
+	var root_id = 'OBI:0000658' //"data representation model" 
+	var html = ''
 
-	$("#entityMenu").foundation();
-
-}
-
-function render_resource_menu(entityId = null, depth = 0 ) {
-	// If entityId not given, display all top-level 'datatype:"model"' 
-	// items in resource
-
-	var html = ""
-	var children = {}
-	if (!entityId) {
-		// Ordered at all?
-		
-		for (entity_id in top.resource.contents.specifications) {
-
-			entity = top.resource.contents.specifications[entity_id]
-			// If a model, and not subordinate to some other model
-			if (entity.datatype == 'model' && (! (  'parent' in entity) || !( entity['parent'] in top.resource.contents.specifications))) {
-				children[entity_id] = []
-			}
+	if (top.resource.contents && top.resource.contents.specifications) {
+		if (root_id in top.resource.contents.specifications) {
+			entities = top.resource.contents.specifications[root_id].models
 		}
-	}
-	else {
-		var entity = top.resource.contents.specifications[entityId]
-		if (entity) {
-			// Ran into this once ...
-			if ('parent' in entity && parent['id'] == entityId) {
-				console.log("Node: " + entityId + " is a parent of itself and so is not re-rendered.")
-				return html
-			}
-			if ('models' in entity)
-				children = entity['models']
-		}
-		
-		if (depth > 0) {
-			html = [
-				'<li class="cart-item" data-ontology-id="',	entityId,'">'
-			 	,	'<a href="#'+entityId+'">'
-				,		entity['uiLabel']
-				,		children.length ? ' <i class="fi-magnifying-glass"></i>' : ''
-				,	'</a>'
-			].join('')
-		}
-
-	}
-
-	// See if entity has subordinate parts that need rendering:
-	if (children) {
-		for (var memberId in children) {
-			// Top level menu items
-			if (depth == 0) html += render_resource_menu(memberId, depth + 1)
-			// Deeper menu items
-			else {
-				// Only list item if it has components or models
-				var child = top.resource.contents.specifications[memberId]
-				if (child && ('models' in child || 'components' in child))
-					html += [
-					'<ul class="menu vertical nested">'
-					,	render_resource_menu(memberId, depth + 1)
-					,'</ul>'
-					].join('')
+		else {
+			// Search for any top level model 
+			for (entity_id in top.resource.contents.specifications) {
+				var entity = top.resource.contents.specifications[entity_id]
+				// If a model, and not subordinate to some other model
+				if (entity.datatype == 'model' && (! ('parent' in entity) || !( entity['parent'] in top.resource.contents.specifications))) {
+					entities[entity_id] = []
+				}
 			}
 		}
 	}
 
-	if (depth > 0)
-		html +=	'</li>'
+	for (entity_id in entities) {
+		html += render_resource_accordion(entity_id)
+	}
 
 	if (html == '') 
 		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
-	return html
+
+	$("#entityMenu").html(html)
+	//$(document).foundation('accordion', 'reflow')
+
+}
+
+function render_resource_accordion(entity_id) {
+	/* Top level items are accordion. Underlying ones are hierarchic menu
+	*/
+	var entity = top.resource.contents.specifications[entity_id];
+	var normalized_id = entity.id.replace(':','_')
+	return [
+		'<li class="accordion-navigation small">',
+		,'	<a href="#menu_', normalized_id, '">', entity.uiLabel, '</a>'
+	    ,'	<div id="menu_', normalized_id, '" class="content">'
+	    ,		'<ul class="side-nav">' + render_resource_menu(entity) +'</ul>'
+	    ,'	</div>'
+	    ,'</li>'
+    ].join('')
+}
+
+function render_resource_menu(entity = null, depth = 0 ) {
+	/* 
+
+	*/
+	var html = ''
+
+	if ('models' in entity) {
+
+		for (var memberId in entity.models) {
+			// Only list item if it has components or models
+			var child = top.resource.contents.specifications[memberId]
+			if (child) {
+				// Infinite loop can happen
+				if ('parent' in child && child.parent.id == entity.id) {
+					console.log("Node: " + entity.id + " is a parent of itself and so is not re-rendered.")
+					return ''
+				}
+
+				html += [
+					'<li class="cart-item" data-ontology-id="', child.id,'">'
+				 	,	'<a href="#', child.id, '">'
+					,		child.uiLabel
+					,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
+					,	'</a>'
+					,	 ('models' in child) ? '<ul class="side-nav">' + render_resource_menu(child, depth + 1) +'</ul>' : ''
+					// || 'components' in child)
+					,'</li>'
+				].join('')
+
+			}
+		}
+
+		return html
+
+	}
+
+	return ''
 }
 
 
@@ -356,7 +362,7 @@ function render_entity_relations(ontologyId) {
 
 	var filling = ''
 	if ('parent' in entity) {
-		filling += render_relation_link('parent', get_entity(entity['parent']))
+		filling += render_relation_link('parent', get_entity(entity.parent))
 	}
 	// Possibly organize each entity's relations under a "relations" section?
 	for (const relation of ['member_of','otherParent']) {
@@ -548,7 +554,6 @@ function init_form_tab() {
 
 }
 
-
 function init_specification_tab() {
 
 	// Trigger popup JSON / EXCELL / YAML view of specification
@@ -561,6 +566,9 @@ function init_specification_tab() {
 	
 }
 
+function init_validation_tab() {
+
+}
 
 /******************************** UTILITY FUNCTIONS *************************/
 

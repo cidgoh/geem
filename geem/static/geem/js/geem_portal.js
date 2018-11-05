@@ -65,7 +65,7 @@ $( document ).ready(function($) {
 
 	$(document).foundation()
 	
-	//$(document).foundation({'abide': top.settings})
+	//$(document).foundation('abide')
 
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
@@ -106,7 +106,7 @@ function render_entity_form() {
 	$(document).foundation()
 
 	// When render_entity is called, activate its (form) tab
-	//$('#content-tabs').foundation('selectTab', '#panelContent'); 
+	$('#content-tabs').foundation('selectTab', '#panelContent'); 
 
 	//$('#mainForm').foundation('abide','events');
 	// See init_form_tab() for validation, submit setup.
@@ -312,6 +312,9 @@ function render_display_context(event) {
 	else
 		var ontologyId = ontologyPath 	
 
+	if ($('#displayContextButton').length == 0) { 
+		$("template_area").append( '<i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>')
+	}
 	// Moves magnify glass next to current one .
 	$(this).append($('#displayContextButton'))
 
@@ -418,7 +421,7 @@ function init_summary_tab() {
 		var content =  {
 			content: JSON.stringify(top.resource.contents),
 			report_type: 'geem.json',
-			id: top.resource.metadata.prefix.toLowerCase()
+			id: top.resource.contents.metadata.prefix.toLowerCase()
 		}
 		download_data_specification(content)
 		return false

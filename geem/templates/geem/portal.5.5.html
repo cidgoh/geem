@@ -43,26 +43,6 @@
     </div>
     <br/>
 
-    <!-- This is invisible but has to be positioned above bottom of page as it takes up height -->
-    <!-- div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true" -->
-    <div id="makePackageForm" data-dropdown-content class="f-dropdown" tabindex="-1">
-      <div class="input-group" >
-        <label>You can add cart items to a draft package you manage</label>
-        <select class="input-group-field" id="userPackages"></select>
-        <p> Package must have a "draft" status in order to be modified.</p>
-      </div>
-      <button id="updatePackageButton" class="button">update</button>
-
-    </div>
-    <!-- link is dynamically placed wherever user is mousing. -->
-
-    <i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>
-    <div id="displayContext" data-dropdown-content class="f-dropdown content" tabindex="-1" aria-hidden="true" aria-autoclose="false">
-      <div>
-        TESTING
-      </div>
-    </div>
-
     <div class="row">
 
       <!-- ************************ ONTOLOGY MENU AND SEARCH ********************* -->
@@ -117,11 +97,20 @@
           <div class="content" id="panelCart">
             <div>
               <a href="#" id="shoppingCartTrash" class="icon fi-trash" title="empty the cart"></a>
-              <button class="button small" id="addToPackageButton" data-toggle="makePackageForm">Add to package</button>
+              <button class="button small" id="addToPackageButton" data-reveal-id="makePackageForm">Add to package</button>
             </div>
 
             <form id="shoppingCart" class="callout"></form>
             
+            <div id="makePackageForm" class="reveal-modal" data-reveal class="f-dropdown content" tabindex="-1">
+              <div class="input-group" >
+                <label>You can add cart items to a draft package you manage</label>
+                <select class="input-group-field" id="userPackages"></select>
+                <p> Package must have a "draft" status in order to be modified.</p>
+              </div>
+              <button id="updatePackageButton" class="button">update</button>
+
+            </div>
 
             <div id="cartInfoBox" class="infoBox">
               <p>Your entity shopping cart is displayed above. 
@@ -152,16 +141,6 @@
 
         <div id="formEntityLabel"></div>
 
-        <div class="infoBox" id="specificationSourceInfoBox">
-          <p>This is a semi-functional prototype for reviewing and downloading GEEM annotated ontology content that enables data specifications to be extracted from curated ontologies. Such specifications can be used to render reports and data entry forms, or to enforce data validation. The GEEM project ultimately aims to interface with existing systems like RedCap to enable standardized, ontology-driven data collection.</p>
-
-          <p>To start, select a GEEM specification resource from the list. This can be an ontology, a public specification package or one of your own private packages.</p>
-
-          <p>Then use the "Browse Specifications" or "Search" menu to see what specifications a resource provides.  Choose an item to see how it would be presented as a form or form part. Options are also provided for downloading that specification, or adding parts of it to your shopping cart, which you can then add to one of your draft packages.</p>
-
-          <p>All other tabs focus on the selected resource. Browsing, searching and shopping for terms can only involve one version of an ontology or package at a time.</p>
-        </div>
-
         <ul id="content-tabs" class="tabs" data-tab>
           <li class="tab-title small"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
@@ -172,7 +151,7 @@
         <div id="tabsContent" class="tab-content" aria-hidden="true">
 
           <!-- ************************* FORM VIEW ******************* -->
-          <div class="content" id="panelContent">
+          <div class="content" id="panelContent" aria-hidden="true">
 
             <form id="mainForm" data-abide ></form> <!-- ="ajax" ; novalidate prevents HTML5 validation -->
 
@@ -279,6 +258,18 @@
 
         </div>
 
+        <!-- ******************* Default infobox **************** -->
+        <div class="infoBox" id="specificationSourceInfoBox">
+          <p>This is a semi-functional prototype for reviewing and downloading GEEM annotated ontology content that enables data specifications to be extracted from curated ontologies. Such specifications can be used to render reports and data entry forms, or to enforce data validation. The GEEM project ultimately aims to interface with existing systems like RedCap to enable standardized, ontology-driven data collection.</p>
+
+          <p>To start, select a GEEM specification resource from the list. This can be an ontology, a public specification package or one of your own private packages.</p>
+
+          <p>Then use the "Browse Specifications" or "Search" menu to see what specifications a resource provides.  Choose an item to see how it would be presented as a form or form part. Options are also provided for downloading that specification, or adding parts of it to your shopping cart, which you can then add to one of your draft packages.</p>
+
+          <p>All other tabs focus on the selected resource. Browsing, searching and shopping for terms can only involve one version of an ontology or package at a time.</p>
+        </div>
+
+
       </div>
     </div>
 
@@ -300,6 +291,10 @@
         <div id="modalEntityHeader"></div> 
         <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
       </div>
+
+      <!-- link is dynamically placed wherever user is mousing. -->
+      <i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>
+      <div id="displayContext" data-dropdown-content class="f-dropdown content" tabindex="-1" aria-hidden="true" aria-autoclose="false"></div>
 
     </div>
 

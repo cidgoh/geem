@@ -936,7 +936,13 @@ function get_specification_form_data(domId) {
 		}
 
 		if (id) {
-			var path = id.split('/')
+
+			// Here id doesn't have a shortened form
+			if (id.indexOf('http://') >= 0)
+				var path = [id]
+			else
+				var path = id.split('/')
+
 			// Possibility of more than one record (via "Add Record" button)
 			// should signal ARRAY of underlings. ANY TIME a path element has
 			// mincardinality=0 or maxcardinality > 1
@@ -960,8 +966,10 @@ function get_specification_form_data(domId) {
 					}
 
 					if (Array.isArray(focus)) {
-						if (!focus.length) focus[0]=[]
-						//console.log('writing array item', item_id, '=', value)
+						if (!focus.length) {
+							focus[0]=[]
+							console.log('Problem with get_specification_form_data() on path: ' + path )
+						}
 						focus[focus.length-1][item_id] = value
 					}
 					else {

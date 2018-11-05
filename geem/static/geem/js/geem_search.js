@@ -12,15 +12,19 @@ function init_search_tab() {
 		search_as_you_type(top.resource.contents.specifications, $("#searchField").val().toLowerCase())
 	})
 
+	// Pertains to search results. Clicking on up-arrow shows info on immediate parents of item.
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', render_display_context)
 
+	// Pertains to render_display_context() modal content. When user clicks on
+	// up-arrow by modal content item, it adds parent term information to that
+	// display.
 	$('#displayContext').on('click','i.fi-arrow-up', function(event){
 		// Insert shopping cart item 
 		var target = $(event.target).parent()
 		var targetId = target[0].dataset.ontologyId
 		// DETECT IF ITEM HAS ALREADY HAD PARENTS ADDED?
-		if ($('#displayContext ul[data-ontology-id="'+targetId+'"]').length == 0 ) {
-			target.parent().wrap('<ul data-ontology-id="'+targetId+'">')
+		if ($('#displayContext ul[data-ontology-id="' + targetId + '"]').length == 0 ) {
+			target.parent().wrap('<ul data-ontology-id="' + targetId + '">')
 			target.parent().before(render_entity_relations(targetId))
 		}
 	})

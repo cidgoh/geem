@@ -4,7 +4,12 @@ input.is-invalid-input, select.is-invalid-input {border-left:3px solid red !impo
 div.field.required > label > div.input-group > input{border-left:3px solid orange;}
 
 
-#resourceForm input, #resourceForm select {margin-bottom:.5rem;}
+#resourceForm input, 
+#resourceForm select {margin-bottom:.5rem;}
+#resourceForm form {margin:0px 10px 10px 0px}
+#resourceForm .row {margin:0px;}
+#resourceForm .columns {padding-right:0!important}
+
 
 #formControls {padding-left:20px;}
 #panelContent.disabled ul#content-tabs, #panelContent.disabled #tabsContent {display:none;}

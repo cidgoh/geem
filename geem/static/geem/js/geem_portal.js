@@ -301,13 +301,10 @@ function render_display_context(event) {
 	to it via "has member" and "has part" and "is a" relations. Parents can be
 	navigated to.
 	*/
-	parent = $('#displayContext')
-	if (parent.length) {
-		$('#displayContext').foundation('destroy') // or else subsequent dropdown position is fixed.
-		$('#displayContextButton,#displayContext').remove()
-	}
+
 	var thisDiv = $(this).parents('[data-ontology-id]').first()
 	var ontologyPath = thisDiv.attr('data-ontology-id')
+
 	var pathDivider = ontologyPath.lastIndexOf('/')
 	if (pathDivider != -1) {
 		var ontologyId = ontologyPath.substr(pathDivider+1)
@@ -315,43 +312,19 @@ function render_display_context(event) {
 	else
 		var ontologyId = ontologyPath 	
 
-	var content = '<div id="displayContext" class="dropdown-pane"><ul>'
+	// Moves magnify glass next to current one .
+	$(this).append($('#displayContextButton'))
+
+	//var content = '<div id="displayContext" class="dropdown-pane"><ul>'
 	if ($(this).is('.fi-magnifying-glass')) {
-		content += render_entity_detail(ontologyId) 
+		$('#displayContext').html(render_entity_detail(ontologyId) )
 	}
 	else //'.fi-arrow-up'
-		content += '<ul>' + render_entity_relations(ontologyId) + '</ul>'
+		$('#displayContext').html( '<ul>' + render_entity_relations(ontologyId) + '</ul>' )
 
-	// Though it is hidden, have to include button or else Foundation throws error.
-	content = '<button id="displayContextButton" data-toggle="displayContext">&nbsp; &nbsp;</button>' + content
+	//if ($(this).is('.fi-arrow-up'))
+	// Now we ennervate the up-arrows. Each can replace content 
 
-	$('body').after(content).foundation() //Places it.
-
-	var elem = new Foundation.Dropdown($('#displayContext'), {hover:true, hoverPane:true});
-	var iconPosition = $(this).offset()
-	
-	//So mouseout works
-	$('#displayContextButton')
-		.css('left', (iconPosition.left) + 'px')
-		.css('top', (iconPosition.top) + 'px')
-
-	$('#displayContext').foundation('open')
-		.css('left', (iconPosition.left + 20) + 'px')
-		.css('top', (iconPosition.top) + 'px')
-
-	if ($(this).is('.fi-arrow-up'))
-		// Drop-down content is defined, now we ennervate the up-arrows.
-		// each can replace content 
-		$('#displayContext').on('click','i.fi-arrow-up',function(event){
-			// Insert shopping cart item 
-			var target = $(event.target).parent()
-			var targetId = target[0].dataset.ontologyId
-			// DETECT IF ITEM HAS ALREADY HAD PARENTS ADDED?
-			if ($('#displayContext ul[data-ontology-id="'+targetId+'"]').length == 0 ) {
-				target.parent().wrap('<ul data-ontology-id="'+targetId+'">')
-				target.parent().before(render_entity_relations(targetId))
-			}
-		})
 
 }
 
@@ -485,9 +458,10 @@ function init_form_tab() {
 
 	/* Wire form's submit button to show GEEM example form submit contents in popup.*/
 	$('#mainForm').on('click', '.buttonFormSubmit', function (e) {  
-		//e.preventDefault();
-		console.log($('#mainForm').foundation("validateForm"))
-		//set_modal_download(get_data_specification('form_submission.json'))
+		e.preventDefault();
+		$('#mainForm').foundation("validateForm")
+		set_modal_download(get_data_specification('form_submission.json'))
+		return false
 	})
 
 	// Form validation triggers constructed once, not every time its rendered

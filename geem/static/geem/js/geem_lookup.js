@@ -18,7 +18,7 @@ render_select_lookup_modal = function(helper, selectId) {
 
 	*/
 	// Houses both <select> and <div.chosen-container>
-	var select = $(helper).parent('div[class="input-group"]').find("select");
+	var select = $(helper).parents('div.row').first().find("select");
 	var value = select.val();
 	if (!value || value.length == 0)
 		return render_select_root_search(select, helper)
@@ -351,6 +351,6 @@ function open_modal_lookup(header, content) {
 	$('#modalLookupDefinition').text('')
 	$("#modalLookupHeaderContent").html(header)
 	$("#modalLookupSelections").html(content)
-	$("#modalLookup").foundation().foundation('open') // not sure why doubled.
+	$("#modalLookup").foundation('reveal','open') // not sure why doubled.
 
 }

@@ -314,7 +314,7 @@ function character_count(string, char, ptr = 0, count = 0) {
 }
 
 function render_cart_item(entity) {
-	/* 
+	/* Display item in cart, including ontology/package version #
 	*/
 	var version = entity.version.substr(entity.version.indexOf('releases/')+9)
 	var depth = character_count(entity.path, '/')
@@ -338,6 +338,7 @@ function render_entity_form_cart_icons(formObj) {
 
 	$('#tabsContent div.field-wrapper:not(.disjunction)')
 		.addClass('cart-item') // Just for styling
+		.find('> div.columns > div.row')
 		.prepend('<i class="fi-shopping-cart"></i>')
 
 	top.cart.keys().forEach(function(item_path) {

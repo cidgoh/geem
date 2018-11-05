@@ -74,7 +74,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				form_html += '<br/><p>This item has no field specification.</p>'
 			}
 			else {
-				form_html += render_button('View Form Submission', 'buttonFormSubmit') 
+				form_html += render_button('View Form Submission', 'buttonFormSubmit', '#modalEntity') 
 			}
 
 			// Place new form html into page
@@ -97,7 +97,6 @@ function OntologyForm(domId, resource, settings, callback) {
 		 	// Reinitialize form since deleted above. FUTURE: use reInit()
 		 	// Critical for establishing type-as-you-go validation; Foundation 5.5.3
 			$(document).foundation('abide', 'reflow');
-			//$(document).foundation()
 
 			// Setup of this class enables callback function to be supplied.
 			// Make event?
@@ -532,7 +531,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	render_section = function(entity, labelHTML, text) {
 		html = [
 		labelHTML
-		,	'	<div class="input-group">\n'
+		,	'	<div>\n'
 		,			text
 		,	'	</div>\n'
 		].join('')
@@ -569,20 +568,26 @@ function OntologyForm(domId, resource, settings, callback) {
 		// feature allows override
 		if (entity.features.format)
 			format = entity.features.format.value
+		
+		var unit_html = render_units(entity)
 
-		html = [label
-			,'	<div class="input-group date" data-date-format="' + format + '">' //DOES THIS NEED AN id= ?????
-			,'		<div class="input-group-label prefix"><i class="fi fi-calendar"></i></div>\n'
-			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
-			,		render_attr_unique_id(entity)
-			,		' data-ontology-id="'+entity.domId+'"'
-			,		' type="text" style="width:200px" '
-			,		get_input_placeholder(entity)
-			//,		render_attr_string(entity)
-			,		entity.disabled
-			,		'/>\n'
-	    	,		render_units(entity)
-			,'	</div></div>\n'
+		html = [
+			'<div class="row collapse date" data-date-format="', format, '">\n'
+			,	label,
+			//,'	<div class="date large-', unit_html.length ? 7 : 12, ' columns" 
+			,'		<div class="large-1 columns"><span class="prefix fi fi-calendar"></span></div>\n'
+			,'		<div class="large-4 columns',unit_html.length ? '':' end','">'
+			,'			<input class="input-group-field prefix ', entity.id, '"'
+			,			render_attr_unique_id(entity)
+			,			' data-ontology-id="', entity.domId, '"'
+			,			' type="text" style="width:200px" '
+			,			get_input_placeholder(entity)
+			,			entity.disabled
+			,			'/>\n'
+			,'		</div>'
+    		,		unit_html
+			,'	</div>\n'
+			,'</div>\n'
 		].join('')
 
 		return get_field_wrapper(entity, html)
@@ -593,29 +598,36 @@ function OntologyForm(domId, resource, settings, callback) {
 		Add case for paragraph / textarea?
 		 <textarea placeholder="None"></textarea>
 
-		<small class="error">...</small> is placed inside label parameter.
 		*/
+		var unit_html = render_units(entity)
 
-		html = [label
-		,	'	<div class="input-group">\n'
-		,	'		<input class="input-group-field '+entity.id+'"'
-		,			render_attr_unique_id(entity)
-		,			' data-ontology-id="' + entity.domId + '"'
-		, 			' type="text"'
-		,			 render_attr_string(entity)
-		,			 entity.disabled
-		,			 get_input_placeholder(entity)
-		,			 '/>\n'
-    	, 			render_units(entity)
-		,	'	</div>\n'].join('')
+		html = [
+			'<div class="row collapse">\n'
+			,	label,
+			,'	<div class="large-', unit_html.length ? 7 : 12, ' columns">'
+			,'		<input ', entity.id, '"'
+			,			render_attr_unique_id(entity)
+			,			' data-ontology-id="', entity.domId, '"'
+			, 			' type="text"'
+			,			 render_attr_string(entity)
+			,			 entity.disabled
+			,			 get_input_placeholder(entity)
+			,		'/>\n'
+			,'	</div>\n'
+    		,	unit_html
+			,'</div>\n'
+			].join('')
+
 		return get_field_wrapper(entity, html)
 	} 
 
-	render_button = function(text, buttonID) {
+	render_button = function(text, button_id) {
 		// Not an ontolog-driven specification.
 		return [
-			'<div>\n'
-		,	'	<button id="' + buttonID + '" class="button float-center ' + buttonID + '">' + text + '</button>\n'
+			'<div class="text-center">\n'
+		,	'	<button id="', button_id, '" class="formButton button small ', button_id, '"">'
+		,			text
+		,		'</button>\n'
 		,	'</div>\n'
 		].join('')
 	}
@@ -650,7 +662,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				aria = ''
 			}
 
-			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
+			htmlTabs += '<li class="tab-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
 			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
 			// Cosmetic issue: tab label repeated in child field wrapper.
 			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
@@ -706,9 +718,11 @@ function OntologyForm(domId, resource, settings, callback) {
 			var typeAttr = ' type="number"'
 		}
 
-		html = [labelHTML,
-			,'<div class="input-group">\n'
-	 		,'	<input class="input-group-field ' + entity.id + '"'
+		html = [
+			,'<div class="row collapse">\n'
+			,	labelHTML,
+			,	'<div class="large-4 columns">'
+	 		,'		<input class="input-group-field ' + entity.id + '"'
 	 		,		render_attr_unique_id(entity)
 	 		,		' data-ontology-id="' + entity.domId + '"'
 	 		,		typeAttr
@@ -719,6 +733,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			,		' pattern="' + type + '"'
 			,		' data-validator="min_max"'
 			,	' />\n'
+			,	'</div>\n'
     		,	render_units(entity)
 			,'</div>\n'
 		].join('')
@@ -728,17 +743,22 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 	render_boolean = function(entity, labelHTML) {
+/*
 
+*/
 		html = [
-			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
-			,'		<input class="switch-input" type="checkbox" data-ontology-id="'+entity.domId+'"'
-			,		' name="' + entity.id + '"'
-			,		render_attr_unique_id(entity)
-			,		entity.disabled
+			,'<div class="row collapse">\n'
+			,'	<div class="large-2 columns switch small">'
+			,'		<input type="checkbox" data-ontology-id="', entity.domId, '"'
+			,			render_attr_unique_id(entity)
+			,			entity.disabled
 			,		' />\n'
-			,	'	<label class="switch-paddle" for="' + entity.uniqueDomId + '"></label>\n'
-			,	'	</div>\n'
-			,	labelHTML
+			,'		<label for="geem_', entity.uniqueDomId, '"></label>\n'
+			,'	</div>\n'
+			,'	<div class="large-9 columns end">'
+			,		labelHTML
+			,'	</div>\n'
+			,'</div>\n'
 			].join('')
 
 		return get_field_wrapper(entity, html)
@@ -764,9 +784,11 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		const ontology_id_attr = render_attr_ontology_id(entity.domId)
 
-		var html = [label
-			,'	<div class="input-group">\n'
-			,'		<select class="input-group-field '+ entity.id + ' regular" ' + ontology_id_attr + entity.disabled + multiple + '>\n'
+		var html = [
+			'<div class="row collapse">\n'
+			, 	label
+			,'	<div class="large-', entity.features.lookup ? 10 : 12, ' columns">'
+			,'		<select class="', entity.id, ' regular" ' + ontology_id_attr, entity.disabled, multiple, '>\n'
 						// Enables no option to be selected:
 			,			(multiple.length == 0) ? '<option value=""></option>' : ''
 						// Because one should deliberately make a selection ... esp. when 
@@ -774,8 +796,9 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'			<option value="" disabled>Select ...</option>'
 			,			render_choice(entity, 0, cutDepth, 'select')
 			,'		</select>\n'
-			,			entity.features.lookup ? '<a class="input-group-label select_lookup" ' + ontology_id_attr + '>lookup choices</a>\n' : ''
 			,'	</div>\n'
+			,	entity.features.lookup ? '<div class="large-2 columns"><button class="select_lookup button tiny" ' + ontology_id_attr + '>lookup</button></div>\n' : ''
+			,'</div>\n'
 		].join('')
 
 		return get_field_wrapper(entity, html, 'categorical')
@@ -888,7 +911,11 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			// If only one unit to choose from then we're done.
 			if (entity.units.length == 1) 
-				return '<span class="input-group-label small">'+ render_simple_label(entity.units[0]) + '</span>\n'
+				return [
+					'<div class="large-5 columns end">'
+					,'	<span class="postfix">'+ render_simple_label(entity.units[0]), '</span>'
+					,'</div>'
+				].join('\n')
 
 			var preferred = entity.features.preferred_unit 
 			var optionsHTML = ''
@@ -905,11 +932,14 @@ function OntologyForm(domId, resource, settings, callback) {
 			}
 
 			return [
-			'<div class="input-group-button" style="font-weight:700;">'
-			,	'<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
-			,	optionsHTML	
-			,	'</select>'
-			,'</div>\n'].join('')
+			'<div class="large-5 columns end" style="border:0px">'
+			,'	<span class="postfix text-left">'
+			,'		<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
+			,			optionsHTML	
+			,'		</select>'
+			,'	</span>'
+			,'</div>'
+			].join('\n')
 	   	}
 	   	return ''
 	}
@@ -934,14 +964,14 @@ function OntologyForm(domId, resource, settings, callback) {
 			labelURL = '<a href="#' + entity.id + '">' + labelURL + '</a>' 
 
 		// Enable mouseover display of above.
-		html = '<label data-ontology-id="'+ entity.id +'" for="geem_' + entity.uniqueDomId + '">'
+		html = '<label for="geem_' + entity.uniqueDomId + '">' // data-ontology-id="'+ entity.id +'" 
 		if (self.settings.ontologyDetails)
-			html += '<i class="fi-magnifying-glass"]></i> ' + labelURL
+			html += '<i class="fi-magnifying-glass"></i>' + labelURL
 		else 
 			if (entity.uiDefinition) {
 				// Beginning, ending, and stand-alone quotes have to be replaced.
 				definition = entity.uiDefinition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
-				html += '<span data-tooltip class="has-tip top left" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
+				html += '<span data-tooltip class="has-tip top" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
 			}
 			else
 				html += labelURL
@@ -1035,11 +1065,12 @@ function OntologyForm(domId, resource, settings, callback) {
 		/* Surrounds given field element with general DOM id, css and cardinality controls
 			If the given entity has model or choice components, this adds a
 			'chindren' CSS class.
+			Zurb Foundation: adds "row collapse"
 		*/ 
 		if (entity.input_group == true)
 			return html
 		else
-			return ['<div class="field-wrapper field'
+			return ['<div class="row field-wrapper field'
 				,		dom_class ? ' ' + dom_class : ''
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 				,		' depth' + entity.depth
@@ -1048,7 +1079,9 @@ function OntologyForm(domId, resource, settings, callback) {
 				,		render_attr(entity, 'minCardinality')
 				,		render_attr(entity, 'maxCardinality')
 				,		'>\n'
-				,		html
+				,		'<div class="large-12 columns">\n'
+				,			html
+				,		'</div>\n'				
 				,	'</div>\n'
 			].join('')
 	}
@@ -1060,12 +1093,14 @@ function OntologyForm(domId, resource, settings, callback) {
 		else
 			return [
 				'<a name="' + entity.domId + '"/>'
-				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-				,	render_attr_ontology_id(entity.domId)
-				,	render_attr(entity, 'minCardinality')
-				,	render_attr(entity, 'maxCardinality')
-				,	'>\n'
-				,	html
+				,	'<div class="row field-wrapper model children depth' + entity.depth + '" '
+				,		render_attr_ontology_id(entity.domId)
+				,		render_attr(entity, 'minCardinality')
+				,		render_attr(entity, 'maxCardinality')
+				,		'>\n'
+				,		'<div class="large-12 columns">\n'
+				,			html
+				,		'</div>\n'
 				,	'</div>\n'
 			].join('')
 	}

@@ -13,6 +13,17 @@ function init_search_tab() {
 	})
 
 	$("#searchResults").on('mouseenter','i.fi-arrow-up.dropdown', render_display_context)
+
+	$('#displayContext').on('click','i.fi-arrow-up', function(event){
+		// Insert shopping cart item 
+		var target = $(event.target).parent()
+		var targetId = target[0].dataset.ontologyId
+		// DETECT IF ITEM HAS ALREADY HAD PARENTS ADDED?
+		if ($('#displayContext ul[data-ontology-id="'+targetId+'"]').length == 0 ) {
+			target.parent().wrap('<ul data-ontology-id="'+targetId+'">')
+			target.parent().before(render_entity_relations(targetId))
+		}
+	})
 }
 
 

@@ -960,6 +960,7 @@ function get_specification_form_data(domId) {
 					}
 
 					if (Array.isArray(focus)) {
+						if (!focus.length) focus[0]=[]
 						//console.log('writing array item', item_id, '=', value)
 						focus[focus.length-1][item_id] = value
 					}
@@ -1061,7 +1062,7 @@ function open_modal(header, content) {
 	/* This displays given string content and header in popup. 
 	Usually called by getChoices()
 	*/
-	$("#modalEntityHeaderContent").html(header).show()
+	$("#modalEntityHeader").html(header).show()
 	$("#modalEntityContentContainer").html(content)
 	$("#spec_download").hide() // hide download button.
 	$("#modalEntity").foundation('open')
@@ -1071,10 +1072,10 @@ function open_modal(header, content) {
 function set_modal_download(contentObj) {
 	/* Used on form.html to download stuff.
 	*/
-	$("#modalEntityHeaderContent").hide()
+	$("#modalEntityHeader").hide()
 	var contentPre = '<pre id="modalEntityContent">' + contentObj.content + '</pre>'
 	$("#modalEntityContentContainer").empty().html(contentPre)
-	$("#modalEntity").foundation('open')
+	$("#modalEntity").foundation('reveal', 'open');
 	$("#spec_download")
     	.off()
     	.on('click', function() { download_data_specification(contentObj) })

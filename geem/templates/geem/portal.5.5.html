@@ -45,7 +45,7 @@
 
     <!-- This is invisible but has to be positioned above bottom of page as it takes up height -->
     <!-- div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true" -->
-    <div id="makePackageForm" data-dropdown-content class="f-dropdown content" tabindex="-1">
+    <div id="makePackageForm" data-dropdown-content class="f-dropdown" tabindex="-1">
       <div class="input-group" >
         <label>You can add cart items to a draft package you manage</label>
         <select class="input-group-field" id="userPackages"></select>
@@ -53,6 +53,14 @@
       </div>
       <button id="updatePackageButton" class="button">update</button>
 
+    </div>
+    <!-- link is dynamically placed wherever user is mousing. -->
+
+    <i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>
+    <div id="displayContext" data-dropdown-content class="f-dropdown content" tabindex="-1" aria-hidden="true" aria-autoclose="false">
+      <div>
+        TESTING
+      </div>
     </div>
 
     <div class="row">
@@ -161,7 +169,7 @@
           <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
         </ul>
 
-        <div id="tabsContent" class="tab-content"> <!--  data-tabs-content="content-tabs"-->
+        <div id="tabsContent" class="tab-content" aria-hidden="true">
 
           <!-- ************************* FORM VIEW ******************* -->
           <div class="content" id="panelContent">
@@ -205,36 +213,38 @@
           </div><!-- end panel content -->
 
           <!-- ******************* DATA SPECIFICATION **************** -->
-          <div class="content" id="panelDataSpecification">
-            <div class="input-group">
-              <select id="specificationType" class="input-group-field">
-                <option value="">Select a specification format to view or download</option>
+          <div class="content" id="panelDataSpecification" aria-hidden="true">
 
-                <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
-                <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
+            <div class="row collapse">
+              <div class="large-9 columns">
+                <select id="specificationType">
+                  <option value="">Select a specification format to view or download</option>
 
-                <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
-                <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
+                  <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
+                  <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
 
-                <option value="raw.json">GEEM raw.json</option>
-                <option value="raw.yml">GEEM raw.yaml</option>
+                  <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
+                  <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
 
-                <option value="form.json">GEEM form.json</option>
-                <option value="form.yml">GEEM form.yaml</option>
+                  <option value="raw.json">GEEM raw.json</option>
+                  <option value="raw.yml">GEEM raw.yaml</option>
 
-                <option value="form.html">GEEM form.html</option>
-                <option value="form_submission.json">GEEM form submission</option>
+                  <option value="form.json">GEEM form.json</option>
+                  <option value="form.yml">GEEM form.yaml</option>
 
-                <optiongroup>
-                  <option value="" disabled="disabled">Coming in 2018!</option>
-                  <option value="redcap.tsv"> ... RedCap</option>
-                  <option value="ontofox.txt"> ... OntoFox</option>
-                </optiongroup>
+                  <option value="form.html">GEEM form.html</option>
+                  <option value="form_submission.json">GEEM form submission</option>
 
-              </select>
+                  <optiongroup>
+                    <option value="" disabled="disabled">Coming in 2018!</option>
+                    <option value="redcap.tsv"> ... RedCap</option>
+                    <option value="ontofox.txt"> ... OntoFox</option>
+                  </optiongroup>
 
-              <div class="input-group-label" style="padding:0">
-                <button id="spec_download" class="button icon fi-download disabled" title="download" style="margin:0;border:0"> Download</button>
+                </select>
+              </div>
+              <div class="large-3 columns">
+                <button id="spec_download" class="button icon fi-download disabled small" title="download"> Download</button>
                 <a id="view_spec_download" download="this_will_be_renamed.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="visibility:hidden"></a>
               </div>
 
@@ -251,7 +261,7 @@
           </div>
 
           <!-- ******************* VALIDATION **************** -->
-          <div class="content" id="panelValidation">
+          <div class="content" id="panelValidation" aria-hidden="true">
 
             <div id="helpValidation" class="infoBox">
               Coming soon - Validate tabular data according to ontology specification
@@ -260,7 +270,7 @@
 
 
         <!-- ******************* DISCUSSION **************** -->
-        <div class="content" id="panelDiscuss">
+        <div class="content" id="panelDiscuss" aria-hidden="true">
           
           <div class="infoBox">
             <p>Discussion about a selected ontology term occurs here. One can select a term by
@@ -285,11 +295,9 @@
     <!-- MODAL DIALOGS -->
     <div id="template_area" style="position:absolute">
         
-      <div id="modalEntity" class="reveal" data-reveal> 
-        <div id="modalEntityHeader">
-          <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal"></button>
-          <div id="modalEntityHeaderContent"></div>
-        </div> 
+      <div id="modalEntity" class="reveal-modal" data-reveal aria-hidden="true" role="dialog"> <!-- aria-labelledby="modalTitle" -->
+        <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+        <div id="modalEntityHeader"></div> 
         <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
       </div>
 

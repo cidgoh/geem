@@ -33,10 +33,10 @@ def portal(request):
 def form(request):
     return render(request, 'geem/form.html', context={})
 
-def portal55(request):
-    return render(request, 'geem/portal.5.5.html', context={})
-def form55(request):
-    return render(request, 'geem/form.5.5.html', context={})
+#def portal55(request):
+#    return render(request, 'geem/portal.5.5.html', context={})
+#def form55(request):
+#    return render(request, 'geem/form.5.5.html', context={})
 def foundation55(request):
     return render(request, 'geem/foundation.5.5.html', context={})
 

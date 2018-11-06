@@ -1,0 +1,32 @@
+{
+    "foodon-merged": {
+        "2018-04-24": {
+            "status": "release",
+            "versionIRI": "http://purl.obolibrary.org/obo/foodon/releases/2018-04-24/foodon.owl",
+            "description": "FoodOn (http://foodon.org) is a consortium-driven project to build a comprehensive and easily accessible global farm-to-fork ontology about food, that accurately and consistently describes foods commonly known in cultures from around the world.",
+            "license": "http://creativecommons.org/licenses/by/3.0/",
+            "title": "Food Ontology",
+            "prefix": "FOODON",
+            "date": "2018-04-24",
+            "resource": "http://purl.obolibrary.org/obo/foodon.owl",
+            "type": "ontology",
+            "local_URL": "data/ontology/foodon-merged.2018-04-24.json",
+            "timestamp": 1530659091.0
+        }
+    },
+    "genepio-merged": {
+        "2018-04-24": {
+            "status": "release",
+            "versionIRI": "http://purl.obolibrary.org/obo/genepio/releases/2018-04-24/genepio.owl",
+            "description": "The Genomic Epidemiology Ontology aims to provide a comprehensive controlled vocabulary for infectious disease surveillance and outbreak investigations. It is an application ontology that draws on many other ontologies including anatomy, taxonomy, disease, symptoms, environment and food types.",
+            "license": "http://creativecommons.org/licenses/by/3.0/",
+            "title": "Genomic Epidemiology Ontology",
+            "prefix": "GENEPIO",
+            "date": "2018-04-24",
+            "resource": "http://purl.obolibrary.org/obo/genepio.owl",
+            "type": "ontology",
+            "local_URL": "data/ontology/genepio-merged.2018-04-24.json",
+            "timestamp": 1530659091.0
+        }
+    }
+}

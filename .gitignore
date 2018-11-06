@@ -106,3 +106,5 @@ ENV/
 
 # secret settings file
 config/settings_secret.py
+scripts/test/
+

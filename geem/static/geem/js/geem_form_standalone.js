@@ -7,9 +7,9 @@ form = {}
 //ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
 ONTOLOGY_LOOKUP_SERVICE_URL = 'http://purl.obolibrary.org/obo/'
 
-$( document ).ready(function() {
+$( document ).ready(function($) {
 
-  OntologyForm.init_foundation()
+  OntologyForm.init_foundation_settings()
 
   api = new GeemAPI()
 
@@ -32,8 +32,7 @@ $( document ).ready(function() {
   // A change in browser URL #[ontologyID] will load new form
   $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
 
-  $('#modalEntity').foundation()
-  $('#rightbar').foundation()
+  $(document).foundation()
 
   // Not sure why we don't need this
   //check_entity_id_change(render_standalone_form)
@@ -53,6 +52,9 @@ function render_standalone_form() {
   $('#specificationType')[0].selectedIndex = 0
 
   $('#buttonFormSubmit').on('click', function () {
+
+    // VALIDATE!!!!!
+
     // Submit button on form triggers download of user's sample data entry.
     set_modal_download(get_data_specification('form_submission.json'))
   })
@@ -78,13 +80,19 @@ function render_section_menu() {
     var depth = classes.substr(classes.indexOf('depth')+5)
     if (parseInt(depth) < 2) {
       var id = $(this).attr('data-ontology-id')
-      var label = $(this).children('label').text()
+      var label = $(this).find('>.columns > label > span,>.columns > .row > label').text()
       sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
     }
   });
 
   if (sections > 1) {
-    $('#formSections').html('<h5>Form Sections</h5>\n' + '<ul class="vertical menu" id="formMenu">' + sectionHTML + '</ul>')
+    $('#formSections').html([
+        '<h5>Form Sections</h5>\n'
+      , '<ul class="vertical menu" id="formMenu">\n'
+      , sectionHTML
+      , '</ul>\n'
+      ].join('')
+    )
   }
 
 }

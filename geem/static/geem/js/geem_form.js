@@ -74,7 +74,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				form_html += '<br/><p>This item has no field specification.</p>'
 			}
 			else {
-				form_html += render_button('View Form Submission', 'buttonFormSubmit') 
+				form_html += render_button('View Form Submission', 'buttonFormSubmit', '#modalEntity') 
 			}
 
 			// Place new form html into page
@@ -95,7 +95,8 @@ function OntologyForm(domId, resource, settings, callback) {
 		 		set_minimal_form(self.formDomId) // Hide empty optional field content.
 
 		 	// Reinitialize form since deleted above. FUTURE: use reInit()
-			self.formDomId.foundation()
+		 	// Critical for establishing type-as-you-go validation; Foundation 5.5.3
+			$(document).foundation('abide', 'reflow');
 
 			// Setup of this class enables callback function to be supplied.
 			// Make event?
@@ -112,10 +113,9 @@ function OntologyForm(domId, resource, settings, callback) {
 		return false
 	}
 
-
 	form_delete = function() {
 		if (self.formDomId) {
-			self.formDomId.off().empty()
+			self.formDomId.empty() // Don't use .off() ;set up broad listeners instead.
 		}
 	}
 
@@ -198,7 +198,7 @@ function OntologyForm(domId, resource, settings, callback) {
 					fieldspec.input_group = true 
 
 					var header = '<div class="inputBlockSeparator"><i class="removeInputElement fi-x-circle"></i><label>Record ' + (kid_count + 1) + '</label></div>'
-					var html = render_form_specification(fieldspec, header, true)
+					var html = render_form_specification(fieldspec, header)
 					element.append(html)
 
 					var new_element = element.children().last()
@@ -412,6 +412,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		time, url, and week
 
 		*/
+		if (!entity.uniqueDomId) {
+			entity.uniqueDomId = self.uniqueDomId;
+			self.uniqueDomId +=1
+		}
 
 		var	labelHTML = ''
 		if (entity.datatype != 'disjunction' && !entity.input_group)
@@ -512,7 +516,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		// Render each component
 		for (var entityId in entity.components) { 
-			html += this.render_form_specification(entity.components[entityId]) //, html
+			html += this.render_form_specification(entity.components[entityId]) 
 		}
 		/*
 		if ('choices' in entity) {
@@ -527,7 +531,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	render_section = function(entity, labelHTML, text) {
 		html = [
 		labelHTML
-		,	'	<div class="input-group">\n'
+		,	'	<div>\n'
 		,			text
 		,	'	</div>\n'
 		].join('')
@@ -564,22 +568,26 @@ function OntologyForm(domId, resource, settings, callback) {
 		// feature allows override
 		if (entity.features.format)
 			format = entity.features.format.value
+		
+		var unit_html = render_units(entity)
 
-		html = [label
-			,'	<div class="input-group date" '
-			,'		id="' + entity.domId + '"'
-			,'		data-date-format="' + format + '"'
-			,'		>'
-			,'		<div class="input-group-label prefix"><i class="fi fi-calendar"></i></div>\n'
-			,'		<div><input class="input-group-field prefix ' + entity.id + '"'
-			,		' data-ontology-id="'+entity.domId+'"'
-			,		' type="text" style="width:200px" '
-			,		get_input_placeholder(entity)
-			//,		render_attr_string(entity)
-			,		entity.disabled
-			,		'/>\n'
-	    	,		render_units(entity)
-			,'	</div></div>\n'
+		html = [
+			'<div class="row collapse date" data-date-format="', format, '">\n'
+			,	label,
+			//,'	<div class="date large-', unit_html.length ? 7 : 12, ' columns" 
+			,'		<div class="large-1 columns"><span class="prefix fi fi-calendar"></span></div>\n'
+			,'		<div class="large-4 columns',unit_html.length ? '':' end','">'
+			,'			<input class="input-group-field prefix ', entity.id, '"'
+			,			render_attr_unique_id(entity)
+			,			' data-ontology-id="', entity.domId, '"'
+			,			' type="text" style="width:200px" '
+			,			get_input_placeholder(entity)
+			,			entity.disabled
+			,			'/>\n'
+			,'		</div>'
+    		,		unit_html
+			,'	</div>\n'
+			,'</div>\n'
 		].join('')
 
 		return get_field_wrapper(entity, html)
@@ -589,27 +597,37 @@ function OntologyForm(domId, resource, settings, callback) {
 		/*
 		Add case for paragraph / textarea?
 		 <textarea placeholder="None"></textarea>
-		*/
 
-		html = [label
-		,	'	<div class="input-group">\n'
-		,	'		<input class="input-group-field '+entity.id+'"'
-		,			' data-ontology-id="'+entity.domId+'"'
-		, 			' type="text" '
-		,			 render_attr_string(entity)
-		,			 entity.disabled
-		,			 get_input_placeholder(entity)
-		,			 '/>\n'
-    	, 			render_units(entity)
-		,	'	</div>\n'].join('')
+		*/
+		var unit_html = render_units(entity)
+
+		html = [
+			'<div class="row collapse">\n'
+			,	label,
+			,'	<div class="large-', unit_html.length ? 7 : 12, ' columns">'
+			,'		<input ', entity.id, '"'
+			,			render_attr_unique_id(entity)
+			,			' data-ontology-id="', entity.domId, '"'
+			, 			' type="text"'
+			,			 render_attr_string(entity)
+			,			 entity.disabled
+			,			 get_input_placeholder(entity)
+			,		'/>\n'
+			,'	</div>\n'
+    		,	unit_html
+			,'</div>\n'
+			].join('')
+
 		return get_field_wrapper(entity, html)
 	} 
 
-	render_button = function(text, buttonID) {
+	render_button = function(text, button_id) {
 		// Not an ontolog-driven specification.
 		return [
-			'<div>\n'
-		,	'	<input id="' + buttonID + '" class="button float-center" value="' + text + '">\n'
+			'<div class="text-center">\n'
+		,	'	<button id="', button_id, '" class="formButton button small ', button_id, '"">'
+		,			text
+		,		'</button>\n'
 		,	'</div>\n'
 		].join('')
 	}
@@ -627,38 +645,40 @@ function OntologyForm(domId, resource, settings, callback) {
 		var domId = entity.domId
 		var htmlTabs = ''
 		var htmlTabContent = ''
-
 		// Could externalize this
 		var activeDone = false // Flag to activate first tab
 		for (var entityId in entity.components) { 
-			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
 			self.uniqueDomId += 1
-
-			var label = render_label(entity.components[entityId])
+			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
+			var component = entity.components[entityId]
+			//var label = render_simple_label()
 			if (activeDone == false) {
 				activeDone = true
-				tab_active = ' is-active '
+				tab_active = ' active is-active '
 				aria = ' aria-selected="true" '
+				aria_hidden = ''
 			}
 			else {
 				tab_active = ''
 				aria = ''
+				aria_hidden = 'aria-hidden="true" '
 			}
 
-			htmlTabs += '<li class="tabs-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
-			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
-			//htmlTabContent += 	this.render(entityId, entity.path, entity.depth+1) //, false, true 
-			// Issue: tab label repeated in child field wrapper.
-			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
-			htmlTabContent += '</div>\n'		
+			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + component.uiLabel + '</a></li>'
+			htmlTabContent += [
+				'<div class="content', tab_active, '" ',aria_hidden, 'id="panel_', childDomId, '">'
+				,	this.render_form_specification(entity.components[entityId]) 
+				,'</div>\n'
+				].join('')		
 		}
 
+		// Currently can't select component by disjunction because of disjunction's anonymous tab id.
 		return [ // A variation on get_field_wrapper()
-			,	'<div class="field-wrapper input-tabs">'
-			,		'<ul class="tabs" data-tabs id="' + domId + '">'
+			,	'<div class="field-wrapper input-tabs disjunction">'
+			,		'<ul class="tabs" data-tab id="' + domId + '">'
 			,			htmlTabs
 			,		'</ul>\n' 
-			,		'<div class="input-group tabs-content" data-tabs-content="' + domId + '">'
+			,		'<div class="tab-content" tabs-content="' + domId + '">'
 			,			htmlTabContent
 			,		'</div>\n'
 			,	'</div>\n'
@@ -701,9 +721,12 @@ function OntologyForm(domId, resource, settings, callback) {
 			var typeAttr = ' type="number"'
 		}
 
-		html = [labelHTML,
-			,'<div class="input-group">\n'
-	 		,'	<input class="input-group-field ' + entity.id + '"'
+		html = [
+			,'<div class="row collapse">\n'
+			,	labelHTML,
+			,	'<div class="large-4 columns">'
+	 		,'		<input class="input-group-field ' + entity.id + '"'
+	 		,		render_attr_unique_id(entity)
 	 		,		' data-ontology-id="' + entity.domId + '"'
 	 		,		typeAttr
 			,		stepAttr
@@ -713,6 +736,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			,		' pattern="' + type + '"'
 			,		' data-validator="min_max"'
 			,	' />\n'
+			,	'</div>\n'
     		,	render_units(entity)
 			,'</div>\n'
 		].join('')
@@ -722,15 +746,22 @@ function OntologyForm(domId, resource, settings, callback) {
 
 
 	render_boolean = function(entity, labelHTML) {
+/*
 
+*/
 		html = [
-			'	<div class="switch small" style="float:left;margin-right:10px;margin-bottom:0">\n'
-			,'		<input data-ontology-id="'+entity.domId+'" class="switch-input" type="checkbox" name="' + entity.id+ '"'
-			,		entity.disabled
+			,'<div class="row collapse">\n'
+			,'	<div class="large-2 columns switch small">'
+			,'		<input type="checkbox" data-ontology-id="', entity.domId, '"'
+			,			render_attr_unique_id(entity)
+			,			entity.disabled
 			,		' />\n'
-			,	'	<label class = "switch-paddle" for="'+entity.domId+'"></label>\n'
-			,	'	</div>\n'
-			,	labelHTML
+			,'		<label for="geem_', entity.uniqueDomId, '"></label>\n'
+			,'	</div>\n'
+			,'	<div class="large-9 columns end">'
+			,		labelHTML
+			,'	</div>\n'
+			,'</div>\n'
 			].join('')
 
 		return get_field_wrapper(entity, html)
@@ -756,9 +787,11 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		const ontology_id_attr = render_attr_ontology_id(entity.domId)
 
-		var html = [label
-			,'	<div class="input-group">\n'
-			,'		<select class="input-group-field '+ entity.id + ' regular" ' + ontology_id_attr + entity.disabled + multiple + '>\n'
+		var html = [
+			'<div class="row collapse">\n'
+			, 	label
+			,'	<div class="large-', entity.features.lookup ? 10 : 12, ' columns">'
+			,'		<select class="', entity.id, ' regular" ' + ontology_id_attr, entity.disabled, multiple, '>\n'
 						// Enables no option to be selected:
 			,			(multiple.length == 0) ? '<option value=""></option>' : ''
 						// Because one should deliberately make a selection ... esp. when 
@@ -766,8 +799,9 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'			<option value="" disabled>Select ...</option>'
 			,			render_choice(entity, 0, cutDepth, 'select')
 			,'		</select>\n'
-			,			entity.features.lookup ? '<a class="input-group-label select_lookup" ' + ontology_id_attr + '>lookup choices</a>\n' : ''
 			,'	</div>\n'
+			,	entity.features.lookup ? '<div class="large-2 columns"><button class="select_lookup button tiny" ' + ontology_id_attr + '>lookup</button></div>\n' : ''
+			,'</div>\n'
 		].join('')
 
 		return get_field_wrapper(entity, html, 'categorical')
@@ -880,7 +914,11 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			// If only one unit to choose from then we're done.
 			if (entity.units.length == 1) 
-				return '<span class="input-group-label small">'+ render_label(entity.units[0]) + '</span>\n'
+				return [
+					'<div class="large-5 columns end">'
+					,'	<span class="postfix text-left units">'+ render_simple_label(entity.units[0]), '</span>'
+					,'</div>'
+				].join('\n')
 
 			var preferred = entity.features.preferred_unit 
 			var optionsHTML = ''
@@ -897,11 +935,14 @@ function OntologyForm(domId, resource, settings, callback) {
 			}
 
 			return [
-			'<div class="input-group-button" style="font-weight:700;">'
-			,	'<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
-			,	optionsHTML	
-			,	'</select>'
-			,'</div>\n'].join('')
+			'<div class="large-5 columns end" style="border:0px">'
+			,'	<span class="postfix text-left">'
+			,'		<select class="units" data-ontology-id="' + entity.domId + '-IAO:0000039">'
+			,			optionsHTML	
+			,'		</select>'
+			,'	</span>'
+			,'</div>'
+			].join('\n')
 	   	}
 	   	return ''
 	}
@@ -920,24 +961,20 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (!entity) 
 			return 'ERROR: Entity not defined'
 
-		var label = entity.uiLabel
-		var definition = entity.uiDefinition
-		// Beginning, ending, and stand-alone quotes have to be replaced.
-		if (definition)
-			definition = definition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
+		var labelURL = entity.uiLabel
 
 		if (self.settings.ontologyDetails && entity.depth > 0)
-			var labelURL = '<a href="#' + entity.id + '">' + label + '</a>' 
-		else
-			var labelURL = label
+			labelURL = '<a href="#' + entity.id + '">' + labelURL + '</a>' 
 
 		// Enable mouseover display of above.
-		html = '<label data-ontology-id="'+ entity.id +'">'
+		html = '<label for="geem_' + entity.uniqueDomId + '">' // data-ontology-id="'+ entity.id +'" 
 		if (self.settings.ontologyDetails)
-			html += '<i class="fi-magnifying-glass"]></i> ' + labelURL
+			html += '<i class="fi-magnifying-glass"></i>' + labelURL
 		else 
-			if (definition) {
-				html += '<span data-tooltip class="has-tip top left" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
+			if (entity.uiDefinition) {
+				// Beginning, ending, and stand-alone quotes have to be replaced.
+				definition = entity.uiDefinition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
+				html += '<span data-tooltip class="has-tip top" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
 			}
 			else
 				html += labelURL
@@ -948,11 +985,36 @@ function OntologyForm(domId, resource, settings, callback) {
 		return html
 	}
 
+
+	render_simple_label = function(entity) {
+		/* 
+		Shorter version of above, w/o definition.
+		*/
+		if (!entity) 
+			return 'ERROR: Entity not defined'
+
+		var labelURL = entity.uiLabel
+
+		if (self.settings.ontologyDetails && entity.depth > 0)
+			labelURL = '<a href="#' + entity.id + '">' + labelURL + '</a>' 
+
+		// Enable mouseover display of above.
+		html = '<label data-ontology-id="'+ entity.id +'">'
+		if (self.settings.ontologyDetails)
+			html += '<i class="fi-magnifying-glass"]></i> '
+
+		html += labelURL
+		html +=  '</label>\n'
+
+		return html
+	}
+
 	render_help = function(entity) {
 		// Only entities that have been initialized have 'help' attribute.
+		var html = '<small class="error">This needs valid input</small>'
 		if (entity.help)
-			return '<span data-tooltip class="has-tip float-right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + entity.help + '"> <i class="fi-info blue"></i></span>'
-		return ''
+			html += '<span data-tooltip class="has-tip float-right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + entity.help + '"> <i class="fi-info blue"></i></span>'		
+		return html
 	 }
 
 	/************************** UTILITIES ************************/
@@ -1006,11 +1068,12 @@ function OntologyForm(domId, resource, settings, callback) {
 		/* Surrounds given field element with general DOM id, css and cardinality controls
 			If the given entity has model or choice components, this adds a
 			'chindren' CSS class.
+			Zurb Foundation: adds "row collapse"
 		*/ 
 		if (entity.input_group == true)
 			return html
 		else
-			return ['<div class="field-wrapper field'
+			return ['<div class="row field-wrapper field'
 				,		dom_class ? ' ' + dom_class : ''
 				,		('models' in entity || 'choices' in entity) ? ' children' : '' // models check needed?
 				,		' depth' + entity.depth
@@ -1019,7 +1082,9 @@ function OntologyForm(domId, resource, settings, callback) {
 				,		render_attr(entity, 'minCardinality')
 				,		render_attr(entity, 'maxCardinality')
 				,		'>\n'
-				,		html
+				,		'<div class="large-12 columns">\n'
+				,			html
+				,		'</div>\n'				
 				,	'</div>\n'
 			].join('')
 	}
@@ -1031,12 +1096,14 @@ function OntologyForm(domId, resource, settings, callback) {
 		else
 			return [
 				'<a name="' + entity.domId + '"/>'
-				,	'<div class="field-wrapper model children depth' + entity.depth + '" '
-				,	render_attr_ontology_id(entity.domId)
-				,	render_attr(entity, 'minCardinality')
-				,	render_attr(entity, 'maxCardinality')
-				,	'>\n'
-				,	html
+				,	'<div class="row field-wrapper model children depth' + entity.depth + '" '
+				,		render_attr_ontology_id(entity.domId)
+				,		render_attr(entity, 'minCardinality')
+				,		render_attr(entity, 'maxCardinality')
+				,		'>\n'
+				,		'<div class="large-12 columns">\n'
+				,			html
+				,		'</div>\n'
 				,	'</div>\n'
 			].join('')
 	}
@@ -1048,6 +1115,10 @@ function OntologyForm(domId, resource, settings, callback) {
 	render_attr = function(entity, attribute) {
 		return (attribute in entity) ? attribute +'="' + entity[attribute] + '" ' : ''
 	}
+
+	render_attr_unique_id = function(entity) {
+		return ' id="geem_' + entity.uniqueDomId +'"'
+	}	
 
 	render_attr_numeric = function(entity, minInclusive, maxInclusive) {
 		/*
@@ -1091,13 +1162,13 @@ function OntologyForm(domId, resource, settings, callback) {
 	render_attr_pattern = function(entity) {
 		/* Render specific regular expression "pattern" that is used to
 		validate data entry. Zurb Foundation accepts some preset 
-		expression names - see init_foundation()
+		expression names - see OntologyForm.init_foundation()
 		*/
 		var pattern = ''
 		if (entity.pattern) {
 			var value = entity.pattern
 			// Zurb Foundation accepts some preset expression names.
-			if (value in Foundation.Abide.defaults.patterns)
+			if (value in top.settings.patterns)
 				pattern = value
 			else
 				pattern = "^" + value + '$' // RegEx match input string start to finish.
@@ -1124,19 +1195,24 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			entityId = document.location.hash.substr(1).split('/',1)[0]
 
 
+	if (!entityId)
+		return false
+
 	if (top.focusEntityId && entityId == top.focusEntityId)	// No work to do here
 		return false
 
 	// Returns if loading resource or if no appropriate resource found
 	// Ensure appropriate resource is loaded for given entity id 
-	if (!top.resource.specifications || ! entityId in top.resource.specifications) {
+	if (!top.resource.contents || ! entityId in top.resource.contents.specifications) {
 
 		resource_URL = api.get_resource_URL(entityId) // Selects favoured resource
 
-		if (top.resource.metadata && top.resource.metadata.resource == resource_URL) {// Should never happen.
+		if (top.resource.contents && top.resource.contents.metadata.resource == resource_URL) {// Should never happen.
 			Error('check_entity_id_change() problem: canonical resource doesn\'t have term')
 			return false
 		}
+		
+		console.log('we got', entityId, resource_URL)
 
 		top.focusEntityId = entityId
 		api.get_resource(resource_URL)
@@ -1148,7 +1224,7 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 
 	// At this point a change in entity_id has occured, so check current
 	// resource and then render form.
-	if (top.resource.specifications && entityId in top.resource.specifications) {
+	if (top.resource.contents && entityId in top.resource.contents.specifications) {
 		top.focusEntityId = entityId
 		entity_callback()
 		return true
@@ -1159,52 +1235,66 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 }
 
 // Implementing a static method for default zurb Foundation settings:
-OntologyForm.init_foundation = function() {
+OntologyForm.init_foundation_settings = function() {
+	//Foundation.Abide.defaults.live_validate = true; // DOESN'T WORK IN foundation 5.5.3???
 
-	Foundation.Abide.defaults.live_validate = true // validate the form as you go
-	Foundation.Abide.defaults.validate_on_blur = true // validate whenever you focus/blur on an input field
-	focus_on_invalid : true, // automatically bring the focus to an invalid input field
-	Foundation.Abide.defaults.error_labels = true, // labels with a for="inputId" will recieve an `error` class
-	// the amount of time Abide will take before it validates the form (in ms). 
-	// smaller time will result in faster validation
-	Foundation.Abide.defaults.timeout = 1000
-	Foundation.Abide.defaults.patterns = {
-		alpha: /^[a-zA-Z]+$/,
-		alpha_numeric: /^[a-zA-Z0-9]+$/,
-		title: /^[a-zA-Z0-9 ]+$/,
-		integer: /^[-+]?(0|[1-9]\d*)$/,
-		number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-		decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-		float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-		//latitudeD:
-		//longitudeD:
-		 
-		// http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#valid-e-mail-address
-		email : /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+	top.settings = {
+    	live_validate: true, // validate the form as you go
+    	validate_on_blur: true, // validate whenever you focus/blur on an input field
+		focus_on_invalid: true, // automatically bring the focus to an invalid input field
+		error_labels: true, // labels with a for="inputId" will recieve an `error` class
+		// the amount of time Abide will take before it validates the form (in ms). 
+		// smaller time will result in faster validation
+		timeout: 1000,
+    	patterns: {
+			alpha: /^[a-zA-Z]+$/,
+			alpha_numeric: /^[a-zA-Z0-9]+$/,
+			title: /^[a-zA-Z0-9 ]+$/,
+			integer: /^[-+]?(0|[1-9]\d*)$/,
+			number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+			decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+			float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+			//latitudeD:
+			//longitudeD:
+			 
+			// http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#valid-e-mail-address
+			email: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
 
-		url: /(https?|ftp|file|ssh):\/\/(((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?/,
-		// abc.de
-		domain: /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/,
+			url: /(https?|ftp|file|ssh):\/\/(((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?/,
+			// abc.de
+			domain: /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/,
 
-		datetime: /([0-2][0-9]{3})\-([0-1][0-9])\-([0-3][0-9])T([0-5][0-9])\:([0-5][0-9])\:([0-5][0-9])(Z|([\-\+]([0-1][0-9])\:00))/,
-		// YYYY-MM-DD
-		date: /(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))/,
-		// HH:MM:SS
-		time : /(0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}/,
-		dateISO: /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/,
-	      // MM/DD/YYYY
-	    month_day_year : /(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/,
-	}
-	Foundation.Abide.defaults.validators['min_max'] = function($el,required,parent) {
-		var test = true
-		if ($el.attr('min'))
-			test = test && (parseFloat($el.val()) >= parseFloat($el.attr('min')) )
-		if ($el.attr('max'))
-			test = test && (parseFloat($el.val()) <= parseFloat($el.attr('max')) )
+			datetime: /([0-2][0-9]{3})\-([0-1][0-9])\-([0-3][0-9])T([0-5][0-9])\:([0-5][0-9])\:([0-5][0-9])(Z|([\-\+]([0-1][0-9])\:00))/,
+			// YYYY-MM-DD
+			date: /(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))/,
+			// HH:MM:SS
+			time: /(0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}/,
+			dateISO: /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/,
+		      // MM/DD/YYYY
+		    month_day_year : /(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/
+		},
+		validators: {
+			'min_max': function($el,required,parent) {
+				var test = true
+				if ($el.attr('min'))
+					test = test && (parseFloat($el.val()) >= parseFloat($el.attr('min')) )
+				if ($el.attr('max'))
+					test = test && (parseFloat($el.val()) <= parseFloat($el.attr('max')) )
 
-		return test
+				return test
+			}
+		}
+  	}
+	//$(document).foundation({abide : {live_validate: true})
 
-	}
+	// Only Zurb 5.5.3 
+	$(document).foundation({abide : top.settings})
+
+	//Foundation 5.0:
+	//Foundation.Abide.defaults = top.settings
+
+
 }
+
 
 

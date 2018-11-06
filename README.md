@@ -106,7 +106,7 @@ python manage.py shell -c 'from django.core.management import utils; print(utils
 
 3. Register an Oauth2 application on Github: https://github.com/settings/applications/new Enter `http://localhost:8000/complete/github/` as the Authorization callback URL. Once the application is created, enter the Client ID and Client Secret into the `settings_secret.py` file as `SOCIAL_AUTH_GITHUB_KEY` and `SOCIAL_AUTH_GITHUB_SECRET`, respectively.
 
-4. Create a new project on the Google Developers Console: https://console.developers.google.com/ Create OAuth client ID Credentials. Select 'Web Application' as the appliction type. Enter `http://localhost:8000/complete/google-oauth2/` as the 'Authorized redirect URI'. Once the application is created, enter the Client ID and Client Secret into the `settings_secret.py` file as `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and `SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET`, respectively.
+4. Create a new project on the Google Developers Console: https://console.developers.google.com/ . In the Library tab, find and activate the Google+ API (https://console.developers.google.com/apis/library/plus.googleapis.com). Create OAuth client ID Credentials. Select 'Web Application' as the appliction type. Enter `http://localhost:8000/complete/google-oauth2/` as the 'Authorized redirect URI'. Once the application is created, enter the Client ID and Client Secret into the `settings_secret.py` file as `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and `SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET`, respectively.
 
 ## Viewing the Application
 

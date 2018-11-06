@@ -29,11 +29,14 @@ form = {}
 cart = []
 
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+// Hardcode properties to show in entity detail modal dialog.
+RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
 
-$( document ).ready(function() {
-
-	// Initializes Zurb Foundation settings (but not foundation itself)
-	OntologyForm.init_foundation()
+$( document ).ready(function($) {
+	
+	// Done early because form rendering (before application of foundation()
+	// may reference top.settings.patterns, etc.
+	OntologyForm.init_foundation_settings()
 
 	api = new GeemAPI()
 
@@ -49,16 +52,22 @@ $( document ).ready(function() {
 	init_summary_tab()
 	init_browse_tab()
 	init_search_tab()
+	init_cart_tab()
 
 	/*********************** Specification focus area ***********************/
 
 	init_form_tab()
 	init_specification_tab()
 	// init_discuss_tab()
-	// init_validation_tab()
-	init_cart_tab()
+	init_validation_tab()
+
+
+	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
+	// Initializes Zurb Foundation settings (but not foundation itself)
 
 	$(document).foundation()
+	
+	//$(document).foundation('abide')
 
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
@@ -72,11 +81,13 @@ $( document ).ready(function() {
 
 
 function resource_callback(resource) {
+	/* This function is triggered after a fetch for a particular resource by id.
 
+	*/
+	
 	$('#resourceTabs').removeClass('disabled')
-	$('#tabsSpecification').show()
+	//$('#resourceTabContent').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
-
 	// Prepare browsable top-level list of ontology items
 	render_resource_form()
 	render_resource_menu_init()
@@ -87,20 +98,17 @@ function resource_callback(resource) {
 function render_entity_form() {
 
 	$('#specificationSourceInfoBox').hide()
-	$('#content').removeClass('disabled')
+	//$('#content').removeClass('disabled')
 
 	// Providing form_callback to add shopping cart to form items.
-	top.form = new OntologyForm('#mainForm', top.resource, top.formSettings, portal_entity_form_callback) 
+	top.form = new OntologyForm('#mainForm', top.resource.contents, top.formSettings, portal_entity_form_callback) 
 
 	top.form.render_entity(top.focusEntityId)
 
-	// When render_entity is called, activate its (form) tab
-	$('#content-tabs').foundation('selectTab', '#panelContent'); 
+	$(document).foundation()
 
-	// Wire form's submit button to show GEEM example form submit contents in popup.
-	$('#buttonFormSubmit').on('click', function () {  
-		set_modal_download(get_data_specification('form_submission.json'))
-	})
+	//$('#mainForm').foundation('abide','events');
+	// See init_form_tab() for validation, submit setup.
 
 }
 
@@ -110,7 +118,6 @@ function portal_entity_form_callback(form) {
 	render_entity_form_cart_icons(form) 
 
 	$('#specificationSourceInfoBox').hide()
-
 	// Clear out specification tab. Deselect specification menu.
 	$('#specificationType')[0].selectedIndex = 0
 	$('#dataSpecification').empty()
@@ -126,7 +133,11 @@ function portal_entity_form_callback(form) {
 		.html(entity.definition || '<span class="small float-right">(select all)</span>')
 
 	// Content area functionality is blocked until form loaded
-	$('#content').removeClass('disabled')
+	//$('#content').removeClass('disabled')
+	// When render_entity is called, activate its (form) tab
+	// THIS ISN'T WORKING!!!!
+	$('#content-tabs').foundation('selectTab', $('#panelContent') ); 
+	$('#panelContent').attr('aria-hidden', false) // Not sure why above isn't working?
 
 }
 
@@ -135,106 +146,141 @@ function portal_entity_form_callback(form) {
 
 function render_resource_menu_init() {
 	/* Prepare browsable top-level list of ontology items
-	Provide context of form to populate. Passes form_callback, name of function in this module for OntologyForm to return to when complete.
+	Provide context of form to populate. Passes form_callback, name of 
+	function in this module for OntologyForm to return to when complete.
 
-	If it is a package ... what is the top level menu id?
+	If loaded resource has a "data representation model" then display kids.
+	Usually this means its an ontology.
+	Otherwise display any top-level model.
 	*/
 
 	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-	$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+	//$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
+	//$('#panelEntities').html('<ul class="vertical menu drilldown" data-drilldown id="entityMenu"></ul>')
 
-	// If it is an ontology, render its data representation model tree:
-	var root_id = 'OBI:0000658'
-	if (root_id in top.resource.specifications)
-		$("#entityMenu").html(render_resource_menu(root_id))
-	else
-		$("#entityMenu").html(render_resource_menu())
+	var entities = {}
+	var root_id = 'OBI:0000658' //"data representation model" 
+	var html = ''
 
-	$("#entityMenu").foundation();
+	if (top.resource.contents && top.resource.contents.specifications) {
+		if (root_id in top.resource.contents.specifications) {
+			entities = top.resource.contents.specifications[root_id].models
+		}
+		else {
+			// Search for any top level model 
+			for (entity_id in top.resource.contents.specifications) {
+				var entity = top.resource.contents.specifications[entity_id]
+				// If a model, and not subordinate to some other model
+				if (entity.datatype == 'model' && (! ('parent' in entity) || !( entity['parent'] in top.resource.contents.specifications))) {
+					entities[entity_id] = []
+				}
+			}
+		}
+	}
+
+	for (entity_id in entities) {
+		html += render_resource_accordion(entity_id)
+	}
+
+	if (html == '') 
+		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
+
+	$("#entityMenu").html(html)
 
 }
 
-function render_resource_menu(entityId = null, depth = 0 ) {
-	// If entityId not given, display all top-level 'datatype:"model"' 
-	// items in resource
+function render_resource_accordion(entity_id) {
+	/* Top level items are accordion. Underlying ones are hierarchic menu
+	*/
+	var entity = top.resource.contents.specifications[entity_id];
+	var normalized_id = entity.id.replace(':','_')
+	return [
+		'<li class="accordion-navigation small">',
+		,'	<a href="#menu_', normalized_id, '">', entity.uiLabel, '</a>'
+	    ,'	<div id="menu_', normalized_id, '" class="content">'
+	    ,		'<ul class="side-nav">' + render_resource_menu(entity) +'</ul>'
+	    ,'	</div>'
+	    ,'</li>'
+    ].join('')
+}
 
-	var html = ""
-	var children = {}
-	if (!entityId) {
-		// Ordered at all?
-		
-		for (entity_id in top.resource.specifications) {
+function render_resource_menu(entity = null, depth = 0 ) {
+	/* 
 
-			entity = top.resource.specifications[entity_id]
-			// If a model, and not subordinate to some other model
-			if (entity.datatype == 'model' && (! (  'parent' in entity) || !( entity['parent'] in top.resource.specifications))) {
-				children[entity_id] = []
+	*/
+	var html = ''
+
+	if ('models' in entity) {
+
+		for (var memberId in entity.models) {
+			// Only list item if it has components or models
+			var child = top.resource.contents.specifications[memberId]
+			if (child) {
+				// Infinite loop possible
+				if ('parent' in child && child.parent.id == entity.id) {
+					console.log("Node: " + entity.id + " is a parent of itself and so is not re-rendered.")
+					return ''
+				}
+
+				html += [
+					'<li class="cart-item" data-ontology-id="', child.id,'">'
+				 	,	'<a href="#', child.id, '">'
+					,		child.uiLabel
+					,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
+					,	'</a>'
+					,	 ('models' in child) ? '<ul class="side-nav">' + render_resource_menu(child, depth + 1) +'</ul>' : ''
+					// || 'components' in child)
+					,'</li>'
+				].join('')
+
 			}
 		}
-	}
-	else {
-		var entity = top.resource.specifications[entityId]
-		if (entity) {
-			// Ran into this once ...
-			if ('parent' in entity && parent['id'] == entityId) {
-				console.log("Node: " + entityId + " is a parent of itself and so is not re-rendered.")
-				return html
-			}
-			if ('models' in entity)
-				children = entity['models']
-		}
-		
-		if (depth > 0) {
-			html = [
-				'<li class="cart-item" data-ontology-id="',	entityId,'">'
-			 	,	'<a href="#'+entityId+'">'
-				,		entity['uiLabel']
-				,		children.length ? ' <i class="fi-magnifying-glass"></i>' : ''
-				,	'</a>'
-			].join('')
-		}
+
+		return html
 
 	}
 
-	// See if entity has subordinate parts that need rendering:
-	if (children) {
-		for (var memberId in children) {
-			// Top level menu items
-			if (depth == 0) html += render_resource_menu(memberId, depth + 1)
-			// Deeper menu items
-			else {
-				// Only list item if it has components or models
-				var child = top.resource.specifications[memberId]
-				if (child && ('models' in child || 'components' in child))
-					html += [
-					'<ul class="menu vertical nested">'
-					,	render_resource_menu(memberId, depth + 1)
-					,'</ul>'
-					].join('')
-			}
-		}
+	return ''
+}
+
+function render_display_context(event) {
+	/* When browsing a resources entities, Provide mouseover function to see
+	dropdown menu that shows given item	as well as any parent items that link
+	to it via "has member" and "has part" and "is a" relations. Parents can be
+	navigated to.
+	*/
+
+	var thisDiv = $(this).parents('[data-ontology-id]').first()
+	var ontologyPath = thisDiv.attr('data-ontology-id')
+
+	var pathDivider = ontologyPath.lastIndexOf('/')
+	var ontologyId = (pathDivider != -1) ? ontologyPath.substr(pathDivider+1) : ontologyPath 	
+
+	if ($(this).is('.fi-magnifying-glass')) {
+		$('#displayContext').html(render_entity_detail(ontologyId) )
 	}
+	else //'.fi-arrow-up'
+		$('#displayContext').html( '<ul>' + render_entity_relations(ontologyId) + '</ul>' )
 
-	if (depth > 0)
-		html +=	'</li>'
+	// Position displayContextButton glass ON TOP OF current one, thus triggering modal details view.
+	var iconPosition = $(this).offset()
+	$('#displayContextButton')
+		.css('left', (iconPosition.left) + 'px')
+		.css('top', (iconPosition.top) + 'px')
 
-	if (html == '') 
-		html = '<div class="infoBox">This package does not contain any specifications.</div>'
-	return html
 }
 
 
 function render_entity_detail(ontologyId) {
-
-	// This links directly to form for this entity.  Not in context of larger form.
-	// Problem is that recursion to fetch parts from parent runs into parents that 
-	// have no further path.
-	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
+	/* In popup modal, display item's ontology id and definition, and 
+	synonyms, dbxrefs etc. ID is linked directly to GEEM form for this
+	entity, skipping path context of its context in encompassing form.
+	*/
 	var entity = get_entity(ontologyId)
 	var entityIdParts = entity['id'].split(':')
 	var idPrefix = entityIdParts[0]
-	if (idPrefix in top.resource['@context']) {
-		entity_url = top.resource['@context'][idPrefix] + entityIdParts[1]
+	if (idPrefix in top.resource.contents['@context']) {
+		entity_url = top.resource.contents['@context'][idPrefix] + entityIdParts[1]
 	}
 	else
 		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
@@ -255,10 +301,8 @@ function render_entity_detail(ontologyId) {
 	if (entity.definition && entity.uiDefinition != entity.definition)
 		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity.definition + '</i></li>\n'
 	
-	// Hardcode properties that you want to show from specification here:
-	var properties = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
-	for (ptr in properties) {
-		var item = properties[ptr]
+	for (ptr in RENDER_PROPERTIES) {
+		var item = RENDER_PROPERTIES[ptr]
 		if (item in entity) {
 			for (var ptr2 in entity[item]) {
 				var val = entity[item][ptr2]
@@ -277,74 +321,13 @@ function render_entity_detail(ontologyId) {
 }
 
 
-function render_display_context(event) {
-	/* When browsing a resources entities, Provide mouseover function to see
-	dropdown menu that shows given item	as well as any parent items that link
-	to it via "has member" and "has part" and "is a" relations. Parents can be
-	navigated to.
-	*/
-	parent = $('#displayContext')
-	if (parent.length) {
-		$('#displayContext').foundation('destroy') // or else subsequent dropdown position is fixed.
-		$('#displayContextButton,#displayContext').remove()
-	}
-	var thisDiv = $(this).parents('[data-ontology-id]').first()
-	var ontologyPath = thisDiv.attr('data-ontology-id')
-	var pathDivider = ontologyPath.lastIndexOf('/')
-	if (pathDivider != -1) {
-		var ontologyId = ontologyPath.substr(pathDivider+1)
-	}
-	else
-		var ontologyId = ontologyPath 	
-
-	var content = '<div id="displayContext" class="dropdown-pane"><ul>'
-	if ($(this).is('.fi-magnifying-glass')) {
-		content += render_entity_detail(ontologyId) 
-	}
-	else //'.fi-arrow-up'
-		content += '<ul>' + render_entity_relations(ontologyId) + '</ul>'
-
-	// Though it is hidden, have to include button or else Foundation throws error.
-	content = '<button id="displayContextButton" data-toggle="displayContext">&nbsp; &nbsp;</button>' + content
-
-	$('body').after(content).foundation() //Places it.
-
-	var elem = new Foundation.Dropdown($('#displayContext'), {hover:true, hoverPane:true});
-	var iconPosition = $(this).offset()
-	
-	//So mouseout works
-	$('#displayContextButton')
-		.css('left', (iconPosition.left) + 'px')
-		.css('top', (iconPosition.top) + 'px')
-
-	$('#displayContext').foundation('open')
-		.css('left', (iconPosition.left + 20) + 'px')
-		.css('top', (iconPosition.top) + 'px')
-
-	if ($(this).is('.fi-arrow-up'))
-		// Drop-down content is defined, now we ennervate the up-arrows.
-		// each can replace content 
-		$('#displayContext').on('click','i.fi-arrow-up',function(event){
-			// Insert shopping cart item 
-			var target = $(event.target).parent()
-			var targetId = target[0].dataset.ontologyId
-			// DETECT IF ITEM HAS ALREADY HAD PARENTS ADDED?
-			if ($('#displayContext ul[data-ontology-id="'+targetId+'"]').length == 0 ) {
-				target.parent().wrap('<ul data-ontology-id="'+targetId+'">')
-				target.parent().before(render_entity_relations(targetId))
-			}
-		})
-
-}
-
-
 function render_entity_relations(ontologyId) {
 	// Returns relations as li links for given entity
 	var entity = get_entity(ontologyId) 
 
 	var filling = ''
 	if ('parent' in entity) {
-		filling += get_relation_link('parent', get_entity(entity['parent']))
+		filling += render_relation_link('parent', get_entity(entity.parent))
 	}
 	// Possibly organize each entity's relations under a "relations" section?
 	for (const relation of ['member_of','otherParent']) {
@@ -379,26 +362,131 @@ function render_relation_link(relation, entity) {
 
 function init_summary_tab() {
 
+	$('#resourceForm').on('click','#summary_create,#summary_copy', function() {
+		// Get all form fields and pass to api.create_resource()
+		var data = get_form_data($('#resourceForm'))
+		if ($(this).is('#summary_copy'))
+			data.name = data.name + ' - COPY'
+		// #Django expecting flat format with contents 
+		data.contents = JSON.stringify(data.contents)
+		api.create_resource(data)
+			.then(function(resource) {
+				api.get_resources()
+				.then(init_resource_select)
+				.then(function(){
+					$('#specificationType').val(resource.id) // select given resource to load it
+				})
+
+				//init_resource_select(top.resources)
+				//$('#specificationType').val(resource.id) // select given resource to load it
+				//return resource
+			})
+			//.then(resource_callback)
+
+		return false
+	})
+
+
+	// Deals with #summary_delete, #summary_download, #summary_update
+	$('#resourceForm').on('click','#summary_delete', function() {
+		// API DELETE RESOURCE.
+		var id = parseInt($('#resourceForm input[name="id"]').val())
+		if (id && id != 5) {
+			api.delete_resource(id)
+				.then(function(){
+					api.get_resources()
+					.then(init_resource_select)
+				})
+	
+			alert("deleted " + id)
+		}		
+	})
+
+	$('#resourceForm').on('click','#summary_download', function() {
+		/* Currently this function is downloading client-side 
+		representation of package or ontology json.
+		*/
+		var content =  {
+			content: JSON.stringify(top.resource.contents),
+			report_type: 'geem.json',
+			id: top.resource.contents.metadata.prefix.toLowerCase()
+		}
+		download_data_specification(content)
+		return false
+	})
+
+	$('#resourceForm').on('click', '#summary_update', function() {
+
+		var data = get_form_data($('#resourceForm'))
+		data.contents = JSON.stringify(data.contents)
+		api.update_resource(data)
+			.then(resource_callback)
+
+		existing_resource = top.resources.filter(record => record.id = data.id)
+		//init_resource_select(top.resources)
+		//$('#specificationType').val(resources.id)
+		return false
+	})
+
+
 }
 
 function init_browse_tab() {
-	// On Browse Specifications tab, enables eye icon click to show form 
-	// without opening/closing the accordion.
-	// ARCHAIC: menu parent never rendered, only leafs are rendered.
-	/*
-	$('#panelEntities').on('click', 'i', function(event) { 
-		event.stopPropagation();
-		if ($(event.target).is('i.fi-magnifying-glass') ) {
-			top.form.render_entity(get_attr_ontology_id(event.target))
-		}
-	});
+	/* Browse Specifications tab
 	*/
 }
 
 function init_form_tab() {
 
-	// In form display area, provides hover view of item's ontology details
+	/* Wire form's submit button to show GEEM example form submit contents in popup.*/
+	$('#mainForm').on('click', '.buttonFormSubmit', function (e) {  
+		e.preventDefault();
+		$('#mainForm').foundation("validateForm")
+		set_modal_download(get_data_specification('form_submission.json'))
+		return false
+	})
+
+	// Form validation triggers constructed once, not every time its rendered
+	$('#mainForm').on('forminvalid.zf.abide,invalid,invalid.fndtn.abide', function(e) {
+		e.preventDefault();
+		console.log("invalid trigger"); 
+		alert("invalid trigger")
+	});
+	$('#mainForm').on('valid,valid.fndtn.abide', function(e) {
+		e.preventDefault();
+		console.log("valid trigger"); 
+		alert("valid trigger")
+	});
+	$('#mainForm').on('submit', function(e) {
+		//e.preventDefault();
+		console.log("submit triggered");
+		// NOW VALIDATE
+		$('#mainForm').foundation("validateForm")
+	});
+
+	$(document).bind('invalid.zf.abide',function(e) {
+  		console.log("Sorry, "+e.target.id+" is not valid");
+	});
+	// to submit via ajax, add the 2 bindings below.  
+	/*
+	$(document)
+	.bind("submit", function(e) {
+	  e.preventDefault();
+	  console.log("submit intercepted");
+	  $('#mainForm').foundation("validateForm")
+	})
+	.bind("formvalid.zf.abide", function(e,$form) {
+	  // ajax submit
+	});
+	*/
+
+	// In form display area, when "toggle specification details" is on,
+	// provides hover view of item's ontology details
 	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)
+	$(document).on('closed.fndtn.reveal', '#displayContext', function () { //[data-reveal]
+		// Gets hidden 'details' icon off screen, if any. See render_display_context()
+		$('#displayContextButton').css('left', '-30px')
+	});
 
 	// chosen <select> event triggers cart icons to be drawn in <options>
 	render_entity_form_select_cart_icons()
@@ -427,7 +515,6 @@ function init_form_tab() {
 
 }
 
-
 function init_specification_tab() {
 
 	// Trigger popup JSON / EXCELL / YAML view of specification
@@ -440,11 +527,14 @@ function init_specification_tab() {
 	
 }
 
+function init_validation_tab() {
+
+}
 
 /******************************** UTILITY FUNCTIONS *************************/
 
 function get_entity(ontologyId) {
-	return top.resource.specifications[ontologyId]
+	return top.resource.contents.specifications[ontologyId]
 }
 
 function dom_item_animate(item, effectClass) {

@@ -1,25 +1,45 @@
+API_RESOURCES_URL = 'api/resources/' 
+
 
 function GeemAPI() {
 
-	//https://developers.google.com/web/fundamentals/primers/promises
+	// non-anonymous user GET and POST methods depend on Django csrftoken.
+	// May have to check logged-in status.
+	// See https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+	$.ajaxSetup({
+	    beforeSend: function(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+	        }
+	    }
+	});
+
+
 	//this.init = function() {}
 
 	this.get_resources = function() {
 		/* 
 			Retrieves available resources for logged-in or public user to browse.
 		*/
+
+		//https://developers.google.com/web/fundamentals/primers/promises
 		return new Promise(function(resolve, reject) {
+			$.ajax({
+				type: 'GET',
+				url: API_RESOURCES_URL + '?format=json',
+				timeout: 30000, //30 sec timeout
+				success: function(resources) {
+					
+					top.resources = resources
+					resolve(resources);
+				},
 
-			// AJAX FUNCTION HERE
-			top.resources =	[
-				{type:'ontology', name:'Genomic Epidemiology Ontology', path:"data/ontology/genepio-merged.json"},
-				{type:'ontology', name:'Food Ontology (FoodOn)', path:'data/ontology/foodon-merged.json'},
-				{type:'shared', name:'Demo Epi Form', path:'data/shared_packages/test.epi.json'},
-				{type:'private', name:'New Demo Package', path:'data/private_packages/new_2018-04-16.json'}
-			]
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resources list could not be loaded: \n\n\t' + API_RESOURCES_URL))
+					return false
+				}
+			});
 
-			// CANNED DUMMY DATA
-			resolve(top.resources)
 		})
 	}
 
@@ -29,29 +49,26 @@ function GeemAPI() {
 
 		Ontology term prefix crudely determines resource at moment
 		CURRENTLY: HARD WIRED TO JUST BE GENEPIO or FOODON
-		Ontology ID provided in URL: CHECK FOR VALID ENTITY REFERENCE IN SOME
-		(PREFERRED?) ONTOLOGY.
-	
+		FUTURE: LOOKUP APPROPRIATE ONTOLOGY FOR ENTITY REFERENCE.
 	  	Note: we can get a dynamic list of OBOFoundry ontologies via: 
 		http://sparql.hegroup.org/sparql?default-graph-uri=&query=SELECT+%3Fv+WHERE+%7B%3Fx+owl%3AversionIRI+%3Fv%7D&format=json
 		In the future these could be candidates for GEEM-driven standards to
 		be encoded in.
 
 		*/
-		const prefix = entityId.split(':')[0].toLowerCase()
 
-		if (prefix == 'foodon')
-			return 'data/ontology/foodon-merged.json'
-
-		return 'data/ontology/genepio-merged.json'
-
+		switch (entityId.split(':')[0].toLowerCase()) {
+			case 'foodon': return '6'
+			case 'genepio': return '3'
+			default: return '3'
+		}
 	}
 
-	this.get_resource = function(resource_URL) {
+	this.get_resource = function(resource_id) {
 		/*
 
 		This loads the json user interface oriented version of an ontology
-		returned resource  top.resource.specifications contains:
+		returned resource  top.resource.contents contains:
 		{
 			@context: {}
 			metadata: {}
@@ -63,16 +80,13 @@ function GeemAPI() {
 
 		*/
 		return new Promise(function(resolve, reject) {
+			var resource_URL = API_RESOURCES_URL + resource_id + '?format=json'
 			$.ajax({
 				type: 'GET',
 				url: resource_URL,
 				timeout: 30000, //30 sec timeout
 				success: function(resource) {
 					
-					// Temporary correction until SPARQL query can be revised.
-					//if ('value' in top.resource.metadata.date)
-					//	top.resource.metadata.date = top.resource.metadata.date.value
-
 					top.resource = resource
 					resolve(resource);
 				},
@@ -88,61 +102,82 @@ function GeemAPI() {
 
 	}
 
-	this.get_new_resource = function() {
-		/* 
-			Retrieves new private package record for logged-in user.
+	this.create_resource = function(data) {
+		/*
 		*/
+		return new Promise(function(resolve, reject) {
+			console.log("creating record:",data);
+	 		$.ajax({
+	            type: "POST",
+	            url: API_RESOURCES_URL,
+	            data: data,
+	            success: function (response) {
+	                console.log(response);
+	                if (! ('id' in response)) {
+	                	alert(JSON.stringify(response))
+	                	reject(Error(JSON.stringify(response)))
+	                }
+	                else
+	                	resolve(response);
+	            },
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be created: \n\n\t' + data))
+				}
+	        });
+	    });
+	 }
 
-		var today = new Date();
-		today = today.toISOString().substring(0, 10);
+	this.delete_resource = function(resource_id) {
+		/*
+		*/
+		return new Promise(function(resolve, reject) {
 
-		// DUMMY DATA / TEMPLATE
-		return {
-			title:			'New private specification package',
-			date:			today,
-			type:			'private',
-			status:			'draft',
-			new: 			true, 
-			resource: 		'',  // General link to resource separate from version IRI??
-			description:	'',
-			prefix:			'',
-			versionIRI:		'data/private_packages/[your acct id]/package_[id]_'+today+'.json',
-			license:		''
-		}
-
+			$.ajax({
+				type: "DELETE",
+				url: API_RESOURCES_URL + resource_id,
+				success: function(response){
+				    resolve(response);
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be deleted: \n\n\t' + resource_id))
+					//alert('Given resource could not be found: \n\n\t' + resource_URL) 
+				}
+			});
+		})
 	}
 
-	this.delete_resource = function(path) {
+	// NEED PARTIAL UPDATE CALL.
+	this.update_resource = function(data) {
+		/*
 
+		*/
+		return new Promise(function(resolve, reject) {
+
+	 		$.ajax({
+	            type: "POST",
+	            url: API_RESOURCES_URL + data.id + '/', // Record id to be updated
+	            data: data,
+	            success: function (response) {
+	                console.log('Updated' , response);
+	                top.resource = response;
+	                resolve(response);
+	            },
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					reject(Error('Given resource could not be updated: \n\n\t' + JSON.stringify(data) ))
+				}
+	        });
+	    });
 	}
-
-	this.update_resource = function(path) {
-
-	}
-
-	/* A package consists of 
-	{
-		name: string
-		description: string
-		version: int //auto-increment per update function.
-		ontologies:	[
-			{prefix: string // "genepio"; OBOFoundry ontology lower case name.
-			version: string // identifier or if none, GEEM download date.
-			}
-		] 
-		specifications:
-			{}
-
-	}
-	*/
 
 
 	this.cart_change_item = function(entity_path, action, versionIRI = null) {
-		/* Sends in given specification entity path, an action to include
+		/* 
+		FUTURE: Add call to server if cart should be managed server side.
+
+		Sends in given specification entity path, an action to include
 		or exclude it from cart, and associated version, if any. If no version
 		then latest version is assumed. 
 		*/
-		// Add call to server if cart should be managed server side.
 
 		return new Promise(function(resolve, reject) {
 			/*
@@ -157,7 +192,7 @@ function GeemAPI() {
 			var ptr = entity_path.lastIndexOf('/')
 			// Get last path item id.
 			var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
-			var entity = top.resource.specifications[entity_id]
+			var entity = top.resource.contents.specifications[entity_id]
 			
 			result = {
 				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
@@ -173,6 +208,29 @@ function GeemAPI() {
 		})
 	}
 
+
+	function csrfSafeMethod(method) {
+	    // These HTTP methods do not require Django CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+
+
+	function getCookie(name) {
+		// From https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie !== '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
 
 }
 

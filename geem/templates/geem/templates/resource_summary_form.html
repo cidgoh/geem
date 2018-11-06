@@ -1,99 +1,154 @@
-<form class="grid-x grid-padding-x" data-abide style="padding-right:10px">
+<form data-abide id="resourceFormTag">
 
-  <!-- Provide checkbox too to enable sharing of package? -->
-  <div class="small-2 cell summary_type">
-    <label for="middle-label" class="text-right middle">type</label>
-  </div>
-  <div class="small-4 cell summary_type" style="float:left">
-    <select id="summary_type" disabled required>
-      <option value="private">private</option>
-      <option value="shared">shared</option>
-      <option value="ontology">ontology</option>
-    </select>
+  <div class="row">
+    <div class="large-2 columns summary_name">
+      <label for="middle-label" class="text-right middle">name</label>
+    </div>
+    <div class="large-10 columns summary_name">
+      <input type="text" name="name" id="summary_name" placeholder="name" value="@name" pattern="[A-Za-z0-9 \.]+" required style="font-weight:bold">
+    </div>
   </div>
 
-  <div class="small-2 cell summary_status" style="float:left;clear:none">
-    <label for="middle-label" class="text-right middle">status</label>
-  </div>
-  <div class="small-4 cell summary_status" style="float:left">
-    <select id="summary_status" disabled required>
-      <option value="draft">draft</option>
-      <option value="release">release</option>
-    </select>
+  <div class="row">
+    <div class="large-2 columns summary_type">
+      <label for="middle-label" class="text-right middle">type</label>
+    </div>
+    <div class="large-4 columns summary_ontology">
+      <select name="ontology" id="summary_ontology" disabled required>
+        <option value="true">ontology</option>
+        <option value="false">user package</option>
+      </select>
+    </div>
+
+    <div class="large-2 columns summary_type">
+      <label for="middle-label" class="text-right middle">access</label>
+    </div>
+    <div class="large-4 columns summary_public">
+      <select name="public" id="summary_public" disabled required>
+        <option value="true">public</option>
+        <option value="false">private</option>
+      </select>
+    </div>
   </div>
 
+  <div class="row">
+    <div class="large-2 columns summary_status">
+      <label for="middle-label" class="text-right middle">status</label>
+    </div>
+    <div class="large-4 columns summary_status">
+      <select name="curation" id="summary_curation" disabled required>
+        <option value="draft">draft</option>
+        <option value="review">under review</option>
+        <option value="release">release</option>
+      </select>
+    </div>
 
-  <div class="small-2 cell summary_title">
-    <label for="middle-label" class="text-right middle">title</label>
-  </div>
-  <div class="small-10 cell summary_title">
-    <input type="text" id="summary_title" placeholder="title" value="@title" pattern="[A-Za-z0-9 \.]+" required style="font-weight:bold">
-  </div>
-
-  <div class="small-2 cell summary_resource">
-    <label for="middle-label" class="text-right middle">URL</label>
-  </div>
-  <div class="small-1 cell summary_resource">
-    <a href="@resource" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
-  </div>
-  <div class="small-9 cell summary_resource">
-    <input type="text" id="summary_resource" placeholder="source file URL" value="@resource">
+    <div class="large-2 columns summary_version">
+      <label for="middle-label" class="text-right middle">version<span data-tooltip title="A version is recommended for any resource that has a 'release' curation status.  A version identifier in format YYYY-MM-DD makes clear the release date, although other alpha-numeric formats are allowed (it may include dash or underscore). Version is used in resource file name (see file base name field). Note - to base a package on an existing version, first copy that package, and give it a new version id."><i class="fi-info blue" style="font-size:1rem;"></i></span></label>
+    </div>
+    <div class="large-4 columns summary_version">
+      <input type="text" name="version" id="summary_version" placeholder="date or id" value="@version"  pattern="[A-Za-z0-9_-]+">
+    </div>
   </div>
 
-  <div class="small-2 cell summary_description">
-    <label for="middle-label" class="text-right middle">desc.</label>
+  <div class="row">
+    <div class="large-2 columns summary_description">
+      <label for="middle-label" class="text-right middle">desc.</label>
+    </div>
+    <div class="large-10 columns summary_description">
+      <textarea name="description" id="summary_description" rows="3">@description</textarea>
+    </div>
   </div>
-  <div class="small-10 cell summary_description">
-    <textarea placeholder="" id="summary_description" rows="3">@description</textarea>
+
+  <div class="row">
+    <div class="large-2 columns summary_id">
+      <label for="middle-label" class="text-right middle">resource id</label>
+    </div>
+    <div class="large-2 columns summary_id">
+      <input type="text" name="id" id="summary_id" value="@id">
+    </div>
+
+    <div class="large-3 columns summary_file_base_name">
+      <label for="middle-label" class="text-right middle">file base name</label>
+    </div>
+    <div class="large-4 columns summary_file_base_name">
+      <input type="text" name="file_base_name" id="summary_file_base_name" value="@file_base_name" pattern="[A-Za-z0-9_-]+">
+    </div>
+    <div class="large-1 columns">
+      <span data-tooltip class="right" title="FUTURE: This resource can be accessed using a data/[user id]/[base file name].[version].json URL. Provide the alphanumeric base file name here (it may include dash or underscore).">
+        <i class="fi-info blue" style="font-size:1.5rem;"></i>
+      </span>
+    </div>
+  </div>
+
+  <hr size = "1"/>
+  <!-- Following content comes from resource's contents.X.Y JSON metadata -->
+
+  <div class="row">
+    <div class="large-2 columns summary_resource">
+      <label for="middle-label" class="text-right middle">URL</label>
+    </div>
+    <div class="large-9 columns summary_resource">
+      <input type="text" name="contents.metadata.resource" id="summary_resource" placeholder="source file URL" value="@contents.metadata.resource">
+    </div>
+    <div class="large-1 columns summary_resource">
+      <a href="@contents.metadata.resource" target="_blank"><i class="fi-web" style="font-size:1.5rem;"></i></a>
+    </div>
   </div>
   
-  <div class="small-2 cell summary_license">
-    <label for="middle-label" class="text-right middle">license</label>
-  </div>
-  <div class="small-1 cell summary_license">
-    <a href="@license" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
-  </div>
-  <div class="small-9 cell summary_license">
-    <input type="text" id="summary_license" readonly placeholder="license" value="@license">
-  </div>
-
-  <div class="small-2 cell summary_prefix">
-    <label for="middle-label" class="text-right middle">prefix</label>
-  </div>
-  <div class="small-10 cell summary_prefix">
-    <input type="text" id="summary_prefix" placeholder="ontology prefix" value="@prefix">
+  <div class="row">
+    <div class="large-2 columns summary_license">
+      <label for="middle-label" class="text-right middle">license</label>
+    </div>
+    <div class="large-9 columns summary_license">
+      <input type="text" name="contents.metadata.license" id="summary_license" placeholder="license" value="@contents.metadata.license">
+    </div>
+    <div class="large-1 columns summary_license">
+      <a href="@contents.metadata.license" target="_blank"><i class="fi-web" style="font-size:1.5rem;"></i></a>
+    </div>
   </div>
 
-  <div class="small-2 cell summary_version">
-    <label for="middle-label" class="text-right middle">version</label>
-  </div>
-   <div class="small-1 cell summary_version">
-    <a href="@versionIRI" target="_blank"><i class="fi-web" style="font-size:1.5rem;padding-left:5px"></i></a>
-  </div>
-  <div class="small-9 cell summary_version">
-    <input type="text" id="summary_version" placeholder="version URI" readonly value="@versionIRI">
-  </div>
-
-  <div class="small-2 cell summary_date">
-    <label for="middle-label" class="text-right middle">updated</label>
-  </div>
-  <div class="small-4 cell summary_date" style="float:left">
-    <input type="text" id="summary_date" readonly placeholder="publication date" value="@date">
+  <div class="row">
+    <div class="large-2 columns summary_version_iri">
+      <label for="middle-label" class="text-right middle">version IRI</label>
+    </div>
+    <div class="large-9 columns summary_version_iri">
+      <input type="text" name="contents.metadata.versionIRI" id="summary_version_iri" placeholder="version URI" value="@contents.metadata.versionIRI">
+    </div>
+     <div class="large-1 columns summary_version_iri">
+      <a href="@contents.metadata.versionIRI" target="_blank"><i class="fi-web" style="font-size:1.5rem;"></i></a>
+    </div>
   </div>
 
+  <div class="row">
+    <div class="large-2 columns summary_prefix">
+      <label for="middle-label" class="text-right middle">prefix</label>
+    </div>
+    <div class="large-4 columns summary_prefix">
+      <input type="text" name="contents.metadata.prefix" id="summary_prefix" placeholder="ontology prefix" value="@contents.metadata.prefix">
+    </div>
+
+    <div class="large-2 columns summary_date">
+      <label for="middle-label" class="text-right middle">updated</label>
+    </div>
+    <div class="large-4 columns summary_date">
+      <input type="text" name="contents.metadata.date" id="summary_date" placeholder="publication date" value="@contents.metadata.date">
+    </div>
+  </div>
 
   <!-- Delete, Download, Copy and Update buttons -->
 
-  <div class="small-12 cell text-center" style="clear:both">
+  <div class="large-12 columns text-center">
 
     <button class="button" id="summary_delete">Delete</button>
 
-    <button class="button" data-tooltip data-click-open="false" id="summary_download" title="Download this entire GEEM resource file of specifications in JSON format.">Download</button>
+    <button class="button" id="summary_download" title="Download this entire GEEM resource file of specifications in JSON format." data-tooltip data-click-open="false" >Download</button>
 
-    <!-- <button class="button" data-tooltip data-click-open="false" id="summary_copy" title="Copy this ontology or package's specifications">Copy</button> -->
+    <!-- <button class="button" data-tooltip data-click-open="false" id="summary_copy">Copy</button> -->
 
-    <button class="button" id="summary_update">Save</button>
-
+    <button class="button" id="summary_update">Update</button>
+    <button class="button" id="summary_copy" title="Copy this ontology or package's specifications">Copy</button>
+    <button class="button" id="summary_create">Create</button>
   </div>
 
 </form>

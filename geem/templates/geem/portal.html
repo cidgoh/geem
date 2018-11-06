@@ -7,46 +7,41 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genomic Epidemiology Entity Mart Prototype</title>
-    <link rel="stylesheet" href="{% static "geem/css/foundation.min.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-5.5.3.min.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-icons/foundation-icons.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-datepicker.min.css" %}">
     <link rel="stylesheet" href="{% static "geem/js/chosen/chosen.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/app.css" %}">
+
+    <script src="{% static "geem/js/vendor-5.5.3/modernizr.js" %}"></script>
+
   </head>
   <body>
     <div class="row" style="background-color:#2199e8;color:white">
       <div class="large-9 medium-9 columns text-center">
         <!-- LOGIN / LOGOUT -->
-        <h2>Genomic Epidemiology Entity Mart Prototype</h2>
+        <h3 style="color:white;padding-top:10px">Genomic Epidemiology Entity Mart Prototype</h3>
       </div>
 
-      <div class="large-2 medium-2 columns">
-        <a class="button" href="https://github.com/GenEpiO/geem/wiki" target="_blank">Help</a>
+      <div class="large-3 medium-3 columns">
+        <a class="button small" href="https://github.com/GenEpiO/geem/wiki" target="_blank">Help</a>
         {% if user.username %}
-          <a class="button" data-tooltip href="accounts/logout" type="button" title="{{user.username}} logged in">Logout</a>
+          <div id="userInfo" data-user-id="{{user.id}}" style="display:none"></div>
+          <a class="button small" data-tooltip href="accounts/logout" type="button" title="{{user.username}} logged in">Logout</a>
+
         {% else %}
-          <a class="button" type="button" data-toggle="login-dropdown">Login</a>
-        	<div id="login-dropdown" class="dropdown-pane" data-dropdown data-auto-focus="true" data-options="align:left" style="min-width:100px; width:175px">
-        	  <a class="button" href="{% url "social:begin" "github" %}">GitHub Login</a>
-        	  <a class="button" href="{% url "social:begin" "google-oauth2" %}">Google Login</a>
+          <!-- a class="button small" type="button" data-toggle="login-dropdown">Login</a> -->
+        	<!-- div id="login-dropdown" class="dropdown-pane" data-dropdown data-auto-focus="true" data-options="align:left" style="min-width:100px; width:175px" -->
+          <a class="button small" data-dropdown="login-dropdown" aria-controls="login-dropdown">Login</a>
+          <div id="login-dropdown" data-dropdown-content class="f-dropdown content" aria-hidden="true" tabindex="-1">
+        	  <a class="button small" href="{% url "social:begin" "github" %}">GitHub Login</a>
+        	  <a class="button small" href="{% url "social:begin" "google-oauth2" %}">Google Login</a>
         	</div>
       	{% endif %}
         <!-- i class="fi-widget large">&nbsp;</i -->
       </div>
     </div>
     <br/>
-
-    <!-- This is invisible but has to be positioned above bottom of page as it takes up height -->
-    <div class="dropdown-pane" id="makePackageForm" data-dropdown data-hover="true" data-hover-pane="true"  data-auto-focus="true">
-
-      <div class="input-group" >
-        <label>Add cart items to package you manage</label>
-        <select class="input-group-field" id="userPackages"></select>
-        <p> Package must have a "draft" status in order to be modified.</p>
-      </div>
-      <button id="updatePackageButton" class="button">update</button>
-
-    </div>
 
     <div class="row">
 
@@ -56,28 +51,29 @@
         <select id="selectResource"></select>
 
         <!-- data-options="scroll_to_content: false" data-options="deep_linking:true" -->
-        <ul id="resourceTabs" class="tabs disabled" data-tabs>
-          <li class="tabs-title"><a id="specificationSummaryTabLink" href="#panelLibrary">Summary</a></li>
-          <li class="tabs-title"><a href="#panelEntities">Browse Specs</a></li>
-          <li class="tabs-title"><a href="#panelSearch">Search&nbsp;<i class="fi-magnifying-glass"></i></a></li>
-          <li class="tabs-title" id="tabPanelCartLink"><a href="#panelCart">Cart&nbsp;<i class="fi-shopping-cart" id="shoppingCartIcon"></i> </a></li>
+        <ul id="resourceTabs" class="tabs disabled" data-tab>
+          <li class="tab-title"><a id="specificationSummaryTabLink" href="#panelLibrary">Summary</a></li>
+          <li class="tab-title"><a href="#panelEntities">Browse</a></li>
+          <li class="tab-title"><a href="#panelSearch">Search&nbsp;<i class="fi-magnifying-glass"></i></a></li>
+          <li class="tab-title" id="tabPanelCartLink"><a href="#panelCart">Cart&nbsp;<i class="fi-shopping-cart" id="shoppingCartIcon"></i> </a></li>
         </ul>
 
 
-        <div id="tabsSpecification" class="tabs-content" data-tabs-content="resourceTabs"> 
+        <div id="resourceTabsContent" class="tabs-content" data-tabs-content="resourceTabs"> 
           
           <!-- ******************* SPECIFICATION MENU ******************* -->
-          <div class="tabs-panel disabled" id="panelLibrary" style="padding:0">
+          <div class="content" id="panelLibrary">
             <div id="resourceForm"></div>
           </div>
 
           <!-- ******************* ENTITY MENU ********************* -->
-          <div class="tabs-panel" id="panelEntities" style="padding:0">
+          <div class="content" id="panelEntities"> 
+            <ul class="accordion" data-accordion id="entityMenu" ></ul> <!-- data-deep-link data-multi-open="true" -->
             <!-- <ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul> -->
           </div>
 
           <!-- ************************ SEARCH ********************* -->
-          <div class="tabs-panel" id="panelSearch">
+          <div class="content" id="panelSearch">
 
             <form data-abide="" novalidate="novalidate" lpformnum="2">
               <input id="searchField" type="text" placeholder="Search for a term (3 characters or more)">
@@ -98,14 +94,23 @@
 
 
           <!-- ********************** SHOPPING CART ******************* -->
-          <div class="tabs-panel" id="panelCart">
-            <div style="padding-right:16px;margin-top:0">
+          <div class="content" id="panelCart">
+            <div>
               <a href="#" id="shoppingCartTrash" class="icon fi-trash" title="empty the cart"></a>
-              <button class="button" id="addToPackageButton" data-toggle="makePackageForm">Add to package</button>
+              <button class="button small" id="addToPackageButton" data-reveal-id="makePackageForm">Add to package</button>
             </div>
 
-            <form id="shoppingCart" class="callout" style="clear:both;border-left:0; border-right:0; border-bottom:0"></form>
+            <form id="shoppingCart" class="callout"></form>
             
+            <div id="makePackageForm" class="reveal-modal" data-reveal class="f-dropdown content" tabindex="-1">
+              <div class="input-group" >
+                <label>You can add cart items to a draft package you manage</label>
+                <select class="input-group-field" id="userPackages"></select>
+                <p> Package must have a "draft" status in order to be modified.</p>
+              </div>
+              <button id="updatePackageButton" class="button">update</button>
+
+            </div>
 
             <div id="cartInfoBox" class="infoBox">
               <p>Your entity shopping cart is displayed above. 
@@ -132,36 +137,26 @@
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
-      <div id="content" class="large-6 medium-6 columns disabled" style="padding:0;margin:0">
+      <div id="mainContent" class="large-7 medium-7 columns">
 
         <div id="formEntityLabel"></div>
 
-        <div class="infoBox" id="specificationSourceInfoBox">
-          <p>This is a semi-functional prototype for reviewing and downloading GEEM annotated ontology content that enables data specifications to be extracted from curated ontologies. Such specifications can be used to render reports and data entry forms, or to enforce data validation. The GEEM project ultimately aims to interface with existing systems like RedCap to enable standardized, ontology-driven data collection.</p>
-
-          <p>To start, select a GEEM-integrated specification resource from the list to work with. This can be an ontology, a shared specification package or one of your own private packages.</p>
-
-          <p>Then use the "Browse Specifications" or "Search" menu to see what specifications an ontology or package provides.  Choose an item to see how it would be presented as a form or form part. Options are also provided for downloading that specification <!--, discussing it with others-->, or adding parts of it to your shopping list in order to make a new package.</p>
-
-          <p>All other tabs focus on the selected resource. Browsing, searching and shopping for terms can only involve one version of an ontology or package at a time.</p>
-        </div>
-
-        <ul id="content-tabs" class="tabs" data-tabs>
-          <li class="tabs-title"><a href="#panelContent">Form View</a></li>
-          <li class="tabs-title"><a href="#panelDataSpecification">Specification</a></li>
+        <ul id="content-tabs" class="tabs" data-tab>
+          <li class="tab-title small"><a href="#panelContent">Form View</a></li>
+          <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tabs-title"><a href="#panelValidation">Validator</a></li>
+          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
         </ul>
 
-        <div id="tabsContent" class="tabs-content" data-tabs-content="content-tabs"> 
+        <div id="tabsContent" class="tab-content" aria-hidden="true">
 
           <!-- ************************* FORM VIEW ******************* -->
-          <div id="panelContent"  class="tabs-panel" style="padding-top:0">
+          <div class="content" id="panelContent" aria-hidden="true">
 
-            <form id="mainForm" data-abide="ajax"></form>
+            <form id="mainForm" data-abide ></form> <!-- ="ajax" ; novalidate prevents HTML5 validation -->
 
             <!-- ************************* FORM CONTROLS ******************* -->
-            <div class="container" style="border-top:1px dotted silver;padding:10px">
+            <div id="formControls">
 
               <div class="row">
                 <div class="switch tiny" style="float:left;margin-right:10px">
@@ -188,62 +183,73 @@
                   <i class="fi-shopping-cart include"></i> click to add item and its descendants to shopping cart<br/>
                   <i class="fi-shopping-cart exclude"></i> click to filter out descendant<br/>
                   <i class="fi-magnifying-glass" style="color:lightblue"></i> see ontology details for item<br/>
-                  <input required size="2" style="height:15px;border-radius: 4px;" onclick="blur()" /> field requires a value
+                  <input required size="2" style="height:15px;width:30px;border-radius: 4px;float:left" onclick="blur()" /> field requires a value
                 </div>
+              </div>
+
+            </div><!-- end form controls -->
+
+          </div><!-- end panel content -->
+
+          <!-- ******************* DATA SPECIFICATION **************** -->
+          <div class="content" id="panelDataSpecification" aria-hidden="true">
+
+            <div class="row collapse">
+              <div class="large-9 columns">
+                <select id="specificationType">
+                  <option value="">Select a specification format to view or download</option>
+
+                  <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
+                  <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
+
+                  <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
+                  <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
+
+                  <option value="raw.json">GEEM raw.json</option>
+                  <option value="raw.yml">GEEM raw.yaml</option>
+
+                  <option value="form.json">GEEM form.json</option>
+                  <option value="form.yml">GEEM form.yaml</option>
+
+                  <option value="form.html">GEEM form.html</option>
+                  <option value="form_submission.json">GEEM form submission</option>
+
+                  <optiongroup>
+                    <option value="" disabled="disabled">Coming in 2018!</option>
+                    <option value="redcap.tsv"> ... RedCap</option>
+                    <option value="ontofox.txt"> ... OntoFox</option>
+                  </optiongroup>
+
+                </select>
+              </div>
+              <div class="large-3 columns">
+                <button id="spec_download" class="button icon fi-download disabled small" title="download"> Download</button>
+                <a id="view_spec_download" download="this_will_be_renamed.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="visibility:hidden"></a>
               </div>
 
             </div>
 
-          </div>
+            <pre id="dataSpecification" class="callout hide"></pre>
 
-          <!-- ******************* DATA SPECIFICATION **************** -->
-          <div class="tabs-panel" id="panelDataSpecification">
-            <div class="input-group">
-            <select id="specificationType" class="input-group-field">
-              <option value="">Select a specification format to view or download</option>
-
-              <option value="form_core_nodes.tsv">GEEM core nodes .tsv</option>
-              <option value="form_core_edges.tsv">GEEM core edges .tsv</option>
-
-              <option value="form_all_nodes.tsv">GEEM all nodes .tsv</option>
-              <option value="form_all_edges.tsv">GEEM all edges .tsv</option>
-
-              <option value="raw.json">GEEM raw.json</option>
-              <option value="raw.yml">GEEM raw.yaml</option>
-
-              <option value="form.json">GEEM form.json</option>
-              <option value="form.yml">GEEM form.yaml</option>
-
-              <option value="form.html">GEEM form.html</option>
-              <option value="form_submission.json">GEEM form submission</option>
-
-              <optiongroup>
-                <option value="" disabled="disabled">Coming in 2018!</option>
-                <option value="redcap.tsv"> ... RedCap</option>
-                <option value="ontofox.txt"> ... OntoFox</option>
-              </optiongroup>
-
-            </select>
-
-            <div class="input-group-label" style="padding:0">
-              <button id="spec_download" class="button icon fi-download disabled" title="download" style="margin:0;border:0"> Download</button>
-              <a id="view_spec_download" download="this_will_be_renamed.txt" href="data:application/octet-stream;charset=utf-8;base64,Zm9vIGJhcg==" style="visibility:hidden"></a>
+            <div id="helpDataSpecification" class="infoBox">
+              Here a selected ontology or package specfication can be viewed and downloaded as a full list of entities, their fields, picklists and unit components.  This is available in tabular, JSON, and YAM formats, or (soon) as a Microsoft Excel template.
             </div>
+            <!-- The YAML view is provided as a flat format in which many items have links to others; while the YAML-tree view is more like the HTML form view, in which hierarchic items are built out. -->
 
 
           </div>
 
-          <pre id="dataSpecification" class="callout hide"></pre>
+          <!-- ******************* VALIDATION **************** -->
+          <div class="content" id="panelValidation" aria-hidden="true">
 
-          <div id="helpDataSpecification" class="infoBox">
-            Here a selected ontology or package specfication can be viewed and downloaded as a full list of entities, their fields, picklists and unit components.  This is available in tabular, JSON, and YAM formats, or (soon) as a Microsoft Excel template.
+            <div id="helpValidation" class="infoBox">
+              Coming soon - Validate tabular data according to ontology specification
+            </div>
           </div>
-          <!-- The YAML view is provided as a flat format in which many items have links to others; while the YAML-tree view is more like the HTML form view, in which hierarchic items are built out. -->
 
-        </div>
 
         <!-- ******************* DISCUSSION **************** -->
-        <div class="tabs-panel" id="panelDiscuss">
+        <div class="content" id="panelDiscuss" aria-hidden="true">
           
           <div class="infoBox">
             <p>Discussion about a selected ontology term occurs here. One can select a term by
@@ -251,6 +257,18 @@
           </div>
 
         </div>
+
+        <!-- ******************* Default infobox **************** -->
+        <div class="infoBox" id="specificationSourceInfoBox">
+          <p>This is a semi-functional prototype for reviewing and downloading GEEM annotated ontology content that enables data specifications to be extracted from curated ontologies. Such specifications can be used to render reports and data entry forms, or to enforce data validation. The GEEM project ultimately aims to interface with existing systems like RedCap to enable standardized, ontology-driven data collection.</p>
+
+          <p>To start, select a GEEM specification resource from the list. This can be an ontology, a public specification package or one of your own private packages.</p>
+
+          <p>Then use the "Browse Specifications" or "Search" menu to see what specifications a resource provides.  Choose an item to see how it would be presented as a form or form part. Options are also provided for downloading that specification, or adding parts of it to your shopping cart, which you can then add to one of your draft packages.</p>
+
+          <p>All other tabs focus on the selected resource. Browsing, searching and shopping for terms can only involve one version of an ontology or package at a time.</p>
+        </div>
+
 
       </div>
     </div>
@@ -266,25 +284,28 @@
     </div>
     
     <!-- MODAL DIALOGS -->
-    <div id="template_area" style="position:absolute">
+    <div id="template_area">
         
-      <div id="modalEntity" class="reveal" data-reveal>
-        <div id="modalEntityHeader">
-          <button type="button" class="button medium icon fi-x float-right" data-close aria-label="Close reveal"></button>
-          <div id="modalEntityHeaderContent"></div>
-        </div> 
+      <div id="modalEntity" class="reveal-modal" data-reveal aria-hidden="true" role="dialog"> <!-- aria-labelledby="modalTitle" -->
+        <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+        <div id="modalEntityHeader"></div> 
         <div id="modalEntityContentContainer" style="border:1px solid silver"></div>
       </div>
 
+      <!-- link is dynamically placed wherever user is mousing. -->
+      <i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>
+      <div id="displayContext" data-dropdown-content class="f-dropdown content" tabindex="-1" aria-hidden="true" aria-autoclose="false"></div>
+
     </div>
 
+    <script src="{% static "geem/js/vendor-5.5.3/jquery.js" %}"></script>
+    <script src="{% static "geem/js/foundation-5.5.3/foundation.min.js" %}"></script>
 
-    <script src="{% static "geem/js/vendor/jquery.js" %}"></script>
-    <script src="{% static "geem/js/vendor/what-input.js" %}"></script>
-    <script src="{% static "geem/js/vendor/foundation.min.js" %}"></script>
     <script src="{% static "geem/js/vendor/foundation-datepicker.min.js" %}"></script>
+    <script src="{% static "geem/js/vendor/what-input.js" %}"></script>
     <script src="{% static "geem/js/vendor/js-yaml.min.js" %}"></script> 
     <script src="{% static "geem/js/chosen/chosen.jquery.min.js" %}"></script>
+
     <script src="{% static "geem/js/geem_resource.js" %}"></script>
     <script src="{% static "geem/js/geem_form.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>

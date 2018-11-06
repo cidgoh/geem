@@ -179,7 +179,7 @@ function cart_check(entity_path) {
 		}
 
 	if (action)
-		api.cart_change_item(entity_path, action, top.resource.metadata.versionIRI)
+		api.cart_change_item(entity_path, action, top.resource.contents.metadata.versionIRI)
 			.then(cart_change)
 
 }
@@ -314,7 +314,7 @@ function character_count(string, char, ptr = 0, count = 0) {
 }
 
 function render_cart_item(entity) {
-	/* 
+	/* Display item in cart, including ontology/package version #
 	*/
 	var version = entity.version.substr(entity.version.indexOf('releases/')+9)
 	var depth = character_count(entity.path, '/')
@@ -336,8 +336,9 @@ function render_entity_form_cart_icons(formObj) {
 
 	*/
 
-	$('#tabsContent div.field-wrapper')
+	$('#tabsContent div.field-wrapper:not(.disjunction)')
 		.addClass('cart-item') // Just for styling
+		.find('> div.columns > div.row')
 		.prepend('<i class="fi-shopping-cart"></i>')
 
 	top.cart.keys().forEach(function(item_path) {
@@ -405,16 +406,10 @@ function render_cart_package_selection_modal() {
 	 Couldn't figure out foundation event for this
 	 A lot like init_resource_select()
 	*/
-	stack = top.resources.slice(0)
 
 	html = ['<option value="">Select a package ...</option>']
-	// Skip display of ontologies and packages user doesn't manage
-	while (stack.length && stack[0].type == 'ontology') 
-		stack.shift()
-
 	// manager_filter turned on so only those items user manages are shown.
-	init_resource_select_item(stack, 'shared', html, '</optgroup>\n<optgroup label="Shared Packages">', true)
-	init_resource_select_item(stack, 'private', html, '</optgroup>\n<optgroup label="Private Packages">', true)
+	init_resource_select_item(top.resources, html, '</optgroup>\n<optgroup label="Draft Packages">', null, null, true)
 	html = html.join('\n')
 
 	// Load menu selection

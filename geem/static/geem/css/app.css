@@ -4,27 +4,51 @@ input.is-invalid-input, select.is-invalid-input {border-left:3px solid red !impo
 div.field.required > label > div.input-group > input{border-left:3px solid orange;}
 
 
-#content > form{border:0;margin:0;}
-#content.disabled ul#content-tabs, #content.disabled #tabsContent {display:none;}
-/* #content.disabled {opacity:0.3;cursor:not-allowed !important; pointer-events: none;}  */
+#resourceForm input, 
+#resourceForm select {margin-bottom:.5rem;}
+#resourceForm form {margin:0px 10px 10px 0px}
+#resourceForm .row {margin:0px;}
+#resourceForm .columns {padding-right:0!important}
+
+
+#formControls {padding-left:20px;}
+#panelContent.disabled ul#content-tabs, #panelContent.disabled #tabsContent {display:none;}
+
+/* TABS */
+#content-tabs > li, #resourceTabs > li {border-right:2px solid white;}
+
+/* Resource tabs */
+#resourceTabs {border:1px solid silver; margin-top:10px;}
+#resourceTabs > li.tab-title a {padding:.3rem 1rem !important;}
+#resourceTabsContent {
+	height:500px; overflow:scroll; border:0;
+	border-left:1px solid #e6e6e6;
+	border-right:1px solid #e6e6e6;
+	border-bottom:1px solid #e6e6e6
+}
+/* Specification form tabs */
+#content-tabs {border:1px solid silver;}
+#content-tabs > li.tab-title i {font-size:1.5rem;position:absolute;margin-top:-5px;margin-left:5px;}
+#content-tabs > li > a {padding:.3rem 1rem !important;}
+#tabsContent {
+	height:500px; overflow:scroll; border:0;
+	padding:10px;
+	border-left:1px solid #e6e6e6;
+	border-right:1px solid #e6e6e6;
+	border-bottom:1px solid #e6e6e6
+}
+
+li.accordion-navigation > div {padding:0!important;}
+/* ALL INPUTS ???? matches foundation .small padding */
+#specificationType {height:2.7rem}
 
 /* CART ITEMS */
-ul#content-tabs > li.tabs-title i {font-size:1.5rem;position:absolute;margin-top:-5px;margin-left:5px;}
-
-#tabsContent {height:500px; overflow:scroll}
-
-#tabsSpecification {height:500px; overflow:scroll; border:0;}
-#resourceForm input, #resourceForm select {margin-bottom:.5rem;}
-
 form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.5rem;margin-left:5px;cursor:pointer;margin-top:-.4rem;}
-
+#shoppingCart {clear:both;border-left:0; border-right:0; border-bottom:0}
 #shoppingCart div.cart-item {clear:both; border-top:1px dotted silver;padding-top:.5rem;}
 #shoppingCart div.cart-item:first-child {border-top:0;}
 #shoppingCart div.cart-item > div.cart-item {margin-left:10px;}
 #shoppingCart li.cart-item i.fi-magnifying-glass {float:right !important; margin-right:20px; font-size:1.3rem;}
-#mainForm li.cart-item {;margin-right:30px;}
-#mainForm li.cart-item.exclude {background-color:silver;}
-#mainForm li.cart-item.include {background-color:green;color:white;}
 
 #shoppingCart div.cart-item.depth1 {margin-left:10px;}
 #shoppingCart div.cart-item.depth2 {margin-left:20px;}
@@ -36,15 +60,22 @@ form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.
 #shoppingCart div.cart-item.depth8 {margin-left:80px;}
 #shoppingCart div.cart-item.depth9 {margin-left:90px;}
 
-.include>i.fi-shopping-cart, i.fi-shopping-cart.include, .include+i.fi-shopping-cart {color:green} 
-.exclude>i.fi-shopping-cart, i.fi-shopping-cart.exclude, .exclude+i.fi-shopping-cart {color:red} 
+/* shopping cart tab list icon */
+#shoppingCart div.cart-item.exclude > i {color:red;}
+#shoppingCart div.cart-item.include > i {color:green;}
 
+/* shopping cart inside chosen select */
+#mainForm li.cart-item {;margin-right:30px;}
+#mainForm li.cart-item.exclude + i {color:red;}
+#mainForm li.cart-item.include + i {color:green}
 
-
+/* main form shopping cart icons */
+div.field-wrapper.include > div.columns > div.row > i.fi-shopping-cart {color:green}
+div.field-wrapper.exclude > div.columns > div.row > i.fi-shopping-cart {color:red}
 
 
 a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#2199e8;cursor:pointer;}
-
+#searchResults {clear:both;}
 #searchResults i.fi-shopping-cart {display:none !important}
 #searchResults i.fi-arrow-up {cursor:pointer; margin-left:5px; margin-right:5px;}
 #searchResults i.fi-arrow-up.dropdown {position:relative;float:right}
@@ -79,7 +110,7 @@ div.package {border-top:1px dotted silver; padding-top:.5rem;}
 	font-size:.9rem;}
 
 
-label >  i.fi-magnifying-glass {font-size:1.1rem; cursor:pointer; color:lightblue}
+label > i.fi-magnifying-glass {font-size:1.1rem; cursor:pointer; color:lightblue}
 i.fi-marker {color:green; cursor:pointer;}
 i.fi-marker.large {font-size: 1.1rem;}
 
@@ -106,7 +137,7 @@ div.callout.footer a:hover {color:navy}
 div.parental {padding-left:15px;}
 
 /* Chosen input select item indentation controlled here */
-.chosen-container {width:inherit !important}
+.chosen-container {width:inherit !important;margin-top:5px;}
 li.depth0 {padding-left:0px !important;}
 li.depth1 {padding-left:15px !important;}
 li.depth2 {padding-left:30px !important;}
@@ -120,7 +151,7 @@ li.depth9 {padding-left:135px !important;}
 li.depth10 {padding-left:150px !important;}
 li.depthReset {padding-left:0px !important;}
 
-select.units {width:auto;cursor:pointer} 
+select.units {width:100%;cursor:pointer;padding:inherit;padding-left:5px;} 
 
 div.model.depth1, div.model.depth2 {margin-left:0px; margin-bottom:15px; margin-top:10px!important; border-top:1px solid grey !important;} /*border-left:0px !important; */
 div.model.depth1 > label, div.model.depth2 > label {background-color:#F0F0F0;padding-left:5px;}
@@ -130,18 +161,19 @@ div.field-wrapper.depth4 {margin-left:10px}
 div.field-wrapper.depth5 {margin-left:10px} 
 
 div#modalEntity {}
-div#modalEntityHeader {color:white;background-color:gray;padding:10px;margin:0;}
+div#modalEntityHeader {padding:10px;margin:0;}
 div#modalEntityContentContainer {max-height:500px;width:100%;overflow:scroll;padding:10px;}
 div#modalEntityContent {white-space: pre-wrap}
 
-
+/*
 div.input-group {margin-bottom:.3rem !important;} 
-/* div.input-group-field {min-height:2.2rem !important;} */
+
 div.input-group-field {height:auto} 
+*/
 div.field-wrapper.required > div.input-group > div.chosen-container > a.chosen-single {border-left:3px solid orange}
 div.field-wrapper.required > span.info {background-color:orange}
 
-.chosen-container {display:inherit;} /*solves issue of multiple select lists overflowing a few lines, obscuring underlying next form field */
+div.chosen-container {display:inherit;} /*solves issue of multiple select lists overflowing a few lines, obscuring underlying next form field */
 .chosen-container .chosen-drop {top:inherit;} /* solves mysterious gap issue between search box and list */
 
 #mainForm div.tabs-panel {padding:5px} /* fields that have tabs */
@@ -153,10 +185,25 @@ a.input-group-label {font-size:.9em;}
 
 #package-tabs .tabs-title > a {padding:.5rem;font-size:.9rem;}
 
-.tabs-title>a { padding: .75rem 1.5rem; font-size:.9rem; } /* Foundation tabs are big for tablet/mobile touch but this is only a PC app for now so made them smaller padding. */
+.tabs-title>a { padding: .75rem 1.5rem; font-size:.9rem; } 
+/* Foundation tabs are big for tablet/mobile touch but this is only a PC app for now so made them smaller padding. */
 
-#displayContext {position:absolute;z-index:1500;color:black;}
+/* Trick to superimpose dropdown content link over existing hourglass or arrow */
+#displayContextButton {
+	position:absolute;
+	color:transparent;
+	margin-top:-2px;
+	margin-left:1px;
+	z-index:100;
+	cursor:pointer;
+}
+#displayContext {
+	min-width:400px;
+	padding:10px;
+	background-color:LemonChiffon ;
+	overflow-x:hidden;
 
+}
 i.fi-shopping-cart.option {position:absolute;right:10px;margin-top:-30px;} 
 i.fi-info {cursor:pointer;}r
 
@@ -169,20 +216,13 @@ li.group-result {display:none;}
 
 #formEntityLabel {
  	padding:.5rem;
- 	margin:0px 0 0 0;
+ 	margin-bottom:10px;
  	font-size:1.1rem;
- 	height:2.4375rem;
+ 	height:2.3rem;
  	background-color:#2199e8; 
  	color:white;
 	text-transform: capitalize;
 	overflow-x:scroll;
-}
-
-#tabsSpecification {
-	padding-top:10px;
-	border-left:1px solid #e6e6e6;
-	border-right:1px solid #e6e6e6;
-	border-bottom:1px solid #e6e6e6
 }
 
 #selectResource { 	
@@ -209,6 +249,7 @@ i.fi-x  {color:white;background-color:#2199e8;cursor:pointer;width:auto;}
 .icon.disabled {color:silver;cursor:not-allowed; pointer-events: none;}
 
 /* Quick fix until GEEM made foundation 6.4 compatible */
+/*
 .grid-x div.cell label {line-height:1 !important; margin:0 !important;}
 .grid-x div.cell input,.grid-x div.cell textarea {font-size:0.9rem;height:inherit;}
 
@@ -219,6 +260,7 @@ i.fi-x  {color:white;background-color:#2199e8;cursor:pointer;width:auto;}
 .grid-x > .small-8 {float:right;}
 .grid-x > .small-9 {float:right;}
 .grid-x > .small-10 {float:right;}
+*/
 
 /* TO DO: make styling nicer for main ontology optgroup */
 
@@ -229,3 +271,27 @@ ul.disabled li a {opacity:0.3;}
 .inputBlockSeparator {padding-left:5px;margin-top:10px;background-color:#F0F0F0;}
 .addInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;padding:5px;}
 .removeInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;width:2rem;text-align:center;}
+
+label.error small.error {display:inline !important;margin-left:10px;}
+
+#entityMenu ul {margin-top:0!important;padding-top:0;}
+#entityMenu ul > li > ul {margin-left:15px !important;padding:0;}
+ul.accordion li.accordion-navigation > a {padding:0.5rem !important;}
+#panelSearch, #panelCart {padding:10px;}
+
+/* Not sure why we have to do this. Foundation tabs should take care of it. */
+div.content[aria-hidden="true"] {display:none;}
+
+label {line-height:inherit;}
+
+/* form calendar icon */
+span.fi-calendar {font-size:1.5rem;}
+button.select_lookup {margin:0;}
+button.small {margin:0;}
+/* button at bottom of entity form */
+.formButton {margin:10px !important}
+
+div.disjunction > ul.tabs {border:1px solid silver !important;}
+div.disjunction > ul.tabs > li {border-right:2px solid white !important;}
+
+span.postfix.units label {padding-left:5px;}

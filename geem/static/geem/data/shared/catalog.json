@@ -1,0 +1,17 @@
+{
+    "test": {
+        "2018-04-16": {
+            "versionIRI": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+            "description": "A GEEM draft standard for European Bioinformatics Institute (EBI) antibiogram data submission",
+            "license": "http://creativecommons.org/licenses/by/3.0/",
+            "title": "Draft Antimicrobial Succeptibility Test Form",
+            "prefix": "",
+            "date": "2018-04-16",
+            "resource": "http://genepio.org/geem/data/shared_packages/test.epi.json",
+            "type": "shared",
+            "status": "draft",
+            "local_URL": "data/shared/test.2018-04-16.json",
+            "timestamp": 1530659091.0
+        }
+    }
+}

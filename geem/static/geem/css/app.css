@@ -151,7 +151,7 @@ li.depth9 {padding-left:135px !important;}
 li.depth10 {padding-left:150px !important;}
 li.depthReset {padding-left:0px !important;}
 
-select.units {width:100%;cursor:pointer} 
+select.units {width:100%;cursor:pointer;padding:inherit;padding-left:5px;} 
 
 div.model.depth1, div.model.depth2 {margin-left:0px; margin-bottom:15px; margin-top:10px!important; border-top:1px solid grey !important;} /*border-left:0px !important; */
 div.model.depth1 > label, div.model.depth2 > label {background-color:#F0F0F0;padding-left:5px;}
@@ -191,8 +191,11 @@ a.input-group-label {font-size:.9em;}
 /* Trick to superimpose dropdown content link over existing hourglass or arrow */
 #displayContextButton {
 	position:absolute;
-	margin-left:-14px;
+	color:transparent;
+	margin-top:-2px;
+	margin-left:1px;
 	z-index:100;
+	cursor:pointer;
 }
 #displayContext {
 	min-width:400px;
@@ -286,4 +289,9 @@ span.fi-calendar {font-size:1.5rem;}
 button.select_lookup {margin:0;}
 button.small {margin:0;}
 /* button at bottom of entity form */
-.formButton {margin:10px;}
+.formButton {margin:10px !important}
+
+div.disjunction > ul.tabs {border:1px solid silver !important;}
+div.disjunction > ul.tabs > li {border-right:2px solid white !important;}
+
+span.postfix.units label {padding-left:5px;}

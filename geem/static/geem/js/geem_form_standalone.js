@@ -7,7 +7,7 @@ form = {}
 //ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
 ONTOLOGY_LOOKUP_SERVICE_URL = 'http://purl.obolibrary.org/obo/'
 
-$( document ).ready(function() {
+$( document ).ready(function($) {
 
   OntologyForm.init_foundation_settings()
 
@@ -32,8 +32,6 @@ $( document ).ready(function() {
   // A change in browser URL #[ontologyID] will load new form
   $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
 
-  //$('#modalEntity').foundation()
-  //$('#rightbar')
   $(document).foundation()
 
   // Not sure why we don't need this
@@ -56,9 +54,6 @@ function render_standalone_form() {
   $('#buttonFormSubmit').on('click', function () {
 
     // VALIDATE!!!!!
-
-
-
 
     // Submit button on form triggers download of user's sample data entry.
     set_modal_download(get_data_specification('form_submission.json'))
@@ -85,7 +80,7 @@ function render_section_menu() {
     var depth = classes.substr(classes.indexOf('depth')+5)
     if (parseInt(depth) < 2) {
       var id = $(this).attr('data-ontology-id')
-      var label = $(this).children('label').text()
+      var label = $(this).find('>.columns > label > span,>.columns > .row > label').text()
       sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
     }
   });

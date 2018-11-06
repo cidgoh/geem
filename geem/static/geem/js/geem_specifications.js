@@ -909,20 +909,6 @@ function get_specification_form_data(domId) {
 	   	input id attribute (separated by forward slashes)
 	*/
 	var obj = {}
-	/* OLD CODE:
-	$.each($(domId).find(".field-wrapper.array"), function(i,item) {
-		var path = $(this).attr('data-ontology-id').split('/')
-		var focus = obj
-		for (var ptr in path) {
-			if ()
-			var id = path[ptr]
-			focus[id] = {}
-			focus = focus[id]
-		}
-		if ($(item).is('.field-wrapper.array')) {
-						focus[item_id] = []
-	}
-	*/
 
 	// Provides linear list of inputs from top to bottom of form
 	$.each($(domId).find("input:not(.button), select, .field-wrapper.array, .field-wrapper.array > .inputBlock"), function(i,item) {
@@ -999,7 +985,9 @@ function get_specification_form_data(domId) {
 
 /*
 	function getFormData2(entity, focus = null, obj = {}) { //, inherited = false
-		//
+		// FUTURE: THIS COULD REPLACE ABOVE CODE THAT DEPENDS ON LOOKING AT DOM
+		// INPUT ELEMENTS. HOWEVER, it doesn't handle user-created items (e.g.
+		// cardinality +1 records)
 		//If an item is .array, then it is represented as such in its parent
 		//parent: {item: []} 
 		//

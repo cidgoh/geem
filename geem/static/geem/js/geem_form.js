@@ -650,32 +650,35 @@ function OntologyForm(domId, resource, settings, callback) {
 		for (var entityId in entity.components) { 
 			self.uniqueDomId += 1
 			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
-
-			var label = render_label(entity.components[entityId])
+			var component = entity.components[entityId]
+			//var label = render_simple_label()
 			if (activeDone == false) {
 				activeDone = true
-				tab_active = ' is-active '
+				tab_active = ' active is-active '
 				aria = ' aria-selected="true" '
+				aria_hidden = ''
 			}
 			else {
 				tab_active = ''
 				aria = ''
+				aria_hidden = 'aria-hidden="true" '
 			}
 
-			htmlTabs += '<li class="tab-title'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + label + '</a></li>'
-			htmlTabContent += '<div class="tabs-panel'+tab_active+'" id="panel_'+childDomId+'">'
-			// Cosmetic issue: tab label repeated in child field wrapper.
-			htmlTabContent += this.render_form_specification(entity.components[entityId]) 
-			htmlTabContent += '</div>\n'		
+			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + component.uiLabel + '</a></li>'
+			htmlTabContent += [
+				'<div class="content', tab_active, '" ',aria_hidden, 'id="panel_', childDomId, '">'
+				,	this.render_form_specification(entity.components[entityId]) 
+				,'</div>\n'
+				].join('')		
 		}
 
 		// Currently can't select component by disjunction because of disjunction's anonymous tab id.
 		return [ // A variation on get_field_wrapper()
 			,	'<div class="field-wrapper input-tabs disjunction">'
-			,		'<ul class="tabs" data-tabs id="' + domId + '">'
+			,		'<ul class="tabs" data-tab id="' + domId + '">'
 			,			htmlTabs
 			,		'</ul>\n' 
-			,		'<div class="input-group tabs-content" data-tabs-content="' + domId + '">'
+			,		'<div class="tab-content" tabs-content="' + domId + '">'
 			,			htmlTabContent
 			,		'</div>\n'
 			,	'</div>\n'
@@ -913,7 +916,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			if (entity.units.length == 1) 
 				return [
 					'<div class="large-5 columns end">'
-					,'	<span class="postfix">'+ render_simple_label(entity.units[0]), '</span>'
+					,'	<span class="postfix text-left units">'+ render_simple_label(entity.units[0]), '</span>'
 					,'</div>'
 				].join('\n')
 
@@ -1285,7 +1288,7 @@ OntologyForm.init_foundation_settings = function() {
 	//$(document).foundation({abide : {live_validate: true})
 
 	// Only Zurb 5.5.3 
-	$(document).foundation({ abide : top.settings})
+	$(document).foundation({abide : top.settings})
 
 	//Foundation 5.0:
 	//Foundation.Abide.defaults = top.settings

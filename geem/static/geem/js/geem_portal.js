@@ -29,6 +29,8 @@ form = {}
 cart = []
 
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+// Hardcode properties to show in entity detail modal dialog.
+RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
 
 $( document ).ready(function($) {
 	
@@ -105,9 +107,6 @@ function render_entity_form() {
 
 	$(document).foundation()
 
-	// When render_entity is called, activate its (form) tab
-	$('#content-tabs').foundation('selectTab', '#panelContent'); 
-
 	//$('#mainForm').foundation('abide','events');
 	// See init_form_tab() for validation, submit setup.
 
@@ -135,6 +134,10 @@ function portal_entity_form_callback(form) {
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
+	// When render_entity is called, activate its (form) tab
+	// THIS ISN'T WORKING!!!!
+	$('#content-tabs').foundation('selectTab', $('#panelContent') ); 
+	$('#panelContent').attr('aria-hidden', false) // Not sure why above isn't working?
 
 }
 
@@ -183,7 +186,6 @@ function render_resource_menu_init() {
 		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
 
 	$("#entityMenu").html(html)
-	//$(document).foundation('accordion', 'reflow')
 
 }
 
@@ -214,7 +216,7 @@ function render_resource_menu(entity = null, depth = 0 ) {
 			// Only list item if it has components or models
 			var child = top.resource.contents.specifications[memberId]
 			if (child) {
-				// Infinite loop can happen
+				// Infinite loop possible
 				if ('parent' in child && child.parent.id == entity.id) {
 					console.log("Node: " + entity.id + " is a parent of itself and so is not re-rendered.")
 					return ''
@@ -241,13 +243,39 @@ function render_resource_menu(entity = null, depth = 0 ) {
 	return ''
 }
 
+function render_display_context(event) {
+	/* When browsing a resources entities, Provide mouseover function to see
+	dropdown menu that shows given item	as well as any parent items that link
+	to it via "has member" and "has part" and "is a" relations. Parents can be
+	navigated to.
+	*/
+
+	var thisDiv = $(this).parents('[data-ontology-id]').first()
+	var ontologyPath = thisDiv.attr('data-ontology-id')
+
+	var pathDivider = ontologyPath.lastIndexOf('/')
+	var ontologyId = (pathDivider != -1) ? ontologyPath.substr(pathDivider+1) : ontologyPath 	
+
+	if ($(this).is('.fi-magnifying-glass')) {
+		$('#displayContext').html(render_entity_detail(ontologyId) )
+	}
+	else //'.fi-arrow-up'
+		$('#displayContext').html( '<ul>' + render_entity_relations(ontologyId) + '</ul>' )
+
+	// Position displayContextButton glass ON TOP OF current one, thus triggering modal details view.
+	var iconPosition = $(this).offset()
+	$('#displayContextButton')
+		.css('left', (iconPosition.left) + 'px')
+		.css('top', (iconPosition.top) + 'px')
+
+}
+
 
 function render_entity_detail(ontologyId) {
-
-	// This links directly to form for this entity.  Not in context of larger form.
-	// Problem is that recursion to fetch parts from parent runs into parents that 
-	// have no further path.
-	// ALSO SELECT LIST CHOICES DON'T HAVE DEPTH STEMMING FROM PARENT ENTITY, only from ???
+	/* In popup modal, display item's ontology id and definition, and 
+	synonyms, dbxrefs etc. ID is linked directly to GEEM form for this
+	entity, skipping path context of its context in encompassing form.
+	*/
 	var entity = get_entity(ontologyId)
 	var entityIdParts = entity['id'].split(':')
 	var idPrefix = entityIdParts[0]
@@ -273,10 +301,8 @@ function render_entity_detail(ontologyId) {
 	if (entity.definition && entity.uiDefinition != entity.definition)
 		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity.definition + '</i></li>\n'
 	
-	// Hardcode properties that you want to show from specification here:
-	var properties = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
-	for (ptr in properties) {
-		var item = properties[ptr]
+	for (ptr in RENDER_PROPERTIES) {
+		var item = RENDER_PROPERTIES[ptr]
 		if (item in entity) {
 			for (var ptr2 in entity[item]) {
 				var val = entity[item][ptr2]
@@ -292,43 +318,6 @@ function render_entity_detail(ontologyId) {
 	itemHTML = 	[labelURL, itemHTML].join('\n')
 
 	return itemHTML
-}
-
-
-function render_display_context(event) {
-	/* When browsing a resources entities, Provide mouseover function to see
-	dropdown menu that shows given item	as well as any parent items that link
-	to it via "has member" and "has part" and "is a" relations. Parents can be
-	navigated to.
-	*/
-
-	var thisDiv = $(this).parents('[data-ontology-id]').first()
-	var ontologyPath = thisDiv.attr('data-ontology-id')
-
-	var pathDivider = ontologyPath.lastIndexOf('/')
-	if (pathDivider != -1) {
-		var ontologyId = ontologyPath.substr(pathDivider+1)
-	}
-	else
-		var ontologyId = ontologyPath 	
-
-	if ($('#displayContextButton').length == 0) { 
-		$("template_area").append( '<i id="displayContextButton" class="fi-magnifying-glass" data-dropdown="displayContext" data-options="is_hover:true" aria-controls="displayContext"></i>')
-	}
-	// Moves magnify glass next to current one .
-	$(this).append($('#displayContextButton'))
-
-	//var content = '<div id="displayContext" class="dropdown-pane"><ul>'
-	if ($(this).is('.fi-magnifying-glass')) {
-		$('#displayContext').html(render_entity_detail(ontologyId) )
-	}
-	else //'.fi-arrow-up'
-		$('#displayContext').html( '<ul>' + render_entity_relations(ontologyId) + '</ul>' )
-
-	//if ($(this).is('.fi-arrow-up'))
-	// Now we ennervate the up-arrows. Each can replace content 
-
-
 }
 
 
@@ -372,7 +361,6 @@ function render_relation_link(relation, entity) {
 
 
 function init_summary_tab() {
-
 
 	$('#resourceForm').on('click','#summary_create,#summary_copy', function() {
 		// Get all form fields and pass to api.create_resource()
@@ -444,16 +432,7 @@ function init_summary_tab() {
 }
 
 function init_browse_tab() {
-	// On Browse Specifications tab, enables eye icon click to show form 
-	// without opening/closing the accordion.
-	// ARCHAIC: menu parent never rendered, only leafs are rendered.
-	/*
-	$('#panelEntities').on('click', 'i', function(event) { 
-		event.stopPropagation();
-		if ($(event.target).is('i.fi-magnifying-glass') ) {
-			top.form.render_entity(get_attr_ontology_id(event.target))
-		}
-	});
+	/* Browse Specifications tab
 	*/
 }
 
@@ -501,8 +480,13 @@ function init_form_tab() {
 	});
 	*/
 
-	// In form display area, provides hover view of item's ontology details
+	// In form display area, when "toggle specification details" is on,
+	// provides hover view of item's ontology details
 	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)
+	$(document).on('closed.fndtn.reveal', '#displayContext', function () { //[data-reveal]
+		// Gets hidden 'details' icon off screen, if any. See render_display_context()
+		$('#displayContextButton').css('left', '-30px')
+	});
 
 	// chosen <select> event triggers cart icons to be drawn in <options>
 	render_entity_form_select_cart_icons()

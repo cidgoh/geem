@@ -33,7 +33,7 @@ import json
 import sys
 import os
 import optparse
-import urllib2
+import urllib2 # Note: this is python 2.7 ; 3.x breaks this up into separate modules.
 import python.ontohelper as oh
 
 import rdflib

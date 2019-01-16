@@ -4,8 +4,8 @@ The OntologyForm class provides all functions needed (using jquery, Zurb
 Foundation and app.css) to render and populate an ontology-driven form.
 
 WISHLIST:
-	- Currently this includes zurb Foundation 6.0 specific tags. Revise to be
-	  generic and have a Foundation additional rendering pass?
+	- Currently this includes zurb Foundation 5.5 specific rendering. Revise to
+	  be generic and have a Foundation additional rendering pass?
 	- Allow xml datatype formats for date&time to be inherited from parent model?
 	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
 	- Also option for 3rd party database field name for form storage
@@ -173,9 +173,10 @@ function OntologyForm(domId, resource, settings, callback) {
 		/* Some specifications allow more than 1 record to be created. This 
 		script provides an "Add record" button to right side of spec. label
 		which when clicked creates a new record within that section of form
-		and scrolls to it for data entry.  GEEM currently doesn't 
-		include server side code to save data but this function provides
-		the browser side code to do so.
+		and scrolls to it for data entry.  
+
+		GEEM currently doesn't include server side code to save data but this
+		function provides the browser side code to do so.
 		*/
 		dom_element
 			.on('click', '.addInputElement', function() {
@@ -197,7 +198,12 @@ function OntologyForm(domId, resource, settings, callback) {
 					// Prevent lable and wrapper from being drawn on field content
 					fieldspec.input_group = true 
 
-					var header = '<div class="inputBlockSeparator"><i class="removeInputElement fi-x-circle"></i><label>Record ' + (kid_count + 1) + '</label></div>'
+					var header = [
+						'<div class="inputBlockSeparator">'
+						,	'<i class="removeInputElement fi-x-circle"></i>'
+						,	'<label>Record ' + (kid_count + 1) + '</label>'
+						,'</div>'].join('')
+
 					var html = render_form_specification(fieldspec, header)
 					element.append(html)
 
@@ -230,7 +236,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			// ISSUE: Numbering - remaining items have "Record XYZ" not in sequence
 			.on('click', '.removeInputElement', function() {
 
-				// API call to delete DATA record server side (if it exists)
+				// FUTURE: API call to delete DATA record server side (if it exists)
 				// api.delete_data(...)
 
 				$(this).parents('div.inputBlock').first().slideUp(400, function(){$(this).remove()} )
@@ -435,7 +441,7 @@ function OntologyForm(domId, resource, settings, callback) {
 				// If specification has stuff, then wrap it:
 				if (html.length > 0 && entity.uiLabel != '[no label]')
 					//  data-ontology-id="'+entity.domId+'"
-					return get_model_wrapper(entity, labelHTML + '<div class="inputBlock">' + html+ '</div>')
+					return get_model_wrapper(entity, '<div class="row">' + labelHTML + '<div class="inputBlock">' + html+ '</div></div>')
 				break;
 
 			/*
@@ -518,13 +524,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		for (var entityId in entity.components) { 
 			html += this.render_form_specification(entity.components[entityId]) 
 		}
-		/*
-		if ('choices' in entity) {
-			for (var entityId in entity.choices) { 
-				html += this.render_form_specification(entity.choices[entityId])
-			}
-		}
-		*/
+
 		return html	
 	}
 

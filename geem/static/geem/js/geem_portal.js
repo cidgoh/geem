@@ -113,8 +113,10 @@ function render_entity_form() {
 }
 
 function portal_entity_form_callback(form) {
-	/* This is executed whenever a new form is rendered.
+	/* This is executed after a new form is rendered.
 	*/
+
+	// Add the extra shopping cart icons for portal version of form
 	render_entity_form_cart_icons(form) 
 
 	$('#specificationSourceInfoBox').hide()

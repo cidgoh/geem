@@ -331,21 +331,20 @@ function render_entity_form_cart_icons(formObj) {
 	/* Add shopping cart icon to each content form field with appropriate
 	include/exclude status.  
 
-	Is there an advantage to loading dom with icons first, then setting their
-	status, or should status be done within loop?
-
+	Is there a rendering advantage to loading dom with icons first, then 
+	setting their status, or should status be done within loop?
 	*/
-
-	$('#tabsContent div.field-wrapper:not(.disjunction)')
-		.addClass('cart-item') // Just for styling
-		.find('> div.columns > div.row')
-		.prepend('<i class="fi-shopping-cart"></i>')
 
 	top.cart.keys().forEach(function(item_path) {
 		const item = top.cart.get(item_path)
 		const attr_id = render_attr_ontology_id(item_path)
 		$('#tabsContent div.field-wrapper[' + attr_id + ']').addClass(item.status)
 	})
+
+	$('#tabsContent div.field-wrapper:not(.disjunction)')
+		.addClass('cart-item') // Just for styling
+		.find('> div.columns > div.row')
+		.prepend('<i class="fi-shopping-cart"></i>')
 
 }
 

@@ -34,18 +34,39 @@ import subprocess
 import sys
 
 backup_dir = os.path.dirname(os.getcwd()) + '/database_backups'
+# Command to dump data in db service
+dump_command = "docker-compose exec db pg_dump " \
+               "--username postgres --dbname postgres > %s/%s"
+# Restore dumped data back to db service
+restore_command = "docker-compose exec -T db psql " \
+                  "--username postgres --dbname postgres < %s/%s"
+# This command destroys all tables and sequences under the public
+# schema in the db service, and should therefore be met with caution.
+clear_command = "docker-compose exec db psql " \
+                 "--username postgres --dbname postgres " \
+                 "--command 'drop schema public cascade;create schema public'"
 
 
-def backup_volume(name):
+def backup_db(name):
     """TODO: ..."""
+    # TODO: save the day in case a call doesn't go through
     # Make backup directory if one does not exist
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
 
-    command = "sudo docker run --rm --volumes-from geem_db_1 -v %s:/backup " \
-              "postgres:10.1 tar cvf /backup/%s.tar " \
-              "/var/lib/postgresql/data/" % (backup_dir, name)
-    call(command)
+    # Backup content in db service
+    call(dump_command % (backup_dir, "temp_dump"))
+    # Change passwords to 0 in db service to "hide" them
+    call("docker-compose exec db psql --username postgres --dbname postgres " \
+         "--command 'update auth_user set password=0'")
+    # Backup content in db service with "hidden" passwords
+    call(dump_command % (backup_dir, name))
+    # Clear content in db service
+    call(clear_command)
+    # Restore content from backup containing "unhidden" passwords
+    call(restore_command % (backup_dir, "temp_dump"))
+    # Remove backup with "unhidden" passwords
+    os.remove(backup_dir + "/temp_dump")
 
 
 def restore_volume(name):
@@ -69,12 +90,13 @@ def setup_database():
 
 def call(command):
     """TODO: ..."""
-    subprocess.call(command.split(" "))
+    # TODO: find out how to do this without shell=True
+    subprocess.call(command, shell=True)
 
 
 def main(op_0, op_1):
     if op_0 == "backup":
-        backup_volume(op_1)
+        backup_db(op_1)
     elif op_0 == "restore":
         if os.path.isfile(backup_dir + "/" + op_1 + ".tar"):
             restore_volume(op_1)

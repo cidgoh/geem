@@ -27,6 +27,7 @@ TODO:
                          cascade; create schema public"
         * docker-compose exec -T db psql --username postgres --dbname
                          postgres < temp_dump
+    * is there any other personal info we should remove from backups?
 """
 
 import os
@@ -49,23 +50,33 @@ clear_command = "docker-compose exec db psql " \
 
 def backup_db(name):
     """TODO: ..."""
-    # TODO: save the day in case a call doesn't go through
     # Make backup directory if one does not exist
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
 
     # Backup content in db service
     call(dump_command % (backup_dir, "temp_dump"))
-    # Change passwords to 0 in db service to "hide" them
-    call("docker-compose exec db psql --username postgres --dbname postgres " \
-         "--command 'update auth_user set password=0'")
-    # Backup content in db service with "hidden" passwords
-    call(dump_command % (backup_dir, name))
-    # Clear content in db service
-    call(clear_command)
-    # Restore content from backup containing "unhidden" passwords
-    call(restore_command % (backup_dir, "temp_dump"))
-    # Remove backup with "unhidden" passwords
+
+    try:
+        # Change passwords to 0 in db service to "hide" them
+        hide_call = "docker-compose exec db psql " \
+                    "--username postgres --dbname postgres " \
+                    "--command 'update auth_user set password=0'"
+        call(hide_call)
+        # Backup content in db service with "hidden" passwords
+        call(dump_command % (backup_dir, name))
+        # Clear content in db service
+        call(clear_command)
+        # Restore content from backup containing "unhidden" passwords
+        call(restore_command % (backup_dir, "temp_dump"))
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Your database contents have been changed. Your original "
+              "contents are still available in %s/temp_dump for restoration"
+              % backup_dir)
+        return None
+
+    # If successful, remove backup with "unhidden" passwords
     os.remove(backup_dir + "/temp_dump")
 
 
@@ -91,7 +102,7 @@ def setup_database():
 def call(command):
     """TODO: ..."""
     # TODO: find out how to do this without shell=True
-    subprocess.call(command, shell=True)
+    subprocess.check_call(command, shell=True)
 
 
 def main(op_0, op_1):

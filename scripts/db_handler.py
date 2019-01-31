@@ -3,20 +3,30 @@
 """...
 
 TODO: complete this
-...the docstring of a script (a stand-alone program) should be usable as its
-"usage" message, printed when the script is invoked with incorrect or
-missing arguments (or perhaps with a "-h" option, for "help"). Such a
-docstring should document the script's function and command line syntax,
-environment variables, and files. Usage messages can be fairly elaborate
-(several screens full) and should be sufficient for a new user to use the
-command properly, as well as a complete quick reference to all options and
-arguments for the sophisticated user.
+...the docstring of a script (a stand-alone program) should be usable
+as its "usage" message, printed when the script is invoked with
+incorrect or missing arguments (or perhaps with a "-h" option, for
+"help"). Such a docstring should document the script's function and
+command line syntax, environment variables, and files. Usage messages
+can be fairly elaborate (several screens full) and should be sufficient
+for a new user to use the command properly, as well as a complete quick
+reference to all options and arguments for the sophisticated user.
 
 TODO:
-    * Find better way to get name of docker db container
-        * Will it always be geem_db_1? How does it get this name?
-    * Find a way to make user information anonymous
-        * Is there only user information in auth_users table?
+    * remove sudo from commands
+    * What we are now going to do:
+        * docker-compose exec db pg_dump --username postgres --dbname
+                         postgres > temp_dump
+        * docker-compose exec db psql --username postgres --dbname
+                         postgres --command "update auth_user set
+                         password='*'"
+        * docker-compose exec db pg_dump --username postgres --dbname
+                         postgres > actual_dump
+        * docker-compose exec db psql --username postgres --dbname
+                         postgres --command "drop schema public
+                         cascade; create schema public"
+        * docker-compose exec -T db psql --username postgres --dbname
+                         postgres < temp_dump
 """
 
 import os

@@ -14,20 +14,43 @@ reference to all options and arguments for the sophisticated user.
 
 TODO:
     * remove sudo from commands
-    * What we are now going to do:
-        * docker-compose exec db pg_dump --username postgres --dbname
-                         postgres > temp_dump
-        * docker-compose exec db psql --username postgres --dbname
-                         postgres --command "update auth_user set
-                         password='*'"
-        * docker-compose exec db pg_dump --username postgres --dbname
-                         postgres > actual_dump
-        * docker-compose exec db psql --username postgres --dbname
-                         postgres --command "drop schema public
-                         cascade; create schema public"
-        * docker-compose exec -T db psql --username postgres --dbname
-                         postgres < temp_dump
-    * is there any other personal info we should remove from backups?
+    * follow new approach: only backup and restore geem_packages
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "\copy geem_package to stdout
+                                delimiter ',' csv header"
+                         > ../database_backups/test_dump.csv
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "create table tmp_table
+                                 as select * from geem_package
+                                 with no data"
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "\copy tmp_table from stdin
+                                delimiter ',' csv header"
+                         < ../database_backups/test_dump.csv
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "update tmp_table set owner_id=1"
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "update tmp_table
+                          set id=nextval('geem_package_id_seq')"
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "insert into geem_package
+                          select * from tmp_table"
+        * docker-compose exec -T db psql
+                         --username postgres --dbname postgres
+                         --command
+                         "drop table tmp_table"
 """
 
 import os

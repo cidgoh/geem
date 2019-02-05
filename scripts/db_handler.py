@@ -78,7 +78,7 @@ def merge_db(backup_name):
         raise e
 
 
-def sync_geem_package_seq_id():
+def sync_geem_package_id_seq():
     """TODO: ..."""
     # Query max id value in geem_package
     get_max_id = "SELECT (MAX(id)) FROM geem_package"
@@ -128,7 +128,7 @@ def main(op_0, op_1):
         raise ValueError("...unrecognized argument: %s" % op_0)
 
     # Sync geem_package_seq_id to corresponding changes
-    sync_geem_package_seq_id()
+    sync_geem_package_id_seq()
 
 
 if __name__ == "__main__":

@@ -53,11 +53,12 @@ TODO:
                          "drop table tmp_table"
 """
 
-import os
-import subprocess
-import sys
+from os.path import abspath, dirname, exists
+from os import makedirs
+from subprocess import check_call
+from sys import argv
 
-backup_dir = os.path.dirname(os.getcwd()) + '/database_backups'
+backup_dir = dirname(dirname(abspath(__file__))) + "/database_backups"
 # Command to dump data in db service
 dump_command = "docker-compose exec db pg_dump " \
                "--username postgres --dbname postgres > %s/%s"
@@ -71,36 +72,17 @@ clear_command = "docker-compose exec db psql " \
                  "--command 'drop schema public cascade;create schema public'"
 
 
-def backup_db(name):
+def backup_db(backup_name):
     """TODO: ..."""
     # Make backup directory if one does not exist
-    if not os.path.exists(backup_dir):
-        os.makedirs(backup_dir)
+    if not exists(backup_dir):
+        makedirs(backup_dir)
 
-    # Backup content in db service
-    call(dump_command % (backup_dir, "temp_dump"))
-
-    try:
-        # Change passwords to 0 in db service to "hide" them
-        hide_call = "docker-compose exec db psql " \
-                    "--username postgres --dbname postgres " \
-                    "--command 'update auth_user set password=0'"
-        call(hide_call)
-        # Backup content in db service with "hidden" passwords
-        call(dump_command % (backup_dir, name))
-        # Clear content in db service
-        call(clear_command)
-        # Restore content from backup containing "unhidden" passwords
-        call(restore_command % (backup_dir, "temp_dump"))
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Your database contents have been changed. Your original "
-              "contents are still available in %s/temp_dump for restoration"
-              % backup_dir)
-        return None
-
-    # If successful, remove backup with "unhidden" passwords
-    os.remove(backup_dir + "/temp_dump")
+    call('docker-compose exec -T db psql '
+         '--username postgres --dbname postgres '
+         '--command '
+         '"\\copy geem_package to stdout delimiter \',\' csv header" '
+         '> %s/%s' % (backup_dir, backup_name))
 
 
 def restore_volume(name):
@@ -125,14 +107,17 @@ def setup_database():
 def call(command):
     """TODO: ..."""
     # TODO: find out how to do this without shell=True
-    subprocess.check_call(command, shell=True)
+    check_call(command, shell=True)
 
 
 def main(op_0, op_1):
+    # Manipulate op_1 to ensure proper file name
+    backup_name = op_1.split(".csv")[0] + ".csv"
+
     if op_0 == "backup":
-        backup_db(op_1)
+        backup_db(backup_name)
     elif op_0 == "restore":
-        if os.path.isfile(backup_dir + "/" + op_1 + ".tar"):
+        if exists(backup_dir + "/" + op_1 + ".tar"):
             restore_volume(op_1)
         else:
             # TODO: better message--match script docstring
@@ -143,8 +128,8 @@ def main(op_0, op_1):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(argv) != 3:
         # TODO: better message--match script docstring
         raise TypeError("...wrong number of arguments")
     else:
-        main(sys.argv[1], sys.argv[2])
+        main(argv[1], argv[2])

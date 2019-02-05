@@ -23,17 +23,6 @@ from sys import argv
 from warnings import warn
 
 backup_dir = dirname(dirname(abspath(__file__))) + "/database_backups"
-# Command to dump data in db service
-dump_command = "docker-compose exec db pg_dump " \
-               "--username postgres --dbname postgres > %s/%s"
-# Restore dumped data back to db service
-restore_command = "docker-compose exec -T db psql " \
-                  "--username postgres --dbname postgres < %s/%s"
-# This command destroys all tables and sequences under the public
-# schema in the db service, and should therefore be met with caution.
-clear_command = "docker-compose exec db psql " \
-                 "--username postgres --dbname postgres " \
-                 "--command 'drop schema public cascade;create schema public'"
 
 
 def backup_db(backup_name):

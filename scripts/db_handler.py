@@ -55,8 +55,9 @@ TODO:
 
 from os.path import abspath, dirname, exists
 from os import makedirs
-from subprocess import check_call
+from subprocess import CalledProcessError, check_call
 from sys import argv
+from warnings import warn
 
 backup_dir = dirname(dirname(abspath(__file__))) + "/database_backups"
 # Command to dump data in db service
@@ -70,6 +71,10 @@ restore_command = "docker-compose exec -T db psql " \
 clear_command = "docker-compose exec db psql " \
                  "--username postgres --dbname postgres " \
                  "--command 'drop schema public cascade;create schema public'"
+# Template for executing commands in docker database
+command_template = 'docker-compose exec -T db psql ' \
+                   '--username postgres --dbname postgres ' \
+                   '--command "%s"'
 
 
 def backup_db(backup_name):
@@ -78,22 +83,26 @@ def backup_db(backup_name):
     if not exists(backup_dir):
         makedirs(backup_dir)
 
-    call('docker-compose exec -T db psql '
-         '--username postgres --dbname postgres '
-         '--command '
-         '"\\copy geem_package to stdout delimiter \',\' csv header" '
-         '> %s/%s' % (backup_dir, backup_name))
+    call(command_template
+         % "\\copy geem_package to stdout delimiter ',' csv header"
+         # Supply stdout with .csv file path
+         + " > %s/%s" % (backup_dir, backup_name))
 
 
-def restore_volume(name):
+def restore_db(backup_name):
     """TODO: ..."""
-    # Stop the database container
-    call("sudo docker stop geem_db_1")
+    # Empty geem_package table
+    call(command_template % "truncate table geem_package")
 
-    command = "sudo docker run --rm --volumes-from geem_db_1 -v %s:/backup " \
-              "postgres:10.1 tar xvf /backup/%s.tar" % (backup_dir, name)
-    call(command)
-    setup_database()
+    # Populate geem_package table with backup_name contents
+    try:
+        call(command_template
+             % "\\copy geem_package from stdin delimiter ',' csv header"
+             # Supply stdin with .csv file path
+             + " < %s/%s" % (backup_dir, backup_name))
+    except CalledProcessError as e:
+        warn("geem_package was truncated, but not restored.")
+        raise e
 
 
 def setup_database():
@@ -106,6 +115,7 @@ def setup_database():
 
 def call(command):
     """TODO: ..."""
+    # TODO: should we put command template here?
     # TODO: find out how to do this without shell=True
     check_call(command, shell=True)
 
@@ -117,11 +127,11 @@ def main(op_0, op_1):
     if op_0 == "backup":
         backup_db(backup_name)
     elif op_0 == "restore":
-        if exists(backup_dir + "/" + op_1 + ".tar"):
-            restore_volume(op_1)
+        if exists(backup_dir + "/" + backup_name):
+            restore_db(backup_name)
         else:
             # TODO: better message--match script docstring
-            raise ValueError("...%s.tar does not exist" % op_1)
+            raise ValueError("...%s does not exist" % backup_name)
     else:
         # TODO: better message--match script docstring
         raise ValueError("...unrecognized argument: %s" % op_0)

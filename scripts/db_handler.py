@@ -11,6 +11,7 @@ command line syntax, environment variables, and files. Usage messages
 can be fairly elaborate (several screens full) and should be sufficient
 for a new user to use the command properly, as well as a complete quick
 reference to all options and arguments for the sophisticated user.
+...assumes you do not have to use sudo with docker
 
 TODO:
     * write tests
@@ -102,38 +103,36 @@ def call(command, suffix=""):
     check_call(command_template % (command, suffix), shell=True)
 
 
-def main(op_0, op_1):
-    # Manipulate op_1 to ensure proper file name
-    backup_name = op_1.split(".csv")[0] + ".csv"
+def main(argv):
+    # Manipulate argv[2] to ensure proper file name
+    backup_name = argv[2].split(".csv")[0] + ".csv"
 
-    if op_0 == "backup":
-        backup_db(backup_name)
-    elif op_0 == "restore":
+    if argv[1] == "backup":
         # TODO: option for restoring some data only
-        if exists(backup_dir + "/" + backup_name):
-            restore_db(backup_name)
-        else:
+        backup_db(backup_name)
+    elif argv[1] == "restore" or argv[1] == "merge":
+        # Check if backup_name exists
+        if not exists(backup_dir + "/" + backup_name):
             # TODO: better message--match script docstring
             raise ValueError("...%s does not exist" % backup_name)
-    elif op_0 == "merge":
-        # TODO: option for merging some data only
-        # TODO: option for excluding duplicates?
-        if exists(backup_dir + "/" + backup_name):
+        # Continue parsing arguments
+        if argv[1] == "restore":
+            # TODO: option for restoring some data only
+             restore_db(backup_name)
+        elif argv[1] == "merge":
+            # TODO: option for merging some data only
+            # TODO: option for excluding duplicates?
             merge_db(backup_name)
-        else:
-            # TODO: better message--match script docstring
-            raise ValueError("...%s does not exist" % backup_name)
     else:
         # TODO: better message--match script docstring
-        raise ValueError("...unrecognized argument: %s" % op_0)
+        raise ValueError("...unrecognized argument: %s" % argv[1])
 
     # Sync geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
 
 
 if __name__ == "__main__":
-    if len(argv) != 3:
+    if len(argv) < 3 or len(argv) > 4:
         # TODO: better message--match script docstring
-        raise TypeError("...wrong number of arguments")
-    else:
-        main(argv[1], argv[2])
+        raise TypeError("...incorrect number of arguments")
+    main(argv)

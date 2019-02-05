@@ -14,44 +14,6 @@ reference to all options and arguments for the sophisticated user.
 
 TODO:
     * write tests
-    * remove sudo from commands
-    * follow new approach: only backup and restore geem_packages
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "\copy geem_package to stdout
-                                delimiter ',' csv header"
-                         > ../database_backups/test_dump.csv
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "create table tmp_table
-                                 as select * from geem_package
-                                 with no data"
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "\copy tmp_table from stdin
-                                delimiter ',' csv header"
-                         < ../database_backups/test_dump.csv
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "update tmp_table set owner_id=1"
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "update tmp_table
-                          set id=nextval('geem_package_id_seq')"
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "insert into geem_package
-                          select * from tmp_table"
-        * docker-compose exec -T db psql
-                         --username postgres --dbname postgres
-                         --command
-                         "drop table tmp_table"
 """
 
 from os.path import abspath, dirname, exists
@@ -123,14 +85,6 @@ def sync_geem_package_seq_id():
     """TODO: ..."""
     get_max_id = "SELECT (MAX(id)) FROM geem_package"
     call("SELECT setval('geem_package_id_seq', (%s))" % get_max_id)
-
-
-def setup_database():
-    """TODO: ..."""
-    command = "sudo docker-compose run web python /code/manage.py %s " \
-              "--noinput"
-    call(command % "makemigrations")
-    call(command % "migrate")
 
 
 def call(command, suffix=""):

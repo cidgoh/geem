@@ -54,26 +54,41 @@ def restore_db(backup_name):
 
 def merge_db(backup_name):
     """TODO: ..."""
-    # Create temporary table
+    # Drop temporary table tmp_table from previous, failed merges
+    call("drop table if exists tmp_table")
+    # Create temporary table tmp_table
     call("create table tmp_table as select * from geem_package with no data")
-    # Populate tmp_table with backup_name contents
-    call("\\copy tmp_table from stdin delimiter ',' csv header",
-         # Supply stdin with .csv file path
-         " < %s/%s" % (backup_dir, backup_name))
-    # Set tmp_table owner_id's to NULL
-    call("update tmp_table set owner_id = NULL")
-    # Alter tmp_table id's to fit geem_package sequence
-    call("update tmp_table set id = nextval('geem_package_id_seq')")
-    # Insert tmp_table contents into geem_package
-    call("insert into geem_package select * from tmp_table")
-    # Drop temporary table
-    call("drop table tmp_table")
+
+    try:
+        # Populate tmp_table with backup_name contents
+        call("\\copy tmp_table from stdin delimiter ',' csv header",
+             # Supply stdin with .csv file path
+             " < %s/%s" % (backup_dir, backup_name))
+        # Set tmp_table owner_id's to NULL
+        call("update tmp_table set owner_id = NULL")
+        # Alter tmp_table id's to fit geem_package sequence
+        call("update tmp_table set id = nextval('geem_package_id_seq')")
+        # Insert tmp_table contents into geem_package
+        call("insert into geem_package select * from tmp_table")
+        # Drop temporary table
+        call("drop table tmp_table")
+    except CalledProcessError as e:
+        warn("Failed to merge data. Table tmp_table was inserted into "
+             "database, but not dropped.")
+        raise e
 
 
 def sync_geem_package_seq_id():
     """TODO: ..."""
+    # Query max id value in geem_package
     get_max_id = "SELECT (MAX(id)) FROM geem_package"
-    call("SELECT setval('geem_package_id_seq', (%s))" % get_max_id)
+
+    # Set current value in geem_package_id_seq accordingly
+    try:
+       call("SELECT setval('geem_package_id_seq', (%s))" % get_max_id)
+    except CalledProcessError as e:
+        warn("geem_package_id_seq was not synchronized")
+        raise e
 
 
 def call(command, suffix=""):
@@ -113,11 +128,7 @@ def main(op_0, op_1):
         raise ValueError("...unrecognized argument: %s" % op_0)
 
     # Sync geem_package_seq_id to corresponding changes
-    try:
-        sync_geem_package_seq_id()
-    except CalledProcessError as e:
-        warn("geem_package_id_seq was not synchronized")
-        raise e
+    sync_geem_package_seq_id()
 
 
 if __name__ == "__main__":

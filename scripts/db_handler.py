@@ -96,7 +96,8 @@ def restore_db(backup_name):
              # Supply stdin with .csv file path
              " < %s/%s" % (backup_dir, backup_name))
     except CalledProcessError as e:
-        warn("geem_package was truncated, but not restored.")
+        warn("geem_package was truncated, but geem_package and "
+             "geem_package_id_seq were not restored.")
         raise e
 
 
@@ -116,6 +117,12 @@ def merge_db(backup_name):
     call("insert into geem_package select * from tmp_table")
     # Drop temporary table
     call("drop table tmp_table")
+
+
+def sync_geem_package_seq_id():
+    """TODO: ..."""
+    get_max_id = "SELECT (MAX(id)) FROM geem_package"
+    call("SELECT setval('geem_package_id_seq', (%s))" % get_max_id)
 
 
 def setup_database():
@@ -161,6 +168,13 @@ def main(op_0, op_1):
     else:
         # TODO: better message--match script docstring
         raise ValueError("...unrecognized argument: %s" % op_0)
+
+    # Sync geem_package_seq_id to corresponding changes
+    try:
+        sync_geem_package_seq_id()
+    except CalledProcessError as e:
+        warn("geem_package_id_seq was not synchronized")
+        raise e
 
 
 if __name__ == "__main__":

@@ -12,17 +12,21 @@ can be fairly elaborate (several screens full) and should be sufficient
 for a new user to use the command properly, as well as a complete quick
 reference to all options and arguments for the sophisticated user.
 ...assumes you do not have to use sudo with docker
+...define database handling
 
 TODO:
     * write tests
+    * rename to package handler?
 """
 
+import argparse
 from os.path import abspath, dirname, exists
 from os import makedirs
+import re
 from subprocess import CalledProcessError, check_call
-from sys import argv
 from warnings import warn
 
+# Directory to place backed up databases
 backup_dir = dirname(dirname(abspath(__file__))) + "/database_backups"
 
 
@@ -103,36 +107,64 @@ def call(command, suffix=""):
     check_call(command_template % (command, suffix), shell=True)
 
 
-def main(argv):
-    # Manipulate argv[2] to ensure proper file name
-    backup_name = argv[2].split(".csv")[0] + ".csv"
+def main(args):
+    """TODO: ..."""
+    # User-specified db_operation
+    db_operation = args.db_operation
+    # User-specified file_name
+    file_name = args.file_name
 
-    if argv[1] == "backup":
-        # TODO: option for restoring some data only
-        backup_db(backup_name)
-    elif argv[1] == "restore" or argv[1] == "merge":
-        # Check if backup_name exists
-        if not exists(backup_dir + "/" + backup_name):
-            # TODO: better message--match script docstring
-            raise ValueError("...%s does not exist" % backup_name)
-        # Continue parsing arguments
-        if argv[1] == "restore":
-            # TODO: option for restoring some data only
-             restore_db(backup_name)
-        elif argv[1] == "merge":
-            # TODO: option for merging some data only
-            # TODO: option for excluding duplicates?
-            merge_db(backup_name)
-    else:
-        # TODO: better message--match script docstring
-        raise ValueError("...unrecognized argument: %s" % argv[1])
+    # If db_operation is restore or merge, file_name should exist
+    if db_operation != "backup":
+        if not exists(backup_dir + "/" + file_name):
+            raise ValueError("Unable to perform %s; %s does not exist"
+                             % (db_operation, file_name))
+
+    if db_operation == "backup":
+        # Backup local geem_package table to file_name
+        backup_db(file_name)
+    elif db_operation == "restore":
+        # Replace local geem_package table with file_name contents
+        restore_db(file_name)
+    elif db_operation == "merge":
+        # Merge file_name contents with local geem_package table
+        merge_db(file_name)
 
     # Sync geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
 
 
+def valid_csv_file_name(input):
+    """TODO: ..."""
+    # We allow users to specify files without the ".csv" extension, but
+    # this line will ensure file_name ends with a ".csv"
+    file_name = input.split(".csv")[0] + ".csv"
+
+    # Check if valid file name
+    if re.match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
+        return file_name
+    else:
+        e = "Not a valid file .csv file name: %s" % file_name
+        raise argparse.ArgumentTypeError(e)
+
+
+def set_up_parser(parser):
+    """TODO: ..."""
+    # Add db_operation argument
+    parser.add_argument("db_operation", choices=["backup", "restore", "merge"])
+    # Add file_name argument--ensure valid name
+    parser.add_argument("file_name", type=valid_csv_file_name)
+    parser.add_argument("-t", "--test")
+    return parser
+
+
 if __name__ == "__main__":
-    if len(argv) < 3 or len(argv) > 4:
-        # TODO: better message--match script docstring
-        raise TypeError("...incorrect number of arguments")
-    main(argv)
+    # TODO: check if docker container is running
+    # Parser to handle command line arguments
+    parser = argparse.ArgumentParser()
+    # Set up acceptable command line arguments
+    set_up_parser(parser)
+    # User-specified arguments
+    args = parser.parse_args()
+    # Entry point into code for database handling
+    main(args)

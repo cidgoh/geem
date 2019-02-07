@@ -29,7 +29,6 @@ TODO:
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
-    * abstract backup, restore, merge, clear (low priority)
 """
 
 import argparse
@@ -74,10 +73,18 @@ def backup_packages(file_name, packages):
     if not exists(backup_dir):
         makedirs(backup_dir)
 
-    # postgres command for copying rows "%s" to a csv file
-    copy_command = "\\copy %s to stdout delimiter ',' csv header"
-    # Replace "%s" with query for all or user-specified packages
-    copy_command = copy_command % get_packages_query(packages)
+    # User did not specify packages to backup
+    if packages is None:
+        # postgres command for copying geem_package table to a csv file
+        copy_command = "\\copy geem_package to stdout delimiter ',' csv header"
+    # User specified packages to backup
+    else:
+        # String representation of packages, with soft brackets
+        packages_str = "(%s)" % ",".join(map(str, packages))
+        # postgres command for selecting specified rows
+        rows = "(select * from geem_package where id in %s)" % packages_str
+        # postgres command for copying specified rows to a csv file
+        copy_command = "\\copy (%s) to stdout delimiter ',' csv header" % rows
 
     # Run copy_command in db service docker container
     call(command_template % copy_command
@@ -94,7 +101,7 @@ def clear_packages(file_name, packages):
     else:
         # String representation of packages, with soft brackets
         packages_str = "(%s)" % ",".join(map(str, packages))
-        # postgres command for deleting rows "%s" from geem_package table
+        # postgres command for deleting specified rows
         delete_command = "delete from geem_package where id in " + packages_str
 
     # Run clear_command in db service docker container

@@ -16,6 +16,13 @@ reference to all options and arguments for the sophisticated user.
 
 TODO:
     * write tests
+        * will this work on Mac?
+        * will this work on Windows? (Probably not)
+    * allow user to specify subset of packages to handle
+        * difficult with restore--implement separate clear function
+    * allow user to set owner_id upon merge
+    * allow user to merge without duplicates
+    * abstract backup, restore, merge, clear (low priority)
 """
 
 import argparse
@@ -25,32 +32,68 @@ import re
 from subprocess import CalledProcessError, check_call
 from warnings import warn
 
+# TODO: replace global variables with getter functions?
 # Directory to place backed up geem_package tables
 backup_dir = dirname(dirname(abspath(__file__))) + "/geem_package_backups"
+# Template for executing commands in docker database
+command_template = 'docker-compose exec -T db psql ' \
+                   '--username postgres --dbname postgres ' \
+                   '--command "%s"'
 
 
-def backup_packages(file_name):
+def get_packages_query(packages):
+    """TODO: ..."""
+    # No specified packages
+    if packages is None:
+        # Return reference to entire geem_package table
+        return "geem_package"
+    # Packages were specified
+    else:
+        # String representation of packages, with soft brackets
+        packages_string = "(%s)" % ",".join(map(str, packages))
+        # Return query for geem_package rows with an id in packages
+        return "(select * from geem_package where id in %s)" % packages_string
+
+
+def call(command):
+    """TODO: ..."""
+    # TODO: find out how to do this without shell=True
+    check_call(command, shell=True)
+
+
+def backup_packages(file_name, packages):
     """TODO: ..."""
     # Make backup directory if one does not exist
     if not exists(backup_dir):
         makedirs(backup_dir)
 
-    # Copy local geem_package table contents to file_name
-    call("\\copy geem_package to stdout delimiter ',' csv header",
-         # Supply stdout with .csv file path
-         " > %s/%s" % (backup_dir, file_name))
+    # postgres command for copying contents "%s" to a csv file
+    copy_command = "\\copy %s to stdout delimiter ',' csv header"
+    # Replace "%s" with query for all or user-specified packages
+    copy_command = copy_command % get_packages_query(packages)
+
+    # Run copy_command in db service docker container
+    call(command_template % copy_command
+         # Specify .csv file path for stdout in shell command
+         + " > %s/%s" % (backup_dir, file_name))
 
 
-def restore_packages(file_name):
+def restore_packages(file_name, packages):
     """TODO: ..."""
-    # Empty geem_package table
-    call("truncate table geem_package")
+    # Delete specified rows
+    # TODO: may need to replace with call to clear
+    truncate_command = "truncate table %s" % get_packages_query(packages)
+    call(command_template % truncate_command)
 
     try:
-        # Populate local geem_package table with file_name contents
-        call("\\copy geem_package from stdin delimiter ',' csv header",
-             # Supply stdin with .csv file path
-             " < %s/%s" % (backup_dir, file_name))
+        # postgres command for copying contents "%s" from a csv file
+        copy_command = "\\copy %s from stdin delimiter ',' csv header"
+        # Replace "%s" with query for all or user-specified packages
+        copy_command = copy_command % get_packages_query(packages)
+        # Run copy_command in db service docker container
+        call(command_template % copy_command
+             # Specify .csv file path for stdout in shell command
+             + " < %s/%s" % (backup_dir, file_name))
     except CalledProcessError as e:
         warn("geem_package was truncated, but geem_package and "
              "geem_package_id_seq were not restored.")
@@ -85,26 +128,18 @@ def merge_packages(file_name):
 
 def sync_geem_package_id_seq():
     """TODO: ..."""
-    # Query for max id value in geem_package
+    # postgres query for max id value in geem_package
     get_max_id = "SELECT (MAX(id)) FROM geem_package"
+    # This is the postgres command to set current value in geem_package_id_seq
+    # to the max id value om geem_package_table.
+    set_curr_val = "SELECT setval('geem_package_id_seq', (%s))" % get_max_id
 
     try:
         # Set current value in geem_package_id_seq to max id value
-       call("SELECT setval('geem_package_id_seq', (%s))" % get_max_id)
+       call(command_template % set_curr_val)
     except CalledProcessError as e:
         warn("geem_package_id_seq was not synchronized")
         raise e
-
-
-def call(command, suffix=""):
-    """TODO: ..."""
-    # Template for executing commands in docker database
-    command_template = 'docker-compose exec -T db psql ' \
-                       '--username postgres --dbname postgres ' \
-                       '--command "%s" %s'
-
-    # TODO: find out how to do this without shell=True
-    check_call(command_template % (command, suffix), shell=True)
 
 
 def main(args):
@@ -113,6 +148,8 @@ def main(args):
     db_operation = args.db_operation
     # User-specified file_name
     file_name = args.file_name
+    # User-specified list of packages (optional; may be None)
+    packages = args.packages
 
     # If db_operation is restore or merge, file_name should exist
     if db_operation != "backup":
@@ -122,10 +159,10 @@ def main(args):
 
     if db_operation == "backup":
         # Backup local geem_package table to file_name
-        backup_packages(file_name)
+        backup_packages(file_name, packages)
     elif db_operation == "restore":
         # Replace local geem_package table with file_name contents
-        restore_packages(file_name)
+        restore_packages(file_name, packages)
     elif db_operation == "merge":
         # Merge file_name contents with local geem_package table
         merge_packages(file_name)
@@ -151,10 +188,11 @@ def valid_csv_file_name(input):
 def set_up_parser(parser):
     """TODO: ..."""
     # Add db_operation argument
-    parser.add_argument("db_operation", choices=["backup", "restore", "merge"])
+    parser.add_argument("db_operation",
+                        choices=["backup", "clear", "restore", "merge"])
     # Add file_name argument--ensure valid name
     parser.add_argument("file_name", type=valid_csv_file_name)
-    parser.add_argument("-t", "--test")
+    parser.add_argument("-p", "--packages", nargs="+", type=int)
     return parser
 
 

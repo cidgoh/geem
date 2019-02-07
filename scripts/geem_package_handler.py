@@ -15,13 +15,20 @@ reference to all options and arguments for the sophisticated user.
 ...define geem_package handling
 
 TODO:
+    * need to rethink restore
+        * user cannot specify which packages in geem_package to restore
+            * they must specify which packages from their csv to
+              restore
+        * we can use upsert instead of deleting rows when restoring
+            * user can call clear to clear anything they like
+    * allow user to specify subset of packages to handle
+        * restore and merge remain
+    * csv -> tsv
+    * allow user to set owner_id upon merge
+    * allow user to merge without duplicates
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
-    * allow user to specify subset of packages to handle
-        * difficult with restore--implement separate clear function
-    * allow user to set owner_id upon merge
-    * allow user to merge without duplicates
     * abstract backup, restore, merge, clear (low priority)
 """
 
@@ -67,7 +74,7 @@ def backup_packages(file_name, packages):
     if not exists(backup_dir):
         makedirs(backup_dir)
 
-    # postgres command for copying contents "%s" to a csv file
+    # postgres command for copying rows "%s" to a csv file
     copy_command = "\\copy %s to stdout delimiter ',' csv header"
     # Replace "%s" with query for all or user-specified packages
     copy_command = copy_command % get_packages_query(packages)
@@ -76,6 +83,22 @@ def backup_packages(file_name, packages):
     call(command_template % copy_command
          # Specify .csv file path for stdout in shell command
          + " > %s/%s" % (backup_dir, file_name))
+
+def clear_packages(file_name, packages):
+    """TODO: ..."""
+    # User did not specify packages to delete
+    if packages is None:
+        # postgres command to empty geem_package table quickly
+        delete_command = "truncate table geem_package"
+    # User specified packages to delete
+    else:
+        # String representation of packages, with soft brackets
+        packages_str = "(%s)" % ",".join(map(str, packages))
+        # postgres command for deleting rows "%s" from geem_package table
+        delete_command = "delete from geem_package where id in " + packages_str
+
+    # Run clear_command in db service docker container
+    call(command_template % delete_command)
 
 
 def restore_packages(file_name, packages):
@@ -86,7 +109,7 @@ def restore_packages(file_name, packages):
     call(command_template % truncate_command)
 
     try:
-        # postgres command for copying contents "%s" from a csv file
+        # postgres command for copying rows "%s" from a csv file
         copy_command = "\\copy %s from stdin delimiter ',' csv header"
         # Replace "%s" with query for all or user-specified packages
         copy_command = copy_command % get_packages_query(packages)
@@ -146,20 +169,16 @@ def main(args):
     """TODO: ..."""
     # User-specified db_operation
     db_operation = args.db_operation
-    # User-specified file_name
+    # User-specified file_name (may be None)
     file_name = args.file_name
-    # User-specified list of packages (optional; may be None)
+    # User-specified list of packages (may be None)
     packages = args.packages
-
-    # If db_operation is restore or merge, file_name should exist
-    if db_operation != "backup":
-        if not exists(backup_dir + "/" + file_name):
-            raise ValueError("Unable to perform %s; %s does not exist"
-                             % (db_operation, file_name))
 
     if db_operation == "backup":
         # Backup local geem_package table to file_name
         backup_packages(file_name, packages)
+    elif db_operation == "clear":
+        clear_packages(file_name, packages)
     elif db_operation == "restore":
         # Replace local geem_package table with file_name contents
         restore_packages(file_name, packages)
@@ -190,19 +209,50 @@ def set_up_parser(parser):
     # Add db_operation argument
     parser.add_argument("db_operation",
                         choices=["backup", "clear", "restore", "merge"])
-    # Add file_name argument--ensure valid name
-    parser.add_argument("file_name", type=valid_csv_file_name)
-    parser.add_argument("-p", "--packages", nargs="+", type=int)
+    # file_name flag: not used in "clear" db_operation
+    parser.add_argument("-f", "--file_name",
+                        type=valid_csv_file_name,
+                        help="required by backup, restore and merge")
+    # packages flag: optional for all db_operation's
+    parser.add_argument("-p", "--packages",
+                        nargs="+", type=int,
+                        help="optional for every db_operation")
+    # Change "optional arguments" in help message to "flag arguments"
+    parser._optionals.title = "flag arguments"
     return parser
 
 
+def valid_args(db_operation, file_name):
+    """TODO: ..."""
+    # If db_operation is clear, file_name should be None
+    if db_operation == "clear":
+        if file_name is not None:
+            raise ValueError("--file_name flag is not used by clear")
+    # If db_operation is not clear, file_name should be None
+    else:
+        if file_name is None:
+            raise ValueError("--file_name flag is required")
+
+    # If db_operation is restore or merge, file_name must exist in path
+    if db_operation == "restore" or db_operation == "merge":
+        if not exists(backup_dir + "/" + file_name):
+            raise ValueError("Unable to perform %s; %s does not exist"
+                             % (db_operation, file_name))
+
+
 if __name__ == "__main__":
-    # TODO: check if docker container is running
     # Parser to handle command line arguments
     parser = argparse.ArgumentParser()
     # Set up acceptable command line arguments
     set_up_parser(parser)
-    # User-specified arguments
+    # User-specified sub-arguments
     args = parser.parse_args()
-    # Entry point into code for geem_package table handling
+    # We must provide additional validation of args that was
+    # unachievable in set_up_parser via native argparse functionality.
+    # An error is thrown here if args fails to validate.
+    valid_args(args.db_operation, args.file_name)
+
+    # TODO: check if docker container is running
+
+    # Entry point into code responsible for geem_package table handling
     main(args)

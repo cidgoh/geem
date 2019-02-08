@@ -91,13 +91,14 @@ def backup_packages(file_name, packages):
          # Specify .csv file path for stdout in shell command
          + " > %s/%s" % (backup_dir, file_name))
 
-def clear_packages(file_name, packages):
+
+def clear_packages(packages):
     """TODO: ..."""
-    # User did not specify packages to delete
+    # User did not specify packages to clear
     if packages is None:
         # postgres command to empty geem_package table quickly
         delete_command = "truncate table geem_package"
-    # User specified packages to delete
+    # User specified packages to clear
     else:
         # String representation of packages, with soft brackets
         packages_str = "(%s)" % ",".join(map(str, packages))
@@ -108,51 +109,36 @@ def clear_packages(file_name, packages):
     call(command_template % delete_command)
 
 
-def restore_packages(file_name, packages):
-    """TODO: ..."""
-    # Delete specified rows
-    # TODO: may need to replace with call to clear
-    truncate_command = "truncate table %s" % get_packages_query(packages)
-    call(command_template % truncate_command)
-
-    try:
-        # postgres command for copying rows "%s" from a csv file
-        copy_command = "\\copy %s from stdin delimiter ',' csv header"
-        # Replace "%s" with query for all or user-specified packages
-        copy_command = copy_command % get_packages_query(packages)
-        # Run copy_command in db service docker container
-        call(command_template % copy_command
-             # Specify .csv file path for stdout in shell command
-             + " < %s/%s" % (backup_dir, file_name))
-    except CalledProcessError as e:
-        warn("geem_package was truncated, but geem_package and "
-             "geem_package_id_seq were not restored.")
-        raise e
-
-
-def merge_packages(file_name):
+def merge_packages(file_name, packages):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed merges
-    call("drop table if exists tmp_table")
+    call(command_template % "drop table if exists tmp_table")
     # Create temporary table tmp_table
-    call("create table tmp_table as select * from geem_package with no data")
+    create_command ="create table tmp_table " \
+                    "as select * from geem_package with no data"
+    call(command_template % create_command)
 
     try:
         # Populate tmp_table with file_name contents
-        call("\\copy tmp_table from stdin delimiter ',' csv header",
+        copy_command = "\\copy tmp_table from stdin delimiter ',' csv header"
+        call(command_template % copy_command
              # Supply stdin with .csv file path
-             " < %s/%s" % (backup_dir, file_name))
-        # Set tmp_table owner_id's to NULL
-        call("update tmp_table set owner_id = NULL")
-        # Alter tmp_table id's to fit geem_package id sequence
-        call("update tmp_table set id = nextval('geem_package_id_seq')")
+             + " < %s/%s" % (backup_dir, file_name))
+
+        # # Set tmp_table owner_id's to NULL
+        # call("update tmp_table set owner_id = NULL")
+        # # Alter tmp_table id's to fit geem_package id sequence
+        # call("update tmp_table set id = nextval('geem_package_id_seq')")
+
         # Insert tmp_table contents into local geem_package table
-        call("insert into geem_package select * from tmp_table")
+        insert_command = "insert into geem_package select * from tmp_table"
+        call(command_template % insert_command)
         # Drop temporary table
-        call("drop table tmp_table")
+        call(command_template % "drop table tmp_table")
     except CalledProcessError as e:
         warn("Failed to merge data. Table tmp_table was inserted into "
-             "database, but not dropped.")
+             "database, but not dropped. If you tried to restore data, "
+             "packages were removed, but not replaced.")
         raise e
 
 
@@ -185,13 +171,21 @@ def main(args):
         # Backup local geem_package table to file_name
         backup_packages(file_name, packages)
     elif db_operation == "clear":
-        clear_packages(file_name, packages)
-    elif db_operation == "restore":
-        # Replace local geem_package table with file_name contents
-        restore_packages(file_name, packages)
+        # Clear local geem_package table contents
+        clear_packages(packages)
     elif db_operation == "merge":
         # Merge file_name contents with local geem_package table
-        merge_packages(file_name)
+        merge_packages(file_name, packages)
+    elif db_operation == "restore":
+        # We must first clear packages from the local geem_package
+        # table that have id's conflicting with the packages to be
+        # restored.
+        clear_packages(packages)
+        # We can then merge the user-specified content in file_name
+        # into the local geem_package table. There will be no
+        # conflicts, and the id of packages to be restored will remain
+        # the same.
+        merge_packages(file_name, packages)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
@@ -215,11 +209,11 @@ def set_up_parser(parser):
     """TODO: ..."""
     # Add db_operation argument
     parser.add_argument("db_operation",
-                        choices=["backup", "clear", "restore", "merge"])
+                        choices=["backup", "clear", "merge", "restore"])
     # file_name flag: not used in "clear" db_operation
     parser.add_argument("-f", "--file_name",
                         type=valid_csv_file_name,
-                        help="required by backup, restore and merge")
+                        help="required by backup, merge and restore")
     # packages flag: optional for all db_operation's
     parser.add_argument("-p", "--packages",
                         nargs="+", type=int,

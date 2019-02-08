@@ -15,20 +15,14 @@ reference to all options and arguments for the sophisticated user.
 ...define geem_package handling
 
 TODO:
-    * need to rethink restore
-        * user cannot specify which packages in geem_package to restore
-            * they must specify which packages from their csv to
-              restore
-        * we can use upsert instead of deleting rows when restoring
-            * user can call clear to clear anything they like
-    * allow user to specify subset of packages to handle
-        * restore and merge remain
-    * csv -> tsv
     * allow user to set owner_id upon merge
     * allow user to merge without duplicates
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
+    * replace global variables with getter functions
+    * better abstract the process of calling commands between clear,
+      restore and merge
 """
 
 import argparse
@@ -47,20 +41,6 @@ command_template = 'docker-compose exec -T db psql ' \
                    '--command "%s"'
 
 
-def get_packages_query(packages):
-    """TODO: ..."""
-    # No specified packages
-    if packages is None:
-        # Return reference to entire geem_package table
-        return "geem_package"
-    # Packages were specified
-    else:
-        # String representation of packages, with soft brackets
-        packages_string = "(%s)" % ",".join(map(str, packages))
-        # Return query for geem_package rows with an id in packages
-        return "(select * from geem_package where id in %s)" % packages_string
-
-
 def call(command):
     """TODO: ..."""
     # TODO: find out how to do this without shell=True
@@ -75,20 +55,23 @@ def backup_packages(file_name, packages):
 
     # User did not specify packages to backup
     if packages is None:
-        # postgres command for copying geem_package table to a csv file
-        copy_command = "\\copy geem_package to stdout delimiter ',' csv header"
+        # postgres command for copying geem_package table to a tsv file
+        copy_command =\
+            "\\copy geem_package to stdout delimiter '\t' csv header"
     # User specified packages to backup
     else:
         # String representation of packages, with soft brackets
-        packages_str = "(%s)" % ",".join(map(str, packages))
+        packages_string = "(%s)" % ",".join(map(str, packages))
         # postgres command for selecting specified rows
-        rows = "(select * from geem_package where id in %s)" % packages_str
-        # postgres command for copying specified rows to a csv file
-        copy_command = "\\copy (%s) to stdout delimiter ',' csv header" % rows
+        specified_rows =\
+            "(select * from geem_package where id in %s)" % packages_string
+        # postgres command for copying specified rows to a tsv file
+        copy_command =\
+            "\\copy (%s) to stdout delimiter '\t' csv header" % specified_rows
 
     # Run copy_command in db service docker container
     call(command_template % copy_command
-         # Specify .csv file path for stdout in shell command
+         # Specify .tsv file path for stdout in shell command
          + " > %s/%s" % (backup_dir, file_name))
 
 
@@ -101,38 +84,38 @@ def clear_packages(packages):
     # User specified packages to clear
     else:
         # String representation of packages, with soft brackets
-        packages_str = "(%s)" % ",".join(map(str, packages))
+        packages_string = "(%s)" % ",".join(map(str, packages))
         # postgres command for deleting specified rows
-        delete_command = "delete from geem_package where id in " + packages_str
+        delete_command =\
+            "delete from geem_package where id in " + packages_string
 
     # Run clear_command in db service docker container
     call(command_template % delete_command)
 
 
-def merge_packages(file_name, packages,
-                   update_ids=True, update_owner_ids=True):
+def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed merges
     call(command_template % "drop table if exists tmp_table")
     # Create temporary table tmp_table
-    create_command ="create table tmp_table " \
-                    "as select * from geem_package with no data"
+    create_command =\
+        "create table tmp_table as select * from geem_package with no data"
     call(command_template % create_command)
 
     try:
         # Populate tmp_table with file_name contents
-        copy_command = "\\copy tmp_table from stdin delimiter ',' csv header"
+        copy_command = "\\copy tmp_table from stdin delimiter '\t' csv header"
         call(command_template % copy_command
-             # Supply stdin with .csv file path
+             # Supply stdin with .tsv file path
              + " < %s/%s" % (backup_dir, file_name))
 
         # User specified packages to merge
         if packages is not None:
             # String representation of packages, with soft brackets
-            packages_str = "(%s)" % ",".join(map(str, packages))
+            packages_string = "(%s)" % ",".join(map(str, packages))
             # postgres command for deleting non-specified rows
-            delete_command = "delete from tmp_table " \
-                             "where id not in " + packages_str
+            delete_command =\
+                "delete from tmp_table where id not in " + packages_string
             # Delete specified rows from tmp_table
             call(command_template % delete_command)
 
@@ -141,18 +124,22 @@ def merge_packages(file_name, packages,
         # merged will have an id already assigned to an existing
         # package in the local geem_package table.
         if update_ids is True:
-            # Alter tmp_table id's to fit geem_package id sequence
-            update_command = "update tmp_table " \
-                             "set id = nextval('geem_package_id_seq')"
+            # This is the postgres command for updating the id's in
+            # tmp_table to the next available id's in the local
+            # geem_package table.
+            update_command =\
+                "update tmp_table set id = nextval('geem_package_id_seq')"
+            # Update id's in tmp_table
             call(command_template % update_command)
 
-        # User does not wants to preserve owner_id's
-        if update_owner_ids is True:
-            # Set tmp_table owner_id's to NULL
+        # User wants to update owner_id's
+        if new_owner_ids is True:
+            # Set tmp_table owner_id's to NULL for now
             call(command_template % "update tmp_table set owner_id = NULL")
 
-        # Insert tmp_table contents into local geem_package table
+        # postgres command for inserting tmp_table into geem_package
         insert_command = "insert into geem_package select * from tmp_table"
+        # Insert tmp_table contents into local geem_package table
         call(command_template % insert_command)
 
         # Drop temporary table
@@ -197,7 +184,8 @@ def main(args):
         clear_packages(packages)
     elif db_operation == "merge":
         # Merge file_name contents with local geem_package table
-        merge_packages(file_name, packages)
+        merge_packages(file_name, packages,
+                       update_ids=True, new_owner_ids=True)
     elif db_operation == "restore":
         # We must first clear packages from the local geem_package
         # table that have id's conflicting with the packages to be
@@ -207,24 +195,23 @@ def main(args):
         # into the local geem_package table. There will be no
         # conflicts, with the id and owner_id of packages to be
         # restored remaining the same.
-        merge_packages(file_name, packages,
-                       update_ids=False, update_owner_ids=False)
+        merge_packages(file_name, packages)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
 
 
-def valid_csv_file_name(input):
+def valid_tsv_file_name(input):
     """TODO: ..."""
-    # We allow users to specify files without the ".csv" extension, but
-    # this line will ensure file_name ends with a ".csv"
-    file_name = input.split(".csv")[0] + ".csv"
+    # We allow users to specify files without the ".tsv" extension, but
+    # this line will ensure file_name ends with a ".tsv"
+    file_name = input.split(".tsv")[0] + ".tsv"
 
     # Check if valid file name
     if re.match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
         return file_name
     else:
-        e = "Not a valid file .csv file name: %s" % file_name
+        e = "Not a valid file .tsv file name: %s" % file_name
         raise argparse.ArgumentTypeError(e)
 
 
@@ -235,7 +222,7 @@ def set_up_parser(parser):
                         choices=["backup", "clear", "merge", "restore"])
     # file_name flag: not used in "clear" db_operation
     parser.add_argument("-f", "--file_name",
-                        type=valid_csv_file_name,
+                        type=valid_tsv_file_name,
                         help="required by backup, merge and restore")
     # packages flag: optional for all db_operation's
     parser.add_argument("-p", "--packages",

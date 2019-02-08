@@ -126,6 +126,16 @@ def merge_packages(file_name, packages,
              # Supply stdin with .csv file path
              + " < %s/%s" % (backup_dir, file_name))
 
+        # User specified packages to merge
+        if packages is not None:
+            # String representation of packages, with soft brackets
+            packages_str = "(%s)" % ",".join(map(str, packages))
+            # postgres command for deleting non-specified rows
+            delete_command = "delete from tmp_table " \
+                             "where id not in " + packages_str
+            # Delete specified rows from tmp_table
+            call(command_template % delete_command)
+
         # The user wants to update the id of packages to be merged.
         # This guarantees no conflicts will occur, as no package to be
         # merged will have an id already assigned to an existing

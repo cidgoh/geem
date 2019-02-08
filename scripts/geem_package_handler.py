@@ -17,18 +17,21 @@ reference to all options and arguments for the sophisticated user.
 TODO:
     * allow user to set owner_id upon merge
     * allow user to merge without duplicates
+    * check if docker container is running
+    * docstrings
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
+    * remove shell=True from check_call
     * replace global variables with getter functions
     * better abstract the process of calling commands between clear,
       restore and merge
 """
 
-import argparse
+from argparse import ArgumentParser, ArgumentTypeError
 from os.path import abspath, dirname, exists
 from os import makedirs
-import re
+from re import match
 from subprocess import CalledProcessError, check_call
 from warnings import warn
 
@@ -208,11 +211,11 @@ def valid_tsv_file_name(input):
     file_name = input.split(".tsv")[0] + ".tsv"
 
     # Check if valid file name
-    if re.match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
+    if match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
         return file_name
     else:
-        e = "Not a valid file .tsv file name: %s" % file_name
-        raise argparse.ArgumentTypeError(e)
+        e = "Not a valid file name: %s" % file_name
+        raise ArgumentTypeError(e)
 
 
 def set_up_parser(parser):
@@ -253,7 +256,7 @@ def valid_args(db_operation, file_name):
 
 if __name__ == "__main__":
     # Parser to handle command line arguments
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     # Set up acceptable command line arguments
     set_up_parser(parser)
     # User-specified sub-arguments

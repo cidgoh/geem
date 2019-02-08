@@ -109,7 +109,8 @@ def clear_packages(packages):
     call(command_template % delete_command)
 
 
-def merge_packages(file_name, packages):
+def merge_packages(file_name, packages,
+                   update_ids=True, update_owner_ids=True):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed merges
     call(command_template % "drop table if exists tmp_table")
@@ -125,14 +126,25 @@ def merge_packages(file_name, packages):
              # Supply stdin with .csv file path
              + " < %s/%s" % (backup_dir, file_name))
 
-        # # Set tmp_table owner_id's to NULL
-        # call("update tmp_table set owner_id = NULL")
-        # # Alter tmp_table id's to fit geem_package id sequence
-        # call("update tmp_table set id = nextval('geem_package_id_seq')")
+        # The user wants to update the id of packages to be merged.
+        # This guarantees no conflicts will occur, as no package to be
+        # merged will have an id already assigned to an existing
+        # package in the local geem_package table.
+        if update_ids is True:
+            # Alter tmp_table id's to fit geem_package id sequence
+            update_command = "update tmp_table " \
+                             "set id = nextval('geem_package_id_seq')"
+            call(command_template % update_command)
+
+        # User does not wants to preserve owner_id's
+        if update_owner_ids is True:
+            # Set tmp_table owner_id's to NULL
+            call(command_template % "update tmp_table set owner_id = NULL")
 
         # Insert tmp_table contents into local geem_package table
         insert_command = "insert into geem_package select * from tmp_table"
         call(command_template % insert_command)
+
         # Drop temporary table
         call(command_template % "drop table tmp_table")
     except CalledProcessError as e:
@@ -183,9 +195,10 @@ def main(args):
         clear_packages(packages)
         # We can then merge the user-specified content in file_name
         # into the local geem_package table. There will be no
-        # conflicts, and the id of packages to be restored will remain
-        # the same.
-        merge_packages(file_name, packages)
+        # conflicts, with the id and owner_id of packages to be
+        # restored remaining the same.
+        merge_packages(file_name, packages,
+                       update_ids=False, update_owner_ids=False)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()

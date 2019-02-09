@@ -222,15 +222,24 @@ def set_up_parser(parser):
     """TODO: ..."""
     # Add db_operation argument
     parser.add_argument("db_operation",
-                        choices=["backup", "clear", "merge", "restore"])
-    # file_name flag: not used in "clear" db_operation
+                        choices=["backup", "clear", "merge", "restore"],
+                        help="Required. Specify action to perform on the "
+                             "packages in your local GEEM database.")
+    # file_name flag: required for every db_operation except "clear"
     parser.add_argument("-f", "--file_name",
                         type=valid_tsv_file_name,
-                        help="required by backup, merge and restore")
+                        help="Required for every operation except clear. "
+                             "Specify .tsv file to perform a backup, merge or "
+                             "restore on.")
     # packages flag: optional for all db_operation's
     parser.add_argument("-p", "--packages",
                         nargs="+", type=int,
-                        help="optional for every db_operation")
+                        help="Optional flag for every operation. Specify "
+                             "packages to perform backup, clear, merge or "
+                             "restore on. Default action specifies all "
+                             "packages.")
+    # Change "positional arguments" in help message to "operations"
+    parser._positionals.title = "operations"
     # Change "optional arguments" in help message to "flag arguments"
     parser._optionals.title = "flag arguments"
     return parser

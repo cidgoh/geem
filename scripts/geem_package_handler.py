@@ -16,7 +16,6 @@ reference to all options and arguments for the sophisticated user.
 
 TODO:
     * allow user to set owner_id upon merge
-    * allow user to merge without duplicates
     * check if docker container is running
     * docstrings
     * write tests
@@ -96,7 +95,7 @@ def delete_packages(packages):
     call(command_template % delete_command)
 
 
-def insert_packages(file_name, packages, update_ids=False, new_owner_ids=False):
+def insert_packages(file_name, packages, keep_ids, update_owner_ids=False):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed inserts
     call(command_template % "drop table if exists tmp_table")
@@ -126,7 +125,7 @@ def insert_packages(file_name, packages, update_ids=False, new_owner_ids=False):
         # This guarantees no conflicts will occur, as no package to be
         # inserted will have an id already assigned to an existing
         # package in the local geem_package table.
-        if update_ids is True:
+        if keep_ids is False:
             # geem_package id column sequence name
             geem_package_id_seq = "pg_get_serial_sequence('%s', '%s')"
             geem_package_id_seq = geem_package_id_seq % ("geem_package", "id")
@@ -139,7 +138,7 @@ def insert_packages(file_name, packages, update_ids=False, new_owner_ids=False):
             call(command_template % update_command)
 
         # User wants to update owner_id's
-        if new_owner_ids is True:
+        if update_owner_ids is True:
             # Set tmp_table owner_id's to NULL for now
             call(command_template % "update tmp_table set owner_id = NULL")
 
@@ -175,12 +174,14 @@ def sync_geem_package_id_seq():
 
 def main(args):
     """TODO: ..."""
-    # User-specified db_operation
+    # Operation argument
     db_operation = args.db_operation
-    # User-specified file_name (may be None)
+    # file_name flag (None for "delete")
     file_name = args.file_name
-    # User-specified list of packages (may be None)
+    # packages flag (may be None)
     packages = args.packages
+    # keep_ids flag (may be True for "insert"; otherwise False)
+    keep_ids = args.keep_ids
 
     if db_operation == "backup":
         # Backup local geem_package table to file_name
@@ -190,8 +191,7 @@ def main(args):
         delete_packages(packages)
     elif db_operation == "insert":
         # Insert file_name contents with local geem_package table
-        insert_packages(file_name, packages,
-                        update_ids=True, new_owner_ids=True)
+        insert_packages(file_name, packages, keep_ids, True)
     elif db_operation == "restore":
         # We must first delete packages from the local geem_package
         # table that have id's conflicting with the packages to be
@@ -201,10 +201,33 @@ def main(args):
         # into the local geem_package table. There will be no
         # conflicts, with the id and owner_id of packages to be
         # restored remaining the same.
-        insert_packages(file_name, packages)
+        insert_packages(file_name, packages, True)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
+
+
+def valid_args(db_operation, file_name, keep_ids):
+    """TODO: ..."""
+    # If db_operation is delete, file_name should be None
+    if db_operation == "delete":
+        if file_name is not None:
+            raise ValueError("--file_name flag is not used by delete")
+    # If db_operation is not delete, file_name should be None
+    else:
+        if file_name is None:
+            raise ValueError("--file_name flag is required")
+
+    # If db_operation is insert or restore, file_name path must exist
+    if db_operation == "insert" or db_operation == "restore":
+        if not exists(backup_dir + "/" + file_name):
+            raise ValueError("Unable to perform %s; %s does not exist"
+                             % (db_operation, file_name))
+
+    # If keep_ids is True, db_operation should be insert
+    if keep_ids is True:
+        if db_operation != "insert":
+            raise ValueError("--keep_ids flag is only used by insert")
 
 
 def valid_tsv_file_name(input):
@@ -228,42 +251,38 @@ def set_up_parser(parser):
                         choices=["backup", "delete", "insert", "restore"],
                         help="Required. Specify action to perform on the "
                              "packages in your local GEEM database.")
-    # file_name flag: required for every db_operation except "delete"
+    # Add file_name flag
     parser.add_argument("-f", "--file_name",
                         type=valid_tsv_file_name,
                         help="Required for every operation except delete. "
                              "Specify .tsv file to perform a backup, insert "
                              "or restore on.")
-    # packages flag: optional for all db_operation's
+    # Add packages flag
     parser.add_argument("-p", "--packages",
                         nargs="+", type=int,
                         help="Optional flag for every operation. Specify "
-                             "packages to perform backup, delete, insert or "
-                             "restore on. Default action specifies all "
-                             "packages.")
+                             "space-delimited list of id's for packages to "
+                             "perform backup, delete, insert or restore on. "
+                             "If this flag is not specified, the action will "
+                             "be performed on all packages.")
+    # Add keep_ids flag
+    parser.add_argument("-k", "--keep_ids",
+                        action='store_true',
+                        help="Optional flag for insert. No additional "
+                             "arguments are needed. When this flag is "
+                             "specified, the id's of the inserted packages "
+                             "will remain the same, and not be changed to the "
+                             "next values in the geem_package id sequence. "
+                             "This may result in conflicts, and therefore, an "
+                             "unsuccessful insert. Note that restore also "
+                             "preserves id's, but automatically deletes "
+                             "existing packages to resolve conflicts.")
     # Change "positional arguments" in help message to "operations"
     parser._positionals.title = "operations"
     # Change "optional arguments" in help message to "flag arguments"
     parser._optionals.title = "flag arguments"
+
     return parser
-
-
-def valid_args(db_operation, file_name):
-    """TODO: ..."""
-    # If db_operation is delete, file_name should be None
-    if db_operation == "delete":
-        if file_name is not None:
-            raise ValueError("--file_name flag is not used by delete")
-    # If db_operation is not delete, file_name should be None
-    else:
-        if file_name is None:
-            raise ValueError("--file_name flag is required")
-
-    # If db_operation is insert or restore, file_name path must exist
-    if db_operation == "insert" or db_operation == "restore":
-        if not exists(backup_dir + "/" + file_name):
-            raise ValueError("Unable to perform %s; %s does not exist"
-                             % (db_operation, file_name))
 
 
 if __name__ == "__main__":
@@ -276,7 +295,7 @@ if __name__ == "__main__":
     # We must provide additional validation of args that was
     # unachievable in set_up_parser via native argparse functionality.
     # An error is thrown here if args fails to validate.
-    valid_args(args.db_operation, args.file_name)
+    valid_args(args.db_operation, args.file_name, args.keep_ids)
 
     # TODO: check if docker container is running
 

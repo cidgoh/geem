@@ -78,13 +78,13 @@ def backup_packages(file_name, packages):
          + " > %s/%s" % (backup_dir, file_name))
 
 
-def clear_packages(packages):
+def delete_packages(packages):
     """TODO: ..."""
-    # User did not specify packages to clear
+    # User did not specify packages to delete
     if packages is None:
         # postgres command to empty geem_package table quickly
         delete_command = "truncate table geem_package"
-    # User specified packages to clear
+    # User specified packages to delete
     else:
         # String representation of packages, with soft brackets
         packages_string = "(%s)" % ",".join(map(str, packages))
@@ -92,13 +92,13 @@ def clear_packages(packages):
         delete_command =\
             "delete from geem_package where id in " + packages_string
 
-    # Run clear_command in db service docker container
+    # Run delete_command in db service docker container
     call(command_template % delete_command)
 
 
-def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
+def insert_packages(file_name, packages, update_ids=False, new_owner_ids=False):
     """TODO: ..."""
-    # Drop temporary table tmp_table from previous, failed merges
+    # Drop temporary table tmp_table from previous, failed inserts
     call(command_template % "drop table if exists tmp_table")
     # Create temporary table tmp_table
     create_command =\
@@ -112,7 +112,7 @@ def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
              # Supply stdin with .tsv file path
              + " < %s/%s" % (backup_dir, file_name))
 
-        # User specified packages to merge
+        # User specified packages to insert
         if packages is not None:
             # String representation of packages, with soft brackets
             packages_string = "(%s)" % ",".join(map(str, packages))
@@ -122,16 +122,19 @@ def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
             # Delete specified rows from tmp_table
             call(command_template % delete_command)
 
-        # The user wants to update the id of packages to be merged.
+        # The user wants to update the id of packages to be inserted.
         # This guarantees no conflicts will occur, as no package to be
-        # merged will have an id already assigned to an existing
+        # inserted will have an id already assigned to an existing
         # package in the local geem_package table.
         if update_ids is True:
+            # geem_package id column sequence name
+            geem_package_id_seq = "pg_get_serial_sequence('%s', '%s')"
+            geem_package_id_seq = geem_package_id_seq % ("geem_package", "id")
             # This is the postgres command for updating the id's in
             # tmp_table to the next available id's in the local
             # geem_package table.
-            update_command =\
-                "update tmp_table set id = nextval('geem_package_id_seq')"
+            update_command = "update tmp_table set id = nextval(%s)"
+            update_command = update_command % geem_package_id_seq
             # Update id's in tmp_table
             call(command_template % update_command)
 
@@ -148,7 +151,7 @@ def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
         # Drop temporary table
         call(command_template % "drop table tmp_table")
     except CalledProcessError as e:
-        warn("Failed to merge data. Table tmp_table was inserted into "
+        warn("Failed to insert data. Table tmp_table was inserted into "
              "database, but not dropped. If you tried to restore data, "
              "packages were removed, but not replaced.")
         raise e
@@ -156,15 +159,15 @@ def merge_packages(file_name, packages, update_ids=False, new_owner_ids=False):
 
 def sync_geem_package_id_seq():
     """TODO: ..."""
-    # postgres query for max id value in geem_package
-    get_max_id = "SELECT (MAX(id)) FROM geem_package"
-    # This is the postgres command to set current value in geem_package_id_seq
-    # to the max id value om geem_package_table.
-    set_curr_val = "SELECT setval('geem_package_id_seq', (%s))" % get_max_id
+    # https://stackoverflow.com/a/3698777
+    max_id = "coalesce(MAX(id), 0) + 1"
+    geem_package_id_seq = "pg_get_serial_sequence('geem_package', 'id')"
+    set_next_val = "select setval(%s, %s, false) from geem_package"
+    set_next_val = set_next_val % (geem_package_id_seq, max_id)
 
     try:
-        # Set current value in geem_package_id_seq to max id value
-       call(command_template % set_curr_val)
+        # Set next value in geem_package_id_seq with above commands
+       call(command_template % set_next_val)
     except CalledProcessError as e:
         warn("geem_package_id_seq was not synchronized")
         raise e
@@ -182,23 +185,23 @@ def main(args):
     if db_operation == "backup":
         # Backup local geem_package table to file_name
         backup_packages(file_name, packages)
-    elif db_operation == "clear":
-        # Clear local geem_package table contents
-        clear_packages(packages)
-    elif db_operation == "merge":
-        # Merge file_name contents with local geem_package table
-        merge_packages(file_name, packages,
-                       update_ids=True, new_owner_ids=True)
+    elif db_operation == "delete":
+        # Delete local geem_package table contents
+        delete_packages(packages)
+    elif db_operation == "insert":
+        # Insert file_name contents with local geem_package table
+        insert_packages(file_name, packages,
+                        update_ids=True, new_owner_ids=True)
     elif db_operation == "restore":
-        # We must first clear packages from the local geem_package
+        # We must first delete packages from the local geem_package
         # table that have id's conflicting with the packages to be
         # restored.
-        clear_packages(packages)
-        # We can then merge the user-specified content in file_name
+        delete_packages(packages)
+        # We can then insert the user-specified content in file_name
         # into the local geem_package table. There will be no
         # conflicts, with the id and owner_id of packages to be
         # restored remaining the same.
-        merge_packages(file_name, packages)
+        insert_packages(file_name, packages)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
@@ -222,20 +225,20 @@ def set_up_parser(parser):
     """TODO: ..."""
     # Add db_operation argument
     parser.add_argument("db_operation",
-                        choices=["backup", "clear", "merge", "restore"],
+                        choices=["backup", "delete", "insert", "restore"],
                         help="Required. Specify action to perform on the "
                              "packages in your local GEEM database.")
-    # file_name flag: required for every db_operation except "clear"
+    # file_name flag: required for every db_operation except "delete"
     parser.add_argument("-f", "--file_name",
                         type=valid_tsv_file_name,
-                        help="Required for every operation except clear. "
-                             "Specify .tsv file to perform a backup, merge or "
-                             "restore on.")
+                        help="Required for every operation except delete. "
+                             "Specify .tsv file to perform a backup, insert "
+                             "or restore on.")
     # packages flag: optional for all db_operation's
     parser.add_argument("-p", "--packages",
                         nargs="+", type=int,
                         help="Optional flag for every operation. Specify "
-                             "packages to perform backup, clear, merge or "
+                             "packages to perform backup, delete, insert or "
                              "restore on. Default action specifies all "
                              "packages.")
     # Change "positional arguments" in help message to "operations"
@@ -247,17 +250,17 @@ def set_up_parser(parser):
 
 def valid_args(db_operation, file_name):
     """TODO: ..."""
-    # If db_operation is clear, file_name should be None
-    if db_operation == "clear":
+    # If db_operation is delete, file_name should be None
+    if db_operation == "delete":
         if file_name is not None:
-            raise ValueError("--file_name flag is not used by clear")
-    # If db_operation is not clear, file_name should be None
+            raise ValueError("--file_name flag is not used by delete")
+    # If db_operation is not delete, file_name should be None
     else:
         if file_name is None:
             raise ValueError("--file_name flag is required")
 
-    # If db_operation is restore or merge, file_name must exist in path
-    if db_operation == "restore" or db_operation == "merge":
+    # If db_operation is insert or restore, file_name path must exist
+    if db_operation == "insert" or db_operation == "restore":
         if not exists(backup_dir + "/" + file_name):
             raise ValueError("Unable to perform %s; %s does not exist"
                              % (db_operation, file_name))

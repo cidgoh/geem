@@ -22,8 +22,8 @@ TODO:
         * will this work on Mac?
         * will this work on Windows? (Probably not)
     * remove shell=True from check_call
-    * better abstract the process of calling commands between clear,
-      restore and merge
+    * better abstract the process of calling commands between backup,
+      insert and delete
 """
 
 from argparse import ArgumentParser, ArgumentTypeError
@@ -48,21 +48,21 @@ def call(command):
     check_call(command, shell=True)
 
 
-def backup_packages(file_name, packages):
+def backup_packages(args):
     """TODO: ..."""
     # Make backup directory if one does not exist
     if not exists(backup_dir):
         makedirs(backup_dir)
 
     # User did not specify packages to backup
-    if packages is None:
+    if args.packages is None:
         # postgres command for copying geem_package table to a tsv file
         copy_command =\
             "\\copy geem_package to stdout delimiter '\t' csv header"
     # User specified packages to backup
     else:
         # String representation of packages, with soft brackets
-        packages_string = "(%s)" % ",".join(map(str, packages))
+        packages_string = "(%s)" % ",".join(map(str, args.packages))
         # postgres command for selecting specified rows
         specified_rows =\
             "(select * from geem_package where id in %s)" % packages_string
@@ -73,28 +73,10 @@ def backup_packages(file_name, packages):
     # Run copy_command in db service docker container
     call(command_template % copy_command
          # Specify .tsv file path for stdout in shell command
-         + " > %s/%s" % (backup_dir, file_name))
+         + " > %s/%s" % (backup_dir, args.file_name))
 
 
-def delete_packages(packages):
-    """TODO: ..."""
-    # User did not specify packages to delete
-    if packages is None:
-        # postgres command to empty geem_package table quickly
-        delete_command = "truncate table geem_package"
-    # User specified packages to delete
-    else:
-        # String representation of packages, with soft brackets
-        packages_string = "(%s)" % ",".join(map(str, packages))
-        # postgres command for deleting specified rows
-        delete_command =\
-            "delete from geem_package where id in " + packages_string
-
-    # Run delete_command in db service docker container
-    call(command_template % delete_command)
-
-
-def insert_packages(file_name, packages, keep_ids, new_owner_ids):
+def insert_packages(args):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed inserts
     call(command_template % "drop table if exists tmp_table")
@@ -108,12 +90,12 @@ def insert_packages(file_name, packages, keep_ids, new_owner_ids):
         copy_command = "\\copy tmp_table from stdin delimiter '\t' csv header"
         call(command_template % copy_command
              # Supply stdin with .tsv file path
-             + " < %s/%s" % (backup_dir, file_name))
+             + " < %s/%s" % (backup_dir, args.file_name))
 
         # User specified packages to insert
-        if packages is not None:
+        if args.packages is not None:
             # String representation of packages, with soft brackets
-            packages_string = "(%s)" % ",".join(map(str, packages))
+            packages_string = "(%s)" % ",".join(map(str, args.packages))
             # postgres command for deleting non-specified rows
             delete_command =\
                 "delete from tmp_table where id not in " + packages_string
@@ -124,7 +106,7 @@ def insert_packages(file_name, packages, keep_ids, new_owner_ids):
         # This guarantees no conflicts will occur, as no package to be
         # inserted will have an id already assigned to an existing
         # package in the local geem_package table.
-        if keep_ids is False:
+        if args.keep_ids is False:
             # geem_package id column sequence name
             geem_package_id_seq = "pg_get_serial_sequence('%s', '%s')"
             geem_package_id_seq = geem_package_id_seq % ("geem_package", "id")
@@ -137,10 +119,10 @@ def insert_packages(file_name, packages, keep_ids, new_owner_ids):
             call(command_template % update_command)
 
         # User specified new owner_id values for the packages to insert
-        if new_owner_ids is not None:
+        if args.new_owner_ids is not None:
             # Postgres command for setting owner_id's to new_owner_ids
             update_command = "update tmp_table set owner_id = "
-            update_command = update_command + str(new_owner_ids)
+            update_command = update_command + str(args.new_owner_ids)
             # Update owner_id's in tmp_table
             call(command_template % update_command)
 
@@ -153,97 +135,38 @@ def insert_packages(file_name, packages, keep_ids, new_owner_ids):
         call(command_template % "drop table tmp_table")
     except CalledProcessError as e:
         warn("Failed to insert data. Table tmp_table was inserted into "
-             "database, but not dropped. If you tried to restore data, "
-             "packages were removed, but not replaced.")
+             "database, but not dropped.")
         raise e
+
+
+def delete_packages(args):
+    """TODO: ..."""
+    # User did not specify packages to delete
+    if args.packages is None:
+        # postgres command to empty geem_package table quickly
+        delete_command = "truncate table geem_package"
+    # User specified packages to delete
+    else:
+        # String representation of packages, with soft brackets
+        packages_string = "(%s)" % ",".join(map(str, args.packages))
+        # postgres command for deleting specified rows
+        delete_command =\
+            "delete from geem_package where id in " + packages_string
+
+    # Run delete_command in db service docker container
+    call(command_template % delete_command)
 
 
 def sync_geem_package_id_seq():
     """TODO: ..."""
     # https://stackoverflow.com/a/3698777
     max_id = "coalesce(MAX(id), 0) + 1"
-    geem_package_id_seq = "pg_get_serial_sequence('geem_package', 'id')"
+    geem_package_id_seq = "pg_gt_serial_sequence('geem_package', 'id')"
     set_next_val = "select setval(%s, %s, false) from geem_package"
     set_next_val = set_next_val % (geem_package_id_seq, max_id)
 
-    try:
-        # Set next value in geem_package_id_seq with above commands
-       call(command_template % set_next_val)
-    except CalledProcessError as e:
-        warn("geem_package_id_seq was not synchronized")
-        raise e
-
-
-def main(args):
-    """TODO: ..."""
-    # Operation argument
-    db_operation = args.db_operation
-    # file_name flag (None for "delete")
-    file_name = args.file_name
-    # packages flag (may be None)
-    packages = args.packages
-    # keep_ids flag (may be True for "insert"; otherwise False)
-    keep_ids = args.keep_ids
-    # new_owner_ids flag (may be an int for "insert"; otherwise None)
-    new_owner_ids = args.new_owner_ids
-
-    if db_operation == "backup":
-        # Backup local geem_package table to file_name
-        backup_packages(file_name, packages)
-    elif db_operation == "delete":
-        # Delete local geem_package table contents
-        delete_packages(packages)
-    elif db_operation == "insert":
-        # Insert file_name contents with local geem_package table
-        insert_packages(file_name, packages, keep_ids, new_owner_ids)
-    elif db_operation == "restore":
-        # We must first delete packages from the local geem_package
-        # table that have id's conflicting with the packages to be
-        # restored.
-        delete_packages(packages)
-        # We can then insert the user-specified content in file_name
-        # into the local geem_package table. There will be no
-        # conflicts, with the id and owner_id of packages to be
-        # restored remaining the same.
-        insert_packages(file_name, packages, True, None)
-
-    # Sync local geem_package_seq_id to corresponding changes
-    sync_geem_package_id_seq()
-
-
-def valid_args(args):
-    """TODO: ..."""
-    # User-inputted command-line arguments
-    db_operation = args.db_operation
-    file_name = args.file_name
-    keep_ids = args.keep_ids
-    new_owner_ids = args.new_owner_ids
-
-    # file_name flag conflicts with the "delete" operation
-    if db_operation == "delete":
-        if file_name is not None:
-            raise ValueError("--file_name flag is not used by delete")
-    # file_name flag is required by all other operations
-    else:
-        if file_name is None:
-            raise ValueError("--file_name flag is required")
-
-    # The file_name flag value must already exist in the backup
-    # directory for "insert" and "restore" operations.
-    if db_operation == "insert" or db_operation == "restore":
-        if not exists(backup_dir + "/" + file_name):
-            error_message = "Unable to perform %s; %s does not exist"
-            raise ValueError(error_message % (db_operation, file_name))
-
-    # keep_ids flag is only available for the "insert" operation
-    if keep_ids is True:
-        if db_operation != "insert":
-            raise ValueError("--keep_ids flag is only used by insert")
-
-    # new_owner_ids flag is only available for the "insert" operation
-    if new_owner_ids is not None:
-        if db_operation != "insert":
-            raise ValueError("--new_owner_ids flag is only used by insert")
+    # Set next value in geem_package_id_seq with above commands
+    call(command_template % set_next_val)
 
 
 def valid_owner_id(input):
@@ -277,53 +200,40 @@ def valid_tsv_file_name(input):
 
 def configure_parser(parser):
     """TODO: ..."""
-    # Add db_operation argument
-    parser.add_argument("db_operation",
-                        choices=["backup", "delete", "insert", "restore"],
-                        help="Required. Specify action to perform on the "
-                             "packages in your local GEEM database.")
-    # Add file_name flag
-    parser.add_argument("-f", "--file_name",
-                        type=valid_tsv_file_name,
-                        help="Required for every operation except delete. "
-                             "Requires one additional argument.Specify .tsv "
-                             "file to perform a backup, insert or restore on.")
-    # Add packages flag
-    parser.add_argument("-p", "--packages",
-                        nargs="+", type=int,
-                        help="Optional flag for every operation. Requires 1 "
-                             "or more additional arguments.Specify "
-                             "space-delimited list of id's for packages to "
-                             "perform backup, delete, insert or restore on. "
-                             "If this flag is not specified, the action will "
-                             "be performed on all packages.")
-    # Add keep_ids flag
-    parser.add_argument("-k", "--keep_ids",
-                        action="store_true",
-                        help="Optional flag for insert. No additional "
-                             "arguments are needed. When this flag is "
-                             "specified, the id's of the inserted packages "
-                             "will remain the same, and not be changed to the "
-                             "next values in the geem_package id sequence. "
-                             "This may result in conflicts, and therefore, an "
-                             "unsuccessful insert. Note that restore also "
-                             "preserves id's, but automatically deletes "
-                             "existing packages to resolve conflicts.")
-    # Add new_owner_ids flag
-    parser.add_argument("-n", "--new_owner_ids",
-                        nargs="?", type=valid_owner_id, const="",
-                        help="Optional flag for insert. Requires 0 or 1 "
-                             "additional arguments. When this flag is "
-                             "specified, the owner_id's of the inserted "
-                             "packages will be updated. If no additional "
-                             "argument is provided, the new owner_id's will "
-                             "be set to NULL. If an argument is provided, the "
-                             "new owner_id's will be set to that value.")
+    subparsers = parser.add_subparsers(help="-h, --help for more details")
 
-    # Change "positional arguments" and "optional arguments" in parser
-    # help message to "operations" and "flag arguments" respectively.
-    parser._positionals.title = "operations"
-    parser._optionals.title = "flag arguments"
+    backup_parser = subparsers.add_parser("backup",
+                                          help="...")
+    backup_parser.add_argument("file_name",
+                               type=valid_tsv_file_name,
+                               help="...")
+    backup_parser.add_argument("-p", "--packages",
+                               nargs="+", type=int,
+                               help="...")
+    backup_parser.set_defaults(func=backup_packages)
+
+    delete_parser = subparsers.add_parser("delete",
+                                          help="...")
+    delete_parser.add_argument("-p", "--packages",
+                               nargs="+", type=int,
+                               help="...")
+    delete_parser.set_defaults(func=delete_packages)
+
+    insert_parser = subparsers.add_parser("insert",
+                                          help="...")
+    insert_parser.add_argument("file_name",
+                               type=valid_tsv_file_name,
+                               help="...")
+    insert_parser.add_argument("-k", "--keep_ids",
+                               action="store_true",
+                               help="...")
+    insert_parser.add_argument("-n", "--new_owner_ids",
+                               nargs="?", type=valid_owner_id, const="",
+                               help="...")
+    insert_parser.add_argument("-p", "--packages",
+                               nargs="+", type=int,
+                               help="...")
+    insert_parser.set_defaults(func=insert_packages)
 
     return parser
 
@@ -333,14 +243,13 @@ if __name__ == "__main__":
     # Set up parser for command-line arguments
     parser = ArgumentParser()
     configure_parser(parser)
-
     # User-inputted command-line arguments
     args = parser.parse_args()
-
-    # argparse does not allow you to easily assign optional arguments
-    # to positional arguments. We implemented this functionality in
-    # valid_args, which throws an error for conflicting arguments.
-    valid_args(args)
-
-    # Entry point into code responsible for geem_package handling
-    # main(args)
+    # Call default function for user-inputted args
+    args.func(args)
+    try:
+        # Adjust sequence of geem_package id column to reflect changes
+        sync_geem_package_id_seq()
+    except CalledProcessError as e:
+        warn("geem_package id sequence was not synchronized")
+        raise e

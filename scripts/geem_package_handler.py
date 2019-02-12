@@ -11,11 +11,11 @@ command line syntax, environment variables, and files. Usage messages
 can be fairly elaborate (several screens full) and should be sufficient
 for a new user to use the command properly, as well as a complete quick
 reference to all options and arguments for the sophisticated user.
+...assume docker containers running
 ...assumes you do not have to use sudo with docker
 ...define geem_package handling
 
 TODO:
-    * check if docker container is running
     * docstrings/better commenting
     * replace global variables with getter functions
     * write tests
@@ -211,29 +211,36 @@ def main(args):
     sync_geem_package_id_seq()
 
 
-def valid_args(db_operation, file_name, keep_ids, new_owner_ids):
+def valid_args(args):
     """TODO: ..."""
-    # If db_operation is delete, file_name should be None
+    # User-inputted command-line arguments
+    db_operation = args.db_operation
+    file_name = args.file_name
+    keep_ids = args.keep_ids
+    new_owner_ids = args.new_owner_ids
+
+    # file_name flag conflicts with the "delete" operation
     if db_operation == "delete":
         if file_name is not None:
             raise ValueError("--file_name flag is not used by delete")
-    # If db_operation is not delete, file_name should be None
+    # file_name flag is required by all other operations
     else:
         if file_name is None:
             raise ValueError("--file_name flag is required")
 
-    # If db_operation is insert or restore, file_name path must exist
+    # The file_name flag value must already exist in the backup
+    # directory for "insert" and "restore" operations.
     if db_operation == "insert" or db_operation == "restore":
         if not exists(backup_dir + "/" + file_name):
-            raise ValueError("Unable to perform %s; %s does not exist"
-                             % (db_operation, file_name))
+            error_message = "Unable to perform %s; %s does not exist"
+            raise ValueError(error_message % (db_operation, file_name))
 
-    # If keep_ids is True, db_operation should be insert
+    # keep_ids flag is only available for the "insert" operation
     if keep_ids is True:
         if db_operation != "insert":
             raise ValueError("--keep_ids flag is only used by insert")
 
-    # If new_owner_ids is not None, db_operation should be insert
+    # new_owner_ids flag is only available for the "insert" operation
     if new_owner_ids is not None:
         if db_operation != "insert":
             raise ValueError("--new_owner_ids flag is only used by insert")
@@ -268,7 +275,7 @@ def valid_tsv_file_name(input):
         raise ArgumentTypeError(e)
 
 
-def set_up_parser(parser):
+def configure_parser(parser):
     """TODO: ..."""
     # Add db_operation argument
     parser.add_argument("db_operation",
@@ -313,28 +320,27 @@ def set_up_parser(parser):
                              "be set to NULL. If an argument is provided, the "
                              "new owner_id's will be set to that value.")
 
-    # Change "positional arguments" in help message to "operations"
+    # Change "positional arguments" and "optional arguments" in parser
+    # help message to "operations" and "flag arguments" respectively.
     parser._positionals.title = "operations"
-    # Change "optional arguments" in help message to "flag arguments"
     parser._optionals.title = "flag arguments"
 
     return parser
 
 
+# Entry point into script
 if __name__ == "__main__":
-    # Parser to handle command line arguments
+    # Set up parser for command-line arguments
     parser = ArgumentParser()
-    # Set up acceptable command line arguments
-    set_up_parser(parser)
-    # User-specified sub-arguments
+    configure_parser(parser)
+
+    # User-inputted command-line arguments
     args = parser.parse_args()
-    # We must provide additional validation of args that was
-    # unachievable in set_up_parser via native argparse functionality.
-    # An error is thrown here if args fails to validate.
-    valid_args(args.db_operation, args.file_name, args.keep_ids,
-               args.new_owner_ids)
 
-    # TODO: check if docker container is running
+    # argparse does not allow you to easily assign optional arguments
+    # to positional arguments. We implemented this functionality in
+    # valid_args, which throws an error for conflicting arguments.
+    valid_args(args)
 
-    # Entry point into code responsible for geem_package table handling
-    main(args)
+    # Entry point into code responsible for geem_package handling
+    # main(args)

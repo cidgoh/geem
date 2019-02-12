@@ -203,13 +203,24 @@ def valid_tsv_file_name(input):
         raise ArgumentTypeError(e)
 
 
-def configure_parser(parser):
-    """TODO: ..."""
-    subparsers = parser.add_subparsers(help="-h, or --help for more details")
+def create_parser():
+    """Configures command-line parser for this script using argparse.
 
+    :return: Parser with defined arguments, formatting and help
+             messages
+    :rtype: ArgumentParser
+    """
+    # Create new parser
+    new_parser = ArgumentParser()
+    # Add subparser capability to new_parser
+    subparsers = new_parser.add_subparsers(help="-h, or --help for details on "
+                                                "each argument")
+
+    # Add "backup" subparser
     backup_parser = subparsers.add_parser("backup",
                                           help="copy geem_package content to "
                                                "a tsv file")
+    # Add accepted arguments to "backup" subparser
     backup_parser.add_argument("file_name",
                                type=valid_tsv_file_name,
                                help="tsv file to copy contents to")
@@ -217,19 +228,25 @@ def configure_parser(parser):
                                nargs="+", type=int,
                                help="packages (by id) to copy (default: all "
                                     "packages)")
+    # Set default function to be called with "backup" arguments
     backup_parser.set_defaults(func=backup_packages)
 
+    # Add "delete" subparser
     delete_parser = subparsers.add_parser("delete",
                                           help="delete geem_package contents")
+    # Add accepted arguments to "delete" subparser
     delete_parser.add_argument("-p", "--packages",
                                nargs="+", type=int,
                                help="packages (by id) to delete (default: all "
                                     "packages)")
+    # Set default function to be called with "delete" arguments
     delete_parser.set_defaults(func=delete_packages)
 
+    # Add "insert" subparser
     insert_parser = subparsers.add_parser("insert",
                                           help="copy content from a tsv file "
                                                "to geem_package")
+    # Add accepted arguments to "insert" subparser
     insert_parser.add_argument("file_name",
                                type=valid_tsv_file_name,
                                help="tsv file to copy content from")
@@ -247,17 +264,17 @@ def configure_parser(parser):
                                nargs="+", type=int,
                                help="packaged (by id) to insert (default: all "
                                     "packages)")
+    # Set default argument to be called with "insert" arguments
     insert_parser.set_defaults(func=insert_packages)
 
-    return parser
+    return new_parser
 
 
 # Entry point into script
 if __name__ == "__main__":
-    # Set up parser for command-line arguments
-    parser = ArgumentParser()
-    configure_parser(parser)
-    # User-inputted command-line arguments
+    # Create parser for command-line arguments
+    parser = create_parser()
+    # Parse user-inputted command-line arguments
     args = parser.parse_args()
     # Call default function for user-inputted args
     args.func(args)

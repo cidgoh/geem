@@ -15,14 +15,13 @@ reference to all options and arguments for the sophisticated user.
 ...define geem_package handling
 
 TODO:
-    * allow user to set owner_id upon merge
     * check if docker container is running
-    * docstrings
+    * docstrings/better commenting
+    * replace global variables with getter functions
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
     * remove shell=True from check_call
-    * replace global variables with getter functions
     * better abstract the process of calling commands between clear,
       restore and merge
 """
@@ -95,7 +94,7 @@ def delete_packages(packages):
     call(command_template % delete_command)
 
 
-def insert_packages(file_name, packages, keep_ids, update_owner_ids=False):
+def insert_packages(file_name, packages, keep_ids, new_owner_ids):
     """TODO: ..."""
     # Drop temporary table tmp_table from previous, failed inserts
     call(command_template % "drop table if exists tmp_table")
@@ -137,10 +136,13 @@ def insert_packages(file_name, packages, keep_ids, update_owner_ids=False):
             # Update id's in tmp_table
             call(command_template % update_command)
 
-        # User wants to update owner_id's
-        if update_owner_ids is True:
-            # Set tmp_table owner_id's to NULL for now
-            call(command_template % "update tmp_table set owner_id = NULL")
+        # User specified new owner_id values for the packages to insert
+        if new_owner_ids is not None:
+            # Postgres command for setting owner_id's to new_owner_ids
+            update_command = "update tmp_table set owner_id = "
+            update_command = update_command + str(new_owner_ids)
+            # Update owner_id's in tmp_table
+            call(command_template % update_command)
 
         # postgres command for inserting tmp_table into geem_package
         insert_command = "insert into geem_package select * from tmp_table"
@@ -182,6 +184,8 @@ def main(args):
     packages = args.packages
     # keep_ids flag (may be True for "insert"; otherwise False)
     keep_ids = args.keep_ids
+    # new_owner_ids flag (may be an int for "insert"; otherwise None)
+    new_owner_ids = args.new_owner_ids
 
     if db_operation == "backup":
         # Backup local geem_package table to file_name
@@ -191,7 +195,7 @@ def main(args):
         delete_packages(packages)
     elif db_operation == "insert":
         # Insert file_name contents with local geem_package table
-        insert_packages(file_name, packages, keep_ids, True)
+        insert_packages(file_name, packages, keep_ids, new_owner_ids)
     elif db_operation == "restore":
         # We must first delete packages from the local geem_package
         # table that have id's conflicting with the packages to be
@@ -201,13 +205,13 @@ def main(args):
         # into the local geem_package table. There will be no
         # conflicts, with the id and owner_id of packages to be
         # restored remaining the same.
-        insert_packages(file_name, packages, True)
+        insert_packages(file_name, packages, True, None)
 
     # Sync local geem_package_seq_id to corresponding changes
     sync_geem_package_id_seq()
 
 
-def valid_args(db_operation, file_name, keep_ids):
+def valid_args(db_operation, file_name, keep_ids, new_owner_ids):
     """TODO: ..."""
     # If db_operation is delete, file_name should be None
     if db_operation == "delete":
@@ -228,6 +232,26 @@ def valid_args(db_operation, file_name, keep_ids):
     if keep_ids is True:
         if db_operation != "insert":
             raise ValueError("--keep_ids flag is only used by insert")
+
+    # If new_owner_ids is not None, db_operation should be insert
+    if new_owner_ids is not None:
+        if db_operation != "insert":
+            raise ValueError("--new_owner_ids flag is only used by insert")
+
+
+def valid_owner_id(input):
+    # Return "NULL" if no input was specified
+    if input == "":
+        return "NULL"
+
+    # Parse int (will throw ValueError if input is not an int)
+    owner_id = int(input)
+    # Make sure owner_id is >= 1
+    if owner_id >= 1:
+        return owner_id
+    else:
+        # Invalid owner_id
+        raise ValueError()
 
 
 def valid_tsv_file_name(input):
@@ -255,19 +279,20 @@ def set_up_parser(parser):
     parser.add_argument("-f", "--file_name",
                         type=valid_tsv_file_name,
                         help="Required for every operation except delete. "
-                             "Specify .tsv file to perform a backup, insert "
-                             "or restore on.")
+                             "Requires one additional argument.Specify .tsv "
+                             "file to perform a backup, insert or restore on.")
     # Add packages flag
     parser.add_argument("-p", "--packages",
                         nargs="+", type=int,
-                        help="Optional flag for every operation. Specify "
+                        help="Optional flag for every operation. Requires 1 "
+                             "or more additional arguments.Specify "
                              "space-delimited list of id's for packages to "
                              "perform backup, delete, insert or restore on. "
                              "If this flag is not specified, the action will "
                              "be performed on all packages.")
     # Add keep_ids flag
     parser.add_argument("-k", "--keep_ids",
-                        action='store_true',
+                        action="store_true",
                         help="Optional flag for insert. No additional "
                              "arguments are needed. When this flag is "
                              "specified, the id's of the inserted packages "
@@ -277,6 +302,17 @@ def set_up_parser(parser):
                              "unsuccessful insert. Note that restore also "
                              "preserves id's, but automatically deletes "
                              "existing packages to resolve conflicts.")
+    # Add new_owner_ids flag
+    parser.add_argument("-n", "--new_owner_ids",
+                        nargs="?", type=valid_owner_id, const="",
+                        help="Optional flag for insert. Requires 0 or 1 "
+                             "additional arguments. When this flag is "
+                             "specified, the owner_id's of the inserted "
+                             "packages will be updated. If no additional "
+                             "argument is provided, the new owner_id's will "
+                             "be set to NULL. If an argument is provided, the "
+                             "new owner_id's will be set to that value.")
+
     # Change "positional arguments" in help message to "operations"
     parser._positionals.title = "operations"
     # Change "optional arguments" in help message to "flag arguments"
@@ -295,7 +331,8 @@ if __name__ == "__main__":
     # We must provide additional validation of args that was
     # unachievable in set_up_parser via native argparse functionality.
     # An error is thrown here if args fails to validate.
-    valid_args(args.db_operation, args.file_name, args.keep_ids)
+    valid_args(args.db_operation, args.file_name, args.keep_ids,
+               args.new_owner_ids)
 
     # TODO: check if docker container is running
 

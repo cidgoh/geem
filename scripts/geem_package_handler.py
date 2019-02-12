@@ -78,6 +78,11 @@ def backup_packages(args):
 
 def insert_packages(args):
     """TODO: ..."""
+    # Raise error if file to insert packages from does not exist
+    if not exists(backup_dir + "/" + args.file_name):
+        error_message = "Unable to perform insert; %s does not exist"
+        raise ValueError(error_message % args.file_name)
+
     # Drop temporary table tmp_table from previous, failed inserts
     call(command_template % "drop table if exists tmp_table")
     # Create temporary table tmp_table
@@ -200,39 +205,48 @@ def valid_tsv_file_name(input):
 
 def configure_parser(parser):
     """TODO: ..."""
-    subparsers = parser.add_subparsers(help="-h, --help for more details")
+    subparsers = parser.add_subparsers(help="-h, or --help for more details")
 
     backup_parser = subparsers.add_parser("backup",
-                                          help="...")
+                                          help="copy geem_package content to "
+                                               "a tsv file")
     backup_parser.add_argument("file_name",
                                type=valid_tsv_file_name,
-                               help="...")
+                               help="tsv file to copy contents to")
     backup_parser.add_argument("-p", "--packages",
                                nargs="+", type=int,
-                               help="...")
+                               help="packages (by id) to copy (default: all "
+                                    "packages)")
     backup_parser.set_defaults(func=backup_packages)
 
     delete_parser = subparsers.add_parser("delete",
-                                          help="...")
+                                          help="delete geem_package contents")
     delete_parser.add_argument("-p", "--packages",
                                nargs="+", type=int,
-                               help="...")
+                               help="packages (by id) to delete (default: all "
+                                    "packages)")
     delete_parser.set_defaults(func=delete_packages)
 
     insert_parser = subparsers.add_parser("insert",
-                                          help="...")
+                                          help="copy content from a tsv file "
+                                               "to geem_package")
     insert_parser.add_argument("file_name",
                                type=valid_tsv_file_name,
-                               help="...")
+                               help="tsv file to copy content from")
     insert_parser.add_argument("-k", "--keep_ids",
                                action="store_true",
-                               help="...")
+                               help="do not change the id of inserted "
+                                    "packages to the next values of the "
+                                    "geem_package id column sequence "
+                                    "(warning: may cause conflicts)")
     insert_parser.add_argument("-n", "--new_owner_ids",
                                nargs="?", type=valid_owner_id, const="",
-                               help="...")
+                               help="change the owner_id of inserted packages "
+                                    "to a specified value (default: null)")
     insert_parser.add_argument("-p", "--packages",
                                nargs="+", type=int,
-                               help="...")
+                               help="packaged (by id) to insert (default: all "
+                                    "packages)")
     insert_parser.set_defaults(func=insert_packages)
 
     return parser

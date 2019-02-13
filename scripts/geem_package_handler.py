@@ -127,7 +127,7 @@ def insert_packages(args):
         if args.new_owner_ids is not None:
             # Postgres command for setting owner_id's to new_owner_ids
             update_command = "update tmp_table set owner_id = "
-            update_command = update_command + str(args.new_owner_ids)
+            update_command = update_command + args.new_owner_ids
             # Update owner_id's in tmp_table
             call(command_template % update_command)
 
@@ -174,31 +174,48 @@ def sync_geem_package_id_seq():
     call(command_template % set_next_val)
 
 
-def valid_owner_id(input):
-    # Return "NULL" if no input was specified
-    if input == "":
-        return "NULL"
+def valid_owner_id(new_owner_ids):
+    """Validates new_owner_ids as a null or natural number.
 
-    # Parse int (will throw ValueError if input is not an int)
-    owner_id = int(input)
-    # Make sure owner_id is >= 1
-    if owner_id >= 1:
-        return owner_id
+    This function does not validate new_owner_ids as a legal value in
+    geem_package, as it does not determine whether new_owner_ids
+    corresponds to an id in auth_user.
+
+    :param str new_owner_ids: User-inputted new_owner_ids argument
+    :return: *potential* owner_id value for geem_package
+    :rtype: str
+    :raises ArgumentTypeError: If new_owner_ids is not valid
+    """
+    # Check if new_owner_ids == "null"
+    if new_owner_ids == "null":
+        # Return validated new_owner_ids
+        return new_owner_ids
+
+    # Check if new_owner_ids is an integer by attempting to parse an
+    # integer from new_owner_ids.
+    try:
+        parsed_owner_id = int(new_owner_ids)
+    except ValueError:
+        raise ArgumentTypeError("must be a natural number")
+
+    # Check if the parsed integer is a natural number
+    if parsed_owner_id >= 1:
+        # Return validated new_owner_ids
+        return new_owner_ids
     else:
-        # Invalid owner_id
-        raise ValueError()
+        raise ArgumentTypeError("must be a natural number")
 
 
 def valid_tsv_file_name(file_name):
-    """Determines whether file_name is a valid file name.
+    """Validates file_name as a legal tsv file name.
 
-    Will add a ".tsv" suffix to file_name, if one does not already
-    exist.
+    Will not throw an error if a ".tsv" extension is missing, but will
+    append a ".tsv" suffix to file_name if necessary.
 
     :param str file_name: User-inputted file_name argument
-    :return: file_name with guaranteed ".tsv" suffix
+    :return: file_name with potentially appended ".tsv" suffix
     :rtype: str
-    :raises ArgumentTypeError: If file_name is not a valid file name
+    :raises ArgumentTypeError: If file_name is not valid
     """
     # Add ".tsv" suffix to file_name if needed
     if not file_name.endswith(".tsv"):
@@ -207,9 +224,10 @@ def valid_tsv_file_name(file_name):
     # Check if file_name is a valid file_name.
     # `Source. <https://stackoverflow.com/a/6768826>`_
     if match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
+        # Return validated file_name
         return file_name
     else:
-        raise ArgumentTypeError("Not a valid file name: " + file_name)
+        raise ArgumentTypeError(file_name + " is not a valid file name")
 
 
 def create_parser():
@@ -267,7 +285,7 @@ def create_parser():
                                     "geem_package id column sequence "
                                     "(warning: may cause conflicts)")
     insert_parser.add_argument("-n", "--new_owner_ids",
-                               nargs="?", type=valid_owner_id, const="",
+                               nargs="?", type=valid_owner_id, const="null",
                                help="change the owner_id of inserted packages "
                                     "to a specified value (default: null)")
     insert_parser.add_argument("-p", "--packages",

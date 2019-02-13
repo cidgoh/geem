@@ -67,31 +67,54 @@ def psqlize_int_list(list):
     """TODO: ..."""
     return"(%s)" % ",".join(map(str, list))
 
+
 def backup_packages(args):
-    """TODO: ..."""
-    # Make backup directory if one does not exist
+    """Follow command-line arguments to backup geem_package rows.
+
+    *Command-line arguments*
+        file_name
+            * str
+            * tsv file to copy rows to
+        packages
+            * list[int] or None
+            * Specify rows (by id) to backup
+
+    **Requires the docker-compose db container to be running.**
+
+    **Will create a new file named file_name, or overwrite on that
+    already exists.**
+
+    :param argparse.Namespace args: Contains command-line arguments
+    :raises CalledProcessError: If a docker command fails to execute
+    """
+    # Create backup directory if it does not already exist
     if not exists(backup_dir):
         makedirs(backup_dir)
 
     # User did not specify packages to backup
     if args.packages is None:
-        # postgres command for copying geem_package table to a tsv file
-        copy_command =\
-            "\\copy geem_package to stdout delimiter '\t' csv header"
+        # postgres command for copying all rows to a stdout with
+        # tab-space delimitation.
+        copy_command = "\\copy geem_package to stdout delimiter '\t'"
     # User specified packages to backup
     else:
-        # String representation of packages, with soft brackets
-        packages_string = "(%s)" % ",".join(map(str, args.packages))
-        # postgres command for selecting specified rows
-        specified_rows =\
-            "(select * from geem_package where id in %s)" % packages_string
-        # postgres command for copying specified rows to a tsv file
-        copy_command =\
-            "\\copy (%s) to stdout delimiter '\t' csv header" % specified_rows
+        # postgres command for selecting the specified rows in
+        # geem_package.
+        specified_rows = "(select * from geem_package where id in %s)"
+        specified_rows = specified_rows % psqlize_int_list(args.packages)
+        # postgres command for copying the specified rows to a stdout
+        # with tab-space delimitation.
+        copy_command = "\\copy (%s) to stdout delimiter '\t'" % specified_rows
 
-    # Run copy_command in db service docker container
-    call(command_template % copy_command
-         # Specify .tsv file path for stdout in shell command
+    # Suffix required to allow the geem_package header to be copied as
+    # well. "csv" will not render a comma-delimited output.
+    copy_command = copy_command + " csv header"
+
+    # Call copy_command inside the db container, with a special suffix
+    # required to supply the path for stdout.
+    call(docker_command(copy_command)
+         # Supply stdout with a path to file_name. Creates or
+         # overwrites "{args.file_name}.tsv".
          + " > %s/%s" % (backup_dir, args.file_name))
 
 
@@ -106,7 +129,7 @@ def insert_packages(args):
               get_backup_dir for details.
         packages
             * list[int] or None
-            * Specify rows (by id) to delete
+            * Specify rows (by id) to insert
         keep_ids
             * bool
             * Specify whether to preserve the id of inserted rows
@@ -116,8 +139,7 @@ def insert_packages(args):
 
     **Requires the docker-compose db container to be running.**
 
-    :param argparse.Namespace args: Object containing command-line
-                                    arguments as attributes
+    :param argparse.Namespace args: Contains command-line arguments
     :raises CalledProcessError: If a docker command fails to execute
     :raises ValueError: If file_name does not exist as a backup
     """
@@ -126,9 +148,10 @@ def insert_packages(args):
         error_message = "Unable to perform insert; %s does not exist"
         raise ValueError(error_message % args.file_name)
 
-    # Drop table tmp_table that may exist from from previous, failed
-    # calls to this function.
-    call(command_template % "drop table if exists tmp_table")
+    # Call the postgres command to drop tmp_table, from inside the
+    # db container, if it exists from previous, failed calls to this
+    # function.
+    call(docker_command("drop table if exists tmp_table"))
     # postgres command for creating a table named "tmp_table" with the
     # same scheme as geem_package.
     create_command = "create table tmp_table " \
@@ -140,7 +163,7 @@ def insert_packages(args):
         # postgres command for copying rows from a stdin into tmp_table
         copy_command = "\\copy tmp_table from stdin delimiter '\t' csv header"
         # Call copy_command inside the db container, with a special
-        # suffix required to supply stdin.
+        # suffix required to supply the path for stdin.
         call(docker_command(copy_command)
              # Supply stdin with the path to file_name
              + " < %s/%s" % (get_backup_dir(), args.file_name))
@@ -174,12 +197,12 @@ def insert_packages(args):
             # postgres command for setting owner_id's to new_owner_ids
             update_command = "update tmp_table set owner_id = "
             update_command = update_command + args.new_owner_ids
-            # Call docker_command inside the db container
+            # Call update_command inside the db container
             call(docker_command(update_command))
 
         # postgres command for copying tmp_table into geem_package
         insert_command = "insert into geem_package select * from tmp_table"
-        # Call insert_command in the db container
+        # Call insert_command inside the db container
         call(docker_command(insert_command))
     except CalledProcessError as e:
         warn("Failed to insert data. Table tmp_table was inserted into "
@@ -206,8 +229,7 @@ def delete_packages(args):
 
     **Requires the docker-compose db container to be running.**
 
-    :param argparse.Namespace args: Object containing command-line
-                                    arguments as attributes
+    :param argparse.Namespace args: Contains command-line arguments
     :raises CalledProcessError: If a docker command fails to execute
     """
     # User did not specify packages to delete

@@ -15,12 +15,18 @@ reference to all options and arguments for the sophisticated user.
 ...assumes you do not have to use sudo with docker
 ...define geem_package handling
 
-TODO:
-    * docstrings/better commenting
+**TODO:**
+    * script docstring
+
     * write tests
-        * will this work on Mac?
-        * will this work on Windows? (Probably not)
+
+      * will this work on Mac?
+      * will this work on Windows? (Probably not)
+
     * remove shell=True from check_call
+
+      * Then, we can remove this function
+
     * better abstract the process of calling commands between backup,
       insert and delete
 """
@@ -39,7 +45,7 @@ def get_backup_dir():
     calls to backup and insert will move geem_package content for your
     db container.
 
-    :return: absolute path
+    :return: Absolute path
     :rtype: str
     """
     # Return a directory in the project root
@@ -50,7 +56,7 @@ def docker_command(command):
     """Format command as needed to run inside your db docker container.
 
     :param str command: postgres command
-    :return: terminal command
+    :return: Terminal command
     :rtype: str
     """
     # Template for executing commands inside the db container
@@ -62,7 +68,10 @@ def docker_command(command):
 
 
 def call(command):
-    """TODO: ..."""
+    """Runs command in your terminal.
+
+    :param str command: Terminal command
+    """
     # TODO: find out how to do this without shell=True. When we do
     #       this, we can get rid of this function.
     check_call(command, shell=True)
@@ -74,8 +83,8 @@ def psqlize_int_list(int_list):
     `See postgres documentation for what consistutes as an array.
     <https://www.postgresql.org/docs/10/arrays.html#ARRAYS-INPUT>`_
 
-    :param list[int] int_list: list to format
-    :return: formatted list
+    :param list[int] int_list: List to format
+    :return: Formatted list
     :rtype: str
     """
     # Map elements of int_list into strings, and join them into a

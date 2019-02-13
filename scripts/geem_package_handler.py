@@ -58,6 +58,10 @@ def call(command):
     check_call(command, shell=True)
 
 
+def psqlize_int_list(list):
+    """TODO: ..."""
+    return"(%s)" % ",".join(map(str, list))
+
 def backup_packages(args):
     """TODO: ..."""
     # Make backup directory if one does not exist
@@ -155,20 +159,30 @@ def insert_packages(args):
 
 
 def delete_packages(args):
-    """TODO: ..."""
+    """Follow command-line arguments to delete rows in geem_package.
+
+    *Command-line arguments*
+        packages
+            * list[int] or None
+            * Specify rows (by id) to delete
+
+    :param argparse.Namespace args: Object containing command-line
+                                    arguments as attributes
+    :raises CalledProcessError: If the docker command fails to execute
+    """
     # User did not specify packages to delete
     if args.packages is None:
-        # postgres command to empty geem_package table quickly
+        # postgres command to delete all rows in geem_package
         delete_command = "truncate table geem_package"
     # User specified packages to delete
     else:
-        # String representation of packages, with soft brackets
-        packages_string = "(%s)" % ",".join(map(str, args.packages))
-        # postgres command for deleting specified rows
-        delete_command =\
-            "delete from geem_package where id in " + packages_string
+        # Convert packages to a postgres command-friendly list format
+        psqlized_packages = psqlize_int_list(args.packages)
+        # postgres command to delete specified rows from geem_package
+        delete_command = "delete from geem_package where id in "
+        delete_command = delete_command + psqlized_packages
 
-    # Run delete_command in db service docker container
+    # Call delete_command in db container
     call(command_template % delete_command)
 
 
@@ -176,11 +190,13 @@ def sync_geem_package_id_seq():
     """Synchronize the sequence of geem_package's id column.
 
     Sets the current value of the sequence to the maximum value in the
-    geem_package id column. Requires the docker-compose db container to
-    be running.
+    geem_package id column, by executing a command in the
+    docker-compose db container. Useful when the geem_package id
+    sequence in no longer synchronized with the table data.
 
-    Useful when the geem_package id sequence in no longer synchronized
-    with the data.
+    Requires the docker_db container to be running.
+
+    :raises CalledProcessError: If the docker command fails to execute
     """
     # Construct the postgres command for synchronizing the geem_package
     # id sequence. `Source. <https://stackoverflow.com/a/3698777>`_

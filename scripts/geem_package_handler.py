@@ -33,7 +33,16 @@ from subprocess import CalledProcessError, check_call
 from warnings import warn
 
 def get_backup_dir():
-    """TODO:..."""
+    """Get absolute path to your backup directory.
+
+    Your backup directory is defined by this function, and is where
+    calls to backup and insert will move geem_package content for your
+    db container.
+
+    :return: absolute path
+    :rtype: str
+    """
+    # Return a directory in the project root
     return dirname(dirname(abspath(__file__))) + "/geem_package_backups"
 
 

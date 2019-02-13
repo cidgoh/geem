@@ -164,9 +164,9 @@ def delete_packages(args):
 
 def sync_geem_package_id_seq():
     """TODO: ..."""
-    # https://stackoverflow.com/a/3698777
+    # `Source <https://stackoverflow.com/a/3698777>`_
     max_id = "coalesce(MAX(id), 0) + 1"
-    geem_package_id_seq = "pg_gt_serial_sequence('geem_package', 'id')"
+    geem_package_id_seq = "pg_get_serial_sequence('geem_package', 'id')"
     set_next_val = "select setval(%s, %s, false) from geem_package"
     set_next_val = set_next_val % (geem_package_id_seq, max_id)
 
@@ -189,25 +189,35 @@ def valid_owner_id(input):
         raise ValueError()
 
 
-def valid_tsv_file_name(input):
-    """TODO: ..."""
-    # We allow users to specify files without the ".tsv" extension, but
-    # this line will ensure file_name ends with a ".tsv"
-    file_name = input.split(".tsv")[0] + ".tsv"
+def valid_tsv_file_name(file_name):
+    """Determines whether file_name is a valid file name.
 
-    # Check if valid file name
+    Will add a ".tsv" suffix to file_name, if one does not already
+    exist.
+
+    :param str file_name: User-inputted file_name argument
+    :return: file_name with guaranteed ".tsv" suffix
+    :rtype: str
+    :raises ArgumentTypeError: If file_name is not a valid file name
+    """
+    # Add ".tsv" suffix to file_name if needed
+    if not file_name.endswith(".tsv"):
+        file_name = file_name + ".tsv"
+
+    # Check if file_name is a valid file_name.
+    # `Source. <https://stackoverflow.com/a/6768826>`_
     if match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
         return file_name
     else:
-        e = "Not a valid file name: %s" % file_name
-        raise ArgumentTypeError(e)
+        raise ArgumentTypeError("Not a valid file name: " + file_name)
 
 
 def create_parser():
     """Configures command-line parser for this script using argparse.
 
-    :return: Parser with defined arguments, formatting and help
-             messages
+    Configures accepted arguments, formatting and help messages.
+
+    :return: Configured parser
     :rtype: ArgumentParser
     """
     # Create new parser

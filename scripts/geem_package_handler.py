@@ -42,6 +42,11 @@ command_template = 'docker-compose exec -T db psql ' \
                    '--command "%s"'
 
 
+def get_backup_dir():
+    """TODO:..."""
+    return dirname(dirname(abspath(__file__))) + "/geem_package_backups"
+
+
 def docker_command(command):
     """TODO:..."""
     # Template for executing commands in docker database
@@ -91,70 +96,103 @@ def backup_packages(args):
 
 
 def insert_packages(args):
-    """TODO: ..."""
+    """Follow command-line arguments to insert rows into geem_package.
+
+    *Command-line arguments*
+        file_name
+            * str
+            * tsv file to copy rows from for insertion
+            * **Must exist as a backup in your backup directory**. See
+              get_backup_dir for details.
+        packages
+            * list[int] or None
+            * Specify rows (by id) to delete
+        keep_ids
+            * bool
+            * Specify whether to preserve the id of inserted rows
+        new_owner_ids
+            * int or None
+            * Specify a new owner_id for inserted rows
+
+    **Requires the docker-compose db container to be running.**
+
+    :param argparse.Namespace args: Object containing command-line
+                                    arguments as attributes
+    :raises CalledProcessError: If a docker command fails to execute
+    :raises ValueError: If file_name does not exist as a backup
+    """
     # Raise error if file to insert packages from does not exist
     if not exists(backup_dir + "/" + args.file_name):
         error_message = "Unable to perform insert; %s does not exist"
         raise ValueError(error_message % args.file_name)
 
-    # Drop temporary table tmp_table from previous, failed inserts
+    # Drop table tmp_table that may exist from from previous, failed
+    # calls to this function.
     call(command_template % "drop table if exists tmp_table")
-    # Create temporary table tmp_table
-    create_command =\
-        "create table tmp_table as select * from geem_package with no data"
-    call(command_template % create_command)
+    # postgres command for creating a table named "tmp_table" with the
+    # same scheme as geem_package.
+    create_command = "create table tmp_table " \
+                     "as select * from geem_package with no data"
+    # Call create_command inside the db container
+    call(docker_command(create_command))
 
     try:
-        # Populate tmp_table with file_name contents
+        # postgres command for copying rows from a stdin into tmp_table
         copy_command = "\\copy tmp_table from stdin delimiter '\t' csv header"
-        call(command_template % copy_command
-             # Supply stdin with .tsv file path
-             + " < %s/%s" % (backup_dir, args.file_name))
+        # Call copy_command inside the db container, with a special
+        # suffix required to supply stdin.
+        call(docker_command(copy_command)
+             # Supply stdin with the path to file_name
+             + " < %s/%s" % (get_backup_dir(), args.file_name))
 
         # User specified packages to insert
         if args.packages is not None:
-            # String representation of packages, with soft brackets
-            packages_string = "(%s)" % ",".join(map(str, args.packages))
-            # postgres command for deleting non-specified rows
-            delete_command =\
-                "delete from tmp_table where id not in " + packages_string
-            # Delete specified rows from tmp_table
-            call(command_template % delete_command)
+            # Convert packages to a postgres command-friendly list format
+            psqlized_packages = psqlize_int_list(args.packages)
+            # postgres command to delete rows that were not specified
+            # from tmp_table.
+            delete_command = "delete from tmp_table where id not in "
+            delete_command = delete_command + psqlize_int_list(args.packages)
+            # Call delete_command inside the db container
+            call(docker_command(delete_command))
 
-        # The user wants to update the id of packages to be inserted.
-        # This guarantees no conflicts will occur, as no package to be
-        # inserted will have an id already assigned to an existing
-        # package in the local geem_package table.
+        # User does not want to preserve the id of inserted packages
         if args.keep_ids is False:
-            # geem_package id column sequence name
+            # postgres command for retrieving the name assigned to
+            # geem_package's id sequence.
             geem_package_id_seq = "pg_get_serial_sequence('%s', '%s')"
             geem_package_id_seq = geem_package_id_seq % ("geem_package", "id")
-            # This is the postgres command for updating the id's in
-            # tmp_table to the next available id's in the local
-            # geem_package table.
+            # postgres command for updating the id's in tmp_table to
+            # the next available id's in geem_package_id_seq.
             update_command = "update tmp_table set id = nextval(%s)"
             update_command = update_command % geem_package_id_seq
-            # Update id's in tmp_table
-            call(command_template % update_command)
+            # Call update_command inside the db container
+            call(docker_command(update_command))
 
-        # User specified new owner_id values for the packages to insert
+        # User specified a new owner_id value for inserted packages
         if args.new_owner_ids is not None:
-            # Postgres command for setting owner_id's to new_owner_ids
+            # postgres command for setting owner_id's to new_owner_ids
             update_command = "update tmp_table set owner_id = "
             update_command = update_command + args.new_owner_ids
-            # Update owner_id's in tmp_table
-            call(command_template % update_command)
+            # Call docker_command inside the db container
+            call(docker_command(update_command))
 
-        # postgres command for inserting tmp_table into geem_package
+        # postgres command for copying tmp_table into geem_package
         insert_command = "insert into geem_package select * from tmp_table"
-        # Insert tmp_table contents into local geem_package table
-        call(command_template % insert_command)
-
-        # Drop temporary table
-        call(command_template % "drop table tmp_table")
+        # Call insert_command in the db container
+        call(docker_command(insert_command))
     except CalledProcessError as e:
         warn("Failed to insert data. Table tmp_table was inserted into "
-             "database, but not dropped.")
+             "your db container, but not dropped.")
+        raise e
+
+    try:
+        # Call the postgres command to drop tmp_table, from inside the
+        # db container.
+        call(docker_command("drop table tmp_table"))
+    except CalledProcessError as e:
+        warn("Table tmp_table was inserted into your db container, but not "
+             "dropped.")
         raise e
 
 
@@ -166,9 +204,11 @@ def delete_packages(args):
             * list[int] or None
             * Specify rows (by id) to delete
 
+    **Requires the docker-compose db container to be running.**
+
     :param argparse.Namespace args: Object containing command-line
                                     arguments as attributes
-    :raises CalledProcessError: If the docker command fails to execute
+    :raises CalledProcessError: If a docker command fails to execute
     """
     # User did not specify packages to delete
     if args.packages is None:
@@ -182,8 +222,8 @@ def delete_packages(args):
         delete_command = "delete from geem_package where id in "
         delete_command = delete_command + psqlized_packages
 
-    # Call delete_command in db container
-    call(command_template % delete_command)
+    # Call delete_command inside the db container
+    call(docker_command(delete_command))
 
 
 def sync_geem_package_id_seq():
@@ -194,9 +234,9 @@ def sync_geem_package_id_seq():
     docker-compose db container. Useful when the geem_package id
     sequence in no longer synchronized with the table data.
 
-    Requires the docker_db container to be running.
+    **Requires the docker-compose db container to be running.**
 
-    :raises CalledProcessError: If the docker command fails to execute
+    :raises CalledProcessError: If a docker command fails to execute
     """
     # Construct the postgres command for synchronizing the geem_package
     # id sequence. `Source. <https://stackoverflow.com/a/3698777>`_
@@ -205,7 +245,7 @@ def sync_geem_package_id_seq():
     set_next_val = "select setval(%s, %s, false) from geem_package"
     set_next_val = set_next_val % (geem_package_id_seq, max_id)
 
-    # Call set_next_val in db container
+    # Call set_next_val inside the db container
     call(docker_command(set_next_val))
 
 
@@ -338,9 +378,9 @@ if __name__ == "__main__":
     # Create parser for command-line arguments
     parser = create_parser()
     # Parse user-inputted command-line arguments
-    args = parser.parse_args()
-    # Call default function for user-inputted args
-    args.func(args)
+    arguments = parser.parse_args()
+    # Call default function for user-inputted arguments
+    arguments.func(arguments)
     try:
         # The sequence of geem_package's id column does not
         # automatically change in response to the changes performed by

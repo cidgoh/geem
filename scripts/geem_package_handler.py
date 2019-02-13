@@ -53,9 +53,20 @@ def call(command):
     check_call(command, shell=True)
 
 
-def psqlize_int_list(list):
-    """TODO: ..."""
-    return"(%s)" % ",".join(map(str, list))
+def psqlize_int_list(int_list):
+    """Formats int_list as a postgres array.
+
+    `See postgres documentation for what consistutes as an array.
+    <https://www.postgresql.org/docs/10/arrays.html#ARRAYS-INPUT>`_
+
+    :param list[int] int_list: list to format
+    :return: formatted list
+    :rtype: str
+    """
+    # Map elements of int_list into strings, and join them into a
+    # single comma-delimited string. Enclose the final result in soft
+    # brackets, and return.
+    return "(%s)" % ",".join(map(str, int_list))
 
 
 def backup_packages(args):

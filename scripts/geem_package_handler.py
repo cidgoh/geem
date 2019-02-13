@@ -42,9 +42,19 @@ command_template = 'docker-compose exec -T db psql ' \
                    '--command "%s"'
 
 
+def docker_command(command):
+    """TODO:..."""
+    # Template for executing commands in docker database
+    command_template = 'docker-compose exec -T db psql ' \
+                       '--username postgres --dbname postgres ' \
+                       '--command "%s"'
+    return command_template % command
+
+
 def call(command):
     """TODO: ..."""
-    # TODO: find out how to do this without shell=True
+    # TODO: find out how to do this without shell=True. When we do
+    #       this, we can get rid of this function.
     check_call(command, shell=True)
 
 
@@ -163,23 +173,32 @@ def delete_packages(args):
 
 
 def sync_geem_package_id_seq():
-    """TODO: ..."""
-    # `Source <https://stackoverflow.com/a/3698777>`_
+    """Synchronize the sequence of geem_package's id column.
+
+    Sets the current value of the sequence to the maximum value in the
+    geem_package id column. Requires the docker-compose db container to
+    be running.
+
+    Useful when the geem_package id sequence in no longer synchronized
+    with the data.
+    """
+    # Construct the postgres command for synchronizing the geem_package
+    # id sequence. `Source. <https://stackoverflow.com/a/3698777>`_
     max_id = "coalesce(MAX(id), 0) + 1"
     geem_package_id_seq = "pg_get_serial_sequence('geem_package', 'id')"
     set_next_val = "select setval(%s, %s, false) from geem_package"
     set_next_val = set_next_val % (geem_package_id_seq, max_id)
 
-    # Set next value in geem_package_id_seq with above commands
-    call(command_template % set_next_val)
+    # Call set_next_val in db container
+    call(docker_command(set_next_val))
 
 
 def valid_owner_id(new_owner_ids):
     """Validates new_owner_ids as a null or natural number.
 
-    This function does not validate new_owner_ids as a legal value in
-    geem_package, as it does not determine whether new_owner_ids
-    corresponds to an id in auth_user.
+    Does not validate new_owner_ids as a legal value in geem_package,
+    as it does not determine whether new_owner_ids corresponds to an id
+    in auth_user.
 
     :param str new_owner_ids: User-inputted new_owner_ids argument
     :return: *potential* owner_id value for geem_package
@@ -307,7 +326,9 @@ if __name__ == "__main__":
     # Call default function for user-inputted args
     args.func(args)
     try:
-        # Adjust sequence of geem_package id column to reflect changes
+        # The sequence of geem_package's id column does not
+        # automatically change in response to the changes performed by
+        # this script's default functions. So, we must do it manually.
         sync_geem_package_id_seq()
     except CalledProcessError as e:
         warn("geem_package id sequence was not synchronized")

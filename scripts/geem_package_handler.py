@@ -17,7 +17,6 @@ reference to all options and arguments for the sophisticated user.
 
 TODO:
     * docstrings/better commenting
-    * replace global variables with getter functions
     * write tests
         * will this work on Mac?
         * will this work on Windows? (Probably not)
@@ -32,15 +31,6 @@ from os import makedirs
 from re import match
 from subprocess import CalledProcessError, check_call
 from warnings import warn
-
-# TODO: replace global variables with getter functions?
-# Directory to place backed up geem_package tables
-backup_dir = dirname(dirname(abspath(__file__))) + "/geem_package_backups"
-# Template for executing commands in docker database
-command_template = 'docker-compose exec -T db psql ' \
-                   '--username postgres --dbname postgres ' \
-                   '--command "%s"'
-
 
 def get_backup_dir():
     """TODO:..."""
@@ -88,8 +78,8 @@ def backup_packages(args):
     :raises CalledProcessError: If a docker command fails to execute
     """
     # Create backup directory if it does not already exist
-    if not exists(backup_dir):
-        makedirs(backup_dir)
+    if not exists(get_backup_dir()):
+        makedirs(get_backup_dir())
 
     # User did not specify packages to backup
     if args.packages is None:
@@ -115,7 +105,7 @@ def backup_packages(args):
     call(docker_command(copy_command)
          # Supply stdout with a path to file_name. Creates or
          # overwrites "{args.file_name}.tsv".
-         + " > %s/%s" % (backup_dir, args.file_name))
+         + " > %s/%s" % (get_backup_dir(), args.file_name))
 
 
 def insert_packages(args):
@@ -144,7 +134,7 @@ def insert_packages(args):
     :raises ValueError: If file_name does not exist as a backup
     """
     # Raise error if file to insert packages from does not exist
-    if not exists(backup_dir + "/" + args.file_name):
+    if not exists(get_backup_dir() + "/" + args.file_name):
         error_message = "Unable to perform insert; %s does not exist"
         raise ValueError(error_message % args.file_name)
 

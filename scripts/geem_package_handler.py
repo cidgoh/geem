@@ -38,11 +38,17 @@ def get_backup_dir():
 
 
 def docker_command(command):
-    """TODO:..."""
-    # Template for executing commands in docker database
+    """Format command as needed to run inside your db docker container.
+
+    :param str command: postgres command
+    :return: terminal command
+    :rtype: str
+    """
+    # Template for executing commands inside the db container
     command_template = 'docker-compose exec -T db psql ' \
                        '--username postgres --dbname postgres ' \
                        '--command "%s"'
+
     return command_template % command
 
 

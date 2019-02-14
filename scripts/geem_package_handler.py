@@ -2,6 +2,8 @@
 
 """Move content in and out of your db container's geem_package table.
 
+Assumes the db container is already running.
+
 ==================
 Command-line usage
 ==================

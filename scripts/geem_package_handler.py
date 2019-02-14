@@ -1,34 +1,92 @@
 #!/usr/bin/python
 
-"""...
+"""Move content in and out of your db container's geem_package table.
 
-TODO: complete this
-...the docstring of a script (a stand-alone program) should be usable
-as its "usage" message, printed when the script is invoked with
-incorrect or missing arguments (or perhaps with a "-h" option, for
-"help"). Such a docstring should document the script's function and
-command line syntax, environment variables, and files. Usage messages
-can be fairly elaborate (several screens full) and should be sufficient
-for a new user to use the command properly, as well as a complete quick
-reference to all options and arguments for the sophisticated user.
-...assume docker containers running
-...assumes you do not have to use sudo with docker
-...define geem_package handling
+==================
+Command-line usage
+==================
+
+-----------------------------------------------------------------------
+``backup [...]``
+-----------------------------------------------------------------------
+Copy geem_package content to a tsv file.
+
+Positional arguments
+====================
+
+``file_name``
+-------------
+tsv file to copy contents to.
+
+Optional arguments
+==================
+
+``[-p PACKAGES [PACKAGES ...]]``
+--------------------------------
+Packages (by id) to copy. *Default: all packages*.
+
+-----------------------------------------------------------------------
+``delete [...]``
+-----------------------------------------------------------------------
+Delete geem_package contents
+
+Optional arguments
+==================
+
+``[-p PACKAGES [PACKAGES ...]]``
+--------------------------------
+Packages (by id) to delete. *Default: all packages*.
+
+-----------------------------------------------------------------------
+``insert [...]``
+-----------------------------------------------------------------------
+Copy content from a tsv file to geem_package
+
+Positional arguments
+====================
+
+``file_name``
+-------------
+tsv file to copy content from
+
+Optional arguments
+==================
+
+``-k, --keep_ids``
+------------------
+Do not change the id of inserted packages to the next values of the
+geem_package id column sequence. **Warning: may cause conflicts.**
+
+``-n [NEW_OWNER_IDS], --new_owner_ids [NEW_OWNER_IDS]``
+-------------------------------------------------------
+Change the owner_id of inserted packages to a specified value.
+*Default: null*.
+
+``-p PACKAGES [PACKAGES ...], --packages PACKAGES [PACKAGES ...]``
+------------------------------------------------------------------
+Packages (by id) to insert. *Default: all packages*.
+
+|
+
+----
+
+|
 
 **TODO:**
-    * script docstring
 
-    * write tests
+* script docstring
 
-      * will this work on Mac?
-      * will this work on Windows? (Probably not)
+* write tests
 
-    * remove shell=True from check_call
+  * will this work on Mac?
+  * will this work on Windows? (Probably not)
 
-      * Then, we can remove this function
+* remove shell=True from check_call
 
-    * better abstract the process of calling commands between backup,
-      insert and delete
+  * Then, we can remove this function
+
+* better abstract the process of calling commands between backup,
+  insert and delete
 """
 
 from argparse import ArgumentParser, ArgumentTypeError
@@ -361,7 +419,9 @@ def create_parser():
     :rtype: ArgumentParser
     """
     # Create new parser
-    new_parser = ArgumentParser()
+    new_parser = ArgumentParser(description="Move content in and out of your "
+                                            "db container's geem_package "
+                                            "table.")
     # Add subparser capability to new_parser
     subparsers = new_parser.add_subparsers(help="-h, or --help for details on "
                                                 "each argument")
@@ -412,7 +472,7 @@ def create_parser():
                                     "to a specified value (default: null)")
     insert_parser.add_argument("-p", "--packages",
                                nargs="+", type=int,
-                               help="packaged (by id) to insert (default: all "
+                               help="packages (by id) to insert (default: all "
                                     "packages)")
     # Set default argument to be called with "insert" arguments
     insert_parser.set_defaults(func=insert_packages)

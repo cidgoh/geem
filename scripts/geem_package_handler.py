@@ -98,6 +98,7 @@ from re import match
 from subprocess import CalledProcessError, check_call
 from warnings import warn
 
+
 def get_backup_dir():
     """Get absolute path to your backup directory.
 

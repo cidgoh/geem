@@ -70,13 +70,11 @@ Packages (by id) to insert. *Default: all packages*.
 
 |
 
-----
+-----------------------------------------------------------------------
 
 |
 
 **TODO:**
-
-* script docstring
 
 * write tests
 
@@ -87,16 +85,13 @@ Packages (by id) to insert. *Default: all packages*.
 
   * Then, we can remove this function
 
-* better abstract the process of calling commands between backup,
-  insert and delete
 """
 
-from argparse import ArgumentParser, ArgumentTypeError
-from os.path import abspath, dirname, exists
-from os import makedirs
-from re import match
-from subprocess import CalledProcessError, check_call
-from warnings import warn
+import argparse
+import os
+import re
+import subprocess
+import warnings
 
 
 def get_backup_dir():
@@ -109,8 +104,12 @@ def get_backup_dir():
     :return: Absolute path
     :rtype: str
     """
+    # Get absolute path to root
+    root_path = os.path.abspath(__file__)
+    root_path = os.path.dirname(root_path)
+    root_path = os.path.dirname(root_path)
     # Return a directory in the project root
-    return dirname(dirname(abspath(__file__))) + "/geem_package_backups"
+    return root_path + "/geem_package_backups"
 
 
 def docker_command(command):
@@ -135,7 +134,7 @@ def call(command):
     """
     # TODO: find out how to do this without shell=True. When we do
     #       this, we can get rid of this function.
-    check_call(command, shell=True)
+    subprocess.check_call(command, shell=True)
 
 
 def psqlize_int_list(int_list):
@@ -174,8 +173,8 @@ def backup_packages(args):
     :raises CalledProcessError: If a docker command fails to execute
     """
     # Create backup directory if it does not already exist
-    if not exists(get_backup_dir()):
-        makedirs(get_backup_dir())
+    if not os.path.exists(get_backup_dir()):
+        os.makedirs(get_backup_dir())
 
     # User did not specify packages to backup
     if args.packages is None:
@@ -230,7 +229,7 @@ def insert_packages(args):
     :raises ValueError: If file_name does not exist as a backup
     """
     # Raise error if file to insert packages from does not exist
-    if not exists(get_backup_dir() + "/" + args.file_name):
+    if not os.path.exists(get_backup_dir() + "/" + args.file_name):
         error_message = "Unable to perform insert; %s does not exist"
         raise ValueError(error_message % args.file_name)
 
@@ -290,18 +289,18 @@ def insert_packages(args):
         insert_command = "insert into geem_package select * from tmp_table"
         # Call insert_command inside the db container
         call(docker_command(insert_command))
-    except CalledProcessError as e:
-        warn("Failed to insert data. Table tmp_table was inserted into "
-             "your db container, but not dropped.")
+    except subprocess.CalledProcessError as e:
+        warnings.warn("Failed to insert data. Table tmp_table was inserted "
+                      "into your db container, but not dropped.")
         raise e
 
     try:
         # Call the postgres command to drop tmp_table, from inside the
         # db container.
         call(docker_command("drop table tmp_table"))
-    except CalledProcessError as e:
-        warn("Table tmp_table was inserted into your db container, but not "
-             "dropped.")
+    except subprocess.CalledProcessError as e:
+        warnings.warn("Table tmp_table was inserted into your db container, "
+                      "but not dropped.")
         raise e
 
 
@@ -379,14 +378,14 @@ def valid_owner_id(new_owner_ids):
     try:
         parsed_owner_id = int(new_owner_ids)
     except ValueError:
-        raise ArgumentTypeError("must be a natural number")
+        raise argparse.ArgumentTypeError("must be a natural number")
 
     # Check if the parsed integer is a natural number
     if parsed_owner_id >= 1:
         # Return validated new_owner_ids
         return new_owner_ids
     else:
-        raise ArgumentTypeError("must be a natural number")
+        raise argparse.ArgumentTypeError("must be a natural number")
 
 
 def valid_tsv_file_name(file_name):
@@ -406,11 +405,12 @@ def valid_tsv_file_name(file_name):
 
     # Check if file_name is a valid file_name.
     # `Source. <https://stackoverflow.com/a/6768826>`_
-    if match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
+    if re.match(r"^[\w,\s-]+\.[A-Za-z]{3}$", file_name) is not None:
         # Return validated file_name
         return file_name
     else:
-        raise ArgumentTypeError(file_name + " is not a valid file name")
+        error_message = file_name + " is not a valid file name"
+        raise argparse.ArgumentTypeError(error_message)
 
 
 def create_parser():
@@ -422,9 +422,9 @@ def create_parser():
     :rtype: ArgumentParser
     """
     # Create new parser
-    new_parser = ArgumentParser(description="Move content in and out of your "
-                                            "db container's geem_package "
-                                            "table.")
+    new_parser = argparse.ArgumentParser(description="Move content in and out "
+                                                     "of your db container's "
+                                                     "geem_package table.")
     # Add subparser capability to new_parser
     subparsers = new_parser.add_subparsers(help="-h, or --help for details on "
                                                 "each argument")
@@ -496,6 +496,6 @@ if __name__ == "__main__":
         # automatically change in response to the changes performed by
         # this script's default functions. So, we must do it manually.
         sync_geem_package_id_seq()
-    except CalledProcessError as e:
-        warn("geem_package id sequence was not synchronized")
+    except subprocess.CalledProcessError as e:
+        warnings.warn("geem_package id sequence was not synchronized")
         raise e

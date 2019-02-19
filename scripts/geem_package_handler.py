@@ -95,21 +95,17 @@ import warnings
 
 
 def get_backup_dir():
-    """Get absolute path to your backup directory.
+    """Get relative path to your backup directory.
 
     Your backup directory is defined by this function, and is where
     calls to backup and insert will move geem_package content for your
     db container.
 
-    :return: Absolute path
+    :return: Relative path
     :rtype: str
     """
-    # Get absolute path to root
-    root_path = os.path.abspath(__file__)
-    root_path = os.path.dirname(root_path)
-    root_path = os.path.dirname(root_path)
     # Return a directory in the project root
-    return root_path + "/geem_package_backups"
+    return "../geem_package_backups"
 
 
 def docker_command(command):

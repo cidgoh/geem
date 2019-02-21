@@ -44,16 +44,22 @@ class TestHelpers(unittest.TestCase):
     def test_docker_command(self):
         self.assertEqual(gph.docker_command(""), 'docker-compose exec -T db '
                                                  'psql --username postgres '
-                                                 '--dbname postgres --command '
-                                                 '""')
+                                                 '--dbname postgres '
+                                                 '--command ""')
         self.assertEqual(gph.docker_command(" "), 'docker-compose exec -T db '
-                                                 'psql --username postgres '
-                                                 '--dbname postgres --command '
-                                                 '" "')
+                                                  'psql --username postgres '
+                                                  '--dbname postgres '
+                                                  '--command " "')
         self.assertEqual(gph.docker_command("a"), 'docker-compose exec -T db '
-                                                 'psql --username postgres '
-                                                 '--dbname postgres --command '
-                                                 '"a"')
+                                                  'psql --username postgres '
+                                                  '--dbname postgres '
+                                                  '--command "a"')
+
+    def test_psqlize_int_list(self):
+        self.assertEqual(gph.psqlize_int_list([]), "()")
+        self.assertEqual(gph.psqlize_int_list([1]), "(1)")
+        self.assertEqual(gph.psqlize_int_list([1, 2, 3]), "(1,2,3)")
+
 
 if __name__ == '__main__':
     unittest.main()

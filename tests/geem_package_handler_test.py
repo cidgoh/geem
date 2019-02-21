@@ -5,6 +5,8 @@
 import subprocess
 import unittest
 
+import scripts.geem_package_handler as gph
+
 
 class TestPackageHandling(unittest.TestCase):
     """Test backup, delete and insert functionality."""
@@ -35,6 +37,23 @@ class TestPackageHandling(unittest.TestCase):
     def test_something(self):
         self.assertEqual(True, False)
 
+
+class TestHelpers(unittest.TestCase):
+    """Test helper methods."""
+
+    def test_docker_command(self):
+        self.assertEqual(gph.docker_command(""), 'docker-compose exec -T db '
+                                                 'psql --username postgres '
+                                                 '--dbname postgres --command '
+                                                 '""')
+        self.assertEqual(gph.docker_command(" "), 'docker-compose exec -T db '
+                                                 'psql --username postgres '
+                                                 '--dbname postgres --command '
+                                                 '" "')
+        self.assertEqual(gph.docker_command("a"), 'docker-compose exec -T db '
+                                                 'psql --username postgres '
+                                                 '--dbname postgres --command '
+                                                 '"a"')
 
 if __name__ == '__main__':
     unittest.main()

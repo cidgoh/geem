@@ -134,10 +134,11 @@ def call(command):
 
 
 def psqlize_int_list(int_list):
-    """Formats int_list as a postgres array.
+    """Formats int_list as a list for the postgres "IN" operator.
 
-    `See postgres documentation for what consistutes as an array.
-    <https://www.postgresql.org/docs/10/arrays.html#ARRAYS-INPUT>`_
+    `See postgres documentation for what constitutes as a list for this
+    operator.
+    <https://www.postgresql.org/docs/9/functions-comparisons.html>`_
 
     :param list[int] int_list: List to format
     :return: Formatted list

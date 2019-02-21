@@ -252,8 +252,6 @@ def insert_packages(args):
 
         # User specified packages to insert
         if args.packages is not None:
-            # Convert packages to a postgres command-friendly list format
-            psqlized_packages = psqlize_int_list(args.packages)
             # postgres command to delete rows that were not specified
             # from tmp_table.
             delete_command = "delete from tmp_table where id not in "
@@ -286,19 +284,19 @@ def insert_packages(args):
         insert_command = "insert into geem_package select * from tmp_table"
         # Call insert_command inside the db container
         call(docker_command(insert_command))
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as error_message:
         warnings.warn("Failed to insert data. Table tmp_table was inserted "
                       "into your db container, but not dropped.")
-        raise e
+        raise error_message
 
     try:
         # Call the postgres command to drop tmp_table, from inside the
         # db container.
         call(docker_command("drop table tmp_table"))
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as error_message:
         warnings.warn("Table tmp_table was inserted into your db container, "
                       "but not dropped.")
-        raise e
+        raise error_message
 
 
 def delete_packages(args):

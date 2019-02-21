@@ -352,7 +352,7 @@ def sync_geem_package_id_seq():
 
 
 def valid_owner_id(new_owner_ids):
-    """Validates new_owner_ids as a null or natural number.
+    """Validates new_owner_ids as null or a natural number.
 
     Does not validate new_owner_ids as a legal value in geem_package,
     as it does not determine whether new_owner_ids corresponds to an id
@@ -363,10 +363,10 @@ def valid_owner_id(new_owner_ids):
     :rtype: str
     :raises ArgumentTypeError: If new_owner_ids is not valid
     """
-    # Check if new_owner_ids == "null"
-    if new_owner_ids == "null":
+    # Check if new_owner_ids is null
+    if str.lower(new_owner_ids) == "null":
         # Return validated new_owner_ids
-        return new_owner_ids
+        return "null"
 
     # Check if new_owner_ids is an integer by attempting to parse an
     # integer from new_owner_ids.

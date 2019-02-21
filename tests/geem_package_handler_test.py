@@ -23,7 +23,7 @@ class TestPackageHandling(unittest.TestCase):
                         % (cls.test_yml, run_command), shell=True)
         subprocess.call("docker-compose -f %s %s migrate --noinput"
                         % (cls.test_yml, run_command), shell=True)
-        subprocess.call("docker-compose -f %s %s loaddata initial_user"
+        subprocess.call("docker-compose -f %s %s loaddata sys_admin"
                         % (cls.test_yml, run_command), shell=True)
 
     @classmethod

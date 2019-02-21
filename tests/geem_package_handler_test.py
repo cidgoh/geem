@@ -2,6 +2,7 @@
 
 """Tests scripts/geem_package_handler."""
 
+import argparse
 import subprocess
 import unittest
 
@@ -54,11 +55,42 @@ class TestHelpers(unittest.TestCase):
                                                   'psql --username postgres '
                                                   '--dbname postgres '
                                                   '--command "a"')
+        self.assertEqual(gph.docker_command("ab"), 'docker-compose exec -T db '
+                                                   'psql --username postgres '
+                                                   '--dbname postgres '
+                                                   '--command "ab"')
 
     def test_psqlize_int_list(self):
         self.assertEqual(gph.psqlize_int_list([]), "()")
         self.assertEqual(gph.psqlize_int_list([1]), "(1)")
         self.assertEqual(gph.psqlize_int_list([1, 2, 3]), "(1,2,3)")
+
+    def test_valid_owner_id(self):
+        self.assertEqual(gph.valid_owner_id("null"), "null")
+        self.assertEqual(gph.valid_owner_id("NULL"), "null")
+        self.assertEqual(gph.valid_owner_id("nUlL"), "null")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("null ")
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id(" ")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("a")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("@")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("a4")
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("0")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("-1")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_owner_id("-2")
+        self.assertEqual("1", "1")
+        self.assertEqual("2", "2")
 
 
 if __name__ == '__main__':

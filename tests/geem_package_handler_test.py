@@ -92,6 +92,37 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual("1", "1")
         self.assertEqual("2", "2")
 
+    def test_valid_tsv_file_name(self):
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name(".tsv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name(r"\ ")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name(r"\ .tsv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("@#")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("@#.tsv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("a@")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("a@.tsv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name(".tsv.tsv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("a.csv")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            gph.valid_tsv_file_name("a.tsv.tsv")
+
+        self.assertEqual(gph.valid_tsv_file_name("a"), "a.tsv")
+        self.assertEqual(gph.valid_tsv_file_name("a.tsv"), "a.tsv")
+        self.assertEqual(gph.valid_tsv_file_name("a_"), "a_.tsv")
+        self.assertEqual(gph.valid_tsv_file_name("a_.tsv"), "a_.tsv")
+        self.assertEqual(gph.valid_tsv_file_name("tsv.tsv"), "tsv.tsv")
+        self.assertEqual(gph.valid_tsv_file_name("tsv.tsv"), "tsv.tsv")
+
 
 if __name__ == '__main__':
     unittest.main()

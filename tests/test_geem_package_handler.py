@@ -3,8 +3,10 @@
 """Tests scripts/geem_package_handler."""
 
 import argparse
+import io
 import subprocess
 import unittest
+from unittest.mock import patch
 
 import scripts.geem_package_handler as gph
 
@@ -122,6 +124,58 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(gph.valid_tsv_file_name("a_.tsv"), "a_.tsv")
         self.assertEqual(gph.valid_tsv_file_name("tsv.tsv"), "tsv.tsv")
         self.assertEqual(gph.valid_tsv_file_name("tsv.tsv"), "tsv.tsv")
+
+
+class TestArgParser(unittest.TestCase):
+    """Test parsing of user-inputted command-line arguments."""
+
+    @classmethod
+    def setUpClass(cls):
+        # Mimic creation of parser in geem_package_handler
+        cls.parser = gph.create_parser()
+
+    @patch("sys.stderr", new_callable=io.StringIO)
+    def test_backup(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"the following arguments are required: "
+                                 r"file_name")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup", "###"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"###.tsv is not a valid file name")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup", "a", "-p"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -p/--packages: expected at least "
+                                 r"one argument")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup", "a", "-p", "a"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -p/--packages: invalid int value")
+
+        try:
+            self.parser.parse_args(["backup", "a"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["backup", "a", "-p", "1"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["backup", "a", "-p", "1", "2"])
+        except:
+            self.fail("Unexpected SystemExit")
+
+        actual_args = self.parser.parse_args(["backup", "a", "-p", "1", "2"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "packages": [1, 2],
+            "func": gph.backup_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
 
 
 if __name__ == '__main__':

@@ -168,12 +168,62 @@ class TestArgParser(unittest.TestCase):
         except:
             self.fail("Unexpected SystemExit")
 
+        actual_args = self.parser.parse_args(["backup", "a"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "packages": None,
+            "func": gph.backup_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
         actual_args = self.parser.parse_args(["backup", "a", "-p", "1", "2"])
         actual_args = vars(actual_args)
         expected_args = {
             "file_name": "a.tsv",
             "packages": [1, 2],
             "func": gph.backup_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+    @patch("sys.stderr", new_callable=io.StringIO)
+    def test_delete(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup", "a", "-p"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -p/--packages: expected at least "
+                                 r"one argument")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["backup", "a", "-p", "a"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -p/--packages: invalid int value")
+
+        try:
+            self.parser.parse_args(["delete"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["delete", "-p", "1"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["delete", "-p", "1", "2"])
+        except:
+            self.fail("Unexpected SystemExit")
+
+        actual_args = self.parser.parse_args(["delete"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "packages": None,
+            "func": gph.delete_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["delete", "-p", "1", "2"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "packages": [1, 2],
+            "func": gph.delete_packages
         }
         self.assertDictEqual(actual_args, expected_args)
 

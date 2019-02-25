@@ -189,12 +189,12 @@ class TestArgParser(unittest.TestCase):
     @patch("sys.stderr", new_callable=io.StringIO)
     def test_delete(self, mock_stderr):
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(["backup", "a", "-p"])
+            self.parser.parse_args(["delete", "-p"])
         self.assertRegexpMatches(mock_stderr.getvalue(),
                                  r"argument -p/--packages: expected at least "
                                  r"one argument")
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(["backup", "a", "-p", "a"])
+            self.parser.parse_args(["delete", "-p", "a"])
         self.assertRegexpMatches(mock_stderr.getvalue(),
                                  r"argument -p/--packages: invalid int value")
 
@@ -224,6 +224,139 @@ class TestArgParser(unittest.TestCase):
         expected_args = {
             "packages": [1, 2],
             "func": gph.delete_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+    @patch("sys.stderr", new_callable=io.StringIO)
+    def test_insert(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"the following arguments are required: "
+                                 r"file_name")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-k", "b"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"unrecognized arguments: b")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-n", "c"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -n/--new_owner_ids: must be a "
+                                 r"natural number")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-n", "0"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -n/--new_owner_ids: must be a "
+                                 r"natural number")
+        # with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-n", "-1"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -n/--new_owner_ids: must be a "
+                                 r"natural number")
+        # with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-n", "-10"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -n/--new_owner_ids: must be a "
+                                 r"natural number")
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["insert", "a", "-p", "a"])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"argument -p/--packages: invalid int value")
+
+        try:
+            self.parser.parse_args(["insert", "a"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-k"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-n"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-n", "1"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-n", "10"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-k", "-n", "1"])
+        except:
+            self.fail("Unexpected SystemExit")
+        try:
+            self.parser.parse_args(["insert", "a", "-k", "-n", "10"])
+        except:
+            self.fail("Unexpected SystemExit")
+
+        actual_args = self.parser.parse_args(["insert", "a"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": False,
+            "new_owner_ids": None,
+            "packages": None,
+            "func": gph.insert_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["insert", "a", "-k"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": True,
+            "new_owner_ids": None,
+            "packages": None,
+            "func": gph.insert_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["insert", "a", "-n"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": False,
+            "new_owner_ids": "null",
+            "packages": None,
+            "func": gph.insert_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["insert", "a", "-n", "10"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": False,
+            "new_owner_ids": "10",
+            "packages": None,
+            "func": gph.insert_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["insert", "a", "-k", "-n"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": True,
+            "new_owner_ids": "null",
+            "packages": None,
+            "func": gph.insert_packages
+        }
+        self.assertDictEqual(actual_args, expected_args)
+
+        actual_args = self.parser.parse_args(["insert", "a", "-k", "-n", "10"])
+        actual_args = vars(actual_args)
+        expected_args = {
+            "file_name": "a.tsv",
+            "keep_ids": True,
+            "new_owner_ids": "10",
+            "packages": None,
+            "func": gph.insert_packages
         }
         self.assertDictEqual(actual_args, expected_args)
 

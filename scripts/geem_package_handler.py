@@ -95,17 +95,17 @@ import warnings
 
 
 def get_backup_dir():
-    """Get relative path to your backup directory.
+    """Get absolute path to your backup directory.
 
     Your backup directory is defined by this function, and is where
     calls to backup and insert will move geem_package content for your
     db container.
 
-    :return: Relative path
+    :return: Absolute path
     :rtype: str
     """
     # Return a directory in the project root
-    return "../geem_package_backups"
+    return os.path.abspath("../geem_package_backups")
 
 
 def docker_command(command):
@@ -422,7 +422,10 @@ def create_parser():
                                                      "geem_package table.")
     # Add subparser capability to new_parser
     subparsers = new_parser.add_subparsers(help="-h, or --help for details on "
-                                                "each argument")
+                                                "each argument",
+                                           dest="{backup,delete,insert}")
+    # Make subparser required
+    subparsers.required = True
 
     # Add "backup" subparser
     backup_parser = subparsers.add_parser("backup",
@@ -480,6 +483,8 @@ def create_parser():
 
 # Entry point into script
 if __name__ == "__main__":
+    # Change current working directory to script directory
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # Create parser for command-line arguments
     parser = create_parser()
     # Parse user-inputted command-line arguments

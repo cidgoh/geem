@@ -37,6 +37,17 @@ class TestPackageHandling(unittest.TestCase):
         subprocess.call("docker-compose -f %s down  --volumes --remove-orphans"
                         % cls.test_yml, shell=True)
 
+    def setUp(self):
+        # Add test packages
+        run_command = "run web python /code/manage.py"
+        subprocess.call("docker-compose -f %s %s loaddata test_packages"
+                        % (self.test_yml, run_command), shell=True)
+
+    def tearDown(self):
+        # Empty geem_package
+        tear_down_command = gph.docker_command("truncate table geem_package")
+        subprocess.call(tear_down_command, shell=True)
+
     def test_something(self):
         self.assertEqual(True, False)
 
@@ -362,4 +373,5 @@ class TestArgParser(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    unittest.TestLoader.sortTestMethodsUsing = None
     unittest.main()

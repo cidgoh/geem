@@ -89,13 +89,30 @@ class TestPackageHandling(unittest.TestCase):
             raise AssertionError("%s and %s are different"
                                  % (actual_backup, expected_backup))
 
+    def test_backup_all_packages(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "all_test_packages")
+
+    def test_backup_one_package(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output",
+                                                    "-p", "3"]))
+        self.compare_backups("actual_output", "one_test_package")
+
+    def test_backup_two_packages(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output",
+                                                    "-p", "2", "3"]))
+        self.compare_backups("actual_output", "two_test_packages")
+
     def test_delete_all_packages(self):
         gph.delete_packages(self.parser.parse_args(["delete"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))
         self.compare_backups("actual_output", "no_test_packages")
 
-    def test_delete_one_packages(self):
+    def test_delete_one_package(self):
         gph.delete_packages(self.parser.parse_args(["delete", "-p", "1"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))

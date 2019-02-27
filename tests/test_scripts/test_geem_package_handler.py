@@ -14,7 +14,12 @@ import scripts.geem_package_handler as gph
 
 
 class TestPackageHandling(unittest.TestCase):
-    """Test backup, delete and insert functionality."""
+    """Test backup, delete and insert functionality.
+
+    |
+
+    **TODO:** test sync_geem_package_id_seq
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -62,7 +67,8 @@ class TestPackageHandling(unittest.TestCase):
         tear_down_command = gph.docker_command("truncate table geem_package")
         subprocess.call(tear_down_command, shell=True)
 
-    def compare_backups(self, actual_backup, expected_backup):
+    @staticmethod
+    def compare_backups(actual_backup, expected_backup):
         """Compare actual and expected geem_package backups.
 
         More specifically, compares "actual" file from
@@ -84,9 +90,22 @@ class TestPackageHandling(unittest.TestCase):
                                  % (actual_backup, expected_backup))
 
     def test_delete_all_packages(self):
+        gph.delete_packages(self.parser.parse_args(["delete"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))
-        self.compare_backups("actual_output", "all_test_packages")
+        self.compare_backups("actual_output", "no_test_packages")
+
+    def test_delete_one_packages(self):
+        gph.delete_packages(self.parser.parse_args(["delete", "-p", "1"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "two_test_packages")
+
+    def test_delete_two_packages(self):
+        gph.delete_packages(self.parser.parse_args(["delete", "-p", "1", "2"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "one_test_package")
 
 
 class TestHelpers(unittest.TestCase):

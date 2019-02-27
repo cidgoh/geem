@@ -1,0 +1,59 @@
+[
+{
+    "model": "geem.package",
+    "pk": 1,
+    "fields": {
+        "owner": 1,
+        "created": "2018-04-24T18:04:39.023Z",
+        "updated": "2018-10-18T23:24:28.196Z",
+        "file_base_name": "test_one",
+        "version": "2018-04-17",
+        "ontology": false,
+        "public": true,
+        "curation": "review",
+        "name": "test_one",
+        "description": "test_one",
+        "contents": {
+            "test": "test_one"
+        }
+    }
+},
+{
+    "model": "geem.package",
+    "pk": 2,
+    "fields": {
+        "owner": 1,
+        "created": "2018-10-19T01:04:42.674Z",
+        "updated": "2018-10-19T01:04:42.674Z",
+        "file_base_name": "test_two",
+        "version": "2018-05-24",
+        "ontology": true,
+        "public": true,
+        "curation": "draft",
+        "name": "test_two",
+        "description": "test_two",
+        "contents": {
+            "test": "test_two"
+        }
+    }
+},
+{
+    "model": "geem.package",
+    "pk": 3,
+    "fields": {
+        "owner": 1,
+        "created": "2018-10-19T01:03:59.978Z",
+        "updated": "2018-10-19T17:14:46.143Z",
+        "file_base_name": "test_three",
+        "version": "",
+        "ontology": false,
+        "public": false,
+        "curation": "draft",
+        "name": "test_three",
+        "description": "test_three",
+        "contents": {
+            "test": "test_three"
+        }
+    }
+}
+]

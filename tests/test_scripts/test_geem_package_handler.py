@@ -3,7 +3,9 @@
 """Tests scripts/geem_package_handler."""
 
 import argparse
+import filecmp
 import io
+import os
 import subprocess
 import unittest
 from unittest.mock import patch
@@ -16,6 +18,13 @@ class TestPackageHandling(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Mimic geem_package_handler working directory
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(os.path.abspath("../../scripts"))
+
+        # Mimic creation of parser in geem_package_handler
+        cls.parser = gph.create_parser()
+
         # Relative path to docker-compose.test.yml
         cls.test_yml = "../docker-compose.test.yml"
 
@@ -36,6 +45,11 @@ class TestPackageHandling(unittest.TestCase):
         # Stop and remove test "db" service
         subprocess.call("docker-compose -f %s down  --volumes --remove-orphans"
                         % cls.test_yml, shell=True)
+        # Remove geem_package backups generated from testing
+        actual_output_path = "../geem_package_backups/actual_output.tsv"
+        os.remove(os.path.abspath(actual_output_path))
+        # Change working directory back
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     def setUp(self):
         # Add test packages
@@ -48,8 +62,31 @@ class TestPackageHandling(unittest.TestCase):
         tear_down_command = gph.docker_command("truncate table geem_package")
         subprocess.call(tear_down_command, shell=True)
 
-    def test_something(self):
-        self.assertEqual(True, False)
+    def compare_backups(self, actual_backup, expected_backup):
+        """Compare actual and expected geem_package backups.
+
+        More specifically, compares "actual" file from
+        geem_package_backups with "expected" file from
+        tests.test_geem_package_backups. Extension must not be
+        specified in actual_backup and expected_backup.
+
+        :param str actual_backup: File name of "actual" file
+        :param str expected_backup: File name of "expected" file
+        :raises AssertionError: If actual_backup and expected_backup
+                                contents are different
+        """
+        are_same = filecmp.cmp("../geem_package_backups/%s.tsv"
+                               % actual_backup,
+                               "../tests/test_geem_package_backups/%s.tsv"
+                               % expected_backup)
+        if are_same is not True:
+            raise AssertionError("%s and %s are different"
+                                 % (actual_backup, expected_backup))
+
+    def test_delete_all_packages(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "all_test_packages")
 
 
 class TestHelpers(unittest.TestCase):
@@ -146,6 +183,14 @@ class TestArgParser(unittest.TestCase):
         cls.parser = gph.create_parser()
 
     @patch("sys.stderr", new_callable=io.StringIO)
+    def test_no_supplied_subparser(self, mock_stderr):
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args([])
+        self.assertRegexpMatches(mock_stderr.getvalue(),
+                                 r"the following arguments are required: "
+                                 r"{backup,delete,insert}")
+
+    @patch("sys.stderr", new_callable=io.StringIO)
     def test_backup(self, mock_stderr):
         with self.assertRaises(SystemExit):
             self.parser.parse_args(["backup"])
@@ -184,7 +229,8 @@ class TestArgParser(unittest.TestCase):
         expected_args = {
             "file_name": "a.tsv",
             "packages": None,
-            "func": gph.backup_packages
+            "func": gph.backup_packages,
+            "{backup,delete,insert}": "backup"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -193,7 +239,8 @@ class TestArgParser(unittest.TestCase):
         expected_args = {
             "file_name": "a.tsv",
             "packages": [1, 2],
-            "func": gph.backup_packages
+            "func": gph.backup_packages,
+            "{backup,delete,insert}": "backup"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -226,7 +273,8 @@ class TestArgParser(unittest.TestCase):
         actual_args = vars(actual_args)
         expected_args = {
             "packages": None,
-            "func": gph.delete_packages
+            "func": gph.delete_packages,
+            "{backup,delete,insert}": "delete"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -234,7 +282,8 @@ class TestArgParser(unittest.TestCase):
         actual_args = vars(actual_args)
         expected_args = {
             "packages": [1, 2],
-            "func": gph.delete_packages
+            "func": gph.delete_packages,
+            "{backup,delete,insert}": "delete"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -312,7 +361,8 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": False,
             "new_owner_ids": None,
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -323,7 +373,8 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": True,
             "new_owner_ids": None,
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -334,7 +385,8 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": False,
             "new_owner_ids": "null",
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -345,7 +397,8 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": False,
             "new_owner_ids": "10",
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -356,7 +409,8 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": True,
             "new_owner_ids": "null",
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
@@ -367,11 +421,14 @@ class TestArgParser(unittest.TestCase):
             "keep_ids": True,
             "new_owner_ids": "10",
             "packages": None,
-            "func": gph.insert_packages
+            "func": gph.insert_packages,
+            "{backup,delete,insert}": "insert"
         }
         self.assertDictEqual(actual_args, expected_args)
 
 
 if __name__ == '__main__':
-    unittest.TestLoader.sortTestMethodsUsing = None
+    # Change current working directory to script directory
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     unittest.main()

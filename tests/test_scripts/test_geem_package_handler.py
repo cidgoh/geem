@@ -14,12 +14,7 @@ import scripts.geem_package_handler as gph
 
 
 class TestPackageHandling(unittest.TestCase):
-    """Test backup, delete and insert functionality.
-
-    |
-
-    **TODO:** test sync_geem_package_id_seq
-    """
+    """Test backup, delete and insert functionality."""
 
     @classmethod
     def setUpClass(cls):

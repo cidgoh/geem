@@ -76,10 +76,7 @@ Packages (by id) to insert. *Default: all packages*.
 
 **TODO:**
 
-* write tests
-
-  * will this work on Mac?
-  * will this work on Windows? (Probably not)
+* test on Mac and Windows
 
 * remove shell=True from check_call
 

@@ -61,11 +61,15 @@ class TestPackageHandling(unittest.TestCase):
         run_command = "run web python /code/manage.py"
         subprocess.call("docker-compose -f %s %s loaddata test_packages"
                         % (self.test_yml, run_command), shell=True)
+        # Next geem_package id in sequence is 4
+        gph.sync_geem_package_id_seq()
 
     def tearDown(self):
         # Empty geem_package
         tear_down_command = gph.docker_command("truncate table geem_package")
         subprocess.call(tear_down_command, shell=True)
+        # Next geem_package id in sequence is 1
+        gph.sync_geem_package_id_seq()
 
     @staticmethod
     def compare_backups(actual_backup, expected_backup):
@@ -98,31 +102,151 @@ class TestPackageHandling(unittest.TestCase):
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output",
                                                     "-p", "3"]))
-        self.compare_backups("actual_output", "one_test_package")
+        self.compare_backups("actual_output", "two_deleted_packages")
 
     def test_backup_two_packages(self):
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output",
                                                     "-p", "2", "3"]))
-        self.compare_backups("actual_output", "two_test_packages")
+        self.compare_backups("actual_output", "one_deleted_package")
 
     def test_delete_all_packages(self):
         gph.delete_packages(self.parser.parse_args(["delete"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))
-        self.compare_backups("actual_output", "no_test_packages")
+        self.compare_backups("actual_output", "no_packages")
 
     def test_delete_one_package(self):
         gph.delete_packages(self.parser.parse_args(["delete", "-p", "1"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))
-        self.compare_backups("actual_output", "two_test_packages")
+        self.compare_backups("actual_output", "one_deleted_package")
 
     def test_delete_two_packages(self):
         gph.delete_packages(self.parser.parse_args(["delete", "-p", "1", "2"]))
         gph.backup_packages(self.parser.parse_args(["backup",
                                                     "actual_output"]))
-        self.compare_backups("actual_output", "one_test_package")
+        self.compare_backups("actual_output", "two_deleted_packages")
+
+    def test_insert_all_packages(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "three_inserted_packages")
+
+    def test_insert_one_package(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-p", "1"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "one_inserted_package")
+
+    def test_insert_two_packages(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-p", "1", "2"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "two_inserted_packages")
+
+    def test_insert_all_packages_keep_ids(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.delete_packages(self.parser.parse_args(["delete"]))
+        # geem_package id sequence not synchronized, so the next
+        # insertions would have id's of 4, 5 and 6 without the "-k"
+        # flag.
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-k"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "all_test_packages")
+
+    def test_insert_all_packages_new_null_owner_id(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-n"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output",
+                             "three_inserted_packages_null_owner_ids")
+
+    def test_insert_all_packages_new_owner_id(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-n"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output",
+                                                    "-p", "4", "5", "6"]))
+        gph.delete_packages(self.parser.parse_args(["delete",
+                                                    "-p", "4", "5", "6"]))
+        gph.sync_geem_package_id_seq()
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-n", "1"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "three_inserted_packages")
+
+    def test_insert_two_packages_keep_ids(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.delete_packages(self.parser.parse_args(["delete", "-p", "2", "3"]))
+        # geem_package id sequence not synchronized, so the next
+        # insertions would have id's of 4 and 5 without the "-k" flag.
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-k",
+                                                    "-p", "2", "3"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output", "all_test_packages")
+
+    def test_insert_two_packages_new_owner_id(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-n",
+                                                    "-p", "1", "2"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output",
+                             "two_inserted_packages_null_owner_ids")
+
+    def test_insert_two_packages_keep_ids_new_owner_id(self):
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-p", "1", "2"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        gph.delete_packages(self.parser.parse_args(["delete", "-p", "4", "5"]))
+        # geem_package id sequence not synchronized, so the next
+        # insertions would have id's of 6 and 7 without the "-k" flag.
+        gph.insert_packages(self.parser.parse_args(["insert",
+                                                    "actual_output",
+                                                    "-k",
+                                                    "-n",
+                                                    "-p", "4", "5"]))
+        gph.backup_packages(self.parser.parse_args(["backup",
+                                                    "actual_output"]))
+        self.compare_backups("actual_output",
+                             "two_inserted_packages_null_owner_ids")
 
 
 class TestHelpers(unittest.TestCase):

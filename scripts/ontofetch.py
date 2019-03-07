@@ -33,7 +33,6 @@ import json
 import sys
 import os
 import optparse
-import urllib2
 import python.ontohelper as oh
 
 import rdflib
@@ -47,6 +46,11 @@ try: #Python 2.7
 	from collections import OrderedDict
 except ImportError: # Python 2.6
 	from ordereddict import OrderedDict
+
+try: #Python2
+	import urllib2 as u
+except ImportError: #Python3
+	import urllib.error as u
 
 def stop_err(msg, exit_code = 1):
 	sys.stderr.write("%s\n" % msg)

@@ -7,6 +7,7 @@ import filecmp
 import io
 import os
 import subprocess
+import time
 import unittest
 from unittest.mock import patch
 
@@ -28,8 +29,29 @@ class TestPackageHandling(unittest.TestCase):
         # Relative path to docker-compose.test.yml
         cls.test_yml = "../docker-compose.test.yml"
 
-        # Stop and remove default "db" service
+        # Stop and remove default docker services
         subprocess.call("docker-compose down", shell=True)
+        # Provide enough time to stop and remove default services
+        time.sleep(10)
+
+        # Command that raises an error if service %s is not running.
+        check_container = "docker-compose exec -T %s echo 'test'"
+
+        # Make sure geem_db_1 is no longer running
+        try:
+            subprocess.check_call(check_container % "db", shell=True)
+            # Should not reach here, unless db is still running
+            raise RuntimeError("Unable to stop and remove db service.")
+        except subprocess.CalledProcessError:
+            pass
+
+        # Make sure geem_web_1 is no longer running
+        try:
+            subprocess.check_call(check_container % "web", shell=True)
+            # Should not reach here, unless web is still running
+            raise RuntimeError("Unable to stop and remove web service.")
+        except subprocess.CalledProcessError:
+            pass
 
         # Setup test "db" service
         run_command = "run web python /code/manage.py"

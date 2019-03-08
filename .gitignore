@@ -108,3 +108,6 @@ ENV/
 config/settings_secret.py
 scripts/test/
 
+# JetBrains
+.idea/
+

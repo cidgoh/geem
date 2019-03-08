@@ -22,5 +22,6 @@ urlpatterns = [
     path('', include('social_django.urls', namespace='social')),
     path('admin/', admin.site.urls),
     path('auth/', include('rest_framework_social_oauth2.urls')),
+    # Is this needed? Already found at api/urls.py:14
     path('api-auth/', include('rest_framework.urls'))
 ]

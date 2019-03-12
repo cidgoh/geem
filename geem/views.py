@@ -14,6 +14,7 @@ from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
 
@@ -90,18 +91,23 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         * api/resources/{pk}/specifications/?id={id}
 
           * Filter specifications field with id == {id}
-
-        TODO:
-
-        * Only display packages user has access to
         """
+        # Query package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Query entire specifications or exact term
         id_query_parameter = request.query_params.get('id', None)
         if id_query_parameter is None:
             query = 'contents__specifications'
         else:
             query = 'contents__specifications__' + id_query_parameter
-        queryset= Package.objects.filter(pk=pk).values(query)
-        return Response(list(queryset)[0])
+        queryset = queryset.values(query)
+
+        try:
+            return Response(list(queryset)[0])
+        except IndexError:
+            raise Http404("No access to package with id %s" % pk)
 
     def create(self, request, pk=None):
 

@@ -10,6 +10,7 @@ import re, os
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
@@ -78,6 +79,29 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
+    @action(detail=True)
+    def specifications(self, request, pk=None):
+        """Get entire specifications, or a single term, from a package.
+
+        * api/resources/{pk}/specifications
+
+          * Specifications of package with id == {pk}
+
+        * api/resources/{pk}/specifications/?id={id}
+
+          * Filter specifications field with id == {id}
+
+        TODO:
+
+        * Only display packages user has access to
+        """
+        id_query_parameter = request.query_params.get('id', None)
+        if id_query_parameter is None:
+            query = 'contents__specifications'
+        else:
+            query = 'contents__specifications__' + id_query_parameter
+        queryset= Package.objects.filter(pk=pk).values(query)
+        return Response(list(queryset)[0])
 
     def create(self, request, pk=None):
 

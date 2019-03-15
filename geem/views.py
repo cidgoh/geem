@@ -80,28 +80,27 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
-    @action(detail=True)
-    def specifications(self, request, pk=None):
+    @action(detail=True, url_path='specifications(?:/(?P<id>[^/.]+))?')
+    def specifications(self, request, pk=None, id=None):
         """Get entire specifications, or a single term, from a package.
 
         * api/resources/{pk}/specifications
 
           * Specifications of package with id == {pk}
 
-        * api/resources/{pk}/specifications/?id={id}
+        * api/resources/{pk}/specifications/{id}
 
-          * Filter specifications field with id == {id}
+          * Get term from specifications with id == {id}
         """
         # Query package
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
         # Query entire specifications or exact term
-        id_query_parameter = request.query_params.get('id', None)
-        if id_query_parameter is None:
+        if id is None:
             query = 'contents__specifications'
         else:
-            query = 'contents__specifications__' + id_query_parameter
+            query = 'contents__specifications__' + id
         queryset = queryset.values(query)
 
         try:

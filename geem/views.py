@@ -10,9 +10,11 @@ import re, os
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
 
@@ -78,6 +80,33 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
+    @action(detail=True, url_path='specifications(?:/(?P<id>[^/.]+))?')
+    def specifications(self, request, pk=None, id=None):
+        """Get entire specifications, or a single term, from a package.
+
+        * api/resources/{pk}/specifications
+
+          * Specifications of package with id == {pk}
+
+        * api/resources/{pk}/specifications/{id}
+
+          * Get term from specifications with id == {id}
+        """
+        # Query package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Query entire specifications or exact term
+        if id is None:
+            query = 'contents__specifications'
+        else:
+            query = 'contents__specifications__' + id
+        queryset = queryset.values(query)
+
+        try:
+            return Response(list(queryset)[0])
+        except IndexError:
+            raise Http404("No access to package with id %s" % pk)
 
     def create(self, request, pk=None):
 

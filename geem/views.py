@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
+from django.db import connection
 
 from geem.models import Package
 from geem.forms import PackageForm
@@ -90,11 +91,17 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         * api/resources/{pk}/specifications/{id}
 
-          * Get term from specifications with id == {id}
+          * Get term with id == {id} from specifications of package
+            with id == {pk}
         """
-        # Query package
+        # Query specified package
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response("No access to package with id %s" % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
 
         # Query entire specifications or exact term
         if id is None:
@@ -103,10 +110,61 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__specifications__' + id
         queryset = queryset.values(query)
 
-        try:
-            return Response(list(queryset)[0])
-        except IndexError:
-            raise Http404("No access to package with id %s" % pk)
+        return Response(list(queryset)[0], content_type=status.HTTP_200_OK)
+
+    @action(detail=True, url_path='delete/specifications(?:/(?P<id>[^/.]+))?')
+    def delete_specifications(self, request, pk=None, id=None):
+        """Delete entire specifications, or one term, from a package.
+
+        * api/resources/delete/{pk}/specifications
+
+          * Delete all terms in specifications of package with id ==
+            {pk}
+
+        * api/resources/delete/{pk}/specifications/{id}
+
+          * Delete term with id == {id} from specifications of package
+            with id == {pk}
+
+        **TODO:**
+
+        * we must implement and use some sort of
+          delete_resource_queryset function instead of
+          _get_resource_queryset
+
+          * just because you can view a queryset, does not mean you
+            should be able to delete it
+
+        * the raw SQL queries in this function may be replaceable with
+          something simpler in the future
+
+          * see https://code.djangoproject.com/ticket/29112
+        """
+        # Query specified package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response("No access to package with id %s" % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if id is None:
+                # Delete entire specifications
+                cursor.execute("update geem_package set contents=(contents || "
+                               "jsonb_build_object('specifications', "
+                               "json_object('{}'))) where id=%s" % pk)
+            else:
+                # Delete exact term
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{specifications,%s}') where id=%s" % (id, pk))
+
+        return Response("Successfully deleted",
+                        content_type=status.HTTP_200_OK)
 
     def create(self, request, pk=None):
 

@@ -100,7 +100,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         # Unable to query any packages
         if queryset.count() == 0:
-            return Response("No access to package with id %s" % pk,
+            return Response('No access to package with id %s' % pk,
                             content_type=status.HTTP_404_NOT_FOUND)
 
         # Query entire specifications or exact term
@@ -128,6 +128,10 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         **TODO:**
 
+        * id should be a full iri, shortened with a prefix
+
+          * Add prefixes as necessary to metadata
+
         * we must implement and use some sort of
           delete_resource_queryset function instead of
           _get_resource_queryset
@@ -146,25 +150,94 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         # Unable to query any packages
         if queryset.count() == 0:
-            return Response("No access to package with id %s" % pk,
+            return Response('No access to package with id %s' % pk,
                             content_type=status.HTTP_404_NOT_FOUND)
+
+        # Validate 'id' key exists in package
+        id_query = 'contents__specifications__' + id
+        if queryset.values(id_query)[0][id_query] is None:
+            return Response('id %s does not exist in package %s' % (id, pk),
+                            content_type=status.HTTP_400_BAD_REQUEST)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
             # deletion queries used below.
             if id is None:
-                # Delete entire specifications
-                cursor.execute("update geem_package set contents=(contents || "
-                               "jsonb_build_object('specifications', "
-                               "json_object('{}'))) where id=%s" % pk)
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{specifications}', "
+                               "jsonb '{}')) where id=%s" % pk)
             else:
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{specifications,%s}') where id=%s" % (id, pk))
 
-        return Response("Successfully deleted",
+        return Response('Successfully deleted',
                         content_type=status.HTTP_200_OK)
+
+    @action(detail=True,
+            url_path='create/specifications/(?P<term>[^/.]+)')
+    def create_specifications(self, request, pk=None, term=None):
+        """Add a term to the specifications of a package.
+
+        * api/resources/create/{pk}/specifications/{term}
+
+          * Add {term} to specifications of package with id == {pk}
+
+        **TODO:**
+
+        * we must implement and use some sort of
+          create_resource_queryset function instead of
+          _get_resource_queryset
+
+          * just because you can view a queryset, does not mean you
+            should be able to add to it
+
+        * the raw SQL queries in this function may be replaceable with
+          something simpler in the future
+
+          * see https://code.djangoproject.com/ticket/29112
+        """
+        # Query specified package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No access to package with id %s' % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
+
+        # Validate term as JSON
+        try:
+            term_json_obj = json.loads(term)
+        except json.JSONDecodeError:
+            return Response('entry is not a valid JSON object',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate term as JSON object
+        if type(term_json_obj) is not dict:
+            return Response('entry is not a valid JSON object',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' key exists in entry
+        if 'id' not in term_json_obj:
+            return Response('entry missing id value',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' key does not already exist in package
+        id = term_json_obj['id']
+        id_query = 'contents__specifications__' + id
+        if queryset.values(id_query)[0][id_query] is not None:
+            return Response('id %s already exists in package %s' % (id, pk),
+                            content_type=status.HTTP_400_BAD_REQUEST)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_set("
+                           "contents, '{specifications, %s}', jsonb '%s')) "
+                           "where id=%s" % (id, term, pk))
+
+        return Response('Successfully created',
+                        content_type=status.HTTP_404_NOT_FOUND)
 
     def create(self, request, pk=None):
 

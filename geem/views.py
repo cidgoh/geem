@@ -116,28 +116,17 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
     def delete_specifications(self, request, pk=None, id=None):
         """Delete entire specifications, or one term, from a package.
 
-        * api/resources/delete/{pk}/specifications
+        * api/resources/{pk}/delete/specifications
 
           * Delete all terms in specifications of package with id ==
             {pk}
 
-        * api/resources/delete/{pk}/specifications/{id}
+        * api/resources/{pk}/delete/specifications/{id}
 
           * Delete term with id == {id} from specifications of package
             with id == {pk}
 
         **TODO:**
-
-        * id should be a full iri, shortened with a prefix
-
-          * Add prefixes as necessary to metadata
-
-        * we must implement and use some sort of
-          delete_resource_queryset function instead of
-          _get_resource_queryset
-
-          * just because you can view a queryset, does not mean you
-            should be able to delete it
 
         * the raw SQL queries in this function may be replaceable with
           something simpler in the future
@@ -145,19 +134,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self._get_resource_queryset(request)
+        queryset = self.get_modifiable_resources(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
         if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
+            return Response('No permission to edit package with id %s' % pk,
                             content_type=status.HTTP_404_NOT_FOUND)
-
-        # Validate 'id' key exists in package
-        id_query = 'contents__specifications__' + id
-        if queryset.values(id_query)[0][id_query] is None:
-            return Response('id %s does not exist in package %s' % (id, pk),
-                            content_type=status.HTTP_400_BAD_REQUEST)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -168,6 +151,12 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                "jsonb_set(contents, '{specifications}', "
                                "jsonb '{}')) where id=%s" % pk)
             else:
+                # Validate 'id' key exists in package
+                id_query = 'contents__specifications__' + id
+                if queryset.values(id_query)[0][id_query] is None:
+                    return Response(
+                        'id %s does not exist in package %s' % (id, pk),
+                        content_type=status.HTTP_400_BAD_REQUEST)
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{specifications,%s}') where id=%s" % (id, pk))
@@ -180,11 +169,15 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
     def create_specifications(self, request, pk=None, term=None):
         """Add a term to the specifications of a package.
 
-        * api/resources/create/{pk}/specifications/{term}
+        * api/resources/{pk}/create/specifications/{term}
 
           * Add {term} to specifications of package with id == {pk}
 
         **TODO:**
+
+        * id should be a full iri, shortened with a prefix
+
+          * Add prefixes as necessary to metadata
 
         * we must implement and use some sort of
           create_resource_queryset function instead of
@@ -199,12 +192,12 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self._get_resource_queryset(request)
+        queryset = self.get_modifiable_resources(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
         if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
+            return Response('No permission to edit package with id %s' % pk,
                             content_type=status.HTTP_404_NOT_FOUND)
 
         # Validate term as JSON
@@ -336,6 +329,18 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             queryset = queryset.filter(Q(public=public))
 
         return queryset.order_by('-ontology', 'public')
+
+    def get_modifiable_resources(self, request):
+        """Get queryset of resources user has permission to modify."""
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Return resources owned by user
+            return Package.objects.filter(Q(owner=user))
+        else:
+            # User cannot modify any resources if they are not
+            # authenticated. Return an empty queryset.
+            return Package.objects.none()
 
     # See https://stackoverflow.com/questions/7204805/dictionaries-of-dictionaries-merge/7205107#7205107
     def _merge(self, a, b, path=None):

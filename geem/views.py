@@ -18,6 +18,8 @@ from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
 from django.db import connection
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 from geem.models import Package
 from geem.forms import PackageForm
@@ -81,7 +83,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
-    @action(detail=True, url_path='specifications(?:/(?P<id>[^/.]+))?')
+    @action(detail=True, url_path='specifications(?:/(?P<id>.+))?')
     def specifications(self, request, pk=None, id=None):
         """Get entire specifications, or a single term, from a package.
 
@@ -112,7 +114,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return Response(list(queryset)[0], content_type=status.HTTP_200_OK)
 
-    @action(detail=True, url_path='delete/specifications(?:/(?P<id>[^/.]+))?')
+    @action(detail=True, url_path='delete/specifications(?:/(?P<id>.+))?')
     def delete_specifications(self, request, pk=None, id=None):
         """Delete entire specifications, or one term, from a package.
 
@@ -164,8 +166,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response('Successfully deleted',
                         content_type=status.HTTP_200_OK)
 
-    @action(detail=True,
-            url_path='create/specifications/(?P<term>[^/.]+)')
+    @action(detail=True, url_path='create/specifications/(?P<term>.+)')
     def create_specifications(self, request, pk=None, term=None):
         """Add a term to the specifications of a package.
 
@@ -210,16 +211,22 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         if type(term_json_obj) is not dict:
             return Response('entry is not a valid JSON object',
                             content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate 'id' key exists in entry
+        # Validate 'id' key exists in term
         if 'id' not in term_json_obj:
             return Response('entry missing id value',
                             content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate 'id' key does not already exist in package
-        id = term_json_obj['id']
-        id_query = 'contents__specifications__' + id
-        if queryset.values(id_query)[0][id_query] is not None:
-            return Response('id %s already exists in package %s' % (id, pk),
+        # Validate 'id' is an IRI
+        term_id = term_json_obj['id']
+        try:
+            URLValidator()(term_id)
+        except ValidationError:
+            return Response('id must be a valid IRI',
                             content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' key does not already exist in package
+        term_id_query = 'contents__specifications__' + term_id
+        if queryset.values(term_id_query)[0][term_id_query] is not None:
+            message = 'id %s already exists in package %s' % (term_id, pk)
+            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -227,7 +234,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             # creation query used below.
             cursor.execute("update geem_package set contents=(jsonb_set("
                            "contents, '{specifications, %s}', jsonb '%s')) "
-                           "where id=%s" % (id, term, pk))
+                           "where id=%s" % (term_id, term, pk))
 
         return Response('Successfully created',
                         content_type=status.HTTP_404_NOT_FOUND)

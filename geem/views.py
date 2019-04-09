@@ -151,7 +151,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self.get_modifiable_resources(request)
+        queryset = self.get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
@@ -215,7 +215,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self.get_modifiable_resources(request)
+        queryset = self.get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
@@ -365,8 +365,14 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return queryset.order_by('-ontology', 'public')
 
-    def get_modifiable_resources(self, request):
-        """Get queryset of resources user has permission to modify."""
+    def get_modifiable_packages(self, request):
+        """Get QuerySet of packages user has permission to modify.
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :return: Packages user has permission to modify
+        :rtype: QuerySet
+        """
         user = self.request.user
 
         if user.is_authenticated:

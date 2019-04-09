@@ -83,18 +83,26 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
-    @action(detail=True, url_path='specifications(?:/(?P<id>.+))?')
-    def specifications(self, request, pk=None, id=None):
+    @action(detail=True, url_path='specifications(?:/(?P<term_id>.+))?')
+    def specifications(self, request, pk, term_id=None):
         """Get entire specifications, or a single term, from a package.
 
         * api/resources/{pk}/specifications
 
           * Specifications of package with id == {pk}
 
-        * api/resources/{pk}/specifications/{id}
+        * api/resources/{pk}/specifications/{term_id}
 
-          * Get term with id == {id} from specifications of package
-            with id == {pk}
+          * Get term with id == {term_id} from specifications of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term_id: id of term inside package specifications
+        :return: One or all terms from package specifications, or
+                 appropriate error message
+        :rtype: rest_framework.request.Response
         """
         # Query specified package
         queryset = self._get_resource_queryset(request)
@@ -106,16 +114,16 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                             content_type=status.HTTP_404_NOT_FOUND)
 
         # Query entire specifications or exact term
-        if id is None:
+        if term_id is None:
             query = 'contents__specifications'
         else:
-            query = 'contents__specifications__' + id
+            query = 'contents__specifications__' + term_id
         queryset = queryset.values(query)
 
         return Response(list(queryset)[0], content_type=status.HTTP_200_OK)
 
-    @action(detail=True, url_path='delete/specifications(?:/(?P<id>.+))?')
-    def delete_specifications(self, request, pk=None, id=None):
+    @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
+    def delete_specifications(self, request, pk, term_id=None):
         """Delete entire specifications, or one term, from a package.
 
         * api/resources/{pk}/delete/specifications
@@ -123,10 +131,17 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * Delete all terms in specifications of package with id ==
             {pk}
 
-        * api/resources/{pk}/delete/specifications/{id}
+        * api/resources/{pk}/delete/specifications/{term_id}
 
-          * Delete term with id == {id} from specifications of package
-            with id == {pk}
+          * Delete term with id == {term_id} from specifications of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term_id: id of term inside package specifications
+        :return: Confirmation of deletion, or appropriate error message
+        :rtype: rest_framework.request.Response
 
         **TODO:**
 
@@ -148,31 +163,38 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
             # deletion queries used below.
-            if id is None:
+            if term_id is None:
                 cursor.execute("update geem_package set contents=(select "
                                "jsonb_set(contents, '{specifications}', "
                                "jsonb '{}')) where id=%s" % pk)
             else:
                 # Validate 'id' key exists in package
-                id_query = 'contents__specifications__' + id
+                id_query = 'contents__specifications__' + term_id
                 if queryset.values(id_query)[0][id_query] is None:
                     return Response(
-                        'id %s does not exist in package %s' % (id, pk),
+                        'id %s does not exist in package %s' % (term_id, pk),
                         content_type=status.HTTP_400_BAD_REQUEST)
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
-                               "'{specifications,%s}') where id=%s" % (id, pk))
+                               "'{specifications,%s}') where id=%s" % (term_id, pk))
 
         return Response('Successfully deleted',
                         content_type=status.HTTP_200_OK)
 
     @action(detail=True, url_path='create/specifications/(?P<term>.+)')
-    def create_specifications(self, request, pk=None, term=None):
+    def create_specifications(self, request, pk, term):
         """Add a term to the specifications of a package.
 
         * api/resources/{pk}/create/specifications/{term}
 
           * Add {term} to specifications of package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term: JSON object corresponding to new term
+        :return: Confirmation of creation, or appropriate error message
+        :rtype: rest_framework.request.Response
 
         **TODO:**
 
@@ -227,7 +249,10 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         if queryset.values(term_id_query)[0][term_id_query] is not None:
             message = 'id %s already exists in package %s' % (term_id, pk)
             return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
-
+        # Get a shortened version of term_id via a substitution prefix.
+        # Add the substitution prefix to the package's context if
+        # necessary.
+        shortened_term_id = self.translate_iri(term_id, pk)
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
@@ -238,6 +263,9 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return Response('Successfully created',
                         content_type=status.HTTP_404_NOT_FOUND)
+
+    def translate_iri(self, term_id, pk):
+        return ""
 
     def create(self, request, pk=None):
 

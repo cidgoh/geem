@@ -226,15 +226,18 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         except ValidationError:
             return Response('id must be a valid IRI',
                             content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate 'id' key does not already exist in package
-        term_id_query = 'contents__specifications__' + term_id
-        if queryset.values(term_id_query)[0][term_id_query] is not None:
-            message = 'id %s already exists in package %s' % (term_id, pk)
-            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
+
         # Get a shortened version of term_id via a substitution prefix.
         # Add the substitution prefix to the package's context if
         # necessary.
         shortened_term_id = self._translate_iri(request, term_id, pk)
+
+        # Validate shortened 'id' key does not already exist in package
+        term_id_query = 'contents__specifications__' + shortened_term_id
+        if queryset.values(term_id_query)[0][term_id_query] is not None:
+            message = 'id %s already exists in package %s' % (term_id, pk)
+            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
+
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on

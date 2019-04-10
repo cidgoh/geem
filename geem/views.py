@@ -64,6 +64,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
     API endpoint that lists packages.
     See: https://www.django-rest-framework.org/api-guide/viewsets/#viewset-actions
     Serializer differs based on list or individual record view.
+
+    **TODO:**
+
+    * the raw SQL queries in some of the functions below that deal with
+      jsonb may be replaceable with something simpler in the future
+
+      * see https://code.djangoproject.com/ticket/29112
     """
     authentication_classes = [OAuth2Authentication, SessionAuthentication]
     permission_classes = [permissions.AllowAny]
@@ -142,16 +149,9 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str term_id: id of term inside package specifications
         :return: Confirmation of deletion, or appropriate error message
         :rtype: rest_framework.request.Response
-
-        **TODO:**
-
-        * the raw SQL queries in this function may be replaceable with
-          something simpler in the future
-
-          * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self.get_modifiable_packages(request)
+        queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
@@ -195,27 +195,9 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str term: JSON object corresponding to new term
         :return: Confirmation of creation, or appropriate error message
         :rtype: rest_framework.request.Response
-
-        **TODO:**
-
-        * id should be a full iri, shortened with a prefix
-
-          * Add prefixes as necessary to metadata
-
-        * we must implement and use some sort of
-          create_resource_queryset function instead of
-          _get_resource_queryset
-
-          * just because you can view a queryset, does not mean you
-            should be able to add to it
-
-        * the raw SQL queries in this function may be replaceable with
-          something simpler in the future
-
-          * see https://code.djangoproject.com/ticket/29112
         """
         # Query specified package
-        queryset = self.get_modifiable_packages(request)
+        queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
         # Unable to query any packages
@@ -252,20 +234,85 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Get a shortened version of term_id via a substitution prefix.
         # Add the substitution prefix to the package's context if
         # necessary.
-        shortened_term_id = self.translate_iri(term_id, pk)
+        shortened_term_id = self._translate_iri(request, term_id, pk)
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
             # creation query used below.
             cursor.execute("update geem_package set contents=(jsonb_set("
                            "contents, '{specifications, %s}', jsonb '%s')) "
-                           "where id=%s" % (term_id, term, pk))
+                           "where id=%s" % (shortened_term_id, term, pk))
 
         return Response('Successfully created',
                         content_type=status.HTTP_404_NOT_FOUND)
 
-    def translate_iri(self, term_id, pk):
-        return ""
+    def _translate_iri(self, request, term_id, pk):
+        """Attempt to shorten term_id with substitution prefix.
+
+        term_id should be an IRI.
+
+        pk corresponds to the id of a single package. If an appropriate
+        prefix does not exist inside its @context, one will be added.
+
+        Large chunks of this function are lifted from get_entity_id in
+        ontohelper. Therefore, this follows several of the assumptions
+        in ontohelper as well:
+
+        * IRI follows BFO format
+
+        * If a prefix does not already exist in @context, the new
+          prefix generation will yield at least 2 characters
+
+          * Therefore, this function may fail to yield an appropriate
+            prefix, in which case the unmodified term_id is returned
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Existing prefixes to consider
+        context = queryset.values('contents__@context')
+        context = context[0]['contents__@context']
+
+        # Split term_id into path, fragment and separator
+        if '_' in term_id:
+            (path, fragment) = term_id.rsplit('_', 1)
+            separator = '_'
+        elif '#' in term_id:
+            (path, fragment) = term_id.rsplit('#', 1)
+            separator = '#'
+        else:
+            (path, fragment) = term_id.rsplit('/', 1)
+            separator = '/'
+
+        # Iterate over prefixes and their short-hand substitutions in
+        # context.
+        for substitution_prefix, prefix in context.items():
+            # Does the beginning of term_id match any of the prefixes
+            # in context?
+            if path+separator == prefix:
+                # Replace the beginning with the substitution and
+                # return.
+                return substitution_prefix+":"+fragment
+
+        # If we reach here, we were unable to find a substitution in
+        # context. We must therefore add one of our own.
+        new_prefix = path.rsplit('/', 1)[1]
+
+        # At least two characters are required to form a prefix, and
+        # the first two characters must not be numbers.
+        if new_prefix[0:2].isalpha():
+            # Connect to the default database service
+            with connection.cursor() as cursor:
+                # See https://stackoverflow.com/a/23500670 for details on
+                # creation query used below.
+                cursor.execute("update geem_package set contents=(jsonb_set("
+                               "contents, '{@context, %s}', '\"%s\"')) where "
+                               "id=%s" % (new_prefix, path+separator, pk))
+            return new_prefix + ":" + fragment
+
+        # Unable to shorten term_id
+        return term_id
 
     def create(self, request, pk=None):
 
@@ -365,14 +412,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return queryset.order_by('-ontology', 'public')
 
-    def get_modifiable_packages(self, request):
-        """Get QuerySet of packages user has permission to modify.
-
-        :param rest_framework.request.Request request: Front-end
-                                                       request metadata
-        :return: Packages user has permission to modify
-        :rtype: QuerySet
-        """
+    def _get_modifiable_packages(self, request):
+        """Get QuerySet of packages user has permission to modify."""
         user = self.request.user
 
         if user.is_authenticated:

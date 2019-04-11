@@ -125,9 +125,9 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__specifications'
         else:
             query = 'contents__specifications__' + term_id
-        queryset = queryset.values(query)
+        queryset = queryset.values_list(query, flat=True)
 
-        return Response(list(queryset)[0], content_type=status.HTTP_200_OK)
+        return Response((queryset)[0], content_type=status.HTTP_200_OK)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
     def delete_specifications(self, request, pk, term_id=None):
@@ -169,14 +169,15 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                "jsonb '{}')) where id=%s" % pk)
             else:
                 # Validate 'id' key exists in package
-                id_query = 'contents__specifications__' + term_id
-                if queryset.values(id_query)[0][id_query] is None:
+                term_id_query = 'contents__specifications__' + term_id
+                if queryset.values_list(term_id_query, flat=True)[0] is None:
                     return Response(
                         'id %s does not exist in package %s' % (term_id, pk),
                         content_type=status.HTTP_400_BAD_REQUEST)
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
-                               "'{specifications,%s}') where id=%s" % (term_id, pk))
+                               "'{specifications,%s}') where id=%s"
+                               % (term_id, pk))
 
         return Response('Successfully deleted',
                         content_type=status.HTTP_200_OK)
@@ -230,11 +231,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Get a shortened version of term_id via a substitution prefix.
         # Add the substitution prefix to the package's context if
         # necessary.
-        shortened_term_id = self._translate_iri(request, term_id, pk)
+        shortened_term_id = self._translate_iri(term_id, queryset)
 
         # Validate shortened 'id' key does not already exist in package
         term_id_query = 'contents__specifications__' + shortened_term_id
-        if queryset.values(term_id_query)[0][term_id_query] is not None:
+        if queryset.values_list(term_id_query, flat=True)[0] is not None:
             message = 'id %s already exists in package %s' % (term_id, pk)
             return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
 
@@ -249,13 +250,14 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response('Successfully created',
                         content_type=status.HTTP_404_NOT_FOUND)
 
-    def _translate_iri(self, request, term_id, pk):
+    def _translate_iri(self, term_id, queryset):
         """Attempt to shorten term_id with substitution prefix.
 
         term_id should be an IRI.
 
-        pk corresponds to the id of a single package. If an appropriate
-        prefix does not exist inside its @context, one will be added.
+        queryset should be a QuerySet referring to a single package. If
+        an appropriate prefix does not exist inside that package's
+        @context, one will be added.
 
         Large chunks of this function are lifted from get_entity_id in
         ontohelper. Therefore, this follows several of the assumptions
@@ -269,13 +271,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
           * Therefore, this function may fail to yield an appropriate
             prefix, in which case the unmodified term_id is returned
         """
-        # Query specified package
-        queryset = self._get_modifiable_packages(request)
-        queryset = queryset.filter(pk=pk)
-
         # Existing prefixes to consider
-        context = queryset.values('contents__@context')
-        context = context[0]['contents__@context']
+        context = queryset.values_list('contents__@context', flat=True)[0]
 
         # Split term_id into path, fragment and separator
         if '_' in term_id:
@@ -305,6 +302,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # At least two characters are required to form a prefix, and
         # the first two characters must not be numbers.
         if new_prefix[0:2].isalpha():
+            # id of package in queryset
+            pk = queryset.values_list('id', flat=True)[0]
             # Connect to the default database service
             with connection.cursor() as cursor:
                 # See https://stackoverflow.com/a/23500670 for details on

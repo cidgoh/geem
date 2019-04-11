@@ -270,10 +270,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
           * Therefore, this function may fail to yield an appropriate
             prefix, in which case the unmodified term_id is returned
-        """
-        # Existing prefixes to consider
-        context = queryset.values_list('contents__@context', flat=True)[0]
 
+        ontohelper does not account for IRI values with identical
+        prefixes but different separators. If an appropriate prefix for
+        term_id exists in @context, but with a different separator, it
+        will not be overwritten, and an untouched term_id will be
+        returned.
+        """
         # Split term_id into path, fragment and separator
         if '_' in term_id:
             (path, fragment) = term_id.rsplit('_', 1)
@@ -285,23 +288,25 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             (path, fragment) = term_id.rsplit('/', 1)
             separator = '/'
 
-        # Iterate over prefixes and their short-hand substitutions in
-        # context.
-        for substitution_prefix, prefix in context.items():
-            # Does the beginning of term_id match any of the prefixes
-            # in context?
-            if path+separator == prefix:
-                # Replace the beginning with the substitution and
-                # return.
-                return substitution_prefix+":"+fragment
-
-        # If we reach here, we were unable to find a substitution in
-        # context. We must therefore add one of our own.
-        new_prefix = path.rsplit('/', 1)[1]
+        # Substitution prefix based on path
+        substitution_prefix = path.rsplit('/', 1)[1]
 
         # At least two characters are required to form a prefix, and
-        # the first two characters must not be numbers.
-        if new_prefix[0:2].isalpha():
+        # the first two characters must not be numbers. If this
+        # condition is not satisfied, we return the untouched term_id.
+        if len(substitution_prefix) < 2:
+            return term_id
+        if not substitution_prefix[0:2].isalpha():
+            return term_id
+
+        # Attempt to query substitution prefix from @context of package
+        # in queryset.
+        lookup = 'contents__@context__' + substitution_prefix
+        substitution_prefix_query = queryset.values_list(lookup, flat=True)
+
+        # Substitution prefix does not exist in @context, so we must
+        # add it.
+        if substitution_prefix_query[0] is None:
             # id of package in queryset
             pk = queryset.values_list('id', flat=True)[0]
             # Connect to the default database service
@@ -310,8 +315,16 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 # creation query used below.
                 cursor.execute("update geem_package set contents=(jsonb_set("
                                "contents, '{@context, %s}', '\"%s\"')) where "
-                               "id=%s" % (new_prefix, path+separator, pk))
-            return new_prefix + ":" + fragment
+                               "id=%s"
+                               % (substitution_prefix, path+separator, pk))
+            # Return term_id shortened with substitution prefix
+            return substitution_prefix + ":" + fragment
+
+        # Substitution prefix exists in context, and with the correct
+        # separator.
+        if substitution_prefix_query[0] == path+separator:
+            # Return term_id shortened with substitution prefix
+            return substitution_prefix + ":" + fragment
 
         # Unable to shorten term_id
         return term_id

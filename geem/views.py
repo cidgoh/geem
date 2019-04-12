@@ -17,6 +17,9 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
+from django.db import connection
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 from geem.models import Package
 from geem.forms import PackageForm
@@ -61,6 +64,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
     API endpoint that lists packages.
     See: https://www.django-rest-framework.org/api-guide/viewsets/#viewset-actions
     Serializer differs based on list or individual record view.
+
+    **TODO:**
+
+    * the raw SQL queries in some of the functions below that deal with
+      jsonb may be replaceable with something simpler in the future
+
+      * see https://code.djangoproject.com/ticket/29112
     """
     authentication_classes = [OAuth2Authentication, SessionAuthentication]
     permission_classes = [permissions.AllowAny]
@@ -80,33 +90,244 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         package = get_object_or_404(queryset, pk=pk)  # OR .get(pk=1) ???
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
-    @action(detail=True, url_path='specifications(?:/(?P<id>[^/.]+))?')
-    def specifications(self, request, pk=None, id=None):
+    @action(detail=True, url_path='specifications(?:/(?P<term_id>.+))?')
+    def specifications(self, request, pk, term_id=None):
         """Get entire specifications, or a single term, from a package.
 
         * api/resources/{pk}/specifications
 
           * Specifications of package with id == {pk}
 
-        * api/resources/{pk}/specifications/{id}
+        * api/resources/{pk}/specifications/{term_id}
 
-          * Get term from specifications with id == {id}
+          * Get term with id == {term_id} from specifications of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term_id: id of term inside package specifications
+        :return: One or all terms from package specifications, or
+                 appropriate error message
+        :rtype: rest_framework.request.Response
         """
-        # Query package
+        # Query specified package
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No access to package with id %s' % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
+
         # Query entire specifications or exact term
-        if id is None:
+        if term_id is None:
             query = 'contents__specifications'
         else:
-            query = 'contents__specifications__' + id
-        queryset = queryset.values(query)
+            query = 'contents__specifications__' + term_id
+        queryset = queryset.values_list(query, flat=True)
 
+        return Response((queryset)[0], content_type=status.HTTP_200_OK)
+
+    @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
+    def delete_specifications(self, request, pk, term_id=None):
+        """Delete entire specifications, or one term, from a package.
+
+        * api/resources/{pk}/delete/specifications
+
+          * Delete all terms in specifications of package with id ==
+            {pk}
+
+        * api/resources/{pk}/delete/specifications/{term_id}
+
+          * Delete term with id == {term_id} from specifications of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term_id: id of term inside package specifications
+        :return: Confirmation of deletion, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if term_id is None:
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{specifications}', "
+                               "jsonb '{}')) where id=%s" % pk)
+            else:
+                # Validate 'id' key exists in package
+                term_id_query = 'contents__specifications__' + term_id
+                if queryset.values_list(term_id_query, flat=True)[0] is None:
+                    return Response(
+                        'id %s does not exist in package %s' % (term_id, pk),
+                        content_type=status.HTTP_400_BAD_REQUEST)
+                # Delete exact term
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{specifications,%s}') where id=%s"
+                               % (term_id, pk))
+
+        return Response('Successfully deleted',
+                        content_type=status.HTTP_200_OK)
+
+    @action(detail=True, url_path='create/specifications/(?P<term>.+)')
+    def create_specifications(self, request, pk, term):
+        """Add a term to the specifications of a package.
+
+        * api/resources/{pk}/create/specifications/{term}
+
+          * Add {term} to specifications of package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str term: JSON object corresponding to new term
+        :return: Confirmation of creation, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            content_type=status.HTTP_404_NOT_FOUND)
+
+        # Validate term as JSON
         try:
-            return Response(list(queryset)[0])
-        except IndexError:
-            raise Http404("No access to package with id %s" % pk)
+            term_json_obj = json.loads(term)
+        except json.JSONDecodeError:
+            return Response('entry is not a valid JSON object',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate term as JSON object
+        if type(term_json_obj) is not dict:
+            return Response('entry is not a valid JSON object',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' key exists in term
+        if 'id' not in term_json_obj:
+            return Response('entry missing id value',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' is an IRI
+        term_id = term_json_obj['id']
+        try:
+            URLValidator()(term_id)
+        except ValidationError:
+            return Response('id must be a valid IRI',
+                            content_type=status.HTTP_400_BAD_REQUEST)
+
+        # Get a shortened version of term_id via a substitution prefix.
+        # Add the substitution prefix to the package's context if
+        # necessary.
+        shortened_term_id = self._translate_iri(term_id, queryset)
+
+        # Validate shortened 'id' key does not already exist in package
+        term_id_query = 'contents__specifications__' + shortened_term_id
+        if queryset.values_list(term_id_query, flat=True)[0] is not None:
+            message = 'id %s already exists in package %s' % (term_id, pk)
+            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_set("
+                           "contents, '{specifications, %s}', jsonb '%s')) "
+                           "where id=%s" % (shortened_term_id, term, pk))
+
+        return Response('Successfully created',
+                        content_type=status.HTTP_404_NOT_FOUND)
+
+    def _translate_iri(self, term_id, queryset):
+        """Attempt to shorten term_id with substitution prefix.
+
+        term_id should be an IRI.
+
+        queryset should be a QuerySet referring to a single package. If
+        an appropriate prefix does not exist inside that package's
+        @context, one will be added.
+
+        Large chunks of this function are lifted from get_entity_id in
+        ontohelper. Therefore, this follows several of the assumptions
+        in ontohelper as well:
+
+        * IRI follows BFO format
+
+        * If a prefix does not already exist in @context, the new
+          prefix generation will yield at least 2 characters
+
+          * Therefore, this function may fail to yield an appropriate
+            prefix, in which case the unmodified term_id is returned
+
+        ontohelper does not account for IRI values with identical
+        prefixes but different separators. If an appropriate prefix for
+        term_id exists in @context, but with a different separator, it
+        will not be overwritten, and an untouched term_id will be
+        returned.
+        """
+        # Split term_id into path, fragment and separator
+        if '_' in term_id:
+            (path, fragment) = term_id.rsplit('_', 1)
+            separator = '_'
+        elif '#' in term_id:
+            (path, fragment) = term_id.rsplit('#', 1)
+            separator = '#'
+        else:
+            (path, fragment) = term_id.rsplit('/', 1)
+            separator = '/'
+
+        # Substitution prefix based on path
+        substitution_prefix = path.rsplit('/', 1)[1]
+
+        # At least two characters are required to form a prefix, and
+        # the first two characters must not be numbers. If this
+        # condition is not satisfied, we return the untouched term_id.
+        if len(substitution_prefix) < 2:
+            return term_id
+        if not substitution_prefix[0:2].isalpha():
+            return term_id
+
+        # Attempt to query substitution prefix from @context of package
+        # in queryset.
+        lookup = 'contents__@context__' + substitution_prefix
+        substitution_prefix_query = queryset.values_list(lookup, flat=True)
+
+        # Substitution prefix does not exist in @context, so we must
+        # add it.
+        if substitution_prefix_query[0] is None:
+            # id of package in queryset
+            pk = queryset.values_list('id', flat=True)[0]
+            # Connect to the default database service
+            with connection.cursor() as cursor:
+                # See https://stackoverflow.com/a/23500670 for details on
+                # creation query used below.
+                cursor.execute("update geem_package set contents=(jsonb_set("
+                               "contents, '{@context, %s}', '\"%s\"')) where "
+                               "id=%s"
+                               % (substitution_prefix, path+separator, pk))
+            # Return term_id shortened with substitution prefix
+            return substitution_prefix + ":" + fragment
+
+        # Substitution prefix exists in context, and with the correct
+        # separator.
+        if substitution_prefix_query[0] == path+separator:
+            # Return term_id shortened with substitution prefix
+            return substitution_prefix + ":" + fragment
+
+        # Unable to shorten term_id
+        return term_id
 
     def create(self, request, pk=None):
 
@@ -205,6 +426,18 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             queryset = queryset.filter(Q(public=public))
 
         return queryset.order_by('-ontology', 'public')
+
+    def _get_modifiable_packages(self, request):
+        """Get QuerySet of packages user has permission to modify."""
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Return resources owned by user
+            return Package.objects.filter(Q(owner=user))
+        else:
+            # User cannot modify any resources if they are not
+            # authenticated. Return an empty queryset.
+            return Package.objects.none()
 
     # See https://stackoverflow.com/questions/7204805/dictionaries-of-dictionaries-merge/7205107#7205107
     def _merge(self, a, b, path=None):

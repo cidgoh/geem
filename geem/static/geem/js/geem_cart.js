@@ -40,10 +40,30 @@ function init_cart_tab() {
 		render_cart_controls()
 	})
 
+    $('#userPackages').on('change', function() {
+        // User-selected draft package to add cart items to
+        top.cart_target_resource_id = this.value
+    });
+
 	$("#addToPackageButton").on('mouseenter', render_cart_package_selection_modal)
 
 	$("#updatePackageButton").on('click', function() {
-		alert('Shopping cart package update coming soon!')
+		const package_to_update_id = top.cart_target_resource_id;
+		if (package_to_update_id === undefined) {
+		    alert('Please select a package first!');
+		    return;
+        }
+        const cart_items = top.cart.values();
+        for (let key in cart_items) {
+            let cart_item = cart_items[key];
+            api.add_to_resource_specifications(cart_item, package_to_update_id)
+                .then(function (success_message) {
+                    console.log(success_message)
+                })
+                .catch(function(error_message) {
+                    alert(error_message)
+                });
+        }
 	})
 
 }

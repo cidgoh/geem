@@ -118,7 +118,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No access to package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Query entire specifications or exact term
         if term_id is None:
@@ -127,7 +127,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__specifications__' + term_id
         queryset = queryset.values_list(query, flat=True)
 
-        return Response((queryset)[0], content_type=status.HTTP_200_OK)
+        return Response((queryset)[0], status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
     def delete_specifications(self, request, pk, term_id=None):
@@ -157,7 +157,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No permission to edit package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -173,14 +173,14 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 if queryset.values_list(term_id_query, flat=True)[0] is None:
                     return Response(
                         'id %s does not exist in package %s' % (term_id, pk),
-                        content_type=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{specifications,%s}') where id=%s"
                                % (term_id, pk))
 
         return Response('Successfully deleted',
-                        content_type=status.HTTP_200_OK)
+                        status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='create/specifications/(?P<term>.+)')
     def create_specifications(self, request, pk, term):
@@ -204,29 +204,29 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No permission to edit package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Validate term as JSON
         try:
             term_json_obj = json.loads(term)
         except json.JSONDecodeError:
             return Response('entry is not a valid JSON object',
-                            content_type=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
         # Validate term as JSON object
         if type(term_json_obj) is not dict:
             return Response('entry is not a valid JSON object',
-                            content_type=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
         # Validate 'id' key exists in term
         if 'id' not in term_json_obj:
             return Response('entry missing id value',
-                            content_type=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
         # Validate 'id' is an IRI
         term_id = term_json_obj['id']
         try:
             URLValidator()(term_id)
         except ValidationError:
             return Response('id must be a valid IRI',
-                            content_type=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Get a shortened version of term_id via a substitution prefix.
         # Add the substitution prefix to the package's context if
@@ -237,7 +237,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         term_id_query = 'contents__specifications__' + shortened_term_id
         if queryset.values_list(term_id_query, flat=True)[0] is not None:
             message = 'id %s already exists in package %s' % (term_id, pk)
-            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -248,7 +248,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                            "where id=%s" % (shortened_term_id, term, pk))
 
         return Response('Successfully created',
-                        content_type=status.HTTP_404_NOT_FOUND)
+                        status=status.HTTP_404_NOT_FOUND)
 
     def _translate_iri(self, term_id, queryset):
         """Attempt to shorten term_id with substitution prefix.

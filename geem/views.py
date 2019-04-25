@@ -250,6 +250,149 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response('Successfully created',
                         status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
+    def context(self, request, pk, prefix=None):
+        """Get entire @context, or a single IRI, from a package.
+
+        * api/resources/{pk}/context
+
+          * @context of package with id == {pk}
+
+        * api/resources/{pk}/context/{prefix}
+
+          * Get IRI with prefix == {prefix} from @context of package
+            with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str prefix: prefix of IRI value inside package @context
+        :return: One or all IRI values from package @context, or
+                 appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No access to package with id %s' % pk,
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Query entire @context or exact prefix
+        if prefix is None:
+            query = 'contents__@context'
+        else:
+            query = 'contents__@context__' + prefix
+        queryset = queryset.values_list(query, flat=True)
+
+        return Response(queryset[0], status=status.HTTP_200_OK)
+
+    @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
+    def delete_context(self, request, pk, prefix=None):
+        """Delete entire @context, or one IRI, from a package.
+
+        * api/resources/{pk}/delete/context
+
+          * Delete all IRI values in @context of package with id ==
+            {pk}
+
+        * api/resources/{pk}/delete/context/{prefix}
+
+          * Delete IRI with prefix == {prefix} from @context of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str prefix: prefix of IRI value inside package @context
+        :return: Confirmation of deletion, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if prefix is None:
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{@context}', "
+                               "jsonb '{}')) where id=%s" % pk)
+            else:
+                # Validate 'prefix' key exists in package
+                prefix_query = 'contents__@context__' + prefix
+                if queryset.values_list(prefix_query, flat=True)[0] is None:
+                    return Response(
+                        'prefix %s does not exist in package %s'
+                        % (prefix, pk),
+                        status=status.HTTP_400_BAD_REQUEST)
+                # Delete exact IRI value
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{@context,%s}') where id=%s" % (prefix, pk))
+
+        return Response('Successfully deleted',
+                        status=status.HTTP_200_OK)
+
+    @action(detail=True,
+            url_path='create/context/(?P<prefix>[^/.]+)/(?P<iri>.+)')
+    def create_context(self, request, pk, prefix, iri):
+        """Add an IRI to the @context of a package.
+
+        * api/resources/{pk}/create/context/{prefix}/{iri}
+
+          * Add {prefix}: {iri} key-value pair to @context of package
+            with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str prefix: Translates to {iri} parameter
+        :param str iri: Translates to {prefix} parameter
+        :return: Confirmation of creation, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate 'iri' is a proper IRI value
+        try:
+            URLValidator()(iri)
+        except ValidationError:
+            return Response('Must supply a valid IRI',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate prefix does not already exist in package
+        term_id_query = 'contents__@context__' + prefix
+        if queryset.values_list(term_id_query, flat=True)[0] is not None:
+            message = 'prefix %s already exists in package %s' % (prefix, pk)
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_insert("
+                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
+                           " id=%s" % (prefix, iri, pk))
+
+        return Response('Successfully created',
+                        status=status.HTTP_404_NOT_FOUND)
+
     def _translate_iri(self, term_id, queryset):
         """Attempt to shorten term_id with substitution prefix.
 

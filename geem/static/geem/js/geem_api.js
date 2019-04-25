@@ -169,36 +169,35 @@ function GeemAPI() {
 	    });
 	}
 
-
-    this.add_to_resource_specifications = function(cart_item,
-                                                   package_to_update_id) {
-        /*
-        TODO: ...
-         */
-        const new_term_obj = {
-            "id": cart_item["id"]
-        };
-        const new_term_str = JSON.stringify(new_term_obj)
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: API_RESOURCES_URL + package_to_update_id
-                    + '/create/specifications/' + new_term_str + '/',
-                success: function (data, textStatus, jqXHR) {
-                    // TODO: add cart_item to appropriate package
-                    resolve('Should reach here')
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    // const error = eval('('
-                    // 	               + xhr.responseText
-                    // 				   + ')');
-                    reject(Error('Unable to update package '
-                        + package_to_update_id + ' with cart item '
-                        + cart_item.label + '.\n\n'
-                        + jqXHR.responseText))
-                }
-            })
-        })
-    };
+	this.add_to_resource_specifications = function(cart_item,
+						       package_to_update_id) {
+		/*
+                TODO: ...
+                 */
+		const new_term_obj = {
+			"id": cart_item["id"]
+		};
+		const new_term_str = JSON.stringify(new_term_obj)
+		return new Promise(function (resolve, reject) {
+			$.ajax({
+				url: API_RESOURCES_URL + package_to_update_id
+					+ '/create/specifications/' + new_term_str + '/',
+				success: function (data, textStatus, jqXHR) {
+					// TODO: add cart_item to appropriate package
+					resolve('Should reach here')
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					// const error = eval('('
+					// 	               + xhr.responseText
+					// 				   + ')');
+					reject(Error('Unable to update package '
+						+ package_to_update_id + ' with cart item '
+						+ cart_item.label + '.\n\n'
+						+ jqXHR.responseText))
+				}
+			})
+		})
+	};
 
 
 	this.cart_change_item = function(entity_path, action, versionIRI = null) {

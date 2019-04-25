@@ -47,11 +47,11 @@ function init_cart_tab() {
 
 	$("#addToPackageButton").on('mouseenter', render_cart_package_selection_modal)
 
-	$("#updatePackageButton").on('click', function() {
-		const package_to_update_id = top.cart_target_resource_id;
-		if (package_to_update_id === undefined) {
-		    alert('Please select a package first!');
-		    return;
+    $("#updatePackageButton").on('click', function() {
+        const package_to_update_id = top.cart_target_resource_id;
+        if (package_to_update_id === undefined) {
+            alert('Please select a package first!');
+            return;
         }
         const cart_items = top.cart.values();
         for (let key in cart_items) {
@@ -64,7 +64,7 @@ function init_cart_tab() {
                     alert(error_message)
                 });
         }
-	})
+    })
 
 }
 

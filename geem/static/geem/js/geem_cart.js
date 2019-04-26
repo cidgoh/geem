@@ -92,8 +92,11 @@ function get_cart_items_full_prefixes(cart_items) {
 	const cart_items_full_prefixes_promises = [];
 	for (let key in cart_items) {
 		let cart_item = cart_items[key];
-		cart_items_full_prefixes_promises
-			.push(api.get_cart_item_full_prefix(cart_item));
+		let cart_item_prefix = cart_item.id.split(':', 1)[0];
+
+		cart_items_full_prefixes_promises.push(
+			api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix)
+		);
 	}
 
 	return Promise.all(cart_items_full_prefixes_promises);
@@ -118,8 +121,9 @@ function get_cart_items_specifications(cart_items) {
 	const cart_items_specifications_promises = [];
 	for (let key in cart_items) {
 		let cart_item = cart_items[key];
-		cart_items_specifications_promises
-			.push(api.get_cart_item_specification(cart_item));
+		cart_items_specifications_promises.push(
+			api.get_resource_specification(cart_item.package_id, cart_item.id)
+		);
 	}
 
 	return Promise.all(cart_items_specifications_promises);

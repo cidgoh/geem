@@ -185,8 +185,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                "'{specifications,%s}') where id=%s"
                                % (term_id, pk))
 
-        return Response('Successfully deleted',
-                        status=status.HTTP_200_OK)
+        return Response('Successfully deleted', status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='create/specifications/(?P<term>.+)')
     def create_specifications(self, request, pk, term):
@@ -253,8 +252,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                            "contents, '{specifications, %s}', jsonb '%s')) "
                            "where id=%s" % (shortened_term_id, term, pk))
 
-        return Response('Successfully created',
-                        status=status.HTTP_404_NOT_FOUND)
+        return Response('Successfully created', status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
     def context(self, request, pk, prefix=None):
@@ -352,8 +350,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{@context,%s}') where id=%s" % (prefix, pk))
 
-        return Response('Successfully deleted',
-                        status=status.HTTP_200_OK)
+        return Response('Successfully deleted', status=status.HTTP_200_OK)
 
     @action(detail=True,
             url_path='create/context/(?P<prefix>[^/.]+)/(?P<iri>.+)')
@@ -403,8 +400,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                            "contents, '{@context, %s}', jsonb '\"%s\"')) where"
                            " id=%s" % (prefix, iri, pk))
 
-        return Response('Successfully created',
-                        status=status.HTTP_404_NOT_FOUND)
+        return Response('Successfully created', status=status.HTTP_200_OK)
 
     def _translate_iri(self, term_id, queryset):
         """Attempt to shorten term_id with substitution prefix.

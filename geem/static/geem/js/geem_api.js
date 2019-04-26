@@ -204,15 +204,15 @@ function GeemAPI() {
 		 */
 		return new Promise(function (resolve, reject) {
 			$.ajax({
-				url: API_RESOURCES_URL + cart_item.package_id + '/specifications/'
-					+ cart_item.id + '/',
+				url: API_RESOURCES_URL + resource_id + '/specifications/' + term_id
+                                        + '/',
 				success: function (data, textStatus, jqXHR) {
 					resolve(data)
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 					reject(
-						Error('Unable to get specifications for '
-							+ cart_item.label + '.\n\n'
+						Error('Unable to get specifications for ' + term_id
+                                                        + ' in package ' + resource_id + '.\n\n'
 							+ jqXHR.responseText)
 					)
 				}
@@ -220,25 +220,23 @@ function GeemAPI() {
 		})
 	};
 
-        this.get_cart_item_full_prefix = function (cart_item) {
+        this.get_resource_full_prefix = function (resource_id, prefix) {
                 /*
                 TODO: ...
                  */
-                const cart_item_prefix = cart_item.id.split(':', 1)[0];
                 return new Promise(function (resolve, reject) {
                         $.ajax({
-                                url: API_RESOURCES_URL + cart_item.package_id + '/context/'
-                                        + cart_item_prefix + '/',
+                                url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
                                 success: function (data, textStatus, jqXHR,) {
                                         const resolve_val = {};
-                                        resolve_val[cart_item_prefix] = data;
+                                        resolve_val[prefix] = data;
                                         resolve(resolve_val)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                         reject(
                                                 Error('Unable to get full prefix for '
-                                                        + cart_item.label + '.\n\n'
-                                                        + jqXHR.responseText)
+                                                        + prefix + ' in package ' + resource_id
+                                                        + '.\n\n' + jqXHR.responseText)
                                         )
                                 }
                         })

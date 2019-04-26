@@ -62,18 +62,51 @@ function init_cart_tab() {
 			return;
 		}
 
-		get_cart_items_specifications(cart_items)
-			.then(function (cart_items_specifications) {
-				return cart_items_specifications;
+		const prefixes_promise = get_cart_items_full_prefixes(cart_items);
+		const specifications_promise = get_cart_items_specifications(cart_items);
+		Promise.all([prefixes_promise, specifications_promise])
+			.then(function([cart_items_full_prefixes, cart_items_specifications]) {
+				return Promise.all([
+					add_full_prefixes_to_package(package_to_update_id,
+						cart_items_full_prefixes),
+					add_specifications_to_package(package_to_update_id,
+						cart_items_specifications)
+				]);
+			})
+			.then(function(resolve) {
+				alert('Successfully added');
 			})
 			.catch(function(err_msg) {
-				alert(err_msg + '\n\nAction aborted.')
-			})
-			.then(function (cart_items_specifications) {
-				// TODO: add prefixes to target package
+				alert(err_msg);
 			})
 	})
 
+}
+
+
+function get_cart_items_full_prefixes(cart_items) {
+	/*
+	TODO: ...
+	 */
+	// Perform context API call for each cart_item
+	const cart_items_full_prefixes_promises = [];
+	for (let key in cart_items) {
+		let cart_item = cart_items[key];
+		cart_items_full_prefixes_promises
+			.push(api.get_cart_item_full_prefix(cart_item));
+	}
+
+	return Promise.all(cart_items_full_prefixes_promises);
+}
+
+
+function add_full_prefixes_to_package(package_id, full_prefixes) {
+	/*
+	TODO: ...
+	 */
+	return new Promise(function(resolve, reject) {
+		reject(Error('stub'));
+	})
 }
 
 
@@ -85,10 +118,21 @@ function get_cart_items_specifications(cart_items) {
 	const cart_items_specifications_promises = [];
 	for (let key in cart_items) {
 		let cart_item = cart_items[key];
-		cart_items_specifications_promises.push(api.get_cart_item_specification(cart_item));
+		cart_items_specifications_promises
+			.push(api.get_cart_item_specification(cart_item));
 	}
 
 	return Promise.all(cart_items_specifications_promises);
+}
+
+
+function add_specifications_to_package(package_id, specifications) {
+	/*
+	TODO: ...
+	 */
+	return new Promise(function(resolve, reject) {
+		reject(Error('stub'));
+	})
 }
 
 

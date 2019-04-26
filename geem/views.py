@@ -127,7 +127,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__specifications__' + term_id
         queryset = queryset.values_list(query, flat=True)
 
-        return Response((queryset)[0], status=status.HTTP_200_OK)
+        # If looking for a specific term, and query failed, return 404
+        if term_id is not None and queryset[0] is None:
+            return Response('%s not found in package with id %s'
+                            % (term_id, pk),
+                            status=status.HTTP_404_NOT_FOUND)
+
+        return Response(queryset[0], status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
     def delete_specifications(self, request, pk, term_id=None):
@@ -287,6 +293,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__@context__' + prefix
         queryset = queryset.values_list(query, flat=True)
 
+        # If looking for a specific prefix, and query failed, return
+        # 404.
+        if prefix is not None and queryset[0] is None:
+            return Response('%s not found in package with id %s'
+                            % (prefix, pk),
+                            status=status.HTTP_404_NOT_FOUND)
+
         return Response(queryset[0], status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
@@ -345,7 +358,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
     @action(detail=True,
             url_path='create/context/(?P<prefix>[^/.]+)/(?P<iri>.+)')
     def create_context(self, request, pk, prefix, iri):
-        """Add an IRI to the @context of a package.
+        """Add a prefix-IRI pair to the @context of a package.
 
         * api/resources/{pk}/create/context/{prefix}/{iri}
 

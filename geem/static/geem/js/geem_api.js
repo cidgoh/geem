@@ -198,7 +198,7 @@ function GeemAPI() {
 		})
 	};
 
-	this.get_cart_item_specification = function (cart_item) {
+	this.get_resource_specification = function (resource_id, term_id) {
 		/*
 		TODO: ...
 		 */

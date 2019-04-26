@@ -169,38 +169,58 @@ function GeemAPI() {
 	    });
 	}
 
-	this.add_to_resource_specifications = function(cart_item,
-						       package_to_update_id) {
+	this.add_to_resource_specifications = function(cart_item, package_to_update_id) {
 		/*
                 TODO: ...
                  */
 		const new_term_obj = {
 			"id": cart_item["id"]
 		};
-		const new_term_str = JSON.stringify(new_term_obj)
+		const new_term_str = JSON.stringify(new_term_obj);
 		return new Promise(function (resolve, reject) {
 			$.ajax({
 				url: API_RESOURCES_URL + package_to_update_id
-					+ '/create/specifications/' + new_term_str + '/',
+					+ '/create/specifications/'
+					+ new_term_str + '/',
 				success: function (data, textStatus, jqXHR) {
-					// TODO: add cart_item to appropriate package
+					// TODO: add cart_item to appropriate
+					//  	 package.
 					resolve('Should reach here')
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					// const error = eval('('
-					// 	               + xhr.responseText
-					// 				   + ')');
-					reject(Error('Unable to update package '
-						+ package_to_update_id + ' with cart item '
-						+ cart_item.label + '.\n\n'
-						+ jqXHR.responseText))
+					reject(
+						Error('Unable to update package '
+							+ package_to_update_id + ' with cart item '
+							+ cart_item.label + '.\n\n'
+							+ jqXHR.responseText))
 				}
 			})
 		})
 	};
 
+	this.get_cart_item_specification = function (cart_item) {
+		/*
+		TODO: ...
+		 */
+		return new Promise(function (resolve, reject) {
+			$.ajax({
+				url: API_RESOURCES_URL + cart_item.package_id + '/specifications/'
+					+ cart_item.id + '/',
+				success: function (data, textStatus, jqXHR) {
+					resolve(data)
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					reject(
+						Error('Unable to get specifications for '
+							+ cart_item.label + '.\n\n'
+							+ jqXHR.responseText)
+					)
+				}
+			})
+		})
+	};
 
-	this.cart_change_item = function(entity_path, action, versionIRI = null) {
+	this.cart_change_item = function(entity_path, action, package_id, versionIRI = null) {
 		/* 
 		FUTURE: Add call to server if cart should be managed server side.
 
@@ -229,6 +249,7 @@ function GeemAPI() {
 				id: entity_id,
 				path: entity_path, //Ontology id is last item in path
 				status: action,
+				package_id: package_id,
 				version: versionIRI
 			}
 

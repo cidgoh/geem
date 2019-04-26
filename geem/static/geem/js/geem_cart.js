@@ -41,31 +41,54 @@ function init_cart_tab() {
 	})
 
 	$('#userPackages').on('change', function() {
-		// User-selected draft package to add cart items to
-		top.cart_target_resource_id = this.value
+		// Set cart_target_resource_id to package user selected
+		top.cart_target_resource_id = this.value;
 	});
 
 	$("#addToPackageButton").on('mouseenter', render_cart_package_selection_modal)
 
+	$("#addToPackageButton").on('click', function() {
+		// User-selected draft package to add cart items to
+		top.cart_target_resource_id = "";
+	});
+
 	$("#updatePackageButton").on('click', function() {
 		const package_to_update_id = top.cart_target_resource_id;
-		if (package_to_update_id === undefined) {
+		const cart_items = top.cart.values();
+
+		// Return if user did not select a package
+		if (package_to_update_id === "") {
 			alert('Please select a package first!');
 			return;
 		}
-		const cart_items = top.cart.values();
-		for (let key in cart_items) {
-			let cart_item = cart_items[key];
-			api.add_to_resource_specifications(cart_item, package_to_update_id)
-				.then(function (success_message) {
-					console.log(success_message)
-				})
-				.catch(function(error_message) {
-					alert(error_message)
-				});
-		}
+
+		get_cart_items_specifications(cart_items)
+			.then(function (cart_items_specifications) {
+				return cart_items_specifications;
+			})
+			.catch(function(err_msg) {
+				alert(err_msg + '\n\nAction aborted.')
+			})
+			.then(function (cart_items_specifications) {
+				// TODO: add prefixes to target package
+			})
 	})
 
+}
+
+
+function get_cart_items_specifications(cart_items) {
+	/*
+	TODO: ...
+	 */
+	// Perform specifications API call for each cart_item
+	const cart_items_specifications_promises = [];
+	for (let key in cart_items) {
+		let cart_item = cart_items[key];
+		cart_items_specifications_promises.push(api.get_cart_item_specification(cart_item));
+	}
+
+	return Promise.all(cart_items_specifications_promises);
 }
 
 
@@ -199,7 +222,7 @@ function cart_check(entity_path) {
 		}
 
 	if (action)
-		api.cart_change_item(entity_path, action, top.resource.contents.metadata.versionIRI)
+		api.cart_change_item(entity_path, action, top.resource.id, top.resource.contents.metadata.versionIRI)
 			.then(cart_change)
 
 }

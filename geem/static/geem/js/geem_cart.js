@@ -88,18 +88,42 @@ function get_cart_items_full_prefixes(cart_items) {
 	/*
 	TODO: ...
 	 */
-	// Perform context API call for each cart_item
-	const cart_items_full_prefixes_promises = [];
-	for (let key in cart_items) {
-		let cart_item = cart_items[key];
-		let cart_item_prefix = cart_item.id.split(':', 1)[0];
+	// Since Promise.all does not natively support Objects, the
+        // eventual return value will begin as an Array. Even indices
+        // will be the "keys", for "values" in the odd indices that
+        // come immediately after.
+        const prefix_iri_values_arr = [];
 
-		cart_items_full_prefixes_promises.push(
-			api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix)
-		);
+	for (let key in cart_items) {
+		const cart_item = cart_items[key];
+		const cart_item_prefix = cart_item.id.split(':', 1)[0];
+
+		// This promise resolves to an IRI value
+                const get_resource_full_prefix_promise =
+                        api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix);
+
+                prefix_iri_values_arr.push(cart_item_prefix);
+                prefix_iri_values_arr.push(get_resource_full_prefix_promise)
 	}
 
-	return Promise.all(cart_items_full_prefixes_promises);
+        return new Promise(function (resolve, reject) {
+                Promise.all(prefix_iri_values_arr)
+                        .then(function (prefix_iri_values_arr) {
+                                // Actual return value
+                                const prefix_iri_values_obj = {}
+                                // Populate the return value
+                                for (let i=0; i<prefix_iri_values_arr.length; i+=2) {
+                                        const prefix = prefix_iri_values_arr[i];
+                                        const iri = prefix_iri_values_arr[i+1];
+                                        prefix_iri_values_obj[prefix] = iri;
+                                }
+
+                                resolve(prefix_iri_values_obj);
+                        })
+                        .catch(function (err_msg) {
+                                reject(err_msg);
+                        })
+        });
 }
 
 
@@ -118,15 +142,15 @@ function get_cart_items_specifications(cart_items) {
 	TODO: ...
 	 */
 	// Perform specifications API call for each cart_item
-	const cart_items_specifications_promises = [];
+	const get_resource_specification_promises = [];
 	for (let key in cart_items) {
-		let cart_item = cart_items[key];
-		cart_items_specifications_promises.push(
+		const cart_item = cart_items[key];
+		get_resource_specification_promises.push(
 			api.get_resource_specification(cart_item.package_id, cart_item.id)
 		);
 	}
 
-	return Promise.all(cart_items_specifications_promises);
+	return Promise.all(get_resource_specification_promises);
 }
 
 

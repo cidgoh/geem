@@ -228,9 +228,7 @@ function GeemAPI() {
                         $.ajax({
                                 url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
                                 success: function (data, textStatus, jqXHR,) {
-                                        const resolve_val = {};
-                                        resolve_val[prefix] = data;
-                                        resolve(resolve_val)
+                                        resolve(data)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                         reject(

@@ -111,7 +111,7 @@ function get_cart_items_prefixes(cart_items) {
                 Promise.all(prefix_iri_values_arr)
                         .then(function (prefix_iri_values_arr) {
                                 // Actual return value
-                                const prefix_iri_values_obj = {}
+                                const prefix_iri_values_obj = {};
                                 // Populate the return value
                                 for (let i=0; i<prefix_iri_values_arr.length; i+=2) {
                                         const prefix = prefix_iri_values_arr[i];
@@ -143,20 +143,22 @@ function add_prefixes_to_package(package_id, prefix_iri_values) {
                 // attempts a call to get_resource_full_prefix to see
                 // if the call failed because the prefix already exists
                 // in the target package.
-                const add_if_needed_promise = new Promise(function (resolve, reject) {
-                        api.add_to_resource_context(package_id, prefix, iri)
-                                .then(function (data) {
-                                        resolve(data);
-                                })
-                                .catch(function (err_msg) {
-                                        return api.get_resource_full_prefix(package_id, prefix);
-                                })
-                                .then(function (data) {
-                                        resolve(data);
-                                })
-                                .catch(function(err_msg) {
-                                        reject(err_msg);
-                                })
+		const add_if_needed_promise = new Promise(function (resolve, reject) {
+			const that = this;
+			api.add_to_resource_context(package_id, prefix, iri)
+				.then(function (data) {
+					resolve(data);
+				})
+				.catch(function (err_msg) {
+					that.first_err_msg = err_msg;
+					return api.get_resource_full_prefix(package_id, prefix);
+				})
+				.then(function (response) {
+					resolve(response);
+				})
+				.catch(function(err_msg) {
+					reject(that.first_err_msg);
+				})
                 });
 	        add_if_needed_promises.push(add_if_needed_promise);
         }
@@ -186,9 +188,14 @@ function add_specifications_to_package(package_id, specifications) {
 	/*
 	TODO: ...
 	 */
-	return new Promise(function(resolve, reject) {
-		reject(Error('stub'));
-	})
+	const add_to_resource_specification_promises = [];
+	for (let i=0; i<specifications.length; i++) {
+		const specification = specifications[i];
+		add_to_resource_specification_promises.push(
+			api.add_to_resource_specification(package_id, specification)
+		);
+	}
+	return Promise.all(add_to_resource_specification_promises);
 }
 
 

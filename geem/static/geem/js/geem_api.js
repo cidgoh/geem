@@ -169,30 +169,24 @@ function GeemAPI() {
 	    });
 	}
 
-	this.add_to_resource_specifications = function(cart_item, package_to_update_id) {
+	this.add_to_resource_specification = function(resource_id, term) {
 		/*
                 TODO: ...
                  */
-		const new_term_obj = {
-			"id": cart_item["id"]
-		};
-		const new_term_str = JSON.stringify(new_term_obj);
 		return new Promise(function (resolve, reject) {
 			$.ajax({
-				url: API_RESOURCES_URL + package_to_update_id
-					+ '/create/specifications/'
-					+ new_term_str + '/',
+				type: 'POST',
+				url: API_RESOURCES_URL + resource_id + '/create/specifications/',
+				data: term,
 				success: function (data, textStatus, jqXHR) {
-					// TODO: add cart_item to appropriate
-					//  	 package.
-					resolve('Should reach here')
+					resolve(data)
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 					reject(
-						Error('Unable to update package '
-							+ package_to_update_id + ' with cart item '
-							+ cart_item.label + '.\n\n'
-							+ jqXHR.responseText))
+                                                Error('Unable to add ' + term.id + ' to package '
+							+ resource_id + '.\n\n'
+							+ jqXHR.responseText)
+					)
 				}
 			})
 		})
@@ -202,19 +196,21 @@ function GeemAPI() {
                 /*
                 TODO: ...
                  */
-                return new Promise(function (resolve, reject) {
-                        $.ajax({
-                                url: API_RESOURCES_URL + resource_id + '/create/context/' + prefix
-                                        + '/' + iri + '/',
-                                success: function (data, textStatus, jqXHR) {
-                                        resolve(data)
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                        reject(
-                                                Error('Unable to add ' + prefix + ': ' + iri
-                                                        + ' to package ' + resource_id + '.\n\n'
-                                                        + jqXHR.responseText))
-                                }
+		return new Promise(function (resolve, reject) {
+			$.ajax({
+				type: 'POST',
+				url: API_RESOURCES_URL + resource_id + '/create/context/',
+				data: {'prefix': prefix, 'iri': iri},
+				success: function (data, textStatus, jqXHR) {
+					resolve(data)
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					reject(
+						Error('Unable to add ' + prefix + ': ' + iri
+							+ ' to package ' + resource_id + '.\n\n'
+							+ jqXHR.responseText)
+					)
+				}
                         })
                 })
         };

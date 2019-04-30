@@ -90,41 +90,41 @@ function get_cart_items_prefixes(cart_items) {
 	TODO: ...
 	 */
 	// Since Promise.all does not natively support Objects, the
-        // eventual return value will begin as an Array. Even indices
-        // will be the "keys", for "values" in the odd indices that
-        // come immediately after.
-        const prefix_iri_values_arr = [];
+	// eventual return value will begin as an Array. Even indices
+	// will be the "keys", for "values" in the odd indices that
+	// come immediately after.
+	const prefix_iri_values_arr = [];
 
 	for (let key in cart_items) {
 		const cart_item = cart_items[key];
 		const cart_item_prefix = cart_item.id.split(':', 1)[0];
 
 		// This promise resolves to an IRI value
-                const get_resource_full_prefix_promise =
-                        api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix);
+		const get_resource_full_prefix_promise =
+			api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix);
 
-                prefix_iri_values_arr.push(cart_item_prefix);
-                prefix_iri_values_arr.push(get_resource_full_prefix_promise)
+		prefix_iri_values_arr.push(cart_item_prefix);
+		prefix_iri_values_arr.push(get_resource_full_prefix_promise)
 	}
 
-        return new Promise(function (resolve, reject) {
-                Promise.all(prefix_iri_values_arr)
-                        .then(function (prefix_iri_values_arr) {
-                                // Actual return value
-                                const prefix_iri_values_obj = {};
-                                // Populate the return value
-                                for (let i=0; i<prefix_iri_values_arr.length; i+=2) {
-                                        const prefix = prefix_iri_values_arr[i];
-                                        const iri = prefix_iri_values_arr[i+1];
-                                        prefix_iri_values_obj[prefix] = iri;
-                                }
+	return new Promise(function (resolve, reject) {
+		Promise.all(prefix_iri_values_arr)
+			.then(function (prefix_iri_values_arr) {
+				// Actual return value
+				const prefix_iri_values_obj = {};
+				// Populate the return value
+				for (let i=0; i<prefix_iri_values_arr.length; i+=2) {
+					const prefix = prefix_iri_values_arr[i];
+					const iri = prefix_iri_values_arr[i+1];
+					prefix_iri_values_obj[prefix] = iri;
+				}
 
-                                resolve(prefix_iri_values_obj);
-                        })
-                        .catch(function (err_msg) {
-                                reject(err_msg);
-                        })
-        });
+				resolve(prefix_iri_values_obj);
+			})
+			.catch(function (err_msg) {
+				reject(err_msg);
+			})
+	});
 }
 
 
@@ -133,16 +133,16 @@ function add_prefixes_to_package(package_id, prefix_iri_values) {
 	TODO: ...
 	 */
 	// Will contain promises to add each prefix-iri pairing to the
-        // target package.
+	// target package.
 	const add_if_needed_promises = [];
 
 	for (let prefix in prefix_iri_values) {
-	        const iri = prefix_iri_values[prefix];
-	        // This promise attempts a call to
-                // add_to_resource_context. If the call fails, it
-                // attempts a call to get_resource_full_prefix to see
-                // if the call failed because the prefix already exists
-                // in the target package.
+		const iri = prefix_iri_values[prefix];
+		// This promise attempts a call to
+		// add_to_resource_context. If the call fails, it
+		// attempts a call to get_resource_full_prefix to see
+		// if the call failed because the prefix already exists
+		// in the target package.
 		const add_if_needed_promise = new Promise(function (resolve, reject) {
 			const that = this;
 			api.add_to_resource_context(package_id, prefix, iri)
@@ -159,9 +159,9 @@ function add_prefixes_to_package(package_id, prefix_iri_values) {
 				.catch(function(err_msg) {
 					reject(that.first_err_msg);
 				})
-                });
-	        add_if_needed_promises.push(add_if_needed_promise);
-        }
+		});
+		add_if_needed_promises.push(add_if_needed_promise);
+	}
 
 	return Promise.all(add_if_needed_promises);
 }

@@ -53,23 +53,30 @@ function init_cart_tab() {
 	});
 
 	$("#updatePackageButton").on('click', function() {
-		const package_to_update_id = top.cart_target_resource_id;
+		const target_package_id = top.cart_target_resource_id;
 		const cart_items = top.cart.values();
 
 		// Return if user did not select a package
-		if (package_to_update_id === "") {
+		if (target_package_id === "") {
 			alert('Please select a package first!');
-			return;
+			return
 		}
 
 		const that = this;
 		get_cart_items_context(cart_items)
 			.then(function (cart_items_context) {
 				that.cart_items_context = cart_items_context;
-				return get_cart_items_specifications(cart_items);
+				return get_cart_items_specifications(cart_items)
 			})
 			.then(function (cart_items_specifications) {
 				that.cart_items_specifications = cart_items_specifications;
+				return add_context_to_package(
+					target_package_id,
+					that.cart_items_context
+				)
+			})
+			.then(function() {
+				return;
 			})
 			.catch(function (err_msg_arr) {
 				alert(err_msg_arr.join('\n\n'))
@@ -94,7 +101,7 @@ function init_cart_tab() {
 	// 	Promise.all([prefix_promises, specifications_promise])
 	// 		.then(function([cart_items_prefixes, cart_items_specifications]) {
 	// 			return Promise.all([
-	// 				add_prefixes_to_package(package_to_update_id,
+	// 				add_context_to_package(package_to_update_id,
 	// 					cart_items_prefixes),
 	// 				add_specifications_to_package(package_to_update_id,
 	// 					cart_items_specifications)
@@ -127,7 +134,7 @@ function get_cart_items_context(cart_items) {
 		const get_resource_context_promise =
 			api.get_resource_context(cart_item.package_id, cart_item_prefix);
 
-		cart_items_context[cart_item_prefix] = get_resource_context_promise;
+		cart_items_context[cart_item_prefix] = get_resource_context_promise
 	}
 
 	let acc = Object.keys(cart_items_context).length;
@@ -156,42 +163,31 @@ function get_cart_items_context(cart_items) {
 }
 
 
-function add_prefixes_to_package(package_id, prefix_iri_values) {
+function add_context_to_package(package_id, context) {
 	/*
 	TODO: ...
 	 */
-	// Will contain promises to add each prefix-iri pairing to the
-	// target package.
-	const add_if_needed_promises = [];
-
-	for (let prefix in prefix_iri_values) {
-		const iri = prefix_iri_values[prefix];
-		// This promise attempts a call to
-		// add_to_resource_context. If the call fails, it
-		// attempts a call to get_resource_context to see
-		// if the call failed because the prefix already exists
-		// in the target package.
-		const add_if_needed_promise = new Promise(function (resolve, reject) {
-			const that = this;
+	const err_msg_arr = [];
+	let acc = Object.keys(context).length;
+	return new Promise(function (resolve, reject) {
+		for (let prefix in context) {
+			const iri = context[prefix];
 			api.add_to_resource_context(package_id, prefix, iri)
-				.then(function (data) {
-					resolve(data);
-				})
 				.catch(function (err_msg) {
-					that.first_err_msg = err_msg;
-					return api.get_resource_context(package_id, prefix);
+					err_msg_arr.push(err_msg)
 				})
-				.then(function (response) {
-					resolve(response);
+				.finally(function() {
+					acc--;
+					if (acc===0) {
+						if (err_msg_arr.length===0) {
+							resolve()
+						} else {
+							reject(err_msg_arr)
+						}
+					}
 				})
-				.catch(function(err_msg) {
-					reject(that.first_err_msg);
-				})
-		});
-		add_if_needed_promises.push(add_if_needed_promise);
-	}
-
-	return Promise.all(add_if_needed_promises);
+		}
+	})
 }
 
 
@@ -244,7 +240,7 @@ function add_specifications_to_package(package_id, specifications) {
 	for (let i=0; i<specifications.length; i++) {
 		const specification = specifications[i];
 		add_to_resource_specification_promises.push(
-			api.add_to_resource_specification(package_id, specification)
+			api.add_to_resource_specifications(package_id, specification)
 		);
 	}
 	return Promise.all(add_to_resource_specification_promises);

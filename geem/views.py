@@ -366,7 +366,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         term_id_query = 'contents__@context__' + prefix
         if queryset.values_list(term_id_query, flat=True)[0] is not None:
             message = 'prefix %s already exists in package %s' % (prefix, pk)
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(message, status=status.HTTP_200_OK)
 
         # Connect to the default database service
         with connection.cursor() as cursor:

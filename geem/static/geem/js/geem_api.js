@@ -169,7 +169,7 @@ function GeemAPI() {
 	    });
 	}
 
-	this.add_to_resource_specification = function(resource_id, term) {
+	this.add_to_resource_specifications = function(resource_id, specification) {
 		/*
                 TODO: ...
                  */
@@ -177,7 +177,7 @@ function GeemAPI() {
 			$.ajax({
 				type: 'POST',
 				url: API_RESOURCES_URL + resource_id + '/create/specifications/',
-				data: term,
+				data: specification,
 				success: function (data, textStatus, jqXHR) {
 					resolve(data)
 				},

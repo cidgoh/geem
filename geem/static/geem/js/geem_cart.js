@@ -62,18 +62,19 @@ function init_cart_tab() {
 			return;
 		}
 
-		const prefixes_promise = get_cart_items_full_prefixes(cart_items);
+		const prefixes_promise = get_cart_items_prefixes(cart_items);
 		const specifications_promise = get_cart_items_specifications(cart_items);
 		Promise.all([prefixes_promise, specifications_promise])
-			.then(function([cart_items_full_prefixes, cart_items_specifications]) {
+			.then(function([cart_items_prefixes, cart_items_specifications]) {
 				return Promise.all([
-					add_full_prefixes_to_package(package_to_update_id,
-						cart_items_full_prefixes),
+					add_prefixes_to_package(package_to_update_id,
+						cart_items_prefixes),
 					add_specifications_to_package(package_to_update_id,
 						cart_items_specifications)
 				]);
 			})
 			.then(function(resolve) {
+				$('#makePackageForm').foundation('reveal', 'close');
 				alert('Successfully added');
 			})
 			.catch(function(err_msg) {
@@ -84,7 +85,7 @@ function init_cart_tab() {
 }
 
 
-function get_cart_items_full_prefixes(cart_items) {
+function get_cart_items_prefixes(cart_items) {
 	/*
 	TODO: ...
 	 */
@@ -127,13 +128,40 @@ function get_cart_items_full_prefixes(cart_items) {
 }
 
 
-function add_full_prefixes_to_package(package_id, full_prefixes) {
+function add_prefixes_to_package(package_id, prefix_iri_values) {
 	/*
 	TODO: ...
 	 */
-	return new Promise(function(resolve, reject) {
-		reject(Error('stub'));
-	})
+	// Will contain promises to add each prefix-iri pairing to the
+        // target package.
+	const add_if_needed_promises = [];
+
+	for (let prefix in prefix_iri_values) {
+	        const iri = prefix_iri_values[prefix];
+	        // This promise attempts a call to
+                // add_to_resource_context. If the call fails, it
+                // attempts a call to get_resource_full_prefix to see
+                // if the call failed because the prefix already exists
+                // in the target package.
+                const add_if_needed_promise = new Promise(function (resolve, reject) {
+                        api.add_to_resource_context(package_id, prefix, iri)
+                                .then(function (data) {
+                                        resolve(data);
+                                })
+                                .catch(function (err_msg) {
+                                        return api.get_resource_full_prefix(package_id, prefix);
+                                })
+                                .then(function (data) {
+                                        resolve(data);
+                                })
+                                .catch(function(err_msg) {
+                                        reject(err_msg);
+                                })
+                });
+	        add_if_needed_promises.push(add_if_needed_promise);
+        }
+
+	return Promise.all(add_if_needed_promises);
 }
 
 

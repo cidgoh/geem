@@ -198,6 +198,27 @@ function GeemAPI() {
 		})
 	};
 
+        this.add_to_resource_context = function(resource_id, prefix, iri) {
+                /*
+                TODO: ...
+                 */
+                return new Promise(function (resolve, reject) {
+                        $.ajax({
+                                url: API_RESOURCES_URL + resource_id + '/create/context/' + prefix
+                                        + '/' + iri + '/',
+                                success: function (data, textStatus, jqXHR) {
+                                        resolve(data)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                        reject(
+                                                Error('Unable to add ' + prefix + ': ' + iri
+                                                        + ' to package ' + resource_id + '.\n\n'
+                                                        + jqXHR.responseText))
+                                }
+                        })
+                })
+        };
+
 	this.get_resource_specification = function (resource_id, term_id) {
 		/*
 		TODO: ...

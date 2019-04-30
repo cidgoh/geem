@@ -66,7 +66,7 @@ function init_cart_tab() {
 		get_cart_items_context(cart_items)
 			.then(function (cart_items_context) {
 				that.cart_items_context = cart_items_context;
-				return get_cart_items_specifications();
+				return get_cart_items_specifications(cart_items);
 			})
 			.then(function (cart_items_specifications) {
 				that.cart_items_specifications = cart_items_specifications;
@@ -199,16 +199,40 @@ function get_cart_items_specifications(cart_items) {
 	/*
 	TODO: ...
 	 */
-	// Perform specifications API call for each cart_item
-	const get_resource_specification_promises = [];
+	const cart_items_specifications = [];
+	const err_msg_arr = [];
+
 	for (let key in cart_items) {
 		const cart_item = cart_items[key];
-		get_resource_specification_promises.push(
+		cart_items_specifications.push(
 			api.get_resource_specifications(cart_item.package_id, cart_item.id)
-		);
+		)
 	}
 
-	return Promise.all(get_resource_specification_promises);
+	let acc = cart_items_specifications.length;
+	return new Promise(function (resolve, reject) {
+		for (let i=0;i<cart_items_specifications.length;i++) {
+			const cart_item_specification_promise = cart_items_specifications[i];
+
+			cart_item_specification_promise
+				.then(function (cart_item_specification) {
+					cart_items_specifications[i] = cart_item_specification
+				})
+				.catch(function (err_msg) {
+					err_msg_arr.push(err_msg)
+				})
+				.finally(function() {
+					acc--;
+					if (acc===0) {
+						if (err_msg_arr.length===0) {
+							resolve(cart_items_specifications)
+						} else {
+							reject(err_msg_arr)
+						}
+					}
+				})
+		}
+	})
 }
 
 

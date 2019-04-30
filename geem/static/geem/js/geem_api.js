@@ -215,7 +215,7 @@ function GeemAPI() {
 		})
 	};
 
-	this.get_resource_specification = function (resource_id, term_id) {
+	this.get_resource_specifications = function (resource_id, term_id) {
 		/*
 		TODO: ...
 		 */
@@ -237,7 +237,7 @@ function GeemAPI() {
 		})
 	};
 
-	this.get_resource_full_prefix = function (resource_id, prefix) {
+	this.get_resource_context = function (resource_id, prefix) {
 		/*
                 TODO: ...
                  */

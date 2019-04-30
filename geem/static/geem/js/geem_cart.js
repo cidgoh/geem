@@ -62,69 +62,97 @@ function init_cart_tab() {
 			return;
 		}
 
-		const prefixes_promise = get_cart_items_prefixes(cart_items);
-		const specifications_promise = get_cart_items_specifications(cart_items);
-		Promise.all([prefixes_promise, specifications_promise])
-			.then(function([cart_items_prefixes, cart_items_specifications]) {
-				return Promise.all([
-					add_prefixes_to_package(package_to_update_id,
-						cart_items_prefixes),
-					add_specifications_to_package(package_to_update_id,
-						cart_items_specifications)
-				]);
+		const that = this;
+		get_cart_items_context(cart_items)
+			.then(function (cart_items_context) {
+				that.cart_items_context = cart_items_context;
+				return get_cart_items_specifications();
 			})
-			.then(function(resolve) {
-				$('#makePackageForm').foundation('reveal', 'close');
-				alert('Successfully added');
+			.then(function (cart_items_specifications) {
+				that.cart_items_specifications = cart_items_specifications;
 			})
-			.catch(function(err_msg) {
-				alert(err_msg);
+			.catch(function (err_msg_arr) {
+				alert(err_msg_arr.join('\n\n'))
 			})
+
+		// for (let prefix in cart_items_context) {
+		// 	const iri_promise = cart_items_context[prefix];
+		// 	iri_promise
+		// 		.then(function (iri) {
+		// 			cart_items_context[prefix] = iri;
+		// 		})
+		// 		.catch(function (err_msg) {
+		// 			err_msg_arr.push(err_msg)
+		// 		});
+		// }
+		// Promise.all(Object.values(cart_items_context))
+		// 	.then(function(data) {
+		// 		return cart_items_context;
+		// 	})
+
+	// 	const specifications_promise = get_cart_items_specifications(cart_items);
+	// 	Promise.all([prefix_promises, specifications_promise])
+	// 		.then(function([cart_items_prefixes, cart_items_specifications]) {
+	// 			return Promise.all([
+	// 				add_prefixes_to_package(package_to_update_id,
+	// 					cart_items_prefixes),
+	// 				add_specifications_to_package(package_to_update_id,
+	// 					cart_items_specifications)
+	// 			]);
+	// 		})
+	// 		.then(function(resolve) {
+	// 			$('#makePackageForm').foundation('reveal', 'close');
+	// 			alert('Successfully added');
+	// 		})
+	// 		.catch(function(err_msg) {
+	// 			alert(err_msg);
+	// 		})
 	})
 
 }
 
 
-function get_cart_items_prefixes(cart_items) {
+function get_cart_items_context(cart_items) {
 	/*
 	TODO: ...
 	 */
-	// Since Promise.all does not natively support Objects, the
-	// eventual return value will begin as an Array. Even indices
-	// will be the "keys", for "values" in the odd indices that
-	// come immediately after.
-	const prefix_iri_values_arr = [];
+	const cart_items_context = {};
+	const err_msg_arr = [];
 
 	for (let key in cart_items) {
 		const cart_item = cart_items[key];
 		const cart_item_prefix = cart_item.id.split(':', 1)[0];
 
 		// This promise resolves to an IRI value
-		const get_resource_full_prefix_promise =
-			api.get_resource_full_prefix(cart_item.package_id, cart_item_prefix);
+		const get_resource_context_promise =
+			api.get_resource_context(cart_item.package_id, cart_item_prefix);
 
-		prefix_iri_values_arr.push(cart_item_prefix);
-		prefix_iri_values_arr.push(get_resource_full_prefix_promise)
+		cart_items_context[cart_item_prefix] = get_resource_context_promise;
 	}
 
+	let acc = Object.keys(cart_items_context).length;
 	return new Promise(function (resolve, reject) {
-		Promise.all(prefix_iri_values_arr)
-			.then(function (prefix_iri_values_arr) {
-				// Actual return value
-				const prefix_iri_values_obj = {};
-				// Populate the return value
-				for (let i=0; i<prefix_iri_values_arr.length; i+=2) {
-					const prefix = prefix_iri_values_arr[i];
-					const iri = prefix_iri_values_arr[i+1];
-					prefix_iri_values_obj[prefix] = iri;
-				}
-
-				resolve(prefix_iri_values_obj);
-			})
-			.catch(function (err_msg) {
-				reject(err_msg);
-			})
-	});
+		for (let prefix in cart_items_context) {
+			const iri_promise = cart_items_context[prefix];
+			iri_promise
+				.then(function (iri) {
+					cart_items_context[prefix] = iri
+				})
+				.catch(function (err_msg) {
+					err_msg_arr.push(err_msg)
+				})
+				.finally(function() {
+					acc--;
+					if (acc===0) {
+						if (err_msg_arr.length===0) {
+							resolve(cart_items_context)
+						} else {
+							reject(err_msg_arr)
+						}
+					}
+				})
+		}
+	})
 }
 
 
@@ -140,7 +168,7 @@ function add_prefixes_to_package(package_id, prefix_iri_values) {
 		const iri = prefix_iri_values[prefix];
 		// This promise attempts a call to
 		// add_to_resource_context. If the call fails, it
-		// attempts a call to get_resource_full_prefix to see
+		// attempts a call to get_resource_context to see
 		// if the call failed because the prefix already exists
 		// in the target package.
 		const add_if_needed_promise = new Promise(function (resolve, reject) {
@@ -151,7 +179,7 @@ function add_prefixes_to_package(package_id, prefix_iri_values) {
 				})
 				.catch(function (err_msg) {
 					that.first_err_msg = err_msg;
-					return api.get_resource_full_prefix(package_id, prefix);
+					return api.get_resource_context(package_id, prefix);
 				})
 				.then(function (response) {
 					resolve(response);
@@ -176,7 +204,7 @@ function get_cart_items_specifications(cart_items) {
 	for (let key in cart_items) {
 		const cart_item = cart_items[key];
 		get_resource_specification_promises.push(
-			api.get_resource_specification(cart_item.package_id, cart_item.id)
+			api.get_resource_specifications(cart_item.package_id, cart_item.id)
 		);
 	}
 

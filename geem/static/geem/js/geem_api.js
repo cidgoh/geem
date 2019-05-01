@@ -183,8 +183,8 @@ function GeemAPI() {
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 					reject(
-						Error('Unable to add ' + term.id + ' to package '
-							+ resource_id + '.\n\n'
+						Error('Unable to add ' + specification.id
+							+ ' to package ' + resource_id + '.\n'
 							+ jqXHR.responseText)
 					)
 				}
@@ -207,7 +207,7 @@ function GeemAPI() {
 				error: function (jqXHR, textStatus, errorThrown) {
 					reject(
 						Error('Unable to add ' + prefix + ': ' + iri
-							+ ' to package ' + resource_id + '.\n\n'
+							+ ' to package ' + resource_id + '.\n'
 							+ jqXHR.responseText)
 					)
 				}
@@ -229,7 +229,7 @@ function GeemAPI() {
 				error: function (jqXHR, textStatus, errorThrown) {
 					reject(
 						Error('Unable to get specifications for ' + term_id
-							+ ' in package ' + resource_id + '.\n\n'
+							+ ' in package ' + resource_id + '.\n'
 							+ jqXHR.responseText)
 					)
 				}
@@ -251,7 +251,7 @@ function GeemAPI() {
 					reject(
 						Error('Unable to get full prefix for '
 							+ prefix + ' in package ' + resource_id
-							+ '.\n\n' + jqXHR.responseText)
+							+ '.\n' + jqXHR.responseText)
 					)
 				}
 			})

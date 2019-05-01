@@ -83,6 +83,10 @@ a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#219
 #searchResults i.fi-arrow-up.dropdown.part {color:blue}
 
 #makePackageDropdown {max-width:400px;}
+#makePackageWaitMessage {
+	display: none;
+	color: blue
+}
 
 #mainForm div.field-wrapper {clear:both;border-left:1px solid transparent;}
 #mainForm div.field-wrapper.exclude {background-color:silver;} 

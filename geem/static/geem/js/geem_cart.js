@@ -62,58 +62,48 @@ function init_cart_tab() {
 			return
 		}
 
+		$('#updatePackageButton').hide();
+		$('#makePackageWaitMessage').show();
+
 		const that = this;
 		get_cart_items_context(cart_items)
 			.then(function (cart_items_context) {
 				that.cart_items_context = cart_items_context;
 				return get_cart_items_specifications(cart_items)
 			})
+			.catch(function (err_msg_arr) {
+				let alert_msg =
+					'Package not modified due to the following errors:\n\n'
+					+ err_msg_arr.join('\n\n');
+
+				alert(alert_msg)
+			})
 			.then(function (cart_items_specifications) {
 				that.cart_items_specifications = cart_items_specifications;
 				return add_context_to_package(
-					target_package_id,
-					that.cart_items_context
+					target_package_id, that.cart_items_context
 				)
 			})
 			.then(function() {
-				return;
+				return add_specifications_to_package(
+					target_package_id, that.cart_items_specifications
+				)
+			})
+			.then(function () {
+				alert('Successfully added all cart items!')
 			})
 			.catch(function (err_msg_arr) {
-				alert(err_msg_arr.join('\n\n'))
+				let alert_msg =
+					'WARNING: the following cart items were not added:\n\n'
+					+ err_msg_arr.join('\n\n');
+
+				alert(alert_msg)
 			})
-
-		// for (let prefix in cart_items_context) {
-		// 	const iri_promise = cart_items_context[prefix];
-		// 	iri_promise
-		// 		.then(function (iri) {
-		// 			cart_items_context[prefix] = iri;
-		// 		})
-		// 		.catch(function (err_msg) {
-		// 			err_msg_arr.push(err_msg)
-		// 		});
-		// }
-		// Promise.all(Object.values(cart_items_context))
-		// 	.then(function(data) {
-		// 		return cart_items_context;
-		// 	})
-
-	// 	const specifications_promise = get_cart_items_specifications(cart_items);
-	// 	Promise.all([prefix_promises, specifications_promise])
-	// 		.then(function([cart_items_prefixes, cart_items_specifications]) {
-	// 			return Promise.all([
-	// 				add_context_to_package(package_to_update_id,
-	// 					cart_items_prefixes),
-	// 				add_specifications_to_package(package_to_update_id,
-	// 					cart_items_specifications)
-	// 			]);
-	// 		})
-	// 		.then(function(resolve) {
-	// 			$('#makePackageForm').foundation('reveal', 'close');
-	// 			alert('Successfully added');
-	// 		})
-	// 		.catch(function(err_msg) {
-	// 			alert(err_msg);
-	// 		})
+			.finally(function () {
+				$('#makePackageForm').foundation('reveal', 'close');
+				$('#updatePackageButton').show();
+				$('#makePackageWaitMessage').hide()
+			})
 	})
 
 }
@@ -207,7 +197,7 @@ function get_cart_items_specifications(cart_items) {
 
 	let acc = cart_items_specifications.length;
 	return new Promise(function (resolve, reject) {
-		for (let i=0;i<cart_items_specifications.length;i++) {
+		for (let i=0; i<cart_items_specifications.length; i++) {
 			const cart_item_specification_promise = cart_items_specifications[i];
 
 			cart_item_specification_promise
@@ -236,14 +226,27 @@ function add_specifications_to_package(package_id, specifications) {
 	/*
 	TODO: ...
 	 */
-	const add_to_resource_specification_promises = [];
-	for (let i=0; i<specifications.length; i++) {
-		const specification = specifications[i];
-		add_to_resource_specification_promises.push(
+	const err_msg_arr = [];
+	let acc = specifications.length;
+	return new Promise(function (resolve, reject) {
+		for (let i=0; i<specifications.length; i++) {
+			const specification = specifications[i];
 			api.add_to_resource_specifications(package_id, specification)
-		);
-	}
-	return Promise.all(add_to_resource_specification_promises);
+				.catch(function (err_msg) {
+					err_msg_arr.push(err_msg)
+				})
+				.finally(function() {
+					acc--;
+					if (acc===0) {
+						if (err_msg_arr.length===0) {
+							resolve()
+						} else {
+							reject(err_msg_arr)
+						}
+					}
+				})
+		}
+	})
 }
 
 

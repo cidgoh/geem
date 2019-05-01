@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from oauth2_provider.models import Application
 from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
+from psycopg2.extras import Json as psql_json_adapter
 
 import re, os
 
@@ -215,15 +216,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response('request.data missing id value',
                             status=status.HTTP_400_BAD_REQUEST)
 
+        # Some of the fields with paragraphs as values (e.g.,
+        # 'definition' for references to ontologies) may have
+        # problematic characters (e.g., single quotes).
+        psql_escaped_data = psql_json_adapter(request.data)
+
         # Connect to the default database service
         with connection.cursor() as cursor:
-            request_data_str = json.dumps(request.data)
             # See https://stackoverflow.com/a/23500670 for details on
             # creation query used below.
             cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{specifications, %s}', jsonb '%s')) "
+                           "contents, '{specifications, %s}', jsonb %s)) "
                            "where id=%s"
-                           % (request.data['id'], request_data_str, pk))
+                           % (request.data['id'], psql_escaped_data, pk))
 
         return Response('Successfully created', status=status.HTTP_200_OK)
 

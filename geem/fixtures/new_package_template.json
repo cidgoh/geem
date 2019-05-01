@@ -1,0 +1,31 @@
+[
+{
+    "model": "geem.package",
+    "pk": 1,
+    "fields": {
+        "owner": 1,
+        "created": "2018-10-19T01:03:59.978Z",
+        "updated": "2018-10-19T17:14:46.143Z",
+        "file_base_name": "package",
+        "version": "",
+        "ontology": false,
+        "public": false,
+        "curation": "draft",
+        "name": "New Package Template",
+        "description": "New resource description",
+        "contents": {
+            "@context": {},
+            "metadata": {
+                "date": "",
+                "title": "New Package Template",
+                "prefix": "",
+                "license": "https://creativecommons.org/licenses/by/4.0/",
+                "resource": "api/resources/@id",
+                "versionIRI": "api/resources/@file_base_name.@version.json",
+                "description": ""
+            },
+            "specifications": {}
+        }
+    }
+}
+]

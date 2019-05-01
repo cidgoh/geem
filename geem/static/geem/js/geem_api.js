@@ -169,23 +169,21 @@ function GeemAPI() {
 	    });
 	}
 
-        this.add_to_resource_specifications = function(resource_id, specification) {
+        this.get_resource_context = function (resource_id, prefix) {
                 /*
                 TODO: ...
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
-                                type: 'POST',
-                                url: API_RESOURCES_URL + resource_id + '/create/specifications/',
-                                data: specification,
-                                success: function (data, textStatus, jqXHR) {
+                                url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
+                                success: function (data, textStatus, jqXHR,) {
                                         resolve(data)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                         reject(
-                                                Error('Unable to add ' + specification.id
-                                                        + ' to package ' + resource_id + '.\n'
-                                                        + jqXHR.responseText)
+                                                Error('Unable to get full prefix for '
+                                                        + prefix + ' in package ' + resource_id
+                                                        + '.\n' + jqXHR.responseText)
                                         )
                                 }
                         })
@@ -237,21 +235,23 @@ function GeemAPI() {
                 })
         };
 
-        this.get_resource_context = function (resource_id, prefix) {
+        this.add_to_resource_specifications = function(resource_id, specification) {
                 /*
                 TODO: ...
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
-                                url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
-                                success: function (data, textStatus, jqXHR,) {
+                                type: 'POST',
+                                url: API_RESOURCES_URL + resource_id + '/create/specifications/',
+                                data: specification,
+                                success: function (data, textStatus, jqXHR) {
                                         resolve(data)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
                                         reject(
-                                                Error('Unable to get full prefix for '
-                                                        + prefix + ' in package ' + resource_id
-                                                        + '.\n' + jqXHR.responseText)
+                                                Error('Unable to add ' + specification.id
+                                                        + ' to package ' + resource_id + '.\n'
+                                                        + jqXHR.responseText)
                                         )
                                 }
                         })

@@ -170,13 +170,18 @@ function GeemAPI() {
 	}
 
         this.get_resource_context = function (resource_id, prefix) {
-                /*
-                TODO: ...
+                /**
+                 * @param {number} resource_id - ID of package.
+                 * @param {string} prefix - prefix from package's
+                 *                         `@context`.
+                 * @returns {Promise<string>} IRI value for prefix from
+                 *                            package's `@context`.
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
+                                // Call to `context` function
                                 url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
-                                success: function (data, textStatus, jqXHR,) {
+                                success: function (data, textStatus, jqXHR) {
                                         resolve(data)
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
@@ -191,12 +196,19 @@ function GeemAPI() {
         };
 
         this.add_to_resource_context = function(resource_id, prefix, iri) {
-                /*
-                TODO: ...
+                /**
+                 * Adds `{prefix: iri}` to a package's `@context`.
+                 * @param {number} resource_id - ID of package.
+                 * @param {string} prefix - prefix from package's
+                 *                          `@context`.
+                 * @param {string} iri - IRI translation of prefix.
+                 * @returns {Promise<string>} - Confirmation of
+                 *                              addition.
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 type: 'POST',
+                                // Call to `create_context` function
                                 url: API_RESOURCES_URL + resource_id + '/create/context/',
                                 data: {'prefix': prefix, 'iri': iri},
                                 success: function (data, textStatus, jqXHR) {
@@ -214,11 +226,16 @@ function GeemAPI() {
         };
 
         this.get_resource_specifications = function (resource_id, term_id) {
-                /*
-                TODO: ...
+                /**
+                 * @param {number} resource_id - ID of package.
+                 * @param {string} term_id - ID of single term from a
+                 *                           package's `specifications`.
+                 * @returns {Promise<Object>} Complete specifications
+                 *                            of term.
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
+                                // Call to `specifications` function
                                 url: API_RESOURCES_URL + resource_id + '/specifications/' + term_id
                                         + '/',
                                 success: function (data, textStatus, jqXHR) {
@@ -236,12 +253,19 @@ function GeemAPI() {
         };
 
         this.add_to_resource_specifications = function(resource_id, specification) {
-                /*
-                TODO: ...
+                /**
+                 * Adds `specification` to a package's `specifications`.
+                 * @param {number} resource_id - ID of package.
+                 * @param {Object} specification - Attributes of some
+                 *                                 entity.
+                 * @returns {Promise<string>} - Confirmation of
+                 *                              addition.
                  */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 type: 'POST',
+                                // Call to `create_specifications`
+                                // function.
                                 url: API_RESOURCES_URL + resource_id + '/create/specifications/',
                                 data: specification,
                                 success: function (data, textStatus, jqXHR) {

@@ -125,11 +125,16 @@ function init_cart_tab() {
 }
 
 
+/**
+ * Get `@context` value for multiple cart_item instances.
+ * @param {Object<string, cart_item>} cart_items
+ * @returns {Promise<Object<string, string>>} Prefix-IRI key-value
+ * 	pairs for all terms in cart_items
+ */
 function get_cart_items_context(cart_items) {
-	/*
-	TODO: ...
-	 */
+	// What the return value resolves to. To be populated.
 	const cart_items_context = {};
+	// Array to hold all error messages (if we get any!)
 	const err_msg_arr = [];
 
 	for (let key in cart_items) {
@@ -143,20 +148,29 @@ function get_cart_items_context(cart_items) {
 		cart_items_context[cart_item_prefix] = get_resource_context_promise
 	}
 
+	// Accumulator to track how many promises have resolved
 	let acc = Object.keys(cart_items_context).length;
+
 	return new Promise(function (resolve, reject) {
 		for (let prefix in cart_items_context) {
 			const iri_promise = cart_items_context[prefix];
+
 			iri_promise
 				.then(function (iri) {
+					// Replace promise of IRI in
+					// `cart_items_context` with
+					// the actual IRI.
 					cart_items_context[prefix] = iri
 				})
 				.catch(function (err_msg) {
 					err_msg_arr.push(err_msg)
 				})
 				.finally(function() {
+					// One less promise resolved
 					acc--;
+					// Was it the last one?
 					if (acc===0) {
+						// Were there errors?
 						if (err_msg_arr.length===0) {
 							resolve(cart_items_context)
 						} else {
@@ -169,22 +183,35 @@ function get_cart_items_context(cart_items) {
 }
 
 
+/**
+ * Add `context` to target package.
+ * @param {number} package_id - ID of target package
+ * @param {Object<string, string>} context - Prefix-IRI key-value pairs
+ * @returns {Promise<>} Confirmation of addition
+ */
 function add_context_to_package(package_id, context) {
-	/*
-	TODO: ...
-	 */
+	// Array to hold all error messages (if we get any!)
 	const err_msg_arr = [];
+
+	// Accumulator to track how many promises have resolved
 	let acc = Object.keys(context).length;
+
 	return new Promise(function (resolve, reject) {
 		for (let prefix in context) {
 			const iri = context[prefix];
+
+			// Promise of `{prefix-iri}` being added to
+			// target package.
 			api.add_to_resource_context(package_id, prefix, iri)
 				.catch(function (err_msg) {
 					err_msg_arr.push(err_msg)
 				})
 				.finally(function() {
+					// One less promise resolved
 					acc--;
+					// Was it the last one?
 					if (acc===0) {
+						// Were there errors?
 						if (err_msg_arr.length===0) {
 							resolve()
 						} else {
@@ -197,35 +224,52 @@ function add_context_to_package(package_id, context) {
 }
 
 
+/**
+ * Get `specifications` value for multiple cart_item instances.
+ * @param {Object<string, cart_item>} cart_items
+ * @returns {Promise<Object<string, string>[]>} Array of specifications
+ * 	for all terms in cart_items
+ */
 function get_cart_items_specifications(cart_items) {
-	/*
-	TODO: ...
-	 */
+	// What the return value resolves to. To be populated.
 	const cart_items_specifications = [];
+	// Array to hold all error messages (if we get any!)
 	const err_msg_arr = [];
 
 	for (let key in cart_items) {
 		const cart_item = cart_items[key];
+
 		cart_items_specifications.push(
+			// Resolves to specifications for term in
+			// cart_item.
 			api.get_resource_specifications(cart_item.package_id, cart_item.id)
 		)
 	}
 
+	// Accumulator to track how many promises have resolved
 	let acc = cart_items_specifications.length;
+
 	return new Promise(function (resolve, reject) {
 		for (let i=0; i<cart_items_specifications.length; i++) {
 			const cart_item_specification_promise = cart_items_specifications[i];
 
 			cart_item_specification_promise
 				.then(function (cart_item_specification) {
+					// Replace promise of
+					// specification in
+					// cart_items_specifications
+					// with actual specification.
 					cart_items_specifications[i] = cart_item_specification
 				})
 				.catch(function (err_msg) {
 					err_msg_arr.push(err_msg)
 				})
 				.finally(function() {
+					// One less promise resolved
 					acc--;
+					// Was it the last one?
 					if (acc===0) {
+						// Were there errors?
 						if (err_msg_arr.length===0) {
 							resolve(cart_items_specifications)
 						} else {
@@ -238,22 +282,36 @@ function get_cart_items_specifications(cart_items) {
 }
 
 
+/**
+ * Add `specifications` to target package.
+ * @param {number} package_id - ID of target package
+ * @param {Object<string, string>[]} specifications - Specifications
+ * 	for multiple terms
+ * @returns {Promise<>} Confirmation of addition
+ */
 function add_specifications_to_package(package_id, specifications) {
-	/*
-	TODO: ...
-	 */
+	// Array to hold all error messages (if we get any!)
 	const err_msg_arr = [];
+
+	// Accumulator to track how many promises have resolved
 	let acc = specifications.length;
+
 	return new Promise(function (resolve, reject) {
 		for (let i=0; i<specifications.length; i++) {
 			const specification = specifications[i];
+
+			// Promise of `{prefix-iri}` being added to
+			// target package.
 			api.add_to_resource_specifications(package_id, specification)
 				.catch(function (err_msg) {
 					err_msg_arr.push(err_msg)
 				})
 				.finally(function() {
+					// One less promise resolved
 					acc--;
+					// Was it the last one?
 					if (acc===0) {
+						// Were there errors?
 						if (err_msg_arr.length===0) {
 							resolve()
 						} else {

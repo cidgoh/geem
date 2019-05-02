@@ -169,14 +169,13 @@ function GeemAPI() {
 	    });
 	}
 
+	/**
+	 * Get IRI for a prefix from a package's `@context`.
+	 * @param {number} resource_id - ID of package to get IRI from
+	 * @param {string} prefix
+	 * @returns {Promise<string>} IRI value
+	 */
         this.get_resource_context = function (resource_id, prefix) {
-                /**
-                 * @param {number} resource_id - ID of package.
-                 * @param {string} prefix - prefix from package's
-                 *                         `@context`.
-                 * @returns {Promise<string>} IRI value for prefix from
-                 *                            package's `@context`.
-                 */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 // Call to `context` function
@@ -195,16 +194,14 @@ function GeemAPI() {
                 })
         };
 
+	/**
+	 * Add `prefix:iri` to a package's `@context`.
+	 * @param {number} resource_id - ID of package to add to
+	 * @param {string} prefix
+	 * @param {string} iri
+	 * @returns {Promise<string>} Confirmation of addition
+	 */
         this.add_to_resource_context = function(resource_id, prefix, iri) {
-                /**
-                 * Adds `{prefix: iri}` to a package's `@context`.
-                 * @param {number} resource_id - ID of package.
-                 * @param {string} prefix - prefix from package's
-                 *                          `@context`.
-                 * @param {string} iri - IRI translation of prefix.
-                 * @returns {Promise<string>} - Confirmation of
-                 *                              addition.
-                 */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 type: 'POST',
@@ -225,14 +222,14 @@ function GeemAPI() {
                 })
         };
 
+	/**
+	 * Get a term from a package's `specifications`.
+	 * @param {number} resource_id - ID of package to get term from
+	 * @param {string} term_id - ID of term from package's
+	 * 	`specifications`
+	 * @returns {Promise<Object>} Complete specifications of term
+	 */
         this.get_resource_specifications = function (resource_id, term_id) {
-                /**
-                 * @param {number} resource_id - ID of package.
-                 * @param {string} term_id - ID of single term from a
-                 *                           package's `specifications`.
-                 * @returns {Promise<Object>} Complete specifications
-                 *                            of term.
-                 */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 // Call to `specifications` function
@@ -252,15 +249,13 @@ function GeemAPI() {
                 })
         };
 
+	/**
+	 * Add `specification` to a package's `specifications`.
+	 * @param {number} resource_id - ID of package to add to
+	 * @param {Object} specification
+	 * @returns {Promise<string>} Confirmation of addition
+	 */
         this.add_to_resource_specifications = function(resource_id, specification) {
-                /**
-                 * Adds `specification` to a package's `specifications`.
-                 * @param {number} resource_id - ID of package.
-                 * @param {Object} specification - Attributes of some
-                 *                                 entity.
-                 * @returns {Promise<string>} - Confirmation of
-                 *                              addition.
-                 */
                 return new Promise(function (resolve, reject) {
                         $.ajax({
                                 type: 'POST',
@@ -305,7 +300,21 @@ function GeemAPI() {
 			// Get last path item id.
 			var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
 			var entity = top.resource.contents.specifications[entity_id]
-			
+
+			/**
+			 * Item in user's cart.
+			 * @typedef cart_item
+			 * @type {Object}
+			 * @property {string} label - Term name
+			 * @property {string} id - Term ID
+			 * @property {string} path - Term hierarchy
+			 * @property {string} status - Action to take
+			 * 	with this item
+			 * @property {number} package_id - ID of term's
+			 * 	package
+			 * @property {string} version - Timestamped IRI
+			 * 	of term package
+			 */
 			result = {
 				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
 				id: entity_id,

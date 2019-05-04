@@ -1,8 +1,7 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
+# 
 
 """ ***************************************************************************
-	
  Author: Damion Dooley
 
  python jsonimo.py [owl ontology file path]
@@ -20,6 +19,41 @@
  RDFLib sparql ISSUE: Doing a "BINDING (?x as ?y)" expression prevents ?x from 
  being output in a SELECT. bug leads to no such field being output.
 
+An entity can have one of the following data types:
+
+		case 'disjunction':	// CURRENTLY WE JUST LUMP 'disjunction' IN WITH 'model'
+
+		case 'model': // If X is_a+ (subclass of) 'data representational model' it is a model.
+
+		PRIMITIVE data types: Inputs as sepecified in an OWL Ontology file can have all the standard
+		xmls data types and restrictions.
+
+		case 'xmls:date':
+		case 'xmls:time': 
+		case 'xmls:dateTime': 
+		case 'xmls:dateTimeStamp': 
+		case 'xmls:duration': 
+		case 'xmls:string':
+		case 'xmls:normalizedString':
+		case 'xmls:token':
+		case 'xmls:integer':
+		case 'xmls:positiveInteger': 
+		case 'xmls:nonNegativeInteger':	
+		case 'xmls:unsignedByte':			
+		case 'xmls:unsignedShort':		
+		case 'xmls:unsignedInt':			
+		case 'xmls:unsignedLong':		
+		case 'xmls:negativeInteger':	
+		case 'xmls:nonPositiveInteger':
+		case 'xmls:byte': 
+		case 'xmls:short': 	
+		case 'xmls:int': 	
+		case 'xmls:decimal': // Decimal, double and float numbers
+		case 'xmls:float':  
+		case 'xmls:double': 
+		case 'xmls:boolean': // Yes/No inputs here
+		case 'xmls:anyURI': // Picklists are here
+
 ******************************************************************************* 
 """ 
 
@@ -27,11 +61,13 @@ import re
 import json
 import sys
 import os
+import datetime
 from pprint import pprint
 import optparse
-import lib.python.ontohelper as oh
 
 import rdflib
+import python.ontohelper as oh
+
 import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
 
 # Do this, otherwise a warning appears on stdout: No handlers could be found for logger "rdflib.term"
@@ -62,11 +98,12 @@ class Ontology(object):
 
 
 	"""
-	CODE_VERSION = '0.0.5'
+	CODE_VERSION = '0.0.6'
 
 	def __init__(self):
 
 		self.onto_helper = oh.OntoHelper()
+		self.timestamp = datetime.datetime.now()
 
 		""" 
 		Add these PREFIXES to Protege Sparql query window if you want to test a query there:
@@ -81,10 +118,11 @@ class Ontology(object):
 			# Generic TREE "is a" hierarchy from given root.
 			#
 			'tree': rdflib.plugins.sparql.prepareQuery("""
-				SELECT DISTINCT ?id ?label ?parent_id ?deprecated ?replaced_by
+				SELECT DISTINCT ?id ?parent_id ?deprecated ?replaced_by
 				WHERE {	
-					?parent_id rdfs:subClassOf* ?root.
+					?id rdfs:subClassOf* ?root.
 					?id rdfs:subClassOf ?parent_id.
+					FILTER (isIRI(?parent_id)). # otherwise parents outside of is_a are included.
 					OPTIONAL {?id rdfs:label ?label}.
 	 				OPTIONAL {?id GENEPIO:0000006 ?ui_label}. # for ordering
 					OPTIONAL {?id owl:deprecated ?deprecatedAnnot.
@@ -99,15 +137,16 @@ class Ontology(object):
 
 			# SECOND VERSION FOR ''
 			##################################################################
+			# RETRIEVES ANY parent and child entities joined by 'has component'
 			# RETRIEVE DATUM CARDINALITY, LIMIT FOR SPECIFICATION RELATIVE TO PARENT
 			# X 'has component' [some|exactly N|min n| max n] Y 
-			#
+			# Parent is always datatype = 'model'
 			'specification_components': rdflib.plugins.sparql.prepareQuery("""
 
-				SELECT DISTINCT ?parent (?datum as ?id) ?cardinality ?limit
+				SELECT DISTINCT ?parent_id (?datum as ?id) ?cardinality ?limit
 				WHERE { 	
 					?restriction owl:onProperty RO:0002180. # has component
-					?parent rdfs:subClassOf ?restriction. 
+					?parent_id rdfs:subClassOf ?restriction. 
 
 					{?restriction owl:onClass ?datum.
 					?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?limit. 
@@ -188,7 +227,8 @@ class Ontology(object):
 						?datatypeObj owl:withRestrictions*/rdf:rest*/rdf:first ?restrictColl.
 						?restrictColl ?constraint ?expression.}
 					UNION # matches a single condition on 
-						{?restriction owl:onDataRange ?datatype.  FILTER (! isBlank(?datatype)).
+						{?restriction owl:onDataRange ?datatype.  
+						FILTER (! isBlank(?datatype)).
 						?restriction (owl:qualifiedCardinality | owl:minQualifiedCardinality | owl:maxQualifiedCardinality) ?expression.
 						?restriction ?constraint ?expression } 
 					UNION
@@ -229,21 +269,24 @@ class Ontology(object):
 			#
 			# Multilingual selection of items in sorted order is done client side.
 			# 
+			#
+			# ISSUE: What is "rdfs:subClassOfTLR"
+
 			'individuals': rdflib.plugins.sparql.prepareQuery("""
 				
-				SELECT DISTINCT ?id ?parent ?datatype
+				SELECT DISTINCT ?id ?parent_id ?datatype
 				WHERE {
 					BIND (GENEPIO:0001655 as ?categorical_root).
 					BIND (xmls:anyURI as ?datatype).
-					?id rdf:type owl:NamedIndividual.
-					?id rdf:type ?parent.
-					?parent rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
-
+					#?parent_id rdfs:subClassOfTLR*/rdfs:subClassOf+ ?categorical_root.
+					?id rdfs:subClassOf+ ?categorical_root.
+					?id rdf:type ?parent_id.
+					FILTER (isIRI(?parent_id)).
+					?id rdf:type owl:NamedIndividual. 
+					?id rdfs:label ?label.
 					OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
-					OPTIONAL {?id rdfs:label ?label}.
-
 				}
-				ORDER BY ?parent ?ui_label ?label
+				ORDER BY ?parent_id ?ui_label ?label
 			""", initNs = self.onto_helper.namespace),
 
 			##################################################################
@@ -251,7 +294,7 @@ class Ontology(object):
 
 			'units' :rdflib.plugins.sparql.prepareQuery("""
 
-				SELECT DISTINCT (?datum as ?id)	?unit	?label ?ui_label
+				SELECT DISTINCT (?datum as ?id)	?unit ?label
 				WHERE { 
 					BIND (GENEPIO:0001605 as ?has_primitive_value_spec). 
 					BIND (IAO:0000039 as ?has_measurement_unit_label).
@@ -362,14 +405,15 @@ class Ontology(object):
 			# that ui_label and ui_definition should really operate. Every entity
 			# in OWL file is retrieved for their rdfs:label, IAO definition etc.
 			#
+			# INPUT
+			#	?datum (otherwise ALL labels etc. in ontology returned.)
+			#
+
 			'entity_text': rdflib.plugins.sparql.prepareQuery("""
 
 				SELECT DISTINCT ?label ?definition ?ui_label ?ui_definition
 				WHERE {  
-					{?datum rdf:type owl:Class} 
-					UNION {?datum rdf:type owl:NamedIndividual} 
-					UNION {?datum rdf:type rdf:Description}.
-					OPTIONAL {?datum rdfs:label ?label.} 
+					{?datum rdfs:label ?label.} 
 					OPTIONAL {?datum IAO:0000115 ?definition.}
 					OPTIONAL {?datum GENEPIO:0000006 ?ui_label.} 
 					OPTIONAL {?datum GENEPIO:0000162 ?ui_definition.}
@@ -408,7 +452,8 @@ class Ontology(object):
 
 				SELECT DISTINCT ?dbXref
 				WHERE {  
-					{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
+					{?datum rdf:type owl:Class} 
+					UNION {?datum rdf:type owl:NamedIndividual}.
 					?datum oboInOwl:hasDbXref ?dbXref.
 				}
 			""", initNs = self.onto_helper.namespace),
@@ -418,11 +463,12 @@ class Ontology(object):
 			# oboInOwl:hasSynonym
 			# Picklist items are augmented with synonyms in order for 
 			# type-as-you-go inputs to return appropriately filtered phrases
+			# OUTPUT below has "has" prefixed to each field name.
 			#
 			# INPUT
 			# 	?datum : id of term to get labels for
 			# OUTPUT
-			#   ?Synonym ?ExactSynonym ?NarrowSynonym
+			#   ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 			#
 			'entity_synonyms': rdflib.plugins.sparql.prepareQuery("""
 
@@ -445,7 +491,7 @@ class Ontology(object):
 		(options, args) = self.get_command_line()
 
 		if options.code_version:
-			print self.CODE_VERSION
+			print (self.CODE_VERSION)
 			return self.CODE_VERSION
 
 		if not len(args):
@@ -453,7 +499,8 @@ class Ontology(object):
 
 		# Accepts relative path with file name e.g. ../genepio-edit.owl
 		(main_ontology_file, output_file_basename) = self.onto_helper.check_ont_file(args[0], options)
-		print "Processing ", main_ontology_file, " ..."
+		
+		self.log("Parsing ", main_ontology_file)
 
 		# Load main ontology file into RDF graph
 		try:
@@ -470,21 +517,36 @@ class Ontology(object):
 		self.onto_helper.do_ontology_includes(main_ontology_file)
 
 		# Load self.onto_helper.struct with ontology metadata
-		self.onto_helper.set_ontology_metadata()
-		print "Metadata:", json.dumps(self.onto_helper.struct['metadata'],  sort_keys=False, indent=4, separators=(',', ': '))
+		self.onto_helper.set_ontology_metadata(
+			self.onto_helper.queries['ontology_metadata'])
+		print ("Metadata:", json.dumps(
+			self.onto_helper.struct['metadata'],  sort_keys=False, indent=4, separators=(',', ': ')))
 
 		# Retrieve subclasses of "data representational model"(OBI:0000658) 
 		# and place in self.onto_helper.struct.specifications
-		print 'Doing term hierarchy query'
-		specBinding = {'root': rdflib.URIRef(self.get_expanded_id('OBI:0000658'))} 
+
+		# ISSUE: get_expanted_id() won't work until do_query_table sets up any found prefixes!!!
+		data_rep_model = 'http://purl.obolibrary.org/obo/OBI_0000658'
+
+		self.log('Doing term hierarchy query on:', data_rep_model)
+		specBinding = {'root': rdflib.URIRef(data_rep_model)} 
 		entities = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
-		print 'Doing terms', len(entities)
+		self.log('Doing models: ', len(entities))
+		#print ("models:", json.dumps(entities,  sort_keys=False, indent=4, separators=(',', ': ')))
 		self.do_entities(entities, 'model')
 
-		self.doSpecComponents(self.onto_helper.do_query_table(self.queries['specification_components'] ))
-		self.doPrimitives(self.onto_helper.do_query_table(self.queries['inherited'] ))
-		self.doPrimitives(self.onto_helper.do_query_table(self.queries['primitives'] ))
-		self.doPrimitives(self.onto_helper.do_query_table(self.queries['categoricals'] ))
+		self.log('specification_components')
+		self.doSpecComponents(
+			self.onto_helper.do_query_table(self.queries['specification_components'] ))
+		self.log('inherited')
+		self.doPrimitives(
+			self.onto_helper.do_query_table(self.queries['inherited'] ))
+		self.log('primitives')
+		self.doPrimitives(
+			self.onto_helper.do_query_table(self.queries['primitives'] ))
+		self.log('categoricals')
+		self.doPrimitives(
+			self.onto_helper.do_query_table(self.queries['categoricals'] ))
 
 
 		# GENEPIO_0001655 = Class:Categorical tree specification
@@ -492,24 +554,59 @@ class Ontology(object):
 		#	- include targets of 'specifies value of'(OBI:0001927)
 		# 	- AS WELL AS ANY subClassOf expressions of categorical.
 		#
-		picklistBinding = {'root': rdflib.URIRef(self.get_expanded_id('GENEPIO:0001655'))}
+		self.log('picklists')
+		picklistBinding = {'root': rdflib.URIRef(self.onto_helper.get_expanded_id('GENEPIO:0001655'))}
 		self.doPickLists(self.onto_helper.do_query_table(self.queries['tree'], picklistBinding ))
-		self.doPickLists(self.onto_helper.do_query_table(self.queries['individuals']))
-
+		#self.log('picklist individuals')
+		#self.doPickLists(self.onto_helper.do_query_table(self.queries['individuals']))
+		self.log('features')
 		self.doUIFeatures(self.onto_helper.do_query_table(self.queries['features']) ,'features')
 		# Second call for 'member of' can override entity and 'has component' features established above.
 
+		self.log('feature_annotations')
 		# doUIFeatures here because its "order" feature reorganizes some of above content.
 		self.doUIFeatures(self.onto_helper.do_query_table(self.queries['feature_annotations']), 'feature_annotations')
+
+		self.log('units')
 		# This is implementing any user interface feature="preferred_unit:..." 
 		self.doUnits(self.onto_helper.do_query_table(self.queries['units'] ))
 
+		# Provide ui_label, synonyms, and hasDbXref's for each item:
+		for key in list(self.onto_helper.struct['specifications']):
+			entity = self.onto_helper.struct['specifications'][key]
+			#print( "testing", entity)
+			if 'datatype' in entity:
+				self.do_entities([entity], entity['datatype'] )
+
+		# list() otherwise dictionary changed size error.
+		for key in list(self.onto_helper.struct['specifications']): 
+			entity = self.onto_helper.struct['specifications'][key]
+
+			if 'datatype' in entity:
+				if entity['datatype'] == 'model' and 'parent_id' in entity:
+					# Some model items sit outside the 'data representational model' hierarchy
+					# They were fetched via 'has component' alone.
+					self.onto_helper.set_struct(
+						self.onto_helper.struct, 'specifications', 
+						entity['parent_id'], 'models', key, []
+					)
+			else: # not sure where this case is happening:
+				print ("Entity",entity, "does not have a datatype!")
+
+
+		self.log('writing output')
 		# DO NOT USE sort_keys=True on piclists etc. because this overrides OrderedDict() sort order.
 		# BUT NEED TO IMPLEMENT json ordereddict sorting patch.
-		self.onto_helper.do_output_json(self.struct, output_file_basename)
+		self.onto_helper.do_output_json(self.onto_helper.struct, output_file_basename)
 
-		#with (open('./data/ontology/' + ontology_filename + '.json', 'w')) as output_handle:
-		#	output_handle.write(json.dumps(self.onto_helper.struct,  sort_keys=False, indent=4, separators=(',', ': ')))
+
+	def log(self, *args):
+		"""
+			Show log messages and differential time between calls
+		"""
+		timestamp = datetime.datetime.now()
+		print("time delta: ", str(timestamp - self.timestamp), "\n", str(args))
+		self.timestamp = timestamp
 
 
 	def do_entities(self, table, datatype):
@@ -535,13 +632,14 @@ class Ontology(object):
 		"""
 
 		# List of parents to process after 1st pass through table's entities.
-		parents = [] 
+		#parents = [] 
 
 		for myDict in table:
 			self.do_entity(myDict, datatype)
-
-			parent_id = self.onto_helper.get_parent_id(myDict) 
-			if not parent_id in parents:
+						
+		"""			
+			# Only 'data representational model' doesn't have parent: {'id': 'OBI:0000658', 'datatype': 'entity'}
+			if parent_id and not parent_id in parents: 
 				parents.append(parent_id)
 
 		# 2nd pass does parents:
@@ -550,14 +648,17 @@ class Ontology(object):
 		# of top-level entity, and not really important.
 		for parent_id in parents:
 			if not parent_id in self.onto_helper.struct['specifications']:
-				self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', parent_id, {
-					'id': parent_id, 
-					'datatype': 'entity'
-				})
+				self.onto_helper.set_entity_default(
+					self.onto_helper.struct, 'specifications', 
+					parent_id, {'id': parent_id, 'datatype': datatype} #'entity'
+				)
+		
 
-	##### ISSSUE: MUST ATTACH PARENT MODELS[child_id] = []
-	#self.set_struct(self.onto_helper.struct, 'specifications', parentId, 'models', myDict['id'], [])
-
+		"""
+	"""
+	The query entities aren't exaxctly in order depth wise or traversal wise.
+	Doing parent related things can't necessarily count on parent's existence.
+	"""
 
 	def do_entity(self, myDict, datatype):
 		"""
@@ -570,60 +671,75 @@ class Ontology(object):
 		"""
 
 		id = str(myDict['id'])
-		myDict['id'] = id
+		myDict['id'] = id # Ensures it is a string
 		myDict['datatype'] = datatype
 
+		# EVERY TERM GETS ONTOLOGY BASED ON LOADED metadata "prefix" ????
 		if 'prefix' in self.onto_helper.struct['metadata']:
 			myDict['ontology'] = self.onto_helper.struct['metadata']['prefix']
 
 		if 'replaced_by' in myDict:
 			myDict['replaced_by'] = self.onto_helper.get_entity_id(myDict['replaced_by'])
 
-	# Addresses case where a term is in query more than once, as
-	# a result of being positioned in different places in hierarchy.
-	# self.struct[struct][id]['other_parent'].append(parentId)
+		self.onto_helper.set_entity_default(
+			self.onto_helper.struct, 'specifications', id, myDict)
 
-		self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, myDict)
+		myURI = rdflib.URIRef(self.onto_helper.get_expanded_id(id))
+		#self.log('entity_text')
+		self.do_entity_text(id, myURI)
+		#self.log('synonyms')
+		self.do_entity_synonyms(id, myURI)
+		#self.log('dbxrefs')
+		self.do_entity_dbxrefs(id, myURI)
 
-		self.do_entity_text(id)
-		self.do_entity_synonyms(id)
-		self.do_entity_dbxrefs(id)
 
-
-	def do_entity_text(self, id):
+	def do_entity_text(self, id, myURI):
 		"""
 		For given entity, all 'labels' query fields are returned (rdfs:label, IAO 
 		definition, UI label, UI definition) and added to the entity directly.
 
+		example myDict: {"label": "Bacteroides"}
 		"""
-		myURI = rdflib.URIRef(self.onto_helper.get_expanded_id(id))
+
 		rows = self.onto_helper.graph.query(
 			self.queries['entity_text'],	
 			initBindings = {'datum': myURI} 
 		)
+		if ":" in id and len(rows) == 0:
+			print ('ERROR in do_entity_text(): No rdfs:label entity for: ', id)
+
 		# Should only be 1 row to loop through
 		for row in rows: 
-			myDict = row.asdict()	
+			myDict = row.asdict()
+
 			# Adds any new text items to given id's structure
-			self.onto_helper.struct['specifications'][id].update(myDict) 
+			for field in myDict:
+				if len(myDict[field]) > 0:
+					self.onto_helper.struct['specifications'][id][field] = myDict[field] 
+					# avoiding update(myDict) because it may have empty values in it.
 
 
-	def do_entity_dbxrefs(self, id):
+	def do_entity_dbxrefs(self, id, myURI):
 		"""
 		Adds list of hasDbXref references to given entity.
 		"""
-		uriID = rdflib.URIRef(self.get_expanded_id(id))
-		dbreferences = self.onto_helper.graph.query(self.queries['dbreferences'], initBindings = {'datum': uriID })
+		dbreferences = self.onto_helper.graph.query(
+			self.queries['dbreferences'], 
+			initBindings = {'datum': myURI }
+		)
 		if len(dbreferences):
 			# Establish hasDbXref list for given entity
-			dbxrefList = self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, 'hasDbXref', [])		
+			dbxrefList = self.onto_helper.set_entity_default(
+				self.onto_helper.struct, 'specifications', id, 'hasDbXref', []
+			)		
 			for row in dbreferences:
 				dbxrefList.append(row['dbXref'])
 
 
-	def do_entity_synonyms(self, id):
+	def do_entity_synonyms(self, id, myURI):
 		"""
 		Augment each entry in 'specifications' with array of hasSynonym etc. 
+		NOTE: 'has' is prefixed to synonym varieties below.
 		synonyms gathered from 'entity_synonyms' query of annotations: 
 
 			oboInOwl:hasSynonym
@@ -638,23 +754,24 @@ class Ontology(object):
 		INPUT
 			?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 		"""
+		synonyms = self.onto_helper.graph.query(
+			self.queries['entity_synonyms'], 
+			initBindings={'datum': myURI}
+		)
+		for row in synonyms:
+			for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
 
-		# Add preferred label and definition for items in each table
-		for id in self.onto_helper.struct['specifications']:
-
-			uriID = rdflib.URIRef(self.get_expanded_id(id))
-			synonyms = self.onto_helper.graph.query(self.queries['entity_synonyms'], initBindings={'datum': uriID })
-			for row in synonyms:
-				for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
-
-					if row[field]: 
-						synonymTypeList = self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', id, 'has' + field, [])
-						# Clean up synonym phrases
-						# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
-						stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
-						phrases = stringy.strip().replace(', ','\n').replace('"','').split('\n')
-						for phrase in phrases:
-							synonymTypeList.append( phrase.strip())
+				if field in row and len(row[field]): 
+					synonymTypeList = self.onto_helper.set_entity_default(
+						self.onto_helper.struct, 'specifications', id, 'has' + field, []
+					)
+					# Clean up synonym phrases
+					# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
+					# stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
+					
+					phrases = row[field].replace('\\n', '\n').strip().replace(', ','\n').replace('"','').split('\n')
+					for phrase in phrases:
+						synonymTypeList.append( phrase.strip())
 
 
 	def doPickLists(self, table):
@@ -672,84 +789,117 @@ class Ontology(object):
 		# Fashion complete picklists (flat list) of items, with parent(s) of each item, and members.
 		for myDict in table:
 			id = str(myDict['id'])
-			parentId = self.get_parent_id(myDict)
+			parent_id = self.onto_helper.get_parent_id(myDict)
 			myDict.pop('parent_id')
 			#This picklist node might already have been mentioned in another picklist 
 			# node's member list so it might already be set up.
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, myDict)
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'datatype', 'xmls:anyURI') # MARKS PICKLIST ITEMS
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'member_of', [])
-			self.onto_helper.get_struct(self.onto_helper.struct, struct, id, 'member_of').append(parentId)
-			# ALSO ADD 'located in' as 'part of' links?????
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, id, myDict)
+			# MARKS PICKLIST ITEMS
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, id, 'datatype', 'xmls:anyURI') 
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, id, 'member_of', [])
+			self.onto_helper.get_struct(
+				self.onto_helper.struct, struct, id, 'member_of').append(parent_id)
+			# ALSO ADD 'located in' as 'part of' links for geo-location ?????
 
 			# Ditto for parent, if any...
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, {'id': parentId} )
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'choices', OrderedDict())
-			self.set_struct(self.onto_helper.struct, struct, parentId, 'choices', id, []) # empty array is set of features.
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parent_id, {'id': parent_id} )
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parent_id, 'datatype', 'xmls:anyURI') 
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parent_id, 'choices', OrderedDict())
+			# Empty array is set of features connected to a choice, handled separately
+			self.onto_helper.set_struct(
+				self.onto_helper.struct, struct, parent_id, 'choices', id, []) 
 
 
 	def doSpecComponents(self, table):
 		""" ####################################################################
-			FIELD GROUPS
+			Specification Components may introduce new entities, both parents 
+			and children.
+			Components are SUPPOSED to have established parents of type "model",
+			BUT BNodes have to be established ...?
 
+			Parents are always of type "model"
 			This is tricky because Cardinality and limit must be transferred to parent's children list.
 			A field's parent might not be in fields yet, so have to initialise it.
 
 			# E.g. myDict = {'expression': {'datatype': 'disjunction', 'data': [u'SIO:000661', u'SIO:000662', u'SIO:000663']}, u'cardinality': u'owl:maxQualifiedCardinality', u'limit': {'datatype': u'xmls:nonNegativeInteger', 'value': u'1'}, u'id': rdflib.term.BNode('N65c806e2db1c4f7db8b7b434bca58f78'), u'parent_id': u'GENEPIO:0001623'}
 
 			INPUTS
-				?parent ?id ?cardinality ?limit
+				?parent_id ?id ?cardinality ?limit
 
 		"""
 		struct = 'specifications'
 		for myDict in table:
 
 			id = str(myDict['id'])
-			if not isinstance(id, basestring):
-				print "Field Groups problem - missing id as string:", myDict
-				return
 
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, {'id': id} )
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, 'otherParent', [] )	
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, id, {'id': id} )
 
-			parentId = self.get_parent_id(myDict)
-			if parentId:
-		
-				if parentId == id:
-					print 'ERROR: an entity mistakenly is "parent" of itself: %s ' % id
+			# What datatype?
+
+			parentId = self.onto_helper.get_parent_id(myDict)
+			if parentId == id:
+				print ('ERROR: an entity mistakenly is "parent" of itself: %s ' % id)
+				continue
+
+			if not 'parent_id' in self.onto_helper.struct[struct][id]:
+				self.onto_helper.struct[struct][id]['parent_id'] = parentId
+
+			# Ensure parent exists and with default data type of 'model' since it has components.
+			# EXPRESSION models
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parentId, {'id':parentId})
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parentId, 'datatype', 'model')
+
+			# if parent_id already exists, then slot new parent id into otherParent.
+			if parentId != self.onto_helper.struct[struct][id]['parent_id']:
+				if not 'otherParent' in self.onto_helper.struct[struct][id]:
+					self.onto_helper.set_entity_default(
+						self.onto_helper.struct, struct, id, 'otherParent', [] )
 				else:
-					# Ensure parent exists and with default data type of 'model' since it has components.
-					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, {'id': parentId, 'datatype': 'model'} )
 					self.onto_helper.struct[struct][id]['otherParent'].append(parentId)
 
-					obj = {'cardinality': myDict['cardinality']}
-					if 'limit' in myDict: 
-						obj.update(self.onto_helper.get_bindings(myDict['limit']))
+			cardObj = {'cardinality': myDict['cardinality']}
+			if 'limit' in myDict: 
+				cardObj.update(self.onto_helper.get_bindings(myDict['limit']))
 
-					# First time children list populated with this id's content:
-					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'components', {})
-					self.onto_helper.set_entity_default(self.onto_helper.struct, struct, parentId, 'components', id, [])
-					self.onto_helper.get_struct(self.onto_helper.struct, struct, parentId, 'components', id).append(obj)
+			# First time children list populated with this id's content:
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parentId, 'components', {})
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, parentId, 'components', id, [])
+			self.onto_helper.get_struct(
+				self.onto_helper.struct, struct, parentId, 'components', id).append(cardObj)
 
-					# BNodes have no name but have expression.
-					if 'expression' in myDict: 
+			# BNodes have no name but have expression.
+			if 'expression' in myDict: 
 
-						print "HAS EXPRESSION: ", myDict['expression']
+				print (id, "HAS EXPRESSION: ", myDict['expression'])
 
-						expression = myDict['expression']
-						self.onto_helper.struct[struct][id]['datatype'] = expression['datatype'] # disjunction usually
-						self.onto_helper.struct[struct][id]['parent_id'] = parentId
-						# Anonymous nodes imbedded within other classes don't get labels.
-						self.onto_helper.struct[struct][id]['ui_label'] = '' 
-						self.onto_helper.struct[struct][id]['components'] = {}
-						# List off each of the disjunction items, all with a 'some'
-						for ptr, partId in enumerate(expression['data']):
-							# So far logical expression parts have no further info. (like cardinality)
-							self.onto_helper.struct[struct][id]['components'][partId] = [{
-		                        "datatype": "xmls:nonNegativeInteger",
-		                        "cardinality": "owl:qualifiedCardinality",
-		                        "value": "1"
-		                    }] 
+				expression = myDict['expression']
+				# Usually expressions have 'disjunction' datatype
+				self.onto_helper.struct[struct][id]['datatype'] = expression['datatype'] 
+
+				# TESTING REMOVAL, redundant
+				#self.onto_helper.struct[struct][id]['parent_id'] = parentId
+				# Anonymous nodes imbedded within other classes don't get labels.
+				self.onto_helper.struct[struct][id]['label'] = '' 
+				self.onto_helper.struct[struct][id]['components'] = {}
+				# List off each of the disjunction items, all with a 'some'
+				for ptr, partId in enumerate(expression['data']):
+					# So far logical expression parts have no further info. (like cardinality)
+					self.onto_helper.struct[struct][id]['components'][partId] = [{
+                        "datatype": "xmls:nonNegativeInteger",
+                        "cardinality": "owl:qualifiedCardinality",
+                        "value": "1"
+                    }] 
 
 
 	def doPrimitives(self, table):
@@ -794,23 +944,25 @@ class Ontology(object):
 		struct = 'specifications'
 		for myDict in table:
 			id = myDict['id']
-			self.onto_helper.set_entity_default(self.onto_helper.struct, struct, id, {'id':id} )
+			self.onto_helper.set_entity_default(
+				self.onto_helper.struct, struct, id, {'id':id} )
 			record = self.onto_helper.struct[struct][id]
 			self.onto_helper.set_entity_default(record, 'datatype', myDict['datatype'])
 
 			if record['datatype'] != myDict['datatype']:
-				self.set_struct(record,'datatype', myDict['datatype'])
-				self.set_struct(record,'constraints', []) #override past constraints.
-				#print "ERROR for %s: multiple datatypes assigned: %s, %s" % (id, record['datatype']['type'], myDict['datatype'])
+				self.onto_helper.set_struct(record,'datatype', myDict['datatype'])
+				self.onto_helper.set_struct(record,'constraints', []) #override past constraints.
+				#print ("ERROR for %s: multiple datatypes assigned: %s, %s" % (id, record['datatype']['type'], myDict['datatype']))
 
 			if 'constraint' in myDict:
 
 				obj = {'constraint': myDict['constraint']}	
 
 				if 'expression' in myDict: 
-					if isinstance(myDict['expression'], basestring):	
+					if isinstance(myDict['expression'], (str, bytes)): # was basestring
 						obj['value'] = myDict['expression']
 					else:
+						print ('expression:', myDict['expression'])
 						obj.update(self.onto_helper.get_bindings(myDict['expression']))
 
 				"""
@@ -850,18 +1002,27 @@ class Ontology(object):
 
 		for myDict in table:
 			if not myDict['id'] in self.onto_helper.struct['specifications']:
-				print "NOTE: field [%s] isn't listed in a specification, but a unit [%s] is attached to it" % (myDict['id'],myDict['unit'])
+				print ("NOTE: field [%s] isn't listed in a specification, but a unit [%s] is attached to it" % (myDict['id'],myDict['unit']))
 				continue
 			else:
-				self.onto_helper.set_entity_default(self.onto_helper.struct, 'specifications', myDict['id'], 'units', [])
-				self.onto_helper.get_struct(self.onto_helper.struct, 'specifications', myDict['id'], 'units').append(myDict['unit'])
+				self.onto_helper.set_entity_default(
+					self.onto_helper.struct, 'specifications', 
+					myDict['id'], 'units', []
+				)
+				self.onto_helper.get_struct(
+					self.onto_helper.struct, 'specifications',
+					myDict['id'], 'units'
+				).append(myDict['unit'])
 
 				# Ensure specifications has this unit
-				self.set_struct(self.onto_helper.struct, 'specifications' ,myDict['unit'] , {
-					'id': myDict['unit'],
-					'ui_label': myDict['label'],
-					'datatype': 'xmls:anyURI'
-				})
+				self.onto_helper.set_struct(
+					self.onto_helper.struct, 'specifications',
+					myDict['unit'], {
+						'id': myDict['unit'],
+						'label': myDict['label'],
+						'datatype': 'xmls:anyURI'
+					}
+				)
 
 
 	def doUIFeatures(self, table, table_name):
@@ -924,7 +1085,7 @@ class Ontology(object):
 		for myDict in table:
 			entityId = myDict['id']
 			if not entityId in self.onto_helper.struct['specifications']:
-				print "Error, no specification for id ", entityId, " when working on", table_name
+				print ("Error, no specification for id ", entityId, " when working on", table_name)
 				continue
 
 			parent_id = myDict['referrer'] # Id of parent if applicable
@@ -933,12 +1094,15 @@ class Ontology(object):
 			valueObj = myDict['value']
 			featureDict = {}
 
-			if 'datatype' in valueObj: # ontology included a datatype in this.
-				featureDict['datatype'] = valueObj['datatype']
-				value = valueObj['value']
+			if isinstance(valueObj, (str, bytes)):
+				# value is a string.
+				value = str(valueObj)
+			else:
+				value = str(valueObj['value'])
+				if 'datatype' in valueObj: # xsd:integer etc.
+					# datatype' in valueObj: # ontology included a datatype in this.
+					featureDict['datatype'] = valueObj['datatype']
 
-			else: # value is a string.
-				value = valueObj 
 
 			# User interface feature, of form [keyword] or [key:value]
 			if featureType == 'GENEPIO:0001763': 
@@ -952,11 +1116,14 @@ class Ontology(object):
 					# hashmark comment after them.
 					if feature == 'order':
 						orderArray = featureDict['value'].strip().strip(r'\n').split(r'\n') #splitlines() not working!
-						featureDict['value'] = [unicode(x.split('#')[0].strip()) for x in orderArray]
+						#featureDict['value'] = [unicode(x.split('#')[0].strip()) for x in orderArray]
+						featureDict['value'] = [x.split('#')[0].strip() for x in orderArray]
+
 					elif feature == 'preferred_unit':
 						# Expecting 1 value. 
 						# strip comments off.
-						featureDict['value'] =	unicode(featureDict['value'].split('#')[0].strip() )
+						#featureDict['value'] =	unicode(featureDict['value'].split('#')[0].strip() )
+						featureDict['value'] =	featureDict['value'].split('#')[0].strip()
 
 				else: # keyword
 					feature = value
@@ -967,7 +1134,7 @@ class Ontology(object):
 				if featureType == 'rdfs:label':
 					feature = 'label'
 					# Issue is that entity['parent_id'] is not showing up
-					#print feature, value, parentId
+					#print (feature, value, parentId)
 
 				elif featureType == 'IAO:0000115':
 					feature = 'definition'
@@ -998,7 +1165,7 @@ class Ontology(object):
 			# about models?
 			parent = self.onto_helper.get_struct(self.onto_helper.struct, 'specifications', parent_id)
 			if not parent:
-				print "Error when adding feature: couldn't locate ", parent_id
+				print ("Error when adding feature: couldn't locate ", parent_id)
 				continue
 				
 			featureDict['feature'] = feature
@@ -1012,7 +1179,7 @@ class Ontology(object):
 		*************************** Parse Command Line *****************************
 		"""
 		parser = MyParser(
-			description = 'GenEpiO JSON field specification generator.  See https://github.com/GenEpiO/genepio',
+			description = 'GEEM JSON field specification generator.  See https://github.com/genepio/geem',
 			usage = 'jsonimo.py [ontology file path] [options]*',
 			epilog="""  """)
 		

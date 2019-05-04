@@ -486,7 +486,7 @@ class Ontology(object):
 
 	def __main__(self): #, main_ontology_file
 
-		self.onto_helper = oh.OntoHelper()
+		self.onto_helper = oh.OntoHelper() # Needed here? duplicate of above.
 
 		(options, args) = self.get_command_line()
 

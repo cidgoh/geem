@@ -169,8 +169,115 @@ function GeemAPI() {
 	    });
 	}
 
+	/**
+	 * Get IRI for a prefix from a package's `@context`.
+	 * @param {number} resource_id - ID of package to get IRI from
+	 * @param {string} prefix
+	 * @returns {Promise<string>} IRI value
+	 */
+        this.get_resource_context = function (resource_id, prefix) {
+                return new Promise(function (resolve, reject) {
+                        $.ajax({
+                                // Call to `context` function
+                                url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
+                                success: function (data, textStatus, jqXHR) {
+                                        resolve(data)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                        reject(
+                                                Error('Unable to get full prefix for '
+                                                        + prefix + ' in package ' + resource_id
+                                                        + '.\n' + jqXHR.responseText)
+                                        )
+                                }
+                        })
+                })
+        };
 
-	this.cart_change_item = function(entity_path, action, versionIRI = null) {
+	/**
+	 * Add `prefix:iri` to a package's `@context`.
+	 * @param {number} resource_id - ID of package to add to
+	 * @param {string} prefix
+	 * @param {string} iri
+	 * @returns {Promise<string>} Confirmation of addition
+	 */
+        this.add_to_resource_context = function(resource_id, prefix, iri) {
+                return new Promise(function (resolve, reject) {
+                        $.ajax({
+                                type: 'POST',
+                                // Call to `create_context` function
+                                url: API_RESOURCES_URL + resource_id + '/create/context/',
+                                data: {'prefix': prefix, 'iri': iri},
+                                success: function (data, textStatus, jqXHR) {
+                                        resolve(data)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                        reject(
+                                                Error('Unable to add ' + prefix + ': ' + iri
+                                                        + ' to package ' + resource_id + '.\n'
+                                                        + jqXHR.responseText)
+                                        )
+                                }
+                        })
+                })
+        };
+
+	/**
+	 * Get a term from a package's `specifications`.
+	 * @param {number} resource_id - ID of package to get term from
+	 * @param {string} term_id - ID of term from package's
+	 * 	`specifications`
+	 * @returns {Promise<Object>} Complete specifications of term
+	 */
+        this.get_resource_specifications = function (resource_id, term_id) {
+                return new Promise(function (resolve, reject) {
+                        $.ajax({
+                                // Call to `specifications` function
+                                url: API_RESOURCES_URL + resource_id + '/specifications/' + term_id
+                                        + '/',
+                                success: function (data, textStatus, jqXHR) {
+                                        resolve(data)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                        reject(
+                                                Error('Unable to get specifications for ' + term_id
+                                                        + ' in package ' + resource_id + '.\n'
+                                                        + jqXHR.responseText)
+                                        )
+                                }
+                        })
+                })
+        };
+
+	/**
+	 * Add `specification` to a package's `specifications`.
+	 * @param {number} resource_id - ID of package to add to
+	 * @param {Object} specification
+	 * @returns {Promise<string>} Confirmation of addition
+	 */
+        this.add_to_resource_specifications = function(resource_id, specification) {
+                return new Promise(function (resolve, reject) {
+                        $.ajax({
+                                type: 'POST',
+                                // Call to `create_specifications`
+                                // function.
+                                url: API_RESOURCES_URL + resource_id + '/create/specifications/',
+                                data: specification,
+                                success: function (data, textStatus, jqXHR) {
+                                        resolve(data)
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                        reject(
+                                                Error('Unable to add ' + specification.id
+                                                        + ' to package ' + resource_id + '.\n'
+                                                        + jqXHR.responseText)
+                                        )
+                                }
+                        })
+                })
+        };
+
+	this.cart_change_item = function(entity_path, action, package_id, versionIRI = null) {
 		/* 
 		FUTURE: Add call to server if cart should be managed server side.
 
@@ -193,12 +300,27 @@ function GeemAPI() {
 			// Get last path item id.
 			var entity_id = ptr ? entity_path.substr(ptr + 1) : entity_path
 			var entity = top.resource.contents.specifications[entity_id]
-			
+
+			/**
+			 * Item in user's cart.
+			 * @typedef cart_item
+			 * @type {Object}
+			 * @property {string} label - Term name
+			 * @property {string} id - Term ID
+			 * @property {string} path - Term hierarchy
+			 * @property {string} status - Action to take
+			 * 	with this item
+			 * @property {number} package_id - ID of term's
+			 * 	package
+			 * @property {string} version - Timestamped IRI
+			 * 	of term package
+			 */
 			result = {
 				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
 				id: entity_id,
 				path: entity_path, //Ontology id is last item in path
 				status: action,
+				package_id: package_id,
 				version: versionIRI
 			}
 

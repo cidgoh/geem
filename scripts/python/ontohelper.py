@@ -1,8 +1,27 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
+# 
 
 """ **************************************************************************
- 
+	This collects a set of commonly used python functions into the OntoHelper class
+	
+	Call from another class init routine. 
+
+	import python.ontohelper as oh
+
+	class Ontology(object):
+
+		self.onto_helper = oh.OntoHelper()
+		...
+
+	Instance of onto_helper has:
+
+		self.graph: holds a triple store graph
+
+		self.struct: an OrderedDict() of
+			.@context: OrderedDict() of prefix:url key values.
+			.metadata: Holds metadata (dc:title etc) for loaded ontology
+			.specifications Holds term details or other derived datastructures
+
 """
 
 import os
@@ -63,6 +82,7 @@ class OntoHelper(object):
 		self.struct['specifications'] = {}
 
 		# Namespace is for rdflib sparql querries
+		# FUTURE: DEPRECATE?.  QUERY ENGINE SHOULD USE @CONTEXT.
 		self.namespace = { 
 			'owl': rdflib.URIRef('http://www.w3.org/2002/07/owl#'),
 			'rdfs': rdflib.URIRef('http://www.w3.org/2000/01/rdf-schema#'),
@@ -224,7 +244,7 @@ class OntoHelper(object):
 			# table, so add it to @context 
 			prefix = path.rsplit('/',1)[1]
 
-			# At least 2 characters in namespace prefix required to avoid
+			# At least 2 characters in @context prefix required to avoid
 			# exception to rule below, as no namespace begins with number
 			# and following is a URI but not an ontology term reference.
 			#	<owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/obi/2018-05-23/obi.owl"/>
@@ -241,9 +261,12 @@ class OntoHelper(object):
 		# If a URI has a recognized prefix, create full version
 		if ':' in myURI: 
 			(prefix, myid) = myURI.rsplit(':',1)
-			for key, value in self.struct['@context'].items():
-				if key == prefix: return value + myid
-			
+
+			if prefix in self.struct['@context']:
+				return self.struct['@context'][prefix] + myid
+			else:
+				print ('ERROR in get_expanded_id(): No @context prefix for: ', myURI, ">" + prefix + "<")
+
 		return myURI 
 
 
@@ -375,7 +398,7 @@ class OntoHelper(object):
 
 				elif valType is rdflib.term.Literal :
 					# Text may include carriage returns; escape to json
-					literal = {'value': value.replace('\n', r'\n').encode('utf-8') } 
+					literal = {'value': value.replace('\n', r'\n')} 
 					#_invalid_uri_chars = '<>" {}|\\^`'
 
 					if hasattr(value, 'datatype'): #rdf:datatype
@@ -489,7 +512,7 @@ class OntoHelper(object):
 				value = entity[field] if field in entity else ''
 				if isinstance(value, list): # Constructed parent_id list.
 					value = ','.join(value)
-				row.append(value.replace('\t',' ').encode('utf-8'))  # str() handles other_parents array
+				row.append(value.replace('\t',' ')) # str() handles other_parents array
 
 			output.append('\t'.join(row))
 

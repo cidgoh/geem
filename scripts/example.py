@@ -1,10 +1,9 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 """ 
 ****************************************************
  example.py
  Author: Damion Dooley
+ Python 2.7 and 3.x compatible.
 
  This is an example script that shows how to load an ontology and its include
  files using rdflib, and how to query it by sparql query below. It depends on
@@ -14,6 +13,7 @@
 
  python example.py ../genepio.owl
 
+ 
 **************************************************** 
 """ 
 
@@ -29,7 +29,7 @@ except ImportError: # Python 2.6
 	from ordereddict import OrderedDict
 
 
-CODE_VERSION = '0.0.0'
+CODE_VERSION = '0.0.1'
 
 def stop_err( msg, exit_code=1 ):
 	sys.stderr.write("%s\n" % msg)
@@ -63,8 +63,9 @@ class Ontology(object):
 			'tree': rdflib.plugins.sparql.prepareQuery("""
 				SELECT DISTINCT ?id ?parent ?label ?ui_label ?definition
 				WHERE {	
-					?parent rdfs:subClassOf* ?root.
+					?id rdfs:subClassOf* ?root.
 					?id rdfs:subClassOf ?parent.
+					FILTER (isIRI(?parent_id)). # otherwise bNode parents outside of is_a are included.
 					OPTIONAL {?id rdfs:label ?label}.
 					OPTIONAL {?id GENEPIO:0000006 ?ui_label}.
 					OPTIONAL {?id IAO:0000115 ?definition.}
@@ -84,7 +85,7 @@ class Ontology(object):
 		(options, args) = self.get_command_line()
 
 		if options.code_version:
-			print self.CODE_VERSION
+			print(self.CODE_VERSION)
 			return self.CODE_VERSION
 
 		if not len(args):
@@ -93,7 +94,7 @@ class Ontology(object):
 		(main_ontology_file, output_file_basename) = self.onto_helper.check_ont_file(args[0], options)
 
 		# Load main ontology file into RDF graph
-		print "Fetching and parsing " + main_ontology_file + " ..."
+		print("Fetching and parsing " + main_ontology_file + ' ...')
 
 		try:
 			# ISSUE: ontology file taken in as ascii; rdflib doesn't accept
@@ -109,7 +110,7 @@ class Ontology(object):
 		self.onto_helper.do_ontology_includes(main_ontology_file)
 
 		# Get stuff under main owl:Thing entity (or supply some other ontology term id)
-		print 'Doing term hierarchy query'
+		print('Doing term hierarchy query')
 		specBinding = {'root': rdflib.URIRef(self.onto_helper.get_expanded_id('owl:Thing'))} 
 		struct = self.onto_helper.do_query_table(self.queries['tree'], specBinding )
 

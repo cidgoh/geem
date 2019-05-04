@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from oauth2_provider.models import Application
 from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
+from psycopg2.extras import Json as psql_json_adapter
 
 import re, os
 
@@ -118,7 +119,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No access to package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Query entire specifications or exact term
         if term_id is None:
@@ -127,7 +128,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             query = 'contents__specifications__' + term_id
         queryset = queryset.values_list(query, flat=True)
 
-        return Response((queryset)[0], content_type=status.HTTP_200_OK)
+        # If looking for a specific term, and query failed, return 404
+        if term_id is not None and queryset[0] is None:
+            return Response('%s not found in package with id %s'
+                            % (term_id, pk),
+                            status=status.HTTP_404_NOT_FOUND)
+
+        return Response(queryset[0], status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
     def delete_specifications(self, request, pk, term_id=None):
@@ -157,7 +164,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No permission to edit package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -173,27 +180,25 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 if queryset.values_list(term_id_query, flat=True)[0] is None:
                     return Response(
                         'id %s does not exist in package %s' % (term_id, pk),
-                        content_type=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
                 # Delete exact term
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{specifications,%s}') where id=%s"
                                % (term_id, pk))
 
-        return Response('Successfully deleted',
-                        content_type=status.HTTP_200_OK)
+        return Response('Successfully deleted', status=status.HTTP_200_OK)
 
-    @action(detail=True, url_path='create/specifications/(?P<term>.+)')
-    def create_specifications(self, request, pk, term):
-        """Add a term to the specifications of a package.
+    @action(detail=True, methods=['post'], url_path='create/specifications')
+    def create_specifications(self, request, pk):
+        """Add a specification to a package.
 
-        * api/resources/{pk}/create/specifications/{term}
-
-          * Add {term} to specifications of package with id == {pk}
+        `request.data` is added to the specifications of a package with
+        `id == pk`. `request.data` must be in `dict` format, and have
+        an `id` attribute.
 
         :param rest_framework.request.Request request: Front-end
                                                        request metadata
         :param str pk: id of package
-        :param str term: JSON object corresponding to new term
         :return: Confirmation of creation, or appropriate error message
         :rtype: rest_framework.request.Response
         """
@@ -204,130 +209,179 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No permission to edit package with id %s' % pk,
-                            content_type=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate term as JSON
-        try:
-            term_json_obj = json.loads(term)
-        except json.JSONDecodeError:
-            return Response('entry is not a valid JSON object',
-                            content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate term as JSON object
-        if type(term_json_obj) is not dict:
-            return Response('entry is not a valid JSON object',
-                            content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate 'id' key exists in term
-        if 'id' not in term_json_obj:
-            return Response('entry missing id value',
-                            content_type=status.HTTP_400_BAD_REQUEST)
-        # Validate 'id' is an IRI
-        term_id = term_json_obj['id']
-        try:
-            URLValidator()(term_id)
-        except ValidationError:
-            return Response('id must be a valid IRI',
-                            content_type=status.HTTP_400_BAD_REQUEST)
+        # Validate 'id' key exists in request.data
+        if 'id' not in request.data:
+            return Response('request.data missing id value',
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        # Get a shortened version of term_id via a substitution prefix.
-        # Add the substitution prefix to the package's context if
-        # necessary.
-        shortened_term_id = self._translate_iri(term_id, queryset)
-
-        # Validate shortened 'id' key does not already exist in package
-        term_id_query = 'contents__specifications__' + shortened_term_id
-        if queryset.values_list(term_id_query, flat=True)[0] is not None:
-            message = 'id %s already exists in package %s' % (term_id, pk)
-            return Response(message, content_type=status.HTTP_400_BAD_REQUEST)
+        # Some of the fields with paragraphs as values (e.g.,
+        # 'definition' for references to ontologies) may have
+        # problematic characters (e.g., single quotes).
+        psql_escaped_data = psql_json_adapter(request.data)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
             # creation query used below.
             cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{specifications, %s}', jsonb '%s')) "
-                           "where id=%s" % (shortened_term_id, term, pk))
+                           "contents, '{specifications, %s}', jsonb %s)) "
+                           "where id=%s"
+                           % (request.data['id'], psql_escaped_data, pk))
 
-        return Response('Successfully created',
-                        content_type=status.HTTP_404_NOT_FOUND)
+        return Response('Successfully created', status=status.HTTP_200_OK)
 
-    def _translate_iri(self, term_id, queryset):
-        """Attempt to shorten term_id with substitution prefix.
+    @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
+    def context(self, request, pk, prefix=None):
+        """Get entire @context, or a single IRI, from a package.
 
-        term_id should be an IRI.
+        * api/resources/{pk}/context
 
-        queryset should be a QuerySet referring to a single package. If
-        an appropriate prefix does not exist inside that package's
-        @context, one will be added.
+          * @context of package with id == {pk}
 
-        Large chunks of this function are lifted from get_entity_id in
-        ontohelper. Therefore, this follows several of the assumptions
-        in ontohelper as well:
+        * api/resources/{pk}/context/{prefix}
 
-        * IRI follows BFO format
+          * Get IRI with prefix == {prefix} from @context of package
+            with id == {pk}
 
-        * If a prefix does not already exist in @context, the new
-          prefix generation will yield at least 2 characters
-
-          * Therefore, this function may fail to yield an appropriate
-            prefix, in which case the unmodified term_id is returned
-
-        ontohelper does not account for IRI values with identical
-        prefixes but different separators. If an appropriate prefix for
-        term_id exists in @context, but with a different separator, it
-        will not be overwritten, and an untouched term_id will be
-        returned.
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str prefix: prefix of IRI value inside package @context
+        :return: One or all IRI values from package @context, or
+                 appropriate error message
+        :rtype: rest_framework.request.Response
         """
-        # Split term_id into path, fragment and separator
-        if '_' in term_id:
-            (path, fragment) = term_id.rsplit('_', 1)
-            separator = '_'
-        elif '#' in term_id:
-            (path, fragment) = term_id.rsplit('#', 1)
-            separator = '#'
+        # Query specified package
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No access to package with id %s' % pk,
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Query entire @context or exact prefix
+        if prefix is None:
+            query = 'contents__@context'
         else:
-            (path, fragment) = term_id.rsplit('/', 1)
-            separator = '/'
+            query = 'contents__@context__' + prefix
+        queryset = queryset.values_list(query, flat=True)
 
-        # Substitution prefix based on path
-        substitution_prefix = path.rsplit('/', 1)[1]
+        # If looking for a specific prefix, and query failed, return
+        # 404.
+        if prefix is not None and queryset[0] is None:
+            return Response('%s not found in package with id %s'
+                            % (prefix, pk),
+                            status=status.HTTP_404_NOT_FOUND)
 
-        # At least two characters are required to form a prefix, and
-        # the first two characters must not be numbers. If this
-        # condition is not satisfied, we return the untouched term_id.
-        if len(substitution_prefix) < 2:
-            return term_id
-        if not substitution_prefix[0:2].isalpha():
-            return term_id
+        return Response(queryset[0], status=status.HTTP_200_OK)
 
-        # Attempt to query substitution prefix from @context of package
-        # in queryset.
-        lookup = 'contents__@context__' + substitution_prefix
-        substitution_prefix_query = queryset.values_list(lookup, flat=True)
+    @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
+    def delete_context(self, request, pk, prefix=None):
+        """Delete entire @context, or one IRI, from a package.
 
-        # Substitution prefix does not exist in @context, so we must
-        # add it.
-        if substitution_prefix_query[0] is None:
-            # id of package in queryset
-            pk = queryset.values_list('id', flat=True)[0]
-            # Connect to the default database service
-            with connection.cursor() as cursor:
-                # See https://stackoverflow.com/a/23500670 for details on
-                # creation query used below.
-                cursor.execute("update geem_package set contents=(jsonb_set("
-                               "contents, '{@context, %s}', '\"%s\"')) where "
-                               "id=%s"
-                               % (substitution_prefix, path+separator, pk))
-            # Return term_id shortened with substitution prefix
-            return substitution_prefix + ":" + fragment
+        * api/resources/{pk}/delete/context
 
-        # Substitution prefix exists in context, and with the correct
-        # separator.
-        if substitution_prefix_query[0] == path+separator:
-            # Return term_id shortened with substitution prefix
-            return substitution_prefix + ":" + fragment
+          * Delete all IRI values in @context of package with id ==
+            {pk}
 
-        # Unable to shorten term_id
-        return term_id
+        * api/resources/{pk}/delete/context/{prefix}
+
+          * Delete IRI with prefix == {prefix} from @context of
+            package with id == {pk}
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :param str prefix: prefix of IRI value inside package @context
+        :return: Confirmation of deletion, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if prefix is None:
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{@context}', "
+                               "jsonb '{}')) where id=%s" % pk)
+            else:
+                # Validate 'prefix' key exists in package
+                prefix_query = 'contents__@context__' + prefix
+                if queryset.values_list(prefix_query, flat=True)[0] is None:
+                    return Response(
+                        'prefix %s does not exist in package %s'
+                        % (prefix, pk),
+                        status=status.HTTP_400_BAD_REQUEST)
+                # Delete exact IRI value
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{@context,%s}') where id=%s" % (prefix, pk))
+
+        return Response('Successfully deleted', status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='create/context')
+    def create_context(self, request, pk):
+        """Add a prefix-IRI pair to the @context of a package.
+
+        `request.data` must be a `dict` with two attributes: `prefix`
+        and `iri`. These values are added to the @context of a package
+        with `id == pk`.
+
+        :param rest_framework.request.Request request: Front-end
+                                                       request metadata
+        :param str pk: id of package
+        :return: Confirmation of creation, or appropriate error message
+        :rtype: rest_framework.request.Response
+        """
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+        # Unable to query any packages
+        if queryset.count() == 0:
+            return Response('No permission to edit package with id %s' % pk,
+                            status=status.HTTP_400_BAD_REQUEST)
+        # Validate 'prefix' key exists in request.data
+        if 'prefix' not in request.data:
+            return Response('request.data missing prefix value',
+                            status=status.HTTP_400_BAD_REQUEST)
+        # Validate 'iri' key exists in request.data
+        if 'iri' not in request.data:
+            return Response('request.data missing iri value',
+                            status=status.HTTP_400_BAD_REQUEST)
+        # Validate 'iri' is a proper IRI value
+        iri = request.data['iri']
+        try:
+            URLValidator()(request.data['iri'])
+        except ValidationError:
+            return Response('Must supply a valid IRI',
+                            status=status.HTTP_400_BAD_REQUEST)
+        # Validate prefix does not already exist in package
+        prefix = request.data['prefix']
+        term_id_query = 'contents__@context__' + prefix
+        if queryset.values_list(term_id_query, flat=True)[0] is not None:
+            message = 'prefix %s already exists in package %s' % (prefix, pk)
+            return Response(message, status=status.HTTP_200_OK)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_insert("
+                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
+                           " id=%s" % (prefix, iri, pk))
+
+        return Response('Successfully created', status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):
 

@@ -316,7 +316,7 @@ function GeemAPI() {
 			 * 	of term package
 			 */
 			result = {
-				label: entity ? entity.uiLabel : '[UNRECOGNIZED]',
+				label: entity ? get_label(entity) : '[UNRECOGNIZED]',
 				id: entity_id,
 				path: entity_path, //Ontology id is last item in path
 				status: action,

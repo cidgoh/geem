@@ -130,9 +130,9 @@ function portal_entity_form_callback(form) {
 	// Provide content area banner that shows selected entity
 	const entity = get_form_specification_component(form.entityId)
 	$('#formEntityLabel')
-		.html(entity.uiLabel + ' &nbsp; <span class="medium">**(' + entity.id + ')</span>')
+		.html(get_label(entity) + ' &nbsp; <span class="medium">**(' + entity.id + ')</span>')
 	$('#mainForm > div.field-wrapper > label')
-		.html(entity.definition || '<span class="small float-right">(select all)</span>')
+		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -198,7 +198,7 @@ function render_resource_accordion(entity_id) {
 	var normalized_id = entity.id.replace(':','_')
 	return [
 		'<li class="accordion-navigation small">',
-		,'	<a href="#menu_', normalized_id, '">', entity.uiLabel, '</a>'
+		,'	<a href="#menu_', normalized_id, '">', get_label(entity), '</a>'
 	    ,'	<div id="menu_', normalized_id, '" class="content">'
 	    ,		'<ul class="side-nav">' + render_resource_menu(entity) +'</ul>'
 	    ,'	</div>'
@@ -227,7 +227,7 @@ function render_resource_menu(entity = null, depth = 0 ) {
 				html += [
 					'<li class="cart-item" data-ontology-id="', child.id,'">'
 				 	,	'<a href="#', child.id, '">'
-					,		child.uiLabel
+					,		get_label(child)
 					,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
 					,	'</a>'
 					,	 ('models' in child) ? '<ul class="side-nav">' + render_resource_menu(child, depth + 1) +'</ul>' : ''
@@ -287,20 +287,22 @@ function render_entity_detail(ontologyId) {
 	else
 		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
 
-	var labelURL = '<a href="' + entity_url + '" target="_blank">' + entity.uiLabel + '</a>' 
+	// ENTITY_ID - hyperlinked to tab/popup
+	var itemHTML = '<li><span class="infoLabel">ontology id:</span><a href="' + entityId + '" target="_blank">' + entity['id'] + '</a></li>\n'
 
-	/* Provide a label mouseover display of underlying ontology details
-	like original ontology definition, term id, synonyms, etc.
-	*/
-	var itemHTML = '<li><span class="infoLabel">ontology id:</span> ' + entity.id + '</li>\n'
+	// UI_LABEL if available
+	if ('ui_label' in entity)
+		itemHTML += '<li><span class="infoLabel">UI label:</span> ' + entity.ui_label + '</li>\n'
 
-	// Label is original ontology's label, not the user interface oriented one.
-	// Show if there is a difference.
-	if (entity.label && entity.label != entity.uiLabel)
-		itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity.label + '</li>\n'
-	
-	// Add original definition if different.
-	if (entity.definition && entity.uiDefinition != entity.definition)
+	// UI_DEFINITION if available
+	if ('ui_definition' in entity)
+		itemHTML += '<li><span class="infoLabel">UI definition:</span> <i>' + entity.ui_definition + '</i></li>\n'
+
+	// LABEL - from original ontology
+	itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity.label + '</li>\n'
+
+	// DEFINITION - from original ontology
+	if (entity.definition)
 		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity.definition + '</i></li>\n'
 	
 	for (ptr in RENDER_PROPERTIES) {
@@ -349,7 +351,7 @@ function render_relation_link(relation, entity) {
 	return ['<li data-ontology-id="' + entity['id'] + '">'
 		,	relation, ': ', links ? '<i class="fi-arrow-up large"></i> ' : ''
 		,	' <a href="#', entity['id'], '">'
-		,		entity['uiLabel']
+		,		get_label(entity)
 		,		' <i class="fi-magnifying-glass large"></i>'
 		,	'</a>'
 		,'</li>'
@@ -537,6 +539,23 @@ function init_validation_tab() {
 
 function get_entity(ontologyId) {
 	return top.resource.contents.specifications[ontologyId]
+}
+
+
+function get_label(entity) {
+	// Label listed an entity's features label overrides ui_label
+	if (entity.features && entity.features.label)
+		//return entity.features.label.value
+		return entity.features.label.value
+
+	if (entity.ui_label)
+		return entity.ui_label
+
+	//TRANSITIONAL:
+	if (entity.uiLabel)
+		return entity.uiLabel
+
+	return entity.label
 }
 
 function dom_item_animate(item, effectClass) {

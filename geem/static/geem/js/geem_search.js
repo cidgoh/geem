@@ -57,8 +57,10 @@ function search_as_you_type(collection, text) {
 function search_text_filter(collection, searchKey) {
 	/* Text Search of ontology contents via JSON specification.
 	This looks at each "specification" entry's main fields, e.g.: label, 
-	uiLabel, definition, uiDefinition, hasSynonym, hasNarrowSynonym, 
+	ui_label, definition, ui_definition, hasSynonym, hasNarrowSynonym, 
 	hasExactSynonym.
+
+	FUTURE: add wildcard searching?
 	 */
 	 var details = $('#toggleSearchDefinition:checked').length
 
@@ -70,9 +72,9 @@ function search_text_filter(collection, searchKey) {
       		//i.e. skip entity components, models, features.
       		return false
       	else
-      		if (!details && (key2 == 'definition' || key2 == 'uiDefinition'))
+      		if (!details && (key2 == 'definition' || key2 == 'ui_definition'))
       			return false
-      		// FUTURE: add wildcard searching?
+      		// What remains are string field contents to search
       		return collection[key][key2].toLowerCase().includes(searchKey);
       })
     })
@@ -86,17 +88,17 @@ function render_search_result_item(ontologyId) {
 	// Get last path item id.
 	var entityId = ptr ? ontologyId.substr(ptr+1) : ontologyId
 	var entity = top.resource.contents.specifications[entityId]
-	if (!entity) entity = {'uiLabel':'[UNRECOGNIZED:' + entityId + ']'}
+	if (!entity) entity = {'label':'[UNRECOGNIZED:' + entityId + ']'}
 	content = ''
 	if ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
 		content = '<i class="fi-arrow-up dropdown member"></i>'
 	var html = [
 		'<div class="cart-item" ', 	render_attr_ontology_id(ontologyId), '>'
 		,	content
-		,	'<a href="#', ontologyId, '">',	entity['uiLabel'], '</a>'
+		,	'<a href="#', ontologyId, '">',	get_label(entity), '</a>'
 		,'</div>'
 		].join('')
 	
-	return [entity['uiLabel'].toLowerCase(), html]
+	return [get_label(entity).toLowerCase(), html]
 
 }

@@ -7,7 +7,7 @@ WISHLIST:
 	- Currently this includes zurb Foundation 5.5 specific rendering. Revise to
 	  be generic and have a Foundation additional rendering pass?
 	- Allow xml datatype formats for date&time to be inherited from parent model?
-	- Enable 3rd party standard form definition to be presented (like label -> uiLabel)
+	- Enable 3rd party standard form definition to be presented (like label -> ui_label)
 	- Also option for 3rd party database field name for form storage
 	- Select list values: enable to be other than ontology id.
 		e.g. ui feature: values_from: ... [hasAlternateId]
@@ -105,7 +105,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 			// Enable page annotation by 3rd party tools by kicking browser to 
 			// understand that a #anchor and page title are different.
-			window.document.title = 'GEEM: ' + self.entityId + ':' + entity.uiLabel
+			window.document.title = 'GEEM: ' + self.entityId + ':' + get_label(entity)
 			
 			return entity
 
@@ -439,7 +439,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			case 'model':
 				html += render_specification(entity)
 				// If specification has stuff, then wrap it:
-				if (html.length > 0 && entity.uiLabel != '[no label]')
+				if (html.length > 0 && get_label(entity) != '[no label]')
 					//  data-ontology-id="'+entity.domId+'"
 					return get_model_wrapper(entity, '<div class="row">' + labelHTML + '<div class="inputBlock">' + html+ '</div></div>')
 				break;
@@ -664,7 +664,8 @@ function OntologyForm(domId, resource, settings, callback) {
 				aria_hidden = 'aria-hidden="true" '
 			}
 
-			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + component.uiLabel + '</a></li>'
+			// Possibly have to simplify this?
+			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + render_label(component) + '</a></li>'
 			htmlTabContent += [
 				'<div class="content', tab_active, '" ',aria_hidden, 'id="panel_', childDomId, '">'
 				,	this.render_form_specification(entity.components[entityId]) 
@@ -926,8 +927,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			for (var ptr in entity.units) {
 
 				var unit = entity.units[ptr]
-				var unitLabel = 'uiLabel' in unit ? unit.uiLabel : unit.label
-				var optionHTML = '		<option value="'+ unit.id + '">' + unitLabel + ' &nbsp;</option>'
+				var optionHTML = '		<option value="'+ unit.id + '">' + get_label(unit) + ' &nbsp;</option>'
 				if (!preferred || preferred.value != unit.id) // place prefered unit first.
 					optionsHTML += optionHTML
 				else
@@ -961,7 +961,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (!entity) 
 			return 'ERROR: Entity not defined'
 
-		var labelURL = entity.uiLabel
+		var labelURL = get_label(entity)
 
 		if (self.settings.ontologyDetails && entity.depth > 0)
 			labelURL = '<a href="#' + entity.id + '">' + labelURL + '</a>' 
@@ -970,15 +970,16 @@ function OntologyForm(domId, resource, settings, callback) {
 		html = '<label for="geem_' + entity.uniqueDomId + '">' // data-ontology-id="'+ entity.id +'" 
 		if (self.settings.ontologyDetails)
 			html += '<i class="fi-magnifying-glass"></i>' + labelURL
-		else 
-			if (entity.uiDefinition) {
+		else {
+			var definition = get_definition(entity)
+			if (definition) {
 				// Beginning, ending, and stand-alone quotes have to be replaced.
-				definition = entity.uiDefinition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
+				definition = definition.replace(/["""]/g, '\'\'').replace(/[^0-9a-z\\. -;,']/gi, '')
 				html += '<span data-tooltip class="has-tip top" data-disable-hover="false" data-click-open="true" data-width="250" title="' + definition + '">' + labelURL + '</span>'
 			}
 			else
 				html += labelURL
-
+		}
 		html += render_help(entity)
 		html +=  '</label>\n'
 
@@ -993,7 +994,7 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (!entity) 
 			return 'ERROR: Entity not defined'
 
-		var labelURL = entity.uiLabel
+		var labelURL = get_label(entity)
 
 		if (self.settings.ontologyDetails && entity.depth > 0)
 			labelURL = '<a href="#' + entity.id + '">' + labelURL + '</a>' 
@@ -1020,11 +1021,15 @@ function OntologyForm(domId, resource, settings, callback) {
 	/************************** UTILITIES ************************/
 
 	get_label = function(entity) {
-		// Label listed an entity's features label overrides uiLabel
+		// Label listed an entity's features label overrides ui_label
 		if (entity.features && entity.features.label)
 			//return entity.features.label.value
 			return entity.features.label.value
 
+		if (entity.ui_label)
+			return entity.ui_label
+
+		//TRANSITIONAL:
 		if (entity.uiLabel)
 			return entity.uiLabel
 
@@ -1034,7 +1039,7 @@ function OntologyForm(domId, resource, settings, callback) {
 	get_definition = function(entity) {
 		/* If an entity has a features.definition - coming from 3rd party 
 		specification, then use that. Otherwise if it has a general ontology
-		driven uiDefinition, use that. Otherwise use entity's IAO_0000115 definition annotation.
+		driven ui_definition, use that. Otherwise use entity's IAO_0000115 definition annotation.
 
 		NOTE: End of next sentence in definition after 140 characters is sought. 
 		returned definition is clipped to that point.
@@ -1045,8 +1050,13 @@ function OntologyForm(domId, resource, settings, callback) {
 		if (entity.features && entity.features.definition)
 			definition = entity.features.definition.value
 
+		else if (entity.ui_definition) // Rare, but an ontology can offer this directly.
+			definition = entity.ui_definition 
+
+		// TRANSITIONAL
 		else if (entity.uiDefinition) // Rare, but an ontology can offer this directly.
 			definition = entity.uiDefinition 
+
 		else if (entity.definition) 
 			definition = entity.definition
 
@@ -1289,9 +1299,6 @@ OntologyForm.init_foundation_settings = function() {
 
 	// Only Zurb 5.5.3 
 	$(document).foundation({abide : top.settings})
-
-	//Foundation 5.0:
-	//Foundation.Abide.defaults = top.settings
 
 
 }

@@ -28,7 +28,7 @@ render_select_lookup_modal = function(helper, selectId) {
 	var parent_id = Array.isArray(value) ? value[0] : value
 	var parent =  top.resource.contents.specifications[parent_id]
 	if (parent)
-		var parent_label = 'Selections for "' + parent.uiLabel + '"[' + parent_id + ']'
+		var parent_label = 'Selections for "' + get_label(parent) + '"[' + parent_id + ']'
 	else
 		var parent_label = 'Selections'
 	
@@ -54,7 +54,7 @@ render_select_lookup_modal = function(helper, selectId) {
 }
 
 function render_select_root_search(select, helper) {
-	/* Grabbing displayed label rather than top specification uiLabel since
+	/* Grabbing displayed label rather than top specification ui_label since
 	that doesn't reflect all customization. 
 
 	FUTURE: A purer form of this would examine form specification directly.
@@ -257,6 +257,16 @@ function render_modal_lookup_form(helper, content, parent_id, parent_label) {
 
 function modal_lookup_do_selection(select, options, parent_id) {
 	/*
+	This code actually performs a selection, and if necessary inserts it into 
+	a form specification as well.  This part is just exploratory - it is up to
+	implementers to handle actual data entry at moment.
+
+	New entry goes in top specification.
+	
+	FUTURE: If done in GEEM portal as a package admin activity, curator's lookups
+	could be added to the package directly?
+
+
 	INPUT
 		select: existing <select> list
 		parent_id: ontology identifier
@@ -283,6 +293,7 @@ function modal_lookup_do_selection(select, options, parent_id) {
 
 		// User asking for new option to be added 
 		else {
+
 			var newOption = document.createElement("option");
 			newOption.text = option.label;
 			newOption.value = option.id;
@@ -295,15 +306,10 @@ function modal_lookup_do_selection(select, options, parent_id) {
 
 			selectDom.add(newOption, selectDom[selectIndex+1]);
 			select.find('option').eq(selectIndex+1).prop('selected', true)
-			
-			// Adjust GEEM specification itself, so this lookup can be
-			// propagated to user packages.
-			// New entry in top specification.
-			// ADD SYNONYMS????
-			// POSSIBLY ALREADY THERE?
+
 			top.resource.contents.specifications[option.id] = {
 				'datatype': "xmls:anyURI",
-				'uiLabel': option.label,
+				'ui_label': option.label,
 				'id': option.id,
 				'definition': option.description,
 				'parent': parent_id

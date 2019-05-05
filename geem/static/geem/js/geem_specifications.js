@@ -128,7 +128,7 @@ function get_tabular_specification(userSpecification, nodesFlag = true, choices 
 
 	*/
 
-	var node_header = ['datatype', 'path', 'id', 'uiLabel', 'uiDefinition', 'help', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern', 'format', 'preferred_unit']
+	var node_header = ['datatype', 'path', 'id', 'label', 'definition', 'ui_label', 'ui_definition', 'help', 'minValue', 'maxValue', 'minLength', 'maxLength', 'pattern', 'format', 'preferred_unit']
 	var edge_header = ['relation', 'path', 'child_id', 'minCardinality', 'maxCardinality']
 
 	var nodes = []
@@ -449,7 +449,7 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 	switch (entity.datatype) {
 		case undefined:
 
-			console.log('This specification component needs a "value specification" so that it can be rendered: "' + entity['uiLabel'] + '" (' + entityId + ')')
+			console.log('This specification component needs a "value specification" so that it can be rendered: "' + get_label(entity) + '" (' + entityId + ')')
 
 		case 'disjunction':
 			// CURRENTLY WE JUST LUMP 'disjunction' IN WITH 'model'
@@ -540,7 +540,7 @@ get_form_specification_component = function(entityId, path = [], depth = 0) { //
 			break;
 
 		default:
-			console.log('UNRECOGNIZED: '+ entityId + ' [' + entity.datatype + ']' + entity.uiLabel)
+			console.log('UNRECOGNIZED: '+ entityId + ' [' + entity.datatype + ']' + get_label(entity) )
 			break;
 	}
 
@@ -569,9 +569,24 @@ initialize_entity = function(entity, entityId, path, depth) {
 
 	get_entity_features(entity) // Guarantees that entity.features exists
 
-	// These may depend on above features fetch.
-	entity['uiLabel'] = get_label(entity)
-	entity['uiDefinition'] = get_definition(entity)
+
+
+	// TEMPORARY, PHASING OUT.  New records should have "ui_label and ui_definition fields"
+	if (entity.uiLabel)
+		entity.ui_label = entity.uiLabel
+	if (entity.uiDefinition)
+		entity.ui_definition = entity.uiDefinition
+	if (!entity.label && entity.uiLabel) {
+		entity.label = entity.uiLabel
+		delete entity.uiLabel
+	}
+	if (!entity.definition && entity.uiDefinition) {
+		entity.definition = entity.uiDefinition
+		delete entity.uiDefinition
+	}
+
+
+
 
 	if (entity.features.help)
 		entity.help = entity.features.help.value
@@ -769,7 +784,9 @@ get_entity_cardinality = function(entity) {
 
 
 get_entity_simplification = function(entity) {
-	/* Simple view of specification dispenses with cross-references and 
+	/* 
+	This pertains only to hierarchy rendering of an entity.
+	Simple view of specification dispenses with cross-references and 
 	other aspects that have already been digested.
 	*/
 	delete (entity.parent_id)
@@ -780,8 +797,8 @@ get_entity_simplification = function(entity) {
 	if ($.isEmptyObject(entity.choices))
 		delete (entity.choices)
 
-	// This is a CHEAT: moves uiLabel to first param in object for display purposes
-	var freshEntity = {'uiLabel': entity['uiLabel']}
+	// This is a CHEAT: moves label to first param in object for downloaded data display purposes
+	var freshEntity = {'label': entity.label}
 	return $.extend(true, freshEntity, entity) 
 }
 

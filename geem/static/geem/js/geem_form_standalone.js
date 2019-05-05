@@ -30,11 +30,13 @@ $( document ).ready(function($) {
 
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
+  // AS LONG AS #[ontologyID] contains a ":" - a very specific format
+  // for now. 
   $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
 
   $(document).foundation()
 
-  // Not sure why we don't need this
+  // ISSUE: sometimes we need this... but not always?
   //check_entity_id_change(render_standalone_form)
 
 });
@@ -80,12 +82,15 @@ function render_section_menu() {
     var depth = classes.substr(classes.indexOf('depth')+5)
     if (parseInt(depth) < 2) {
       var id = $(this).attr('data-ontology-id')
+
       var entity = top.resource.contents.specifications[id.split('/').pop()]
       var label = entity ? get_label(entity) : '(entity not found)' 
       sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
+
     }
   });
 
+  // Only display if there is more than one model to display
   if (sections > 1) {
     $('#formSections').html([
         '<h5>Form Sections</h5>\n'

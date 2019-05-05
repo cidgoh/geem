@@ -649,7 +649,8 @@ function OntologyForm(domId, resource, settings, callback) {
 		var activeDone = false // Flag to activate first tab
 		for (var entityId in entity.components) { 
 			self.uniqueDomId += 1
-			var childDomId = (domId + '_' + entityId + '_' + self.uniqueDomId).replace(/[^a-zA-Z0-9]/g,'_') //
+			//domId + '_' + 
+			var childDomId = (entityId + '_' + self.uniqueDomId) //.replace(/[^a-zA-Z0-9]/g,'_') //
 			var component = entity.components[entityId]
 			//var label = render_simple_label()
 			if (activeDone == false) {
@@ -1205,11 +1206,15 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			entityId = document.location.hash.substr(1).split('/',1)[0]
 
 
-	if (!entityId)
+	if (!entityId) {
+		console.log("Couldn't find " + entityId) // No work to do here
 		return false
+	}
 
-	if (top.focusEntityId && entityId == top.focusEntityId)	// No work to do here
+	if (top.focusEntityId && entityId == top.focusEntityId)	{
+		console.log("Already have " + entityId) // No work to do here
 		return false
+	}
 
 	// Returns if loading resource or if no appropriate resource found
 	// Ensure appropriate resource is loaded for given entity id 

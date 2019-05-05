@@ -7,13 +7,16 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genomic Epidemiology Entity Mart Form Viewer</title>
-    <link rel="stylesheet" href="{% static "geem/css/foundation-docs-5.5.3.css" %}">
+    <link rel="stylesheet" href="{% static "geem/css/foundation-5.5.3.min.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-icons/foundation-icons.css" %}">
     <link rel="stylesheet" href="{% static "geem/css/foundation-datepicker.min.css" %}">
     <link rel="stylesheet" href="{% static "geem/js/chosen/chosen.css" %}">
-    <link rel="stylesheet" href="{% static "geem/css/normalize-5.5.3.css" %}">
+    <!-- link rel="stylesheet" href="{% static "geem/css/normalize-5.5.3.css" %}" -->
     <link rel="stylesheet" href="{% static "geem/css/app.css" %}">
+    <style type="text/css">
+      .row {max-width:none !important}
 
+    </style>
     <script src="{% static "geem/js/vendor-5.5.3/modernizr.js" %}"></script>
   </head>
   <body>
@@ -22,25 +25,8 @@
 
       <!-- ************************ ONTOLOGY MENU AND SEARCH ********************* -->
       <div class="large-3 medium-3 columns" id="sidebar" style="max-height: 620px;overflow:scroll">
-        <br/>
-        <!--
-        <ul class="vertical menu" id="entityMenu">
-          <li>
-            <a href="index.html">GEEM Introduction</a>
-          </li>
-          <li>
-            <a href="portal.html">GEEM Portal</a>
-          </li>
-          <li class="active">
-            <a href="#">GEEM Form Viewer</a>
-          </li>
-        </ul>
-
-        <hr size="2"/>
-        -->
-        
+        <br/>        
         <div id="formSections"></div>
-
       </div>
 
       <!-- ************************ CONTENT AREA ********************* -->
@@ -154,9 +140,9 @@
     <script src="{% static "geem/js/chosen/chosen.jquery.min.js" %}"></script>
 
     <script src="{% static "geem/js/geem_form.js" %}"></script>
-    <script src="{% static "geem/js/geem_lookup.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>
     <script src="{% static "geem/js/geem_api.js" %}"></script>
+    <script src="{% static "geem/js/geem_lookup.js" %}"></script>
     <script src="{% static "geem/js/geem_form_standalone.js" %}"></script>
 
   </body>

@@ -80,7 +80,8 @@ function render_section_menu() {
     var depth = classes.substr(classes.indexOf('depth')+5)
     if (parseInt(depth) < 2) {
       var id = $(this).attr('data-ontology-id')
-      var label = $(this).find('>.columns > label > span,>.columns > .row > label').text()
+      var entity = top.resource.contents.specifications[id.split('/').pop()]
+      var label = entity ? get_label(entity) : '(entity not found)' 
       sectionHTML += '<li class="depth'+ depth + '"><a href="#' + id + '">' + label + '</a></li>'
     }
   });

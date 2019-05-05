@@ -665,7 +665,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			}
 
 			// Possibly have to simplify this?
-			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + render_label(component) + '</a></li>'
+			htmlTabs += '<li class="tab-title small'+tab_active+'"><a href="#panel_'+childDomId+'" ' + aria + '>' + get_label(component) + '</a></li>'
 			htmlTabContent += [
 				'<div class="content', tab_active, '" ',aria_hidden, 'id="panel_', childDomId, '">'
 				,	this.render_form_specification(entity.components[entityId]) 

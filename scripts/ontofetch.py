@@ -33,7 +33,8 @@ import json
 import sys
 import os
 import optparse
-import urllib2 # Note: this is python 2.7 ; 3.x breaks this up into separate modules.
+#import rdfextras; rdfextras.registerplugins() # so we can Graph.query()
+# import urllib2 # Note: this is python 2.7 ; 3.x breaks this up into separate modules.
 import python.ontohelper as oh
 
 import rdflib
@@ -192,9 +193,9 @@ class Ontology(object):
 			# conversion stuff like .replace() below
 			self.onto_helper.graph.parse(main_ontology_file, format='xml')
 
-		except urllib2.URLError as e:
+		except Exception as e:
 			#urllib2.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
-			stop_err('WARNING:' + main_ontology_file + " could not be loaded!\n")
+			stop_err('WARNING:' + main_ontology_file + " could not be loaded!\n", e)
 
 		# Add each ontology include file (must be in OWL RDF format)
 		self.onto_helper.do_ontology_includes(main_ontology_file)

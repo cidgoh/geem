@@ -303,13 +303,14 @@ class OntoHelper(object):
 		for result_row in imports:
 
 			import_file = result_row.import_file
-
+			print (import_file)
 			# If main file supplied as a URI, then process imports likewise
 			if main_ontology_file[0:4] == 'http':
 				try:
 					self.graph.parse(import_file, format='xml')	
-				except rdflib.exceptions.ParserError as e:
-					print ('WARNING:' + import_file + " could not be loaded!\n")		
+				#except rdflib.exceptions.ParserError as e:
+				except Exception as e:
+					print ('WARNING:' + import_file + " could not be loaded!\n", e)		
 
 			# Ontology given as file path, so only check its ./imports/ folder
 			# since, as a local resource, its imports should be local too.

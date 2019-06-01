@@ -72,7 +72,8 @@ function form_standalone_callback(form){
 
 function render_section_menu() {
   // Provide form menu that echoes form specification to two levels down of
-  // model
+  // model. If only one model, skips display since form title already relays
+  // model title if it is a model.
   $('#formSections').empty()
   var sections = 0
   var sectionHTML = ''

@@ -110,7 +110,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str term_id: id of term inside package specifications
         :return: One or all terms from package specifications, or
                  appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_resource_queryset(request)
@@ -155,7 +155,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str pk: id of package
         :param str term_id: id of term inside package specifications
         :return: Confirmation of deletion, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
@@ -200,7 +200,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                                        request metadata
         :param str pk: id of package
         :return: Confirmation of creation, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
@@ -251,7 +251,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str prefix: prefix of IRI value inside package @context
         :return: One or all IRI values from package @context, or
                  appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_resource_queryset(request)
@@ -264,8 +264,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
-    def delete_context(self, request, pk, prefix=None):
-        """Delete entire @context, or one IRI, from a package.
+    def delete_context_response(self, request, pk, prefix=None):
+        """Responds by deleting one or all IRI from a package @context.
 
         * api/resources/{pk}/delete/context
 
@@ -282,38 +282,37 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str pk: id of package
         :param str prefix: prefix of IRI value inside package @context
         :return: Confirmation of deletion, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_400_NOT_FOUND)
+        try:
+            self.delete_context(queryset, prefix)
+            return Response('Successfully deleted', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if prefix is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{@context}', "
-                               "jsonb '{}')) where id=%s" % pk)
-            else:
-                # Validate 'prefix' key exists in package
-                prefix_query = 'contents__@context__' + prefix
-                if queryset.values_list(prefix_query, flat=True)[0] is None:
-                    return Response(
-                        'prefix %s does not exist in package %s'
-                        % (prefix, pk),
-                        status=status.HTTP_400_BAD_REQUEST)
-                # Delete exact IRI value
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{@context,%s}') where id=%s" % (prefix, pk))
-
-        return Response('Successfully deleted', status=status.HTTP_200_OK)
+        # # Connect to the default database service
+        # with connection.cursor() as cursor:
+        #     # See https://stackoverflow.com/a/23500670 for details on
+        #     # deletion queries used below.
+        #     if prefix is None:
+        #         cursor.execute("update geem_package set contents=(select "
+        #                        "jsonb_set(contents, '{@context}', "
+        #                        "jsonb '{}')) where id=%s" % pk)
+        #     else:
+        #         # Validate 'prefix' key exists in package
+        #         prefix_query = 'contents__@context__' + prefix
+        #         if queryset.values_list(prefix_query, flat=True)[0] is None:
+        #             return Response(
+        #                 'prefix %s does not exist in package %s'
+        #                 % (prefix, pk),
+        #                 status=status.HTTP_400_BAD_REQUEST)
+        #         # Delete exact IRI value
+        #         cursor.execute("update geem_package set contents=(contents #- "
+        #                        "'{@context,%s}') where id=%s" % (prefix, pk))
 
     @action(detail=True, methods=['post'], url_path='create/context')
     def create_context(self, request, pk):
@@ -327,7 +326,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                                        request metadata
         :param str pk: id of package
         :return: Confirmation of creation, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
@@ -381,7 +380,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :raises ValueError: Unable to retrieve @context somehow
         """
         if package.count() != 1:
-            raise ValueError("Please query an appropriate package")
+            raise ValueError('Please query an appropriate package')
 
         if prefix is None:
             query = 'contents__@context'
@@ -394,6 +393,38 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             raise ValueError(prefix + ' not found in package')
 
         return ret
+
+    @staticmethod
+    def delete_context(package, prefix=None):
+        """Get entire @context, or a single IRI, from ``package``.
+
+        :param package: queried package to delete values from
+        :type package: django.db.models.query.QuerySet
+        :param prefix: prefix of IRI value inside package @context
+        :type: prefix: str
+        :raises ValueError: Unable to delete values somehow
+        """
+        if package.count() != 1:
+            raise ValueError('Please query an appropriate package')
+
+        package_id = package.values_list('id', flat=True)[0]
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if prefix is None:
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{@context}', "
+                               "jsonb '{}')) where id=%s" % package_id)
+            else:
+                prefix_query = 'contents__@context__' + prefix
+                if package.values_list(prefix_query, flat=True)[0] is None:
+                    raise ValueError(prefix + ' not found in package')
+
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{@context,%s}') where id=%s"
+                               % (prefix, package_id))
 
     def create(self, request, pk=None):
 

@@ -294,26 +294,6 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-        # # Connect to the default database service
-        # with connection.cursor() as cursor:
-        #     # See https://stackoverflow.com/a/23500670 for details on
-        #     # deletion queries used below.
-        #     if prefix is None:
-        #         cursor.execute("update geem_package set contents=(select "
-        #                        "jsonb_set(contents, '{@context}', "
-        #                        "jsonb '{}')) where id=%s" % pk)
-        #     else:
-        #         # Validate 'prefix' key exists in package
-        #         prefix_query = 'contents__@context__' + prefix
-        #         if queryset.values_list(prefix_query, flat=True)[0] is None:
-        #             return Response(
-        #                 'prefix %s does not exist in package %s'
-        #                 % (prefix, pk),
-        #                 status=status.HTTP_400_BAD_REQUEST)
-        #         # Delete exact IRI value
-        #         cursor.execute("update geem_package set contents=(contents #- "
-        #                        "'{@context,%s}') where id=%s" % (prefix, pk))
-
     @action(detail=True, methods=['post'], url_path='create/context')
     def create_context(self, request, pk):
         """Add a prefix-IRI pair to the @context of a package.

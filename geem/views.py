@@ -233,8 +233,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response('Successfully created', status=status.HTTP_200_OK)
 
     @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
-    def context(self, request, pk, prefix=None):
-        """Get entire @context, or a single IRI, from a package.
+    def get_context_response(self, request, pk, prefix=None):
+        """Responds with entire @context, or one IRI, from a package.
 
         * api/resources/{pk}/context
 
@@ -257,26 +257,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Query entire @context or exact prefix
-        if prefix is None:
-            query = 'contents__@context'
-        else:
-            query = 'contents__@context__' + prefix
-        queryset = queryset.values_list(query, flat=True)
-
-        # If looking for a specific prefix, and query failed, return
-        # 404.
-        if prefix is not None and queryset[0] is None:
-            return Response('%s not found in package with id %s'
-                            % (prefix, pk),
-                            status=status.HTTP_404_NOT_FOUND)
-
-        return Response(queryset[0], status=status.HTTP_200_OK)
+        try:
+            return Response(self.get_context(queryset, prefix),
+                            status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
     def delete_context(self, request, pk, prefix=None):
@@ -306,7 +291,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         # Unable to query any packages
         if queryset.count() == 0:
             return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
+                            status=status.HTTP_400_NOT_FOUND)
 
         # Connect to the default database service
         with connection.cursor() as cursor:
@@ -382,6 +367,33 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                            " id=%s" % (prefix, iri, pk))
 
         return Response('Successfully created', status=status.HTTP_200_OK)
+
+    @staticmethod
+    def get_context(package, prefix=None):
+        """Get entire @context, or a single IRI, from ``package``.
+
+        :param package: queried package to get values from
+        :type package: django.db.models.query.QuerySet
+        :param prefix: prefix of IRI value inside package @context
+        :type: prefix: str
+        :return: One or all IRI values from package @context
+        :rtype: dict[str,str] or str
+        :raises ValueError: Unable to retrieve @context somehow
+        """
+        if package.count() != 1:
+            raise ValueError("Please query an appropriate package")
+
+        if prefix is None:
+            query = 'contents__@context'
+        else:
+            query = 'contents__@context__' + prefix
+
+        ret = package.values_list(query, flat=True)[0]
+
+        if prefix is not None and ret is None:
+            raise ValueError(prefix + ' not found in package')
+
+        return ret
 
     def create(self, request, pk=None):
 

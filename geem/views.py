@@ -295,8 +295,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='create/context')
-    def create_context(self, request, pk):
-        """Add a prefix-IRI pair to the @context of a package.
+    def create_context_response(self, request, pk):
+        """Responds by adding prefix-IRI pair to package @context.
 
         `request.data` must be a `dict` with two attributes: `prefix`
         and `iri`. These values are added to the @context of a package
@@ -308,13 +308,6 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :return: Confirmation of creation, or appropriate error message
         :rtype: rest_framework.response.Response
         """
-        # Query specified package
-        queryset = self._get_modifiable_packages(request)
-        queryset = queryset.filter(pk=pk)
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_400_BAD_REQUEST)
         # Validate 'prefix' key exists in request.data
         if 'prefix' not in request.data:
             return Response('request.data missing prefix value',
@@ -323,29 +316,17 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         if 'iri' not in request.data:
             return Response('request.data missing iri value',
                             status=status.HTTP_400_BAD_REQUEST)
-        # Validate 'iri' is a proper IRI value
-        iri = request.data['iri']
+
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
         try:
-            URLValidator()(request.data['iri'])
-        except ValidationError:
-            return Response('Must supply a valid IRI',
-                            status=status.HTTP_400_BAD_REQUEST)
-        # Validate prefix does not already exist in package
-        prefix = request.data['prefix']
-        term_id_query = 'contents__@context__' + prefix
-        if queryset.values_list(term_id_query, flat=True)[0] is not None:
-            message = 'prefix %s already exists in package %s' % (prefix, pk)
-            return Response(message, status=status.HTTP_200_OK)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_insert("
-                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
-                           " id=%s" % (prefix, iri, pk))
-
-        return Response('Successfully created', status=status.HTTP_200_OK)
+            self.create_context(queryset, request.data['prefix'],
+                                request.data['iri'])
+            return Response('Successfully created', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def get_context(package, prefix=None):
@@ -354,7 +335,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param package: queried package to get values from
         :type package: django.db.models.query.QuerySet
         :param prefix: prefix of IRI value inside package @context
-        :type: prefix: str
+        :type prefix: str
         :return: One or all IRI values from package @context
         :rtype: dict[str,str] or str
         :raises ValueError: Unable to retrieve @context somehow
@@ -376,12 +357,12 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
     @staticmethod
     def delete_context(package, prefix=None):
-        """Get entire @context, or a single IRI, from ``package``.
+        """Delete entire @context, or a single IRI, from ``package``.
 
         :param package: queried package to delete values from
         :type package: django.db.models.query.QuerySet
         :param prefix: prefix of IRI value inside package @context
-        :type: prefix: str
+        :type prefix: str
         :raises ValueError: Unable to delete values somehow
         """
         if package.count() != 1:
@@ -405,6 +386,40 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{@context,%s}') where id=%s"
                                % (prefix, package_id))
+
+    @staticmethod
+    def create_context(package, prefix, iri):
+        """Add ``prefix``-``iri`` pair to @context of ``package``.
+
+        :param package: queried package to delete values from
+        :type package: django.db.models.query.QuerySet
+        :param prefix: key added to ``package`` @context
+        :type prefix: str
+        :param iri: value added to ``package`` @context
+        :type iri: str
+        :raises ValueError: Unable to add values somehow
+        """
+        if package.count() != 1:
+            raise ValueError('Please query an appropriate package')
+
+        try:
+            URLValidator()(iri)
+        except ValidationError:
+            raise ValueError('Must supply a valid IRI')
+
+        term_id_query = 'contents__@context__' + prefix
+        if package.values_list(term_id_query, flat=True)[0] is not None:
+            raise ValueError(prefix + ' already exists in package')
+
+        package_id = package.values_list('id', flat=True)[0]
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_insert("
+                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
+                           " id=%s" % (prefix, iri, package_id))
 
     def create(self, request, pk=None):
 

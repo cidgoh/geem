@@ -92,8 +92,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
     @action(detail=True, url_path='specifications(?:/(?P<term_id>.+))?')
-    def specifications(self, request, pk, term_id=None):
-        """Get entire specifications, or a single term, from a package.
+    def get_specifications_response(self, request, pk, term_id=None):
+        """Responds with one or all specifications from a package.
 
         * api/resources/{pk}/specifications
 
@@ -116,25 +116,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Query entire specifications or exact term
-        if term_id is None:
-            query = 'contents__specifications'
-        else:
-            query = 'contents__specifications__' + term_id
-        queryset = queryset.values_list(query, flat=True)
-
-        # If looking for a specific term, and query failed, return 404
-        if term_id is not None and queryset[0] is None:
-            return Response('%s not found in package with id %s'
-                            % (term_id, pk),
-                            status=status.HTTP_404_NOT_FOUND)
-
-        return Response(queryset[0], status=status.HTTP_200_OK)
+        try:
+            return Response(self.get_specifications(queryset, term_id),
+                            status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
     def delete_specifications(self, request, pk, term_id=None):
@@ -327,6 +313,33 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response('Successfully created', status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def get_specifications(package, term_id=None):
+        """Get one or all specifications from ``package``.
+
+        :param package: queried package to get values from
+        :type package: django.db.models.query.QuerySet
+        :param term_id: prefix of IRI value inside package @context
+        :type term_id: str
+        :return: One or all IRI values from package @context
+        :rtype: dict
+        :raises ValueError: Unable to retrieve specifications somehow
+        """
+        if package.count() != 1:
+            raise ValueError('Please query an appropriate package')
+
+        if term_id is None:
+            query = 'contents__specifications'
+        else:
+            query = 'contents__specifications__' + term_id
+
+        ret = package.values_list(query, flat=True)[0]
+
+        if term_id is not None and ret is None:
+            raise ValueError(term_id + ' not found in package')
+
+        return ret
 
     @staticmethod
     def get_context(package, prefix=None):

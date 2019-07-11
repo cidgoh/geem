@@ -123,8 +123,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
-    def delete_specifications(self, request, pk, term_id=None):
-        """Delete entire specifications, or one term, from a package.
+    def delete_specifications_response(self, request, pk, term_id=None):
+        """Responds by deleting one or all terms from a package.
 
         * api/resources/{pk}/delete/specifications
 
@@ -147,32 +147,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if term_id is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{specifications}', "
-                               "jsonb '{}')) where id=%s" % pk)
-            else:
-                # Validate 'id' key exists in package
-                term_id_query = 'contents__specifications__' + term_id
-                if queryset.values_list(term_id_query, flat=True)[0] is None:
-                    return Response(
-                        'id %s does not exist in package %s' % (term_id, pk),
-                        status=status.HTTP_400_BAD_REQUEST)
-                # Delete exact term
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{specifications,%s}') where id=%s"
-                               % (term_id, pk))
-
-        return Response('Successfully deleted', status=status.HTTP_200_OK)
+        try:
+            self.delete_specifications(queryset, term_id)
+            return Response('Successfully deleted', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='create/specifications')
     def create_specifications(self, request, pk):
@@ -320,9 +299,9 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         :param package: queried package to get values from
         :type package: django.db.models.query.QuerySet
-        :param term_id: prefix of IRI value inside package @context
+        :param term_id: ID of term inside package specifications
         :type term_id: str
-        :return: One or all IRI values from package @context
+        :return: One or all terms from package specifications
         :rtype: dict
         :raises ValueError: Unable to retrieve specifications somehow
         """
@@ -340,6 +319,38 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             raise ValueError(term_id + ' not found in package')
 
         return ret
+
+    @staticmethod
+    def delete_specifications(package, term_id=None):
+        """Delete one or all specifications from ``package``.
+
+        :param package: queried package to get values from
+        :type package: django.db.models.query.QuerySet
+        :param term_id: ID of term inside package specifications
+        :type term_id: str
+        :raises ValueError: Unable to delete specifications somehow
+        """
+        if package.count() != 1:
+            raise ValueError('Please query an appropriate package')
+
+        package_id = package.values_list('id', flat=True)[0]
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # deletion queries used below.
+            if term_id is None:
+                cursor.execute("update geem_package set contents=(select "
+                               "jsonb_set(contents, '{specifications}', "
+                               "jsonb '{}')) where id=%s" % package_id)
+            else:
+                term_id_query = 'contents__specifications__' + term_id
+                if package.values_list(term_id_query, flat=True)[0] is None:
+                    raise ValueError(term_id + ' not found in package')
+
+                cursor.execute("update geem_package set contents=(contents #- "
+                               "'{specifications,%s}') where id=%s"
+                               % (term_id, package_id))
 
     @staticmethod
     def get_context(package, prefix=None):

@@ -154,8 +154,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='create/specifications')
-    def create_specifications(self, request, pk):
-        """Add a specification to a package.
+    def create_specifications_response(self, request, pk):
+        """Responds by adding a specification to a package.
 
         `request.data` is added to the specifications of a package with
         `id == pk`. `request.data` must be in `dict` format, and have
@@ -171,31 +171,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate 'id' key exists in request.data
-        if 'id' not in request.data:
-            return Response('request.data missing id value',
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # Some of the fields with paragraphs as values (e.g.,
-        # 'definition' for references to ontologies) may have
-        # problematic characters (e.g., single quotes).
-        psql_escaped_data = psql_json_adapter(request.data)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{specifications, %s}', jsonb %s)) "
-                           "where id=%s"
-                           % (request.data['id'], psql_escaped_data, pk))
-
-        return Response('Successfully created', status=status.HTTP_200_OK)
+        try:
+            self.create_specifications(queryset, request.data)
+            return Response('Successfully created', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
     def get_context_response(self, request, pk, prefix=None):
@@ -351,6 +331,38 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 cursor.execute("update geem_package set contents=(contents #- "
                                "'{specifications,%s}') where id=%s"
                                % (term_id, package_id))
+
+    @staticmethod
+    def create_specifications(package, term):
+        """Add ``term`` to specifications of ``package``.
+
+        :param package: queried package to get values from
+        :type package: django.db.models.query.QuerySet
+        :param term: term to add to specifications
+        :type term: dict
+        :raises ValueError: Unable to add specification somehow
+        """
+        if package.count() != 1:
+            raise ValueError('Please query an appropriate package')
+
+        if 'id' not in term:
+            raise ValueError('Term must have an ID value')
+
+        package_id = package.values_list('id', flat=True)[0]
+
+        # Some of the fields with paragraphs as values (e.g.,
+        # 'definition' for references to ontologies) may have
+        # problematic characters (e.g., single quotes).
+        psql_escaped_data = psql_json_adapter(term)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation query used below.
+            cursor.execute("update geem_package set contents=(jsonb_set("
+                           "contents, '{specifications, %s}', jsonb %s)) "
+                           "where id=%s"
+                           % (term['id'], psql_escaped_data, package_id))
 
     @staticmethod
     def get_context(package, prefix=None):

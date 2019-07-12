@@ -170,6 +170,28 @@ function GeemAPI() {
 	}
 
 	/**
+	 * Attempt to add cart items to package
+	 * @param {Object<string, cart_item>} cart_items
+	 * @param {number} target_package_id - package to add cart
+	 * 	items to
+	 * @returns {Promise<Object>} Result of each attempted addition
+	 */
+	this.add_cart_items_to_package = function(cart_items, target_package_id) {
+		return new Promise(function (resolve) {
+			$.ajax({
+				url: API_RESOURCES_URL + target_package_id + '/add_cart_items/',
+				type: 'POST',
+				data: JSON.stringify(cart_items),
+				contentType: 'application/json',
+				datatype: 'json',
+				success: function (data) {
+					resolve(data)
+				}
+			})
+		})
+	};
+
+	/**
 	 * Get IRI for a prefix from a package's `@context`.
 	 * @param {number} resource_id - ID of package to get IRI from
 	 * @param {string} prefix

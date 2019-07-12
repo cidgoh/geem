@@ -445,7 +445,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         term_id_query = 'contents__@context__' + prefix
         if package.values_list(term_id_query, flat=True)[0] is not None:
-            raise ValueError(prefix + ' already exists in package')
+            # Already exists in package
+            return
 
         package_id = package.values_list('id', flat=True)[0]
 
@@ -456,6 +457,54 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             cursor.execute("update geem_package set contents=(jsonb_insert("
                            "contents, '{@context, %s}', jsonb '\"%s\"')) where"
                            " id=%s" % (prefix, iri, package_id))
+
+    @action(detail=True, methods=['post'], url_path='add_cart_items')
+    def add_cart_items_to_package(self, request, pk):
+        """Add cart items to a package.
+
+        This method is only meant to be called by
+        ``geem_api.GeemAPI.add_cart_items_to_package``.
+
+        :param request: ``data`` member is a ``dict`` containing
+            information on cart items
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to add cart items to
+        :type pk: str
+        :returns: Response with ``data`` member is JSON detailing
+            result of each attempted addition
+        :rtype: rest_framework.response.Response
+        """
+        response_data = {}
+
+        user_packages = self._get_resource_queryset(request)
+        target_package = user_packages.filter(pk=pk)
+
+        for cart_item in request.data.values():
+            cart_item_id = cart_item['id']
+            cart_item_prefix = cart_item_id.split(':')[0]
+
+            cart_item_package_id = cart_item['package_id']
+            cart_item_package = user_packages.filter(pk=cart_item_package_id)
+
+            try:
+                cart_item_iri = self.get_context(cart_item_package,
+                                                 cart_item_prefix)
+
+                cart_item_term =\
+                    self.get_specifications(cart_item_package, cart_item_id)
+
+                self.create_context(target_package, cart_item_prefix,
+                                    cart_item_iri)
+
+                self.create_specifications(target_package, cart_item_term)
+            except ValueError as e:
+                response_data[cart_item_id] = {'status': 400,
+                                               'message': str(e)}
+                continue
+
+            response_data[cart_item_id] = {'status': 200, 'message': 'ok'}
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):
 

@@ -73,49 +73,19 @@ function init_cart_tab() {
 		// Items in user's cart
 		const cart_items = top.cart.values();
 
-		const that = this;
-
-		get_cart_items_context(cart_items)
-			.then(function (cart_items_context) {
-				// Prefix and IRI values needed for
-				// each cart item.
-				that.cart_items_context = cart_items_context;
-
-				return get_cart_items_specifications(cart_items)
+		api.add_cart_items_to_package(cart_items, target_package_id)
+			.then(function(cart_item_responses) {
+				const entries = Object.entries(cart_item_responses);
+				for (const [cart_item_id, cart_item_response] of entries) {
+					if (cart_item_response['status'] === 400) {
+						const err_msg = cart_item_response['message'];
+						alert(`Couldn't add ${cart_item_id}\n\n${err_msg}`)
+					}
+				}
 			})
-			// Failed to retrieve `@context` or
-			// `specifications` for cart items. Abort.
-			.catch(function (err_msg_arr) {
-				let alert_msg =
-					'Package not modified due to the following errors:\n\n'
-					+ err_msg_arr.join('\n\n');
-				alert(alert_msg)
-			})
-			.then(function (cart_items_specifications) {
-				that.cart_items_specifications = cart_items_specifications;
-				return add_context_to_package(
-					target_package_id, that.cart_items_context
-				)
-			})
-			.then(function() {
-				return add_specifications_to_package(
-					target_package_id, that.cart_items_specifications
-				)
-			})
-			.then(function () {
-				alert('Successfully added all cart items!')
-			})
-			// Problem adding cart items `@context` or
-			// `specifications` to target package.
-			.catch(function (err_msg_arr) {
-				let alert_msg =
-					'WARNING: the following cart items were not added:\n\n'
-					+ err_msg_arr.join('\n\n');
-				alert(alert_msg)
-			})
-			// Close the modal and reverse above CSS
-			// changes regardless.
 			.finally(function () {
+				// Close the modal and reverse above
+				// CSS changes.
 				$('#makePackageForm').foundation('reveal', 'close');
 				$('#updatePackageButton').show();
 				$('#makePackageWaitMessage').hide()

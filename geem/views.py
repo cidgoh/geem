@@ -1,12 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-#from django.template import Context
 from oauth2_provider.models import Application
 from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
-from psycopg2.extras import Json as psql_json_adapter
-
-import re, os
 
 from rest_framework import mixins
 from rest_framework import status
@@ -15,15 +10,12 @@ from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
-from django.db import connection
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
 
 from geem.models import Package
 from geem.forms import PackageForm
+from geem import utils
 
 ROOT_PATH     = 'geem/static/geem/'
 
@@ -117,7 +109,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            return Response(self.get_specifications(queryset, term_id),
+            return Response(utils.get_specifications(queryset, term_id),
                             status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
@@ -148,7 +140,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            self.delete_specifications(queryset, term_id)
+            utils.delete_specifications(queryset, term_id)
             return Response('Successfully deleted', status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
@@ -172,7 +164,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            self.create_specifications(queryset, request.data)
+            utils.create_specifications(queryset, request.data)
             return Response('Successfully created', status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
@@ -203,7 +195,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            return Response(self.get_context(queryset, prefix),
+            return Response(utils.get_context(queryset, prefix),
                             status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
@@ -234,7 +226,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            self.delete_context(queryset, prefix)
+            utils.delete_context(queryset, prefix)
             return Response('Successfully deleted', status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
@@ -267,196 +259,11 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         queryset = queryset.filter(pk=pk)
 
         try:
-            self.create_context(queryset, request.data['prefix'],
-                                request.data['iri'])
+            utils.create_context(queryset, request.data['prefix'],
+                                 request.data['iri'])
             return Response('Successfully created', status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-
-    @staticmethod
-    def get_specifications(package, term_id=None):
-        """Get one or all specifications from ``package``.
-
-        :param package: queried package to get values from
-        :type package: django.db.models.query.QuerySet
-        :param term_id: ID of term inside package specifications
-        :type term_id: str
-        :return: One or all terms from package specifications
-        :rtype: dict
-        :raises ValueError: Unable to retrieve specifications somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        if term_id is None:
-            query = 'contents__specifications'
-        else:
-            query = 'contents__specifications__' + term_id
-
-        ret = package.values_list(query, flat=True)[0]
-
-        if term_id is not None and ret is None:
-            raise ValueError(term_id + ' not found in package')
-
-        return ret
-
-    @staticmethod
-    def delete_specifications(package, term_id=None):
-        """Delete one or all specifications from ``package``.
-
-        :param package: queried package to get values from
-        :type package: django.db.models.query.QuerySet
-        :param term_id: ID of term inside package specifications
-        :type term_id: str
-        :raises ValueError: Unable to delete specifications somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        package_id = package.values_list('id', flat=True)[0]
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if term_id is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{specifications}', "
-                               "jsonb '{}')) where id=%s" % package_id)
-            else:
-                term_id_query = 'contents__specifications__' + term_id
-                if package.values_list(term_id_query, flat=True)[0] is None:
-                    raise ValueError(term_id + ' not found in package')
-
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{specifications,%s}') where id=%s"
-                               % (term_id, package_id))
-
-    @staticmethod
-    def create_specifications(package, term):
-        """Add ``term`` to specifications of ``package``.
-
-        :param package: queried package to get values from
-        :type package: django.db.models.query.QuerySet
-        :param term: term to add to specifications
-        :type term: dict
-        :raises ValueError: Unable to add specification somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        if 'id' not in term:
-            raise ValueError('Term must have an ID value')
-
-        package_id = package.values_list('id', flat=True)[0]
-
-        # Some of the fields with paragraphs as values (e.g.,
-        # 'definition' for references to ontologies) may have
-        # problematic characters (e.g., single quotes).
-        psql_escaped_data = psql_json_adapter(term)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{specifications, %s}', jsonb %s)) "
-                           "where id=%s"
-                           % (term['id'], psql_escaped_data, package_id))
-
-    @staticmethod
-    def get_context(package, prefix=None):
-        """Get entire @context, or a single IRI, from ``package``.
-
-        :param package: queried package to get values from
-        :type package: django.db.models.query.QuerySet
-        :param prefix: prefix of IRI value inside package @context
-        :type prefix: str
-        :return: One or all IRI values from package @context
-        :rtype: dict[str,str] or str
-        :raises ValueError: Unable to retrieve @context somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        if prefix is None:
-            query = 'contents__@context'
-        else:
-            query = 'contents__@context__' + prefix
-
-        ret = package.values_list(query, flat=True)[0]
-
-        if prefix is not None and ret is None:
-            raise ValueError(prefix + ' not found in package')
-
-        return ret
-
-    @staticmethod
-    def delete_context(package, prefix=None):
-        """Delete entire @context, or a single IRI, from ``package``.
-
-        :param package: queried package to delete values from
-        :type package: django.db.models.query.QuerySet
-        :param prefix: prefix of IRI value inside package @context
-        :type prefix: str
-        :raises ValueError: Unable to delete values somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        package_id = package.values_list('id', flat=True)[0]
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if prefix is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{@context}', "
-                               "jsonb '{}')) where id=%s" % package_id)
-            else:
-                prefix_query = 'contents__@context__' + prefix
-                if package.values_list(prefix_query, flat=True)[0] is None:
-                    raise ValueError(prefix + ' not found in package')
-
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{@context,%s}') where id=%s"
-                               % (prefix, package_id))
-
-    @staticmethod
-    def create_context(package, prefix, iri):
-        """Add ``prefix``-``iri`` pair to @context of ``package``.
-
-        :param package: queried package to delete values from
-        :type package: django.db.models.query.QuerySet
-        :param prefix: key added to ``package`` @context
-        :type prefix: str
-        :param iri: value added to ``package`` @context
-        :type iri: str
-        :raises ValueError: Unable to add values somehow
-        """
-        if package.count() != 1:
-            raise ValueError('Please query an appropriate package')
-
-        try:
-            URLValidator()(iri)
-        except ValidationError:
-            raise ValueError('Must supply a valid IRI')
-
-        term_id_query = 'contents__@context__' + prefix
-        if package.values_list(term_id_query, flat=True)[0] is not None:
-            # Already exists in package
-            return
-
-        package_id = package.values_list('id', flat=True)[0]
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_insert("
-                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
-                           " id=%s" % (prefix, iri, package_id))
 
     @action(detail=True, methods=['post'], url_path='add_cart_items')
     def add_cart_items_to_package(self, request, pk):
@@ -487,16 +294,16 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             cart_item_package = user_packages.filter(pk=cart_item_package_id)
 
             try:
-                cart_item_iri = self.get_context(cart_item_package,
-                                                 cart_item_prefix)
+                cart_item_iri = utils.get_context(cart_item_package,
+                                                  cart_item_prefix)
 
                 cart_item_term =\
-                    self.get_specifications(cart_item_package, cart_item_id)
+                    utils.get_specifications(cart_item_package, cart_item_id)
 
-                self.create_context(target_package, cart_item_prefix,
-                                    cart_item_iri)
+                utils.create_context(target_package, cart_item_prefix,
+                                     cart_item_iri)
 
-                self.create_specifications(target_package, cart_item_term)
+                utils.create_specifications(target_package, cart_item_term)
             except ValueError as e:
                 response_data[cart_item_id] = {'status': 400,
                                                'message': str(e)}

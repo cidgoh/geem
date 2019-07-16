@@ -170,112 +170,26 @@ function GeemAPI() {
 	}
 
 	/**
-	 * Get IRI for a prefix from a package's `@context`.
-	 * @param {number} resource_id - ID of package to get IRI from
-	 * @param {string} prefix
-	 * @returns {Promise<string>} IRI value
+	 * Attempt to add cart items to package
+	 * @param {Object<string, cart_item>} cart_items
+	 * @param {number} target_package_id - package to add cart
+	 * 	items to
+	 * @returns {Promise<Object>} Result of each attempted addition
 	 */
-        this.get_resource_context = function (resource_id, prefix) {
-                return new Promise(function (resolve, reject) {
-                        $.ajax({
-                                // Call to `context` function
-                                url: API_RESOURCES_URL + resource_id + '/context/' + prefix + '/',
-                                success: function (data, textStatus, jqXHR) {
-                                        resolve(data)
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                        reject(
-                                                Error('Unable to get full prefix for '
-                                                        + prefix + ' in package ' + resource_id
-                                                        + '.\n' + jqXHR.responseText)
-                                        )
-                                }
-                        })
-                })
-        };
-
-	/**
-	 * Add `prefix:iri` to a package's `@context`.
-	 * @param {number} resource_id - ID of package to add to
-	 * @param {string} prefix
-	 * @param {string} iri
-	 * @returns {Promise<string>} Confirmation of addition
-	 */
-        this.add_to_resource_context = function(resource_id, prefix, iri) {
-                return new Promise(function (resolve, reject) {
-                        $.ajax({
-                                type: 'POST',
-                                // Call to `create_context` function
-                                url: API_RESOURCES_URL + resource_id + '/create/context/',
-                                data: {'prefix': prefix, 'iri': iri},
-                                success: function (data, textStatus, jqXHR) {
-                                        resolve(data)
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                        reject(
-                                                Error('Unable to add ' + prefix + ': ' + iri
-                                                        + ' to package ' + resource_id + '.\n'
-                                                        + jqXHR.responseText)
-                                        )
-                                }
-                        })
-                })
-        };
-
-	/**
-	 * Get a term from a package's `specifications`.
-	 * @param {number} resource_id - ID of package to get term from
-	 * @param {string} term_id - ID of term from package's
-	 * 	`specifications`
-	 * @returns {Promise<Object>} Complete specifications of term
-	 */
-        this.get_resource_specifications = function (resource_id, term_id) {
-                return new Promise(function (resolve, reject) {
-                        $.ajax({
-                                // Call to `specifications` function
-                                url: API_RESOURCES_URL + resource_id + '/specifications/' + term_id
-                                        + '/',
-                                success: function (data, textStatus, jqXHR) {
-                                        resolve(data)
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                        reject(
-                                                Error('Unable to get specifications for ' + term_id
-                                                        + ' in package ' + resource_id + '.\n'
-                                                        + jqXHR.responseText)
-                                        )
-                                }
-                        })
-                })
-        };
-
-	/**
-	 * Add `specification` to a package's `specifications`.
-	 * @param {number} resource_id - ID of package to add to
-	 * @param {Object} specification
-	 * @returns {Promise<string>} Confirmation of addition
-	 */
-        this.add_to_resource_specifications = function(resource_id, specification) {
-                return new Promise(function (resolve, reject) {
-                        $.ajax({
-                                type: 'POST',
-                                // Call to `create_specifications`
-                                // function.
-                                url: API_RESOURCES_URL + resource_id + '/create/specifications/',
-                                data: specification,
-                                success: function (data, textStatus, jqXHR) {
-                                        resolve(data)
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                        reject(
-                                                Error('Unable to add ' + specification.id
-                                                        + ' to package ' + resource_id + '.\n'
-                                                        + jqXHR.responseText)
-                                        )
-                                }
-                        })
-                })
-        };
+	this.add_cart_items_to_package = function(cart_items, target_package_id) {
+		return new Promise(function (resolve) {
+			$.ajax({
+				url: API_RESOURCES_URL + target_package_id + '/add_cart_items/',
+				type: 'POST',
+				data: JSON.stringify(cart_items),
+				contentType: 'application/json',
+				datatype: 'json',
+				success: function (data) {
+					resolve(data)
+				}
+			})
+		})
+	};
 
 	this.cart_change_item = function(entity_path, action, package_id, versionIRI = null) {
 		/* 

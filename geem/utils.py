@@ -187,3 +187,33 @@ def create_context(package, prefix, iri):
         cursor.execute("update geem_package set contents=(jsonb_insert("
                        "contents, '{@context, %s}', jsonb '\"%s\"')) where"
                        " id=%s" % (prefix, iri, package_id))
+
+
+def add_cart_item_to_package(cart_item_id, cart_item_package, target_package):
+    """TODO:..."""
+    cart_item_prefix = cart_item_id.split(':')[0]
+
+    try:
+        cart_item_iri = get_context(cart_item_package, cart_item_prefix)
+
+        cart_item_term = get_specifications(cart_item_package, cart_item_id)
+
+        create_context(target_package, cart_item_prefix, cart_item_iri)
+
+        create_specifications(target_package, cart_item_term)
+    except ValueError as e:
+        return {cart_item_id: {'status': 400, 'message': str(e)}}
+
+    ret = {cart_item_id: {'status': 200, 'message': 'ok'}}
+
+    if 'choices' in cart_item_term:
+        for child_id in cart_item_term['choices'].keys():
+            ret.update(add_cart_item_to_package(child_id, cart_item_package,
+                                                target_package))
+
+    if 'components' in cart_item_term:
+        for child_id in cart_item_term['components'].keys():
+            ret.update(add_cart_item_to_package(child_id, cart_item_package,
+                                                target_package))
+
+    return ret

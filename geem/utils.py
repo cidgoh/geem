@@ -190,7 +190,18 @@ def create_context(package, prefix, iri):
 
 
 def add_cart_item_to_package(cart_item_id, cart_item_package, target_package):
-    """TODO:..."""
+    """Add cart item and its children to package.
+
+    :param cart_item_id: cart item id value
+    :type cart_item_id: str
+    :param cart_item_package: cart item package
+    :type cart_item_package: django.db.models.query.QuerySet
+    :param target_package: package to add cart item to
+    :type target_package: django.db.models.query.QuerySet
+    :returns: response for addition of cart item and all its nested
+        children, detailing success or failure
+    :rtype: dict[str,dict]
+    """
     cart_item_prefix = cart_item_id.split(':')[0]
 
     try:

@@ -170,7 +170,7 @@ function GeemAPI() {
 	}
 
 	/**
-	 * Attempt to add cart items to package
+	 * Attempt to add cart items and their children to package.
 	 * @param {Object<string, cart_item>} cart_items
 	 * @param {number} target_package_id - package to add cart
 	 * 	items to

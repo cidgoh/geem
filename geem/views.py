@@ -1,6 +1,3 @@
-from django.shortcuts import render
-from oauth2_provider.models import Application
-from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
 
 from rest_framework import mixins
@@ -12,10 +9,13 @@ from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.db.models import Q
+from django.shortcuts import render
+from oauth2_provider.models import Application
 
 from geem.models import Package
 from geem.forms import PackageForm
 from geem import utils
+from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 
 ROOT_PATH     = 'geem/static/geem/'
 
@@ -267,7 +267,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
     @action(detail=True, methods=['post'], url_path='add_cart_items')
     def add_cart_items_to_package(self, request, pk):
-        """Add cart items to a package.
+        """Add cart items and their children to a package.
 
         This method is only meant to be called by
         ``geem_api.GeemAPI.add_cart_items_to_package``.
@@ -288,28 +288,12 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         for cart_item in request.data.values():
             cart_item_id = cart_item['id']
-            cart_item_prefix = cart_item_id.split(':')[0]
-
             cart_item_package_id = cart_item['package_id']
             cart_item_package = user_packages.filter(pk=cart_item_package_id)
 
-            try:
-                cart_item_iri = utils.get_context(cart_item_package,
-                                                  cart_item_prefix)
-
-                cart_item_term =\
-                    utils.get_specifications(cart_item_package, cart_item_id)
-
-                utils.create_context(target_package, cart_item_prefix,
-                                     cart_item_iri)
-
-                utils.create_specifications(target_package, cart_item_term)
-            except ValueError as e:
-                response_data[cart_item_id] = {'status': 400,
-                                               'message': str(e)}
-                continue
-
-            response_data[cart_item_id] = {'status': 200, 'message': 'ok'}
+            response_data.update(
+                utils.add_cart_item_to_package(cart_item_id, cart_item_package,
+                                               target_package))
 
         return Response(response_data, status=status.HTTP_200_OK)
 

@@ -217,20 +217,30 @@ function render_resource_menu_init() {
 
 }
 
+
+/**
+ * Render top-level item (accordion), and underlying hierarchic menu
+ * @param {string} entity_id - ID of top-level item
+ * @param {boolean} ontology - Whether top-level item comes from an
+ * 	ontology or not
+ * @returns {string} HTML to be rendered
+ */
 function render_resource_accordion(entity_id, ontology) {
-	/* Top level items are accordion. Underlying ones are hierarchic menu
-	*/
-	var entity = top.resource.contents.specifications[entity_id];
-	var normalized_id = entity.id.replace(':','_')
-	return [
-		'<li class="accordion-navigation small">',
-		,'	<a href="#menu_', normalized_id, '">', get_label(entity), '</a>'
-	    ,'	<div id="menu_', normalized_id, '" class="content">'
-	    ,		'<ul class="side-nav">' + render_resource_menu(entity, undefined, ontology) +'</ul>'
-	    ,'	</div>'
-	    ,'</li>'
-    ].join('')
+	const entity = top.resource.contents.specifications[entity_id];
+	const normalized_id = entity.id.replace(':','_')
+
+	const subordinates_html = render_resource_menu(entity, undefined, ontology);
+
+	return `
+		<li class="accordion-navigation small">
+			<a href="#menu_${normalized_id}">${get_label(entity)}</a>
+			<div id="menu_${normalized_id}" class="content">
+				<ul class="side-nav">${subordinates_html}</ul>
+			</div>
+		</li>
+	`;
 }
+
 
 /**
  * Recursively render subordinates under top-level items in browse-tab.
@@ -264,17 +274,18 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 				return ''
 			}
 
-			html += [
-				'<li class="cart-item" data-ontology-id="', child.id,'">'
-				,	'<a href="#', child.id, '">'
-				,		get_label(child)
-				,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
-				,	'</a>'
-				,	 ('models' in child) ? '<ul class="side-nav">'
-					+ render_resource_menu(child, depth + 1, ontology) + '</ul>' : ''
-				,'</li>'
-			].join('')
+			let child_html = '';
+			if ('models' in child) child_html = render_resource_menu(child, depth + 1, ontology);
 
+			html += `
+				<li class="cart-item" data-ontology-id="${child.id}">
+					<a href="#${child.id}">
+						${get_label(child)}
+						${('models' in child) ? '<i class="fi-magnifying-glass"></i>' : ''}
+					</a>
+					<ul class="side-nav">${child_html}</ul>
+				</li>
+			`;
 		}
 	}
 

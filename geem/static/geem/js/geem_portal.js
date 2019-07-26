@@ -164,24 +164,50 @@ function render_resource_menu_init() {
 	var root_id = 'OBI:0000658' //"data representation model" 
 	var html = ''
 
+	let specifications;
 	if (top.resource.contents && top.resource.contents.specifications) {
-		if (root_id in top.resource.contents.specifications) {
-			entities = top.resource.contents.specifications[root_id].models
-		}
-		else {
-			// Search for any top level model 
-			for (entity_id in top.resource.contents.specifications) {
-				var entity = top.resource.contents.specifications[entity_id]
-				// If a model, and not subordinate to some other model
-				if (entity.datatype == 'model' && (! ('parent' in entity) || !( entity['parent'] in top.resource.contents.specifications))) {
-					entities[entity_id] = []
-				}
+		specifications = top.resource.contents.specifications
+	}
+
+	if (root_id in specifications) {
+		entities = top.resource.contents.specifications[root_id].models
+	}
+	// Ontology
+	else if (top.resource.ontology) {
+		// Search for any top level model
+		for (const entity_id in specifications) {
+			const entity = specifications[entity_id];
+			// If a model, and not subordinate to some other model
+			if (entity.datatype === 'model' && (!('parent' in entity) || !(entity['parent']
+				in specifications))) {
+				entities[entity_id] = []
 			}
 		}
 	}
+	// Not an ontology
+	else {
+		for (const entity_id in specifications) {
+			const entity = specifications[entity_id];
 
-	for (entity_id in entities) {
-		html += render_resource_accordion(entity_id)
+			let parents = [];
+			if ('parent' in entity) {
+				parents.push(entity.parent)
+			}
+			if ('otherParent' in entity) {
+				parents = parents.concat(entity.otherParent)
+			}
+			if ('member_of' in entity) {
+				parents = parents.concat(entity.member_of)
+			}
+
+			const specified_parents = parents.filter(parent => parent in specifications);
+
+			if (!specified_parents.length) entities[entity_id] = []
+		}
+	}
+
+	for (const entity_id in entities) {
+		html += render_resource_accordion(entity_id, top.resource.ontology)
 	}
 
 	if (html == '') 
@@ -191,7 +217,7 @@ function render_resource_menu_init() {
 
 }
 
-function render_resource_accordion(entity_id) {
+function render_resource_accordion(entity_id, ontology) {
 	/* Top level items are accordion. Underlying ones are hierarchic menu
 	*/
 	var entity = top.resource.contents.specifications[entity_id];
@@ -200,49 +226,59 @@ function render_resource_accordion(entity_id) {
 		'<li class="accordion-navigation small">',
 		,'	<a href="#menu_', normalized_id, '">', get_label(entity), '</a>'
 	    ,'	<div id="menu_', normalized_id, '" class="content">'
-	    ,		'<ul class="side-nav">' + render_resource_menu(entity) +'</ul>'
+	    ,		'<ul class="side-nav">' + render_resource_menu(entity, undefined, ontology) +'</ul>'
 	    ,'	</div>'
 	    ,'</li>'
     ].join('')
 }
 
-function render_resource_menu(entity = null, depth = 0 ) {
-	/* 
+/**
+ * Recursively render subordinates under top-level items in browse-tab.
+ * @param {Object} entity - Top-level item
+ * @param {number} depth - Accumulator used in recursion to render
+ * 	subordinates with appropriate indentation
+ * @param {boolean} ontology - Whether top-level item comes from an
+ * 	ontology or not
+ * @returns {string} HTML to be rendered
+ */
+function render_resource_menu(entity=null, depth=0, ontology) {
+	let html = '';
 
-	*/
-	var html = ''
-
-	if ('models' in entity) {
-
-		for (var memberId in entity.models) {
-			// Only list item if it has components or models
-			var child = top.resource.contents.specifications[memberId]
-			if (child) {
-				// Infinite loop possible
-				if ('parent' in child && child.parent.id == entity.id) {
-					console.log("Node: " + entity.id + " is a parent of itself and so is not re-rendered.")
-					return ''
-				}
-
-				html += [
-					'<li class="cart-item" data-ontology-id="', child.id,'">'
-				 	,	'<a href="#', child.id, '">'
-					,		get_label(child)
-					,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
-					,	'</a>'
-					,	 ('models' in child) ? '<ul class="side-nav">' + render_resource_menu(child, depth + 1) +'</ul>' : ''
-					// || 'components' in child)
-					,'</li>'
-				].join('')
-
-			}
-		}
-
-		return html
-
+	let subordinate_ids = [];
+	if (ontology) {
+		// Only list item if it has components or models
+		if ('models' in entity) subordinate_ids = Object.keys(entity.models)
+	} else {
+		if ('models' in entity) subordinate_ids = Object.keys(entity.models);
+		if ('components' in entity) subordinate_ids = [...subordinate_ids, ...Object.keys(entity.components)]
 	}
 
-	return ''
+	// Only list item if it has components or models
+	for (const subordinate_id of subordinate_ids) {
+		const child = top.resource.contents.specifications[subordinate_id];
+		if (child) {
+			// Infinite loop possible
+			if ('parent' in child && child.parent.id === entity.id) {
+				console.log('Node: ' + entity.id
+					+ ' is a parent of itself and so is not re-rendered');
+				return ''
+			}
+
+			html += [
+				'<li class="cart-item" data-ontology-id="', child.id,'">'
+				,	'<a href="#', child.id, '">'
+				,		get_label(child)
+				,		('models' in child) ? ' <i class="fi-magnifying-glass"></i>' : ''
+				,	'</a>'
+				,	 ('models' in child) ? '<ul class="side-nav">'
+					+ render_resource_menu(child, depth + 1, ontology) + '</ul>' : ''
+				,'</li>'
+			].join('')
+
+		}
+	}
+
+	return html;
 }
 
 function render_display_context(event) {

@@ -6,7 +6,7 @@
 
 */
 
-RESOURCE_TEMPLATE_ID = '1';
+RESOURCE_TEMPLATE_ID = 1;
 
 function render_resource_form() {
 	/* 
@@ -166,7 +166,7 @@ function init_resource_select(resources) {
 	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="Public Packages">', false, true)
 	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="My Private Packages (login required)">', false, false)
 
-	html.push(`\n<option value="${RESOURCE_TEMPLATE_ID}">Add new package ...</option>\n</optgroup>`) // Resource #5 is template for package
+	html.push(`\n<option value="${RESOURCE_TEMPLATE_ID}">Add new package ...</option>\n</optgroup>`)
 	html = html.join('\n')
 
 	// When a new ontology is selected:
@@ -243,9 +243,10 @@ function do_resource_selection() {
 		return
 	}
 
-	if (resource_id == 5) { //Special package id for template
-		// User requesting to make a new package
-		api.get_resource(5)
+	// User requesting to make a new package
+	if (resource_id == RESOURCE_TEMPLATE_ID) { 
+
+		api.get_resource(RESOURCE_TEMPLATE_ID)
 			.then(init_new_resource)
 			.then(resource_callback)
 	}

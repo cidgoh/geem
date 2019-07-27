@@ -458,29 +458,6 @@ class Ontology(object):
 				}
 			""", initNs = self.onto_helper.namespace),
 
-
-			# ################################################################
-			# oboInOwl:hasSynonym
-			# Picklist items are augmented with synonyms in order for 
-			# type-as-you-go inputs to return appropriately filtered phrases
-			# OUTPUT below has "has" prefixed to each field name.
-			#
-			# INPUT
-			# 	?datum : id of term to get labels for
-			# OUTPUT
-			#   ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
-			#
-			'entity_synonyms': rdflib.plugins.sparql.prepareQuery("""
-
-				SELECT DISTINCT ?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
-				WHERE {  
-					{?datum rdf:type owl:Class} UNION {?datum rdf:type owl:NamedIndividual}.
-					{?datum oboInOwl:hasSynonym ?Synonym.} 
-					UNION {?datum oboInOwl:hasExactSynonym ?ExactSynonym.}
-					UNION {?datum oboInOwl:hasNarrowSynonym ?NarrowSynonym.}
-					UNION {?datum IAO:0000118 ?AlternativeTerm.}
-				}
-			""", initNs = self.onto_helper.namespace),
 		}
 
 
@@ -755,19 +732,19 @@ class Ontology(object):
 			?datum ?Synonym ?ExactSynonym ?NarrowSynonym ?AlternativeTerm
 		"""
 		synonyms = self.onto_helper.graph.query(
-			self.queries['entity_synonyms'], 
+			self.onto_helper.queries['entity_synonyms'], 
 			initBindings={'datum': myURI}
 		)
 		for row in synonyms:
-			for field in ['Synonym','ExactSynonym','NarrowSynonym','AlternativeTerm']:
+			for field in self.onto_helper.SYNONYM_FIELDS:
 
 				if field in row and len(row[field]): 
 					synonymTypeList = self.onto_helper.set_entity_default(
-						self.onto_helper.struct, 'specifications', id, 'has' + field, []
+						self.onto_helper.struct, 'specifications', id, field, []
 					)
-					# Clean up synonym phrases
-					# Insisting on terms separated by comma+space because chemistry expressions have tight comma separated synonyms
-					# stringy = row[field].encode('unicode-escape').decode('utf8').replace('\\n', '\n')
+					# Clean up synonym phrases.  Insisting on terms separated
+					# by comma+space because chemistry expressions have tight
+					# comma separated synonyms.
 					
 					phrases = row[field].replace('\\n', '\n').strip().replace(', ','\n').replace('"','').split('\n')
 					for phrase in phrases:

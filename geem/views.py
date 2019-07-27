@@ -1,12 +1,4 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-#from django.template import Context
-from oauth2_provider.models import Application
-from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 import json
-from psycopg2.extras import Json as psql_json_adapter
-
-import re, os
 
 from rest_framework import mixins
 from rest_framework import status
@@ -15,15 +7,15 @@ from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 from rest_framework.response import Response
 from django.db.models import Q
-from django.db import connection
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
+from django.shortcuts import render
+from oauth2_provider.models import Application
 
 from geem.models import Package
 from geem.forms import PackageForm
+from geem import utils
+from geem.serializers import ResourceSummarySerializer, ResourceDetailSerializer
 
 ROOT_PATH     = 'geem/static/geem/'
 
@@ -92,8 +84,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         return Response(ResourceDetailSerializer(package, context={'request': request}).data)
 
     @action(detail=True, url_path='specifications(?:/(?P<term_id>.+))?')
-    def specifications(self, request, pk, term_id=None):
-        """Get entire specifications, or a single term, from a package.
+    def get_specifications_response(self, request, pk, term_id=None):
+        """Responds with one or all specifications from a package.
 
         * api/resources/{pk}/specifications
 
@@ -110,35 +102,21 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str term_id: id of term inside package specifications
         :return: One or all terms from package specifications, or
                  appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Query entire specifications or exact term
-        if term_id is None:
-            query = 'contents__specifications'
-        else:
-            query = 'contents__specifications__' + term_id
-        queryset = queryset.values_list(query, flat=True)
-
-        # If looking for a specific term, and query failed, return 404
-        if term_id is not None and queryset[0] is None:
-            return Response('%s not found in package with id %s'
-                            % (term_id, pk),
-                            status=status.HTTP_404_NOT_FOUND)
-
-        return Response(queryset[0], status=status.HTTP_200_OK)
+        try:
+            return Response(utils.get_specifications(queryset, term_id),
+                            status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/specifications(?:/(?P<term_id>.+))?')
-    def delete_specifications(self, request, pk, term_id=None):
-        """Delete entire specifications, or one term, from a package.
+    def delete_specifications_response(self, request, pk, term_id=None):
+        """Responds by deleting one or all terms from a package.
 
         * api/resources/{pk}/delete/specifications
 
@@ -155,42 +133,21 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str pk: id of package
         :param str term_id: id of term inside package specifications
         :return: Confirmation of deletion, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if term_id is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{specifications}', "
-                               "jsonb '{}')) where id=%s" % pk)
-            else:
-                # Validate 'id' key exists in package
-                term_id_query = 'contents__specifications__' + term_id
-                if queryset.values_list(term_id_query, flat=True)[0] is None:
-                    return Response(
-                        'id %s does not exist in package %s' % (term_id, pk),
-                        status=status.HTTP_400_BAD_REQUEST)
-                # Delete exact term
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{specifications,%s}') where id=%s"
-                               % (term_id, pk))
-
-        return Response('Successfully deleted', status=status.HTTP_200_OK)
+        try:
+            utils.delete_specifications(queryset, term_id)
+            return Response('Successfully deleted', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='create/specifications')
-    def create_specifications(self, request, pk):
-        """Add a specification to a package.
+    def create_specifications_response(self, request, pk):
+        """Responds by adding a specification to a package.
 
         `request.data` is added to the specifications of a package with
         `id == pk`. `request.data` must be in `dict` format, and have
@@ -200,41 +157,21 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                                        request metadata
         :param str pk: id of package
         :return: Confirmation of creation, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate 'id' key exists in request.data
-        if 'id' not in request.data:
-            return Response('request.data missing id value',
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # Some of the fields with paragraphs as values (e.g.,
-        # 'definition' for references to ontologies) may have
-        # problematic characters (e.g., single quotes).
-        psql_escaped_data = psql_json_adapter(request.data)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{specifications, %s}', jsonb %s)) "
-                           "where id=%s"
-                           % (request.data['id'], psql_escaped_data, pk))
-
-        return Response('Successfully created', status=status.HTTP_200_OK)
+        try:
+            utils.create_specifications(queryset, request.data)
+            return Response('Successfully created', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='context(?:/(?P<prefix>.+))?')
-    def context(self, request, pk, prefix=None):
-        """Get entire @context, or a single IRI, from a package.
+    def get_context_response(self, request, pk, prefix=None):
+        """Responds with entire @context, or one IRI, from a package.
 
         * api/resources/{pk}/context
 
@@ -251,36 +188,21 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str prefix: prefix of IRI value inside package @context
         :return: One or all IRI values from package @context, or
                  appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No access to package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Query entire @context or exact prefix
-        if prefix is None:
-            query = 'contents__@context'
-        else:
-            query = 'contents__@context__' + prefix
-        queryset = queryset.values_list(query, flat=True)
-
-        # If looking for a specific prefix, and query failed, return
-        # 404.
-        if prefix is not None and queryset[0] is None:
-            return Response('%s not found in package with id %s'
-                            % (prefix, pk),
-                            status=status.HTTP_404_NOT_FOUND)
-
-        return Response(queryset[0], status=status.HTTP_200_OK)
+        try:
+            return Response(utils.get_context(queryset, prefix),
+                            status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, url_path='delete/context(?:/(?P<prefix>.+))?')
-    def delete_context(self, request, pk, prefix=None):
-        """Delete entire @context, or one IRI, from a package.
+    def delete_context_response(self, request, pk, prefix=None):
+        """Responds by deleting one or all IRI from a package @context.
 
         * api/resources/{pk}/delete/context
 
@@ -297,42 +219,21 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         :param str pk: id of package
         :param str prefix: prefix of IRI value inside package @context
         :return: Confirmation of deletion, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
         # Query specified package
         queryset = self._get_modifiable_packages(request)
         queryset = queryset.filter(pk=pk)
 
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # deletion queries used below.
-            if prefix is None:
-                cursor.execute("update geem_package set contents=(select "
-                               "jsonb_set(contents, '{@context}', "
-                               "jsonb '{}')) where id=%s" % pk)
-            else:
-                # Validate 'prefix' key exists in package
-                prefix_query = 'contents__@context__' + prefix
-                if queryset.values_list(prefix_query, flat=True)[0] is None:
-                    return Response(
-                        'prefix %s does not exist in package %s'
-                        % (prefix, pk),
-                        status=status.HTTP_400_BAD_REQUEST)
-                # Delete exact IRI value
-                cursor.execute("update geem_package set contents=(contents #- "
-                               "'{@context,%s}') where id=%s" % (prefix, pk))
-
-        return Response('Successfully deleted', status=status.HTTP_200_OK)
+        try:
+            utils.delete_context(queryset, prefix)
+            return Response('Successfully deleted', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='create/context')
-    def create_context(self, request, pk):
-        """Add a prefix-IRI pair to the @context of a package.
+    def create_context_response(self, request, pk):
+        """Responds by adding prefix-IRI pair to package @context.
 
         `request.data` must be a `dict` with two attributes: `prefix`
         and `iri`. These values are added to the @context of a package
@@ -342,15 +243,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                                                        request metadata
         :param str pk: id of package
         :return: Confirmation of creation, or appropriate error message
-        :rtype: rest_framework.request.Response
+        :rtype: rest_framework.response.Response
         """
-        # Query specified package
-        queryset = self._get_modifiable_packages(request)
-        queryset = queryset.filter(pk=pk)
-        # Unable to query any packages
-        if queryset.count() == 0:
-            return Response('No permission to edit package with id %s' % pk,
-                            status=status.HTTP_400_BAD_REQUEST)
         # Validate 'prefix' key exists in request.data
         if 'prefix' not in request.data:
             return Response('request.data missing prefix value',
@@ -359,29 +253,49 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         if 'iri' not in request.data:
             return Response('request.data missing iri value',
                             status=status.HTTP_400_BAD_REQUEST)
-        # Validate 'iri' is a proper IRI value
-        iri = request.data['iri']
+
+        # Query specified package
+        queryset = self._get_modifiable_packages(request)
+        queryset = queryset.filter(pk=pk)
+
         try:
-            URLValidator()(request.data['iri'])
-        except ValidationError:
-            return Response('Must supply a valid IRI',
-                            status=status.HTTP_400_BAD_REQUEST)
-        # Validate prefix does not already exist in package
-        prefix = request.data['prefix']
-        term_id_query = 'contents__@context__' + prefix
-        if queryset.values_list(term_id_query, flat=True)[0] is not None:
-            message = 'prefix %s already exists in package %s' % (prefix, pk)
-            return Response(message, status=status.HTTP_200_OK)
+            utils.create_context(queryset, request.data['prefix'],
+                                 request.data['iri'])
+            return Response('Successfully created', status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-        # Connect to the default database service
-        with connection.cursor() as cursor:
-            # See https://stackoverflow.com/a/23500670 for details on
-            # creation query used below.
-            cursor.execute("update geem_package set contents=(jsonb_insert("
-                           "contents, '{@context, %s}', jsonb '\"%s\"')) where"
-                           " id=%s" % (prefix, iri, pk))
+    @action(detail=True, methods=['post'], url_path='add_cart_items')
+    def add_cart_items_to_package(self, request, pk):
+        """Add cart items and their children to a package.
 
-        return Response('Successfully created', status=status.HTTP_200_OK)
+        This method is only meant to be called by
+        ``geem_api.GeemAPI.add_cart_items_to_package``.
+
+        :param request: ``data`` member is a ``dict`` containing
+            information on cart items
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to add cart items to
+        :type pk: str
+        :returns: Response with ``data`` member is JSON detailing
+            result of each attempted addition
+        :rtype: rest_framework.response.Response
+        """
+        response_data = {}
+
+        user_packages = self._get_resource_queryset(request)
+        target_package = user_packages.filter(pk=pk)
+
+        for cart_item in request.data.values():
+            cart_item_id = cart_item['id']
+            cart_item_package_id = cart_item['package_id']
+            cart_item_package = user_packages.filter(pk=cart_item_package_id)
+
+            response_data.update(
+                utils.add_cart_item_to_package(cart_item_id, cart_item_package,
+                                               target_package))
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):
 

@@ -6,7 +6,7 @@
 
 */
 
-RESOURCE_TEMPLATE_ID = 1;
+RESOURCE_TEMPLATE_ID = '1';
 
 function render_resource_form() {
 	/* 

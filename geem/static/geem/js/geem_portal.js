@@ -231,6 +231,14 @@ function render_resource_accordion(entity_id, ontology) {
 
 	const subordinates_html = render_resource_menu(entity, undefined, ontology);
 
+	// If there are no subordinates, accordion must direct to its
+	// own page.
+	if (subordinates_html === '') {
+		$('#entityMenu').on('click', `[href=#menu_${normalized_id}]`, function () {
+			window.location.hash = entity.id
+		});
+	}
+
 	return `
 		<li class="accordion-navigation small">
 			<a href="#menu_${normalized_id}">${get_label(entity)}</a>

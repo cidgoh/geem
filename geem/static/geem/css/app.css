@@ -21,7 +21,9 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 #resourceTabs {border:1px solid silver; margin-top:10px;}
 #resourceTabs > li.tab-title a {padding:.3rem 1rem !important;}
 #resourceTabsContent {
-	height:500px; overflow:scroll; border:0;
+	height:500px; 
+	overflow-y:scroll; 
+	border:0;
 	border-left:1px solid #e6e6e6;
 	border-right:1px solid #e6e6e6;
 	border-bottom:1px solid #e6e6e6
@@ -31,12 +33,16 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 #content-tabs > li.tab-title i {font-size:1.5rem;position:absolute;margin-top:-5px;margin-left:5px;}
 #content-tabs > li > a {padding:.3rem 1rem !important;}
 #tabsContent {
-	height:500px; overflow:scroll; border:0;
+	height:500px; 
+	overflow-y:scroll; 
+	overflow-x:hidden;
+	border:0;
 	padding:10px;
 	border-left:1px solid #e6e6e6;
 	border-right:1px solid #e6e6e6;
 	border-bottom:1px solid #e6e6e6
 }
+.tabs-content>.content {padding:0;}
 
 li.accordion-navigation > div {padding:0!important;}
 /* ALL INPUTS ???? matches foundation .small padding */

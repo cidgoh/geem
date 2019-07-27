@@ -166,7 +166,12 @@ function init_resource_select(resources) {
 	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="Public Packages">', false, true)
 	init_resource_select_item(resources, html, '</optgroup>\n<optgroup label="My Private Packages (login required)">', false, false)
 
-	html.push(`\n<option value="${RESOURCE_TEMPLATE_ID}">Add new package ...</option>\n</optgroup>`)
+	// User logged in
+	if ($('#userInfo').length) {
+		html.push(`\n<option value="${RESOURCE_TEMPLATE_ID}">Add new package ...</option>`)
+	}
+
+	html.push('\n</optgroup>')
 	html = html.join('\n')
 
 	// When a new ontology is selected:

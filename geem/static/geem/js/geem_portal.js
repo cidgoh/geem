@@ -227,7 +227,7 @@ function render_resource_menu_init() {
  */
 function render_resource_accordion(entity_id, ontology) {
 	const entity = top.resource.contents.specifications[entity_id];
-	const normalized_id = entity.id.replace(':','_')
+	const normalized_id = entity.id.replace(':','_');
 
 	const subordinates_html = render_resource_menu(entity, undefined, ontology);
 
@@ -260,7 +260,9 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 		if ('models' in entity) subordinate_ids = Object.keys(entity.models)
 	} else {
 		if ('models' in entity) subordinate_ids = Object.keys(entity.models);
-		if ('components' in entity) subordinate_ids = [...subordinate_ids, ...Object.keys(entity.components)]
+		if ('components' in entity) {
+			subordinate_ids = subordinate_ids.concat(Object.keys(entity.components))
+		}
 	}
 
 	// Only list item if it has components or models
@@ -275,14 +277,15 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 			}
 
 			let child_html = '';
-			if ('models' in child) child_html = render_resource_menu(child, depth + 1, ontology);
+			let label = get_label(child);
+			if ('models' in child) {
+				child_html = render_resource_menu(child, depth + 1, ontology);
+				label += ' <i class="fi-magnifying-glass"></i>'
+			}
 
 			html += `
 				<li class="cart-item" data-ontology-id="${child.id}">
-					<a href="#${child.id}">
-						${get_label(child)}
-						${('models' in child) ? '<i class="fi-magnifying-glass"></i>' : ''}
-					</a>
+					<a href="#${child.id}">${label}</a>
 					<ul class="side-nav">${child_html}</ul>
 				</li>
 			`;

@@ -62,7 +62,14 @@ function render_resource_form() {
 			}
 		}
 
-		$('#resourceForm').foundation() // Enables tool tips 
+		// User creating new package
+		if (resource.id.toString() === RESOURCE_TEMPLATE_ID) {
+			$('#summary_name').removeAttr('readonly');
+			$('#summary_name').attr('value', '');
+			$('#summary_license').attr('readonly', 'readonly');
+		}
+
+		$('#resourceForm').foundation() // Enables tool tips
 
 	});
 

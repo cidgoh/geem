@@ -32,6 +32,9 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 #content-tabs {border:1px solid silver;}
 #content-tabs > li.tab-title i {font-size:1.5rem;position:absolute;margin-top:-5px;margin-left:5px;}
 #content-tabs > li > a {padding:.3rem 1rem !important;}
+.tabs dd.active>a, .tabs .tab-title.active>a {
+    background-color: #ddd;
+}
 #tabsContent {
 	height:500px; 
 	overflow-y:scroll; 

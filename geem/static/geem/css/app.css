@@ -221,13 +221,13 @@ li.group-result {display:none;}
 #formEntityLabel {
  	padding-top:.5rem;
  	padding-left:.5rem;
- 	margin-bottom:10px;
+ 	margin-bottom: 10px;
  	font-size:1.1rem;
- 	height:3.2rem;
+ 	height:2.22rem;
  	background-color:#2199e8; 
  	color:white;
 	text-transform: capitalize;
-	overflow-x:scroll;
+	overflow-y:scroll;
 }
 
 #selectResource { 	

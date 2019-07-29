@@ -8,58 +8,45 @@
 
 RESOURCE_TEMPLATE_ID = '1';
 
+/**
+ * Populates resource form template.
+ *
+ * Uses various view/edit/hide field logic depending on status of
+ * record.
+ */
 function render_resource_form() {
-	/* 
-	Populates resource form template with a resource record which user *may*
-	be the owner of. Implements various view/edit/hide field logic depending
-	on status of record.
-		
-	*/
 	$.ajax('templates/resource_summary_form.html').done(function(response) {
 
-		const resource = top.resource
-		$('#resourceForm').html( do_template_fill(response, resource) )
+		const resource = top.resource;
+		$('#resourceForm').html(do_template_fill(response, resource));
 
-		// By default, all form elements are disabled / read-only
-		$('#resourceForm select').prop('disabled', true)
-		$('#resourceForm input').attr('readonly','readonly')
+		// By default, all form elements are disabled/read-only
+		$('#resourceForm select').prop('disabled', true);
+		$('#resourceForm input').attr('readonly','readonly');
+		$('#resourceForm textarea').attr('readonly','readonly');
 
-		// 2 select lists to select options in:
-		$('#summary_public option[value="' + resource.public + '"]').prop('selected', true)
-		$('#summary_ontology option[value="' + resource.ontology + '"]').prop('selected', true)
-		$('#summary_curation option[value="' + resource.curation + '"]').prop('selected', true)
+		$(`#summary_public option[value="${resource.public}"]`)
+			.prop('selected', 'selected');
+		$(`#summary_ontology option[value="${resource.ontology}"]`)
+			.prop('selected', 'selected');
+		$(`#summary_curation option[value="${resource.curation}"]`)
+			.prop('selected', 'selected');
 
-		// If loaded data is direct from ontology, hide/disable certain buttons/fields. 
-		var onto_fields = $('#summary_name, #summary_version, #summary_resource, #summary_description, #summary_prefix')
+		if (!resource.ontology) $('.summary_prefix').hide();
 
-		// Packages don't have prefixes.
-		if (!resource.ontology)
-			$('.summary_prefix').hide() 
-
-		const resource_owner = get_owner_status(resource)
-
-		if (resource_owner) {
-			$('#summary_curation, #summary_public').prop('disabled', false)
-		}
-
-		// Public resources can't be deleted or updated.
-		if (resource.public && resource.curation != 'draft') {
-			
-			$('#summary_delete, #summary_update, #summary_create').hide()
-
-		}
-		else {
-			$("#summary_license").removeAttr('readonly')
-
-			if (resource.new) {
-				// new records are always private, draft packages.
-				$('.summary_resource, .summary_prefix').hide()
-				$('#summary_delete, #summary_download, #summary_copy, #summary_update').hide()
+		const owned_fields = ['summary_name', 'summary_public', 'summary_curation',
+			'summary_version', 'summary_description', 'summary_file_base_name',
+			'summary_license', 'summary_version_iri', 'summary_date',
+			'summary_prefix'];
+		if (get_owner_status(resource)) {
+			for (const owned_field of owned_fields) {
+				$(`#${owned_field}`).prop('disabled', false);
+				$(`#${owned_field}`).attr('readonly', false);
 			}
-			else {// Existing record can be copied
-				$('#summary_create').hide()
-				$("#summary_public, #summary_ontology, #summary_curation").prop('disabled', false)
-			}
+		} else {
+			$('#summary_delete').hide();
+			$('#summary_update').hide();
+			$('#summary_create').hide()
 		}
 
 		// User creating new package
@@ -69,8 +56,8 @@ function render_resource_form() {
 			$('#summary_license').attr('readonly', 'readonly');
 		}
 
-		$('#resourceForm').foundation() // Enables tool tips
-
+		 // Enable tool tips
+		$('#resourceForm').foundation()
 	});
 
 }

@@ -453,7 +453,7 @@ function init_summary_tab() {
 	$('#resourceForm').on('click','#summary_delete', function() {
 		// API DELETE RESOURCE.
 		var id = parseInt($('#resourceForm input[name="id"]').val())
-		if (id && id != 5) {
+		if (id && id != RESOURCE_TEMPLATE_ID) {
 			api.delete_resource(id)
 				.then(function(){
 					api.get_resources()

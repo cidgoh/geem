@@ -316,17 +316,20 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
     def post(self, request, pk=None, format=None):
         """
+        Updates package metadata - title, description, version, etc. - per
+        user request.  Also may include new dictionary key values in package
+        contents (@context, specifications, and metadata) which will be MERGED
+        with existing keys on server side if present.
+        We want to ensure that package owner field can never be tampered with
+        by direct API hacks so owner is copied from existing package.
+
         """
         # IF POST doesn't include a field is it dropped from package?    
         
         # Retrieve existing package for given pk id.
         package = get_object_or_404(Package, pk=pk) 
-
-        #if request.method == 'POST':
-
-        #package.contents['metadata']['prefix'] = "TEST"
+        existing_owner = package.owner
         existing_contents = package.contents # A somewhat recursive dictionary
-        #print ("existing : ", existing_contents)
 
         form = PackageForm(request.POST or None, instance=package)
         if form.is_valid():
@@ -336,11 +339,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             # contents.
             new_contents = json.loads(request.POST['contents'])
             self._merge(package.contents, new_contents)
-            #print ("now: ", package.contents )
-
-            #print ("post :", package.contents)
-            #package.owner = self.request.user
-
+            package.owner = existing_owner
             package.save()
 
             return Response(ResourceDetailSerializer(package, context={'request': request}).data)
@@ -351,18 +350,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_Success
         200 OK
         201 Created
-
-        serializer = ResourceDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         """
-
-        # So we don't get back a giant file ...
-        #response_obj = {'response': 'success'}
-        #return Response(response_obj, status=status.HTTP_200_OK)
-
 
     def partial_update(self, request, pk=None):
         pass

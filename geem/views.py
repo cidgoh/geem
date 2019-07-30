@@ -336,7 +336,10 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             package = form.save(commit=False)
             # Merge POST json ".contents" field into existing package.contents
             # Or else POST.contents field will replace entire existing package
-            # contents.
+            # contents.  
+
+            # ISSUE: How to DELETE top-level specification items???
+
             new_contents = json.loads(request.POST['contents'])
             self._merge(package.contents, new_contents)
             package.owner = existing_owner

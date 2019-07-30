@@ -453,15 +453,17 @@ function init_summary_tab() {
 	$('#resourceForm').on('click','#summary_delete', function() {
 		// API DELETE RESOURCE.
 		var id = parseInt($('#resourceForm input[name="id"]').val())
-		if (id && id != RESOURCE_TEMPLATE_ID) {
+		var message = "Confirm deletion of this package?"
+		if (id && id != RESOURCE_TEMPLATE_ID && confirm(message) ) {
 			api.delete_resource(id)
 				.then(function(){
 					api.get_resources()
 					.then(init_resource_select)
 				})
 	
-			alert("deleted " + id)
+			console.log("Deleted " + id)
 		}		
+		return false
 	})
 
 	$('#resourceForm').on('click','#summary_download', function() {

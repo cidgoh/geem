@@ -38,22 +38,36 @@ function render_resource_form() {
 			'summary_version', 'summary_description', 'summary_file_base_name',
 			'summary_license', 'summary_version_iri', 'summary_date',
 			'summary_prefix'];
-		if (get_owner_status(resource)) {
+		const creating_new_package = resource.id.toString() === RESOURCE_TEMPLATE_ID;
+		if (get_owner_status(resource) || creating_new_package) {
 			for (const owned_field of owned_fields) {
 				$(`#${owned_field}`).prop('disabled', false);
 				$(`#${owned_field}`).attr('readonly', false);
 			}
+		}
+
+		// Additional logic for package creation
+		if (creating_new_package) {
+			$('#summary_name').attr('value', '');
+			$('#summary_description').empty();
+			$('#summary_file_base_name').attr('value', '');
+			$('#summary_public option[value="false"]').prop('selected', 'selected')
+		}
+
+		// Button logic
+
+		// User is creating package
+		if (creating_new_package) {
+			$('#summary_delete').hide();
+			$('#summary_download').hide();
+			$('#summary_update').hide();
+			$('#summary_copy').hide();
+		} else if (get_owner_status(resource)) {
+			$('#summary_create').hide();
 		} else {
 			$('#summary_delete').hide();
 			$('#summary_update').hide();
-			$('#summary_create').hide()
-		}
-
-		// User creating new package
-		if (resource.id.toString() === RESOURCE_TEMPLATE_ID) {
-			$('#summary_name').removeAttr('readonly');
-			$('#summary_name').attr('value', '');
-			$('#summary_license').attr('readonly', 'readonly');
+			$('#summary_create').hide();
 		}
 
 		 // Enable tool tips
@@ -201,7 +215,10 @@ function init_resource_select_item(resources, html, header, ontology=null, publi
 	if (ontology != null)
 		resource_list = resource_list.filter(resource => resource.ontology == ontology)
 	if (public != null)
-		resource_list = resource_list.filter(resource => resource.public == public)
+		// Filter all packages except New Package Template
+		resource_list = resource_list.filter(resource =>
+			resource.public === public && resource.id !== 1
+		);
 	if (draft == true)
 		resource_list = resource_list.filter(resource => resource.curation == 'draft')
 

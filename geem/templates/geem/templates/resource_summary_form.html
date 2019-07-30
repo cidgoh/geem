@@ -56,7 +56,7 @@
       <label for="middle-label" class="text-right middle">desc.</label>
     </div>
     <div class="large-10 columns summary_description">
-      <textarea name="description" id="summary_description" rows="3">@description</textarea>
+      <textarea name="description" id="summary_description" rows="3" required>@description</textarea>
     </div>
   </div>
 
@@ -72,7 +72,7 @@
       <label for="middle-label" class="text-right middle">file base name</label>
     </div>
     <div class="large-4 columns summary_file_base_name">
-      <input type="text" name="file_base_name" id="summary_file_base_name" value="@file_base_name" pattern="[A-Za-z0-9_-]+">
+      <input type="text" name="file_base_name" id="summary_file_base_name" value="@file_base_name" pattern="[A-Za-z0-9_-]+" required>
     </div>
     <div class="large-1 columns">
       <span data-tooltip class="right" title="FUTURE: This resource can be accessed using a data/[user id]/[base file name].[version].json URL. Provide the alphanumeric base file name here (it may include dash or underscore).">

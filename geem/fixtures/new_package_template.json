@@ -9,8 +9,8 @@
         "file_base_name": "package",
         "version": "",
         "ontology": false,
-        "public": false,
-        "curation": "draft",
+        "public": true,
+        "curation": "release",
         "name": "New Package Template",
         "description": "New resource description",
         "contents": {

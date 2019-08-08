@@ -34,7 +34,7 @@ def get_specifications(package, term_id=None):
 def delete_specifications(package, term_id=None):
     """Delete one or all specifications from ``package``.
 
-    :param package: queried package to get values from
+    :param package: queried package to delete values from
     :type package: django.db.models.query.QuerySet
     :param term_id: ID of term inside package specifications
     :type term_id: str
@@ -66,7 +66,7 @@ def delete_specifications(package, term_id=None):
 def create_specifications(package, term):
     """Add ``term`` to specifications of ``package``.
 
-    :param package: queried package to get values from
+    :param package: queried package to add values to
     :type package: django.db.models.query.QuerySet
     :param term: term to add to specifications
     :type term: dict
@@ -157,7 +157,7 @@ def delete_context(package, prefix=None):
 def create_context(package, prefix, iri):
     """Add ``prefix``-``iri`` pair to @context of ``package``.
 
-    :param package: queried package to delete values from
+    :param package: queried package to add values to
     :type package: django.db.models.query.QuerySet
     :param prefix: key added to ``package`` @context
     :type prefix: str

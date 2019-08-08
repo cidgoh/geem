@@ -189,6 +189,31 @@ def create_context(package, prefix, iri):
                        " id=%s" % (prefix, iri, package_id))
 
 
+def add_path_status_to_package(package, path, status):
+    """Add ``path``-``status`` pair to customization of ``package``.
+
+    :param package: queried package to add path and status to
+    :type package: django.db.models.query.QuerySet
+    :param path: key added to ``package`` customization
+    :type path: str
+    :param status: value added to ``package`` customization
+    :type status: str
+    :raises ValueError: Unable to add path and status somehow
+    """
+    if package.count() != 1:
+        raise ValueError('Please query an appropriate package')
+
+    package_id = package.values_list('id', flat=True)[0]
+
+    # Connect to the default database service
+    with connection.cursor() as cursor:
+        # See https://stackoverflow.com/a/23500670 for details on
+        # creation query used below.
+        cursor.execute("update geem_package set contents=(jsonb_set("
+                       "contents, '{customization, %s}', jsonb '\"%s\"')) "
+                       "where id=%s" % (path, status, package_id))
+
+
 def add_cart_item_to_package(cart_item_id, cart_item_package, target_package):
     """Add cart item and its children to package.
 

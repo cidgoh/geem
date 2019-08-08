@@ -108,7 +108,8 @@ function get_form_data(domId) {
 		'contents': {
 			'@context': 		{},
 			'specifications': 	{},
-			'metadata': 		{}
+			'metadata': 		{},
+			'customization':	{}
 		}
 	}
 

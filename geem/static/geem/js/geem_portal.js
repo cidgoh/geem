@@ -112,6 +112,27 @@ function render_entity_form() {
 
 }
 
+
+/**
+ * De-render form view tab,
+ */
+function derender_entity_form() {
+	$('#mainForm').empty();
+	$('#formControls').empty();
+	$('#specificationSourceInfoBox').show();
+}
+
+
+/**
+ * Reset specifications tab.
+ */
+function reset_specification_tab() {
+	$('#specificationType')[0].selectedIndex = 0;
+	$('#dataSpecification').empty().hide();
+	$("#helpDataSpecification").show();
+}
+
+
 function portal_entity_form_callback(form) {
 	/* This is executed after a new form is rendered.
 	*/
@@ -120,12 +141,7 @@ function portal_entity_form_callback(form) {
 	render_entity_form_cart_icons(form) 
 
 	$('#specificationSourceInfoBox').hide()
-	// Clear out specification tab. Deselect specification menu.
-	$('#specificationType')[0].selectedIndex = 0
-	$('#dataSpecification').empty()
-	$('#specification-tabs li.is-active')
-		.removeClass('is-active')
-		.find('a').removeAttr('aria-selected'); // how else?
+	reset_specification_tab();
 
 	// Provide content area banner that shows selected entity
 	const entity = get_form_specification_component(form.entityId)

@@ -245,7 +245,8 @@ class OntoHelper(object):
 			prefix = path.rsplit('/',1)[1]
 
 			# At least 2 characters in @context prefix required to avoid
-			# exception to rule below, as no namespace begins with number
+			# exception to rule below where a version date exists in file.
+			# No namespace begins with number
 			# and following is a URI but not an ontology term reference.
 			#	<owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/obi/2018-05-23/obi.owl"/>
 

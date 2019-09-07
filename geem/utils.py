@@ -114,6 +114,8 @@ def get_context(package, prefix=None):
     else:
         query = 'contents__@context__' + prefix
 
+    #print ("query", query)
+    #print ("package.values_list", package.values_list('contents__metadata', flat=True)[0])
     ret = package.values_list(query, flat=True)[0]
 
     if prefix is not None and ret is None:

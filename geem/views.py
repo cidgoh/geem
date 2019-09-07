@@ -295,6 +295,13 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 utils.add_cart_item_to_package(cart_item_id, cart_item_package,
                                                target_package))
 
+            # Add path and status of top-level cart item if it
+            # succeeded in its addition to the target package.
+            if response_data[cart_item_id]['status'] == 200:
+                utils.add_path_status_to_package(
+                    target_package, cart_item['path'], cart_item['status']
+                )
+
         return Response(response_data, status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):

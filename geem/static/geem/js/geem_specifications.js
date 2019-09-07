@@ -31,7 +31,7 @@ function get_data_specification(report_type) {
 			entityId = path[0] // last item: path.length-1
 		}
 
-		$("#helpDataSpecification").remove()
+		$("#helpDataSpecification").hide();
 
 		switch (report_type) {
 

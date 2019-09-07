@@ -51,7 +51,8 @@ function render_resource_form() {
 			$('#summary_name').attr('value', '');
 			$('#summary_description').empty();
 			$('#summary_file_base_name').attr('value', '');
-			$('#summary_public option[value="false"]').prop('selected', 'selected')
+			$('#summary_public option[value="false"]').prop('selected', 'selected');
+			$('#summary_curation option[value="draft"]').prop('selected', 'selected')
 		}
 
 		// Button logic
@@ -108,7 +109,8 @@ function get_form_data(domId) {
 		'contents': {
 			'@context': 		{},
 			'specifications': 	{},
-			'metadata': 		{}
+			'metadata': 		{},
+			'customization':	{}
 		}
 	}
 

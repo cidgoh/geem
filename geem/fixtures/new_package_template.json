@@ -24,7 +24,8 @@
                 "versionIRI": "api/resources/@file_base_name.@version.json",
                 "description": ""
             },
-            "specifications": {}
+            "specifications": {},
+            "customization": {}
         }
     }
 }

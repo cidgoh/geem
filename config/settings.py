@@ -25,7 +25,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 25242880 # ~25Mb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition

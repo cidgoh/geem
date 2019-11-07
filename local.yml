@@ -14,6 +14,7 @@ services:
     volumes:
       - .:/code
     env_file:
+      - .envs/.local/.web
       - .envs/.local/.db
     ports:
       - '8000:8000'

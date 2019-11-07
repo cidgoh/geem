@@ -13,6 +13,8 @@ services:
       - db
     volumes:
       - .:/code
+    env_file:
+      - .envs/.local/.db
     ports:
       - '8000:8000'
     command: /start
@@ -21,5 +23,7 @@ services:
     image: postgres:10.1
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .envs/.local/.db
     ports:
       - '5432:5432'

@@ -6,4 +6,4 @@ from .base import *
 # ----------------------------------------------------------------------
 DEBUG = True
 ALLOWED_HOSTS = ['*']
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY = 'local_secret_key'

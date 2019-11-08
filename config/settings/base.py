@@ -133,4 +133,4 @@ SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 # STATIC
 # ----------------------------------------------------------------------
-STATIC_URL = '/static/'
+STATIC_URL = '/geem/static/'

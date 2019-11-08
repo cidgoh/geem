@@ -2,7 +2,6 @@ FROM python:3.6
 
 ENV PYTHONUNBUFFERED 1
 
-
 COPY ./requirements /requirements
 RUN pip install -r requirements/local.txt
 # TODO: may not need this anymore

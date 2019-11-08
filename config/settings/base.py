@@ -2,7 +2,6 @@
 
 import os
 
-from config.settings_secret import *
 from definitions import BASE_DIR
 
 # GENERAL
@@ -116,6 +115,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     )
 }
+SOCIAL_AUTH_GITHUB_KEY = os.environ['SOCIAL_AUTH_GITHUB_KEY']
+SOCIAL_AUTH_GITHUB_SECRET = os.environ['SOCIAL_AUTH_GITHUB_SECRET']
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ['SOCIAL_AUTH_GOOGLE_OAUTH2_KEY']
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ['SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET']
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 # STATIC

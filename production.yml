@@ -17,6 +17,7 @@ services:
     env_file:
       - ./.envs/.production/.web
       - ./.envs/.production/.db
+      - ./.envs/.production/.auth
     command: /start
     expose:
       - '5050'
@@ -41,6 +42,6 @@ services:
     volumes:
       - production_postgres_data:/var/lib/postgresql/data
     env_file:
-      - .envs/.production/.db
+      - ./.envs/.production/.db
     ports:
       - '6432:5432'

@@ -15,19 +15,6 @@ USE_TZ = True
 # ~25Mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 25242880
 
-# DATABASES
-# ----------------------------------------------------------------------
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ['POSTGRES_HOST'],
-        'PORT': os.environ['POSTGRES_PORT'],
-        'NAME': os.environ['POSTGRES_DB'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-    }
-}
-
 # URLS
 # ----------------------------------------------------------------------
 ROOT_URLCONF = 'config.urls'

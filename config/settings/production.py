@@ -8,6 +8,19 @@ from definitions import BASE_DIR
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOST']]
 
+# DATABASES
+# ----------------------------------------------------------------------
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'db',
+        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+    }
+}
+
 # STATIC
 # ----------------------------------------------------------------------
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

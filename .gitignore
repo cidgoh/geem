@@ -112,3 +112,5 @@ scripts/test/
 # JetBrains
 .idea/
 
+# nginx
+compose/production/nginx/nginx.conf

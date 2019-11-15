@@ -20,6 +20,6 @@ http {
       alias /code/geem/static/;
     }
 
-    listen 8888;
+    listen 80;
   }
 }

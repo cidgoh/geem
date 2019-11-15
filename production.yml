@@ -32,7 +32,7 @@ services:
     volumes:
       - production_static_data:/code/geem/static
     ports:
-      - '8888:8888'
+      - '8888:80'
 
   db:
     build:

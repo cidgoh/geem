@@ -6,7 +6,10 @@ from definitions import BASE_DIR
 # GENERAL
 # ----------------------------------------------------------------------
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOST']]
+if os.environ['DJANGO_ALLOWED_HOST']:
+    ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOST']]
+else:
+    ALLOWED_HOSTS = ['localhost']
 
 # DATABASES
 # ----------------------------------------------------------------------

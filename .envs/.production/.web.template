@@ -3,4 +3,6 @@ DJANGO_SETTINGS_MODULE=config.settings.production
 # Fill these values out yourself, and uncomment
 # DJANGO_SECRET_KEY=
 # DJANGO_ADMIN_URL=
-# DJANGO_ALLOWED_HOST=
+
+# This can be left blank, if you are hosting on ``localhost``
+DJANGO_ALLOWED_HOST=

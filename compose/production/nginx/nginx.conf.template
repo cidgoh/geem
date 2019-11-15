@@ -13,7 +13,7 @@ http {
       proxy_pass http://web:5050/geem/;
       proxy_redirect http://web:5050/geem/ http://$host/geem/;
       proxy_set_header SCRIPT_NAME /geem;
-      proxy_set_header Host $host:$server_port;
+      proxy_set_header Host $http_host;
     }
 
     location /geem/static/ {

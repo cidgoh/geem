@@ -1,4 +1,4 @@
-## The Genomic Epidemiology Entity Mart
+# The Genomic Epidemiology Entity Mart
 
 The Genomic Epidemiology Entity Mart (GEEM) is a portal for examining and 
 downloading ontology-driven specifications for standardized data components. 
@@ -9,7 +9,7 @@ without the need to be trained in ontology curation or querying. Ontology-
 driven standards benefit from features of open-source published OWL 2.0 
 ontologies such as globally unique identifiers for terms, multilingual label 
 and definition functionality, and logical validation and reasoning over 
-controlled vocabularies. Such a specification can be designed to satisfy the 
+controlled vocabularies. Such a specificatio#n can be designed to satisfy the 
 requirements of an environmental pH measurement, or a person's age, or a more 
 structured entity like a contact address, or a genomic sequence repository 
 submission for example. 
@@ -21,131 +21,114 @@ submission for example.
 
 ___________
 
-## Creating a Development Server
+## Deployment
 
-### Using Docker
-
-1. Build the GEEM docker image:
+Clone this repository.
 
 ```bash
-$ docker build .
+$ git clone https://github.com/GenEpiO/geem.git
 ```
 
-2. Set up the database:
+### Setting up social authentication
+
+To run a local server, create the file `.envs/.local/.auth`. To run a 
+production server, create the file `.envs/.production/.auth`. Neither of these 
+files are tracked by Github.
+
+Templates of both files are found at `.envs/.local/.auth.template` and 
+`.envs/.production/.auth.template`.
+
+#### SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET
+
+[Register an Oauth2 application on Github.][1] If you are running a local 
+server, enter `http://localhost:8000/index.html` as Homepage URL, and 
+`http://localhost:8000/complete/github/` as Authorization callback URL. If 
+you are running a production server, enter 
+`http://localhost:8888/geem/index.html` as Homepage URL, and 
+`http://localhost:8888/geem/complete/github/` as Authorization callback URL.
+
+Once the application is created, enter the Client ID and Client Secret into 
+your `.auth` file as `SOCIAL_AUTH_GITHUB_KEY` and `SOCIAL_AUTH_GITHUB_SECRET` 
+respectively.
+
+#### SOCIAL_AUTH_GOOGLE_OAUTH2_KEY and SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
+
+[Register an Oauth2 application on the Google Developers Console.][2] Select 
+_Web Application_ as the Application type. If you are running a local server, 
+enter `http://localhost:8000/complete/google-oauth2/` as a value for Authorized 
+redirect URIs. If you are running a production server, enter 
+`http://localhost:8888/geem/complete/google-oauth2/`.
+
+Once the application is created, enter the Client ID and Client Secret into 
+your `.auth` file as `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and 
+`SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET` respectively.
+
+### Running a local server
+
+Build the local docker image.
 
 ```bash
-$ docker-compose run web python /code/manage.py makemigrations --noinput
-$ docker-compose run web python /code/manage.py migrate --noinput
+$ docker-compose --file local.yml --build
 ```
 
-3. Create your admin user:
+Set up the database.
 
 ```bash
-$ docker-compose run web python /code/manage.py createsuperuser
+$ docker-compose --file local.yml run web python manage.py makemigrations
+$ docker-compose --file local.yml run web python manage.py migrate
 ```
 
-4. Load initial data:
+Load initial data.
 
 ```bash
-$ docker-compose run web python /code/manage.py loaddata shared_packages
+$ docker-compose --file local.yml run web python manage.py \
+    loaddata sys_admin new_package_template damion_packages
 ```
 
-5. Run the development server:
+Run the local server.
 
 ```bash
-$ docker-compose up
+$ docker-compose --file local.yml up --detach
 ```
 
-### Without Docker
+View at [http://localhost:8000/portal.html](http://localhost:8000/portal.html).
 
-1. Create a postgresql database and edit `config/settings.py` with connection 
-   details.
 
-2. Create a conda environment:
+### Running a production server
+
+Create the files `.envs/.production/.web` and `.envs/.production/.db`, using 
+`.envs/.production/.web.template` and `.envs/.production.db` as reference. 
+We recommend using unique and random keys for the `DJANGO_SECRET_KEY`, 
+`DJANGO_ADMIN_URL`, `POSTGRES_USER` and `POSTGRES_PASSWORD` values.
+
+Build the production docker image.
 
 ```bash
-$ conda create -n geem python=3.6
-$ source activate geem
+$ docker-compose --file production.yml --build
 ```
 
-3. Install dependencies:
+Set up the database.
 
 ```bash
-$ pip install -r requirements.txt
+$ docker-compose --file production.yml run web python manage.py makemigrations
+$ docker-compose --file production.yml run web python manage.py migrate
 ```
 
-4. Prepare development database:
+Load initial data.
 
 ```bash
-$ python manage.py migrate
+$ docker-compose --file production.yml run web python manage.py \
+    loaddata sys_admin new_package_template damion_packages
 ```
 
-5. Create your admin user. (Enter details when prompted)
+Run the production server.
 
 ```bash
-$ python manage.py createsuperuser
+$ docker-compose --file production.yml up --detach
 ```
 
-6. Load initial data:
+View at [http://localhost:8888/geem/portal.html][3].
 
-```bash
-$ python manage.py loaddata shared_packages
-```
-
-7. Run the development server:
-
-```
-$ python manage.py runserver
-```
-
-### Setting up Social Authentication
-
-1. Create a file `config/settings_secret.py` to contain our application 
-   secrets. This file is included in the project `.gitignore` file and should 
-   not be checked into version control.
-
-```
-SECRET_KEY = ''
-SOCIAL_AUTH_GITHUB_KEY = ''
-SOCIAL_AUTH_GITHUB_SECRET = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
-```
-
-2. A Django `SECRET_KEY` can be generated with the following command:
-
-```
-python manage.py shell -c 'from django.core.management import utils; \
-    print(utils.get_random_secret_key())'
-```
-
-3. Register an Oauth2 application on Github: 
-   https://github.com/settings/applications/new Enter 
-   `http://localhost:8000/complete/github/` as the Authorization callback URL. 
-   Once the application is created, enter the Client ID and Client Secret into 
-   the `settings_secret.py` file as `SOCIAL_AUTH_GITHUB_KEY` and 
-   `SOCIAL_AUTH_GITHUB_SECRET`, respectively.
-
-4. Create a new project on the Google Developers Console: 
-   https://console.developers.google.com/ . In the Library tab, find and 
-   activate the Google+ API 
-   (https://console.developers.google.com/apis/library/plus.googleapis.com). 
-   Create OAuth client ID Credentials. Select 'Web Application' as the 
-   appliction type. Enter `http://localhost:8000/complete/google-oauth2/` as 
-   the 'Authorized redirect URI'. Once the application is created, enter the 
-   Client ID and Client Secret into the `settings_secret.py` file as 
-   `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and `SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET`, 
-   respectively.
-
-## Viewing the Application
-
- - View on a web browser at: 
-   [http://localhost:8000/index.html](http://localhost:8000/index.html)
-
- - The Django admin interface can be viewed at: 
-   [http://localhost:8000/admin/](http://localhost:8000/admin/). 
-   Login with the admin credentials used during the `createsuperuser` step.
-
- - The browsable GEEM API can be viewed at: http://localhost:8000/api/
-
-
+[1]: https://github.com/settings/applications/new
+[2]: https://console.developers.google.com/apis/credentials/oauthclient
+[3]: http://localhost:8888/geem/portal.html

@@ -88,7 +88,7 @@ $ docker-compose --file local.yml run web python manage.py \
 Run the local server.
 
 ```bash
-$ docker-compose --file local.yml up --detach
+$ docker-compose --file local.yml up
 ```
 
 View at [http://localhost:8000/portal.html](http://localhost:8000/portal.html).
@@ -124,10 +124,16 @@ $ docker-compose --file production.yml run web python manage.py \
 Run the production server.
 
 ```bash
-$ docker-compose --file production.yml up --detach
+$ docker-compose --file production.yml up
 ```
 
 View at [http://localhost:8888/geem/portal.html][3].
+
+### Running a production server on another domain
+
+If you do not want to run a production server on `localhost`, specify 
+your host under `DJANGO_ALLOWED_HOST` at `.envs/.production/.web`, and 
+`server_name` at `compose/production/nginx/nginx.conf`.
 
 [1]: https://github.com/settings/applications/new
 [2]: https://console.developers.google.com/apis/credentials/oauthclient

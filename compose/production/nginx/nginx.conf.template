@@ -1,0 +1,25 @@
+events {
+
+}
+
+http {
+  include mime.types;
+  sendfile on;
+  server {
+    # Fill out value and uncomment
+    # server_name ###;
+
+    location /geem/ {
+      proxy_pass http://web:5050/geem/;
+      proxy_redirect http://web:5050/geem/ http://$host/geem/;
+      proxy_set_header SCRIPT_NAME /geem;
+      proxy_set_header Host $host:$server_port;
+    }
+
+    location /geem/static/ {
+      alias /code/geem/static/;
+    }
+
+    listen 80;
+  }
+}

@@ -82,6 +82,7 @@ celerybeat-schedule
 
 # dotenv
 .env
+.envs/
 
 # virtualenv
 .venv
@@ -111,3 +112,5 @@ scripts/test/
 # JetBrains
 .idea/
 
+# nginx
+compose/production/nginx/nginx.conf

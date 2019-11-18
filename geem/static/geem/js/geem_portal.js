@@ -609,7 +609,11 @@ function init_specification_tab() {
 
 function init_validation_tab() {
 	$(document).ready(function () {
-		create_grid();
+		const grid_options = get_grid_options();
+		create_grid(grid_options);
+		$('#validation_download').click(function () {
+			grid_options.api.exportDataAsCsv()
+		})
 	});
 }
 

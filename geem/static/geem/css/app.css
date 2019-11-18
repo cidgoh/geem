@@ -314,7 +314,7 @@ span.postfix.units label {padding-left:5px;}
 form .row .row {margin:0 0 5px 0 !important;}
 
 /*AgGrid*/
-#validationGrid {
+#validation_grid {
 	height: 100%;
 	width: 100%;
 }

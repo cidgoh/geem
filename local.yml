@@ -1,0 +1,30 @@
+version: '3'
+
+volumes:
+  local_postgres_data: {}
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/local/web/Dockerfile
+    image: geem_local_web
+    depends_on:
+      - db
+    volumes:
+      - .:/code
+    env_file:
+      - ./.envs/.local/.auth
+    ports:
+      - '8000:8000'
+    command: /start
+
+  db:
+    build:
+      context: .
+      dockerfile: ./compose/local/db/Dockerfile
+    image: geem_local_db
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'

@@ -1,0 +1,7 @@
+django==2.2.4
+sphinx==1.7.*
+django-oauth-toolkit==1.1.*
+psycopg2-binary==2.8.*
+djangorestframework==3.8.*
+django-rest-framework-social-oauth2==1.1.*
+social-auth-app-django==2.1.*

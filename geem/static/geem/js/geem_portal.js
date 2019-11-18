@@ -608,7 +608,9 @@ function init_specification_tab() {
 }
 
 function init_validation_tab() {
-
+	$(document).ready(function () {
+		create_grid();
+	});
 }
 
 /******************************** UTILITY FUNCTIONS *************************/

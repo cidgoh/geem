@@ -312,3 +312,9 @@ span.postfix.units label {padding-left:5px;}
 
 /*Overriding Foundation */
 form .row .row {margin:0 0 5px 0 !important;}
+
+/*AgGrid*/
+#validationGrid {
+	height: 100%;
+	width: 100%;
+}

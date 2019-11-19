@@ -315,6 +315,9 @@ form .row .row {margin:0 0 5px 0 !important;}
 
 /*AgGrid*/
 #validation_grid {
-	height: 100%;
+	height: 20em;
 	width: 100%;
+}
+label[for='validation_upload'] {
+	text-transform: none;
 }

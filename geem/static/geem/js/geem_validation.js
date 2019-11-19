@@ -22,7 +22,6 @@ function get_grid_options() {
 	return {
 		columnDefs: column_defs,
 		rowData: row_data,
-		domLayout: 'autoHeight',
 	};
 }
 

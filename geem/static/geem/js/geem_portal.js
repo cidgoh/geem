@@ -614,6 +614,10 @@ function init_validation_tab() {
 		$('#validation_download').click(function () {
 			grid_options.api.exportDataAsCsv()
 		})
+		$('#validation_upload').change(function () {
+			const path = $('#validation_upload').val();
+			// TODO: process file somehow
+		})
 	});
 }
 

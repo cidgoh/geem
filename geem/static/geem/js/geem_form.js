@@ -1206,8 +1206,8 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			entityId = document.location.hash.substr(1).split('/',1)[0]
 
 
-	if (!entityId) {
-		derender_entity_form();
+	if (!entityId && top.derender_entity_form) {
+		derender_entity_form(); // Only for geem_portal.js
 		reset_specification_tab();
 		top.focusEntityId = null;
 		$('a[href$="panelContent"]').click();

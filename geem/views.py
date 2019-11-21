@@ -39,7 +39,7 @@ def foundation55(request):
     return render(request, 'geem/foundation.5.5.html', context={})
 
 def favicon(request):
-    return render(request, 'geem/favicon.ico', context={})
+    return render(request, 'geem/static/geem/images/favicon.ico', context={})
 
 def login(request):
     context = {}

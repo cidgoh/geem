@@ -1,0 +1,47 @@
+version: '3'
+
+volumes:
+  production_postgres_data: {}
+  production_static_data: {}
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/production/web/Dockerfile
+    image: geem_production_web
+    depends_on:
+      - db
+    volumes:
+      - production_static_data:/code/geem/static
+    env_file:
+      - ./.envs/.production/.web
+      - ./.envs/.production/.db
+      - ./.envs/.production/.auth
+    command: /start
+    expose:
+      - '5050'
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./compose/production/nginx/Dockerfile
+    image: geem_production_nginx
+    depends_on:
+      - web
+    volumes:
+      - production_static_data:/code/geem/static
+    ports:
+      - '8888:80'
+
+  db:
+    build:
+      context: .
+      dockerfile: ./compose/production/db/Dockerfile
+    image: geem_production_db
+    volumes:
+      - production_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.production/.db
+    ports:
+      - '6432:5432'

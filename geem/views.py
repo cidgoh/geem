@@ -3,7 +3,7 @@ import json
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404, redirect
@@ -26,12 +26,7 @@ def index(request):
     return render(request, 'geem/index.html', context={})
 
 def portal(request):
-    focus = 'panelContent'
-    if request.session.get('focus_validator'):
-        focus = 'panelValidation'
-        del request.session['focus_validator']
-
-    return render(request, 'geem/portal.html', context={'focus': focus})
+    return render(request, 'geem/portal.html', context={})
 
 def form(request):
     return render(request, 'geem/form.html', context={})
@@ -59,10 +54,12 @@ def resource_summary_form(request):
     return render(request, 'geem/templates/resource_summary_form.html', context={})
 
 
-def render_uploaded_validation_data(request):
+@api_view(['POST'])
+def get_uploaded_validation_data(request):
     """TODO:..."""
-    request.session['focus_validator'] = True
-    return redirect('portal')
+    uploaded_file = request.FILES['file']
+    uploaded_file_str = uploaded_file.read()
+    return Response(uploaded_file_str, status=status.HTTP_200_OK)
 
 
 class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin): # mixins.UpdateModelMixin, 

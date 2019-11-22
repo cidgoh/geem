@@ -148,16 +148,16 @@
         <div id="formEntityLabel"></div>
 
         <ul id="content-tabs" class="tabs" data-tab>
-          <li class="tab-title small {% if focus == 'panelContent' %}active{% endif %}"><a href="#panelContent">Form View</a></li>
+          <li class="tab-title small active"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tab-title small {% if focus == 'panelValidation' %}active{% endif %}"><a href="#panelValidation">Validator</a></li>
+          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
         </ul>
 
         <div id="tabsContent" class="tabs-content">
 
           <!-- ************************* FORM VIEW ******************* -->
-          <div class="content {% if focus == 'panelContent' %}active{% endif %}" id="panelContent">
+          <div class="content active" id="panelContent">
 
             <form id="mainForm" data-abide ></form> <!-- ="ajax" ; novalidate prevents HTML5 validation -->
 
@@ -246,15 +246,12 @@
           </div>
 
           <!-- ******************* VALIDATION **************** -->
-          <div class="content {% if focus == 'panelValidation' %}active{% endif %}" id="panelValidation">
+          <div class="content" id="panelValidation">
 
             <div class="row">
               <div class="small-6 columns">
-                <form id="validation_form" action="/render_uploaded_validation_data" method="post">
-                  {% csrf_token %}
-                  <label for="validation_upload" class="button">Upload (.csv)</label>
-                  <input type="file" id="validation_upload" class="show-for-sr">
-                </form>
+                <label for="validation_upload" class="button">Upload (.csv)</label>
+                <input type="file" id="validation_upload" class="show-for-sr">
               </div>
               <div class="small-6 columns">
                 <button id="validation_download">Download (.csv)</button>

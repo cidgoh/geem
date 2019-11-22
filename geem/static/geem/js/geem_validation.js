@@ -34,3 +34,18 @@ function create_grid(grid_options) {
 	const grid_div = document.querySelector('#validation_grid');
 	new agGrid.Grid(grid_div, grid_options);
 }
+
+
+/**
+ * Update the grid with new rows
+ * @param {Object }grid_options - Grid options
+ * @param {str} data - ``csv`` string representation of new grid rows
+ */
+function update_grid(grid_options, data) {
+	let new_rows = data.split('\n');
+	new_rows = new_rows.map(function (val) {
+		const row_values = val.split(',');
+		return {test_column_one: row_values[0], test_column_two: row_values[1]}
+	});
+	grid_options.api.setRowData(new_rows)
+}

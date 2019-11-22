@@ -4,18 +4,12 @@
 
 
 /**
- * Get grid options for validator tab grid.
+ * Create grid options object for validator tab grid.
  * @returns {Object} Grid options
  */
 function get_grid_options() {
-	// const form_specs
-	const column_defs = [
-		{headerName: 'Test Column One', field: 'test_column_one'},
-		{headerName: 'Test Column Two', field: 'test_column_two'},
-	];
-
 	return {
-		columnDefs: column_defs,
+		columnDefs: [],
 		rowData: [],
 	};
 }
@@ -37,10 +31,28 @@ function create_grid(grid_options) {
  * @param {string} data - ``csv`` string representation of new grid rows
  */
 function update_grid(grid_options, data) {
-	let new_rows = data.split('\n');
-	new_rows = new_rows.map(function (val) {
-		const row_values = val.split(',');
-		return {test_column_one: row_values[0], test_column_two: row_values[1]}
+	let data_matrix = data.split('\n');
+	data_matrix = data_matrix.map(function(csv_row) {
+		return csv_row.split(',')
 	});
-	grid_options.api.setRowData(new_rows)
+
+	const data_headers = data_matrix.shift();
+	const column_defs = data_headers.map(function (col) {
+		return {headerName: col, field: col}
+	});
+	grid_options.api.setColumnDefs(column_defs);
+
+	const row_data = data_matrix.map(function (row) {
+		const ret = {};
+
+		// The minimum function is used to prevent errors due
+		// to incomplete or overflowing rows.
+		for (let i = 0; i < Math.min(column_defs.length, row.length); i++) {
+			const col = column_defs[i]['field'];
+			ret[col] = row[i]
+		}
+
+		return ret
+	});
+	grid_options.api.setRowData(row_data)
 }

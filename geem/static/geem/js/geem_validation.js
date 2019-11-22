@@ -6,7 +6,6 @@
 /**
  * Get grid options for validator tab grid.
  * @returns {Object} Grid options
- * TODO: Instead of using mock data, retrieve data from cart
  */
 function get_grid_options() {
 	// const form_specs
@@ -35,7 +34,7 @@ function create_grid(grid_options) {
 /**
  * Update the grid with new rows
  * @param {Object }grid_options - Grid options
- * @param {str} data - ``csv`` string representation of new grid rows
+ * @param {string} data - ``csv`` string representation of new grid rows
  */
 function update_grid(grid_options, data) {
 	let new_rows = data.split('\n');

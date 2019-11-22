@@ -626,6 +626,9 @@ function init_validation_tab() {
 				contentType: false,
 				success: function (data) {
 					update_grid(grid_options, data)
+				},
+				error: function (_, text_status, error_thrown) {
+					alert(text_status + ': ' + error_thrown)
 				}
 			})
 		})

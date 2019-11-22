@@ -148,16 +148,16 @@
         <div id="formEntityLabel"></div>
 
         <ul id="content-tabs" class="tabs" data-tab>
-          <li class="tab-title small"><a href="#panelContent">Form View</a></li>
+          <li class="tab-title small {% if focus == 'panelContent' %}active{% endif %}"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
+          <li class="tab-title small {% if focus == 'panelValidation' %}active{% endif %}"><a href="#panelValidation">Validator</a></li>
         </ul>
 
-        <div id="tabsContent" class="tab-content" aria-hidden="true">
+        <div id="tabsContent" class="tabs-content">
 
           <!-- ************************* FORM VIEW ******************* -->
-          <div class="content" id="panelContent" aria-hidden="true">
+          <div class="content {% if focus == 'panelContent' %}active{% endif %}" id="panelContent">
 
             <form id="mainForm" data-abide ></form> <!-- ="ajax" ; novalidate prevents HTML5 validation -->
 
@@ -198,7 +198,7 @@
           </div><!-- end panel content -->
 
           <!-- ******************* DATA SPECIFICATION **************** -->
-          <div class="content" id="panelDataSpecification" aria-hidden="true">
+          <div class="content" id="panelDataSpecification">
 
             <div class="row collapse">
               <div class="large-9 columns">
@@ -246,10 +246,12 @@
           </div>
 
           <!-- ******************* VALIDATION **************** -->
-          <div class="content" id="panelValidation" aria-hidden="true">
+          <div class="content {% if focus == 'panelValidation' %}active{% endif %}" id="panelValidation">
 
             <div class="row">
               <div class="small-6 columns">
+                <form id="validation_form" action="/render_uploaded_validation_data" method="post">
+                  {% csrf_token %}
                   <label for="validation_upload" class="button">Upload (.csv)</label>
                   <input type="file" id="validation_upload" class="show-for-sr">
                 </form>
@@ -265,7 +267,7 @@
 
 
         <!-- ******************* DISCUSSION **************** -->
-        <div class="content" id="panelDiscuss" aria-hidden="true">
+        <div class="content" id="panelDiscuss">
           
           <div class="infoBox">
             <p>Discussion about a selected ontology term occurs here. One can select a term by

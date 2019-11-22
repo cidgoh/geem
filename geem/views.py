@@ -6,7 +6,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import render
@@ -26,7 +26,12 @@ def index(request):
     return render(request, 'geem/index.html', context={})
 
 def portal(request):
-    return render(request, 'geem/portal.html', context={})
+    focus = 'panelContent'
+    if request.session.get('focus_validator'):
+        focus = 'panelValidation'
+        del request.session['focus_validator']
+
+    return render(request, 'geem/portal.html', context={'focus': focus})
 
 def form(request):
     return render(request, 'geem/form.html', context={})
@@ -50,7 +55,15 @@ def modal_lookup(request):
     return render(request, 'geem/templates/modal_lookup.html', context={})
 
 def resource_summary_form(request):
+
     return render(request, 'geem/templates/resource_summary_form.html', context={})
+
+
+def render_uploaded_validation_data(request):
+    """TODO:..."""
+    request.session['focus_validator'] = True
+    return redirect('portal')
+
 
 class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin): # mixins.UpdateModelMixin, 
     """

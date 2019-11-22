@@ -613,10 +613,9 @@ function init_validation_tab() {
 		create_grid(grid_options);
 		$('#validation_download').click(function () {
 			grid_options.api.exportDataAsCsv()
-		})
+		});
 		$('#validation_upload').change(function () {
-			const path = $('#validation_upload').val();
-			// TODO: process file somehow
+			$('#validation_form').submit()
 		})
 	});
 }

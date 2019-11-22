@@ -9,15 +9,14 @@ without the need to be trained in ontology curation or querying. Ontology-
 driven standards benefit from features of open-source published OWL 2.0 
 ontologies such as globally unique identifiers for terms, multilingual label 
 and definition functionality, and logical validation and reasoning over 
-controlled vocabularies. Such a specificatio#n can be designed to satisfy the 
+controlled vocabularies. Such a specification can be designed to satisfy the 
 requirements of an environmental pH measurement, or a person's age, or a more 
 structured entity like a contact address, or a genomic sequence repository 
 submission for example. 
 
 * View details of our overal project aim, description, and implementation on 
   the [Wiki](https://github.com/GenEpiO/geem/wiki/) site.
-* A working prototype of the portal is available at <http://genepio.org/geem>. 
-  This version doesn't currently incorporate the Django framework yet.
+* A working prototype of the portal is available at <https://watson.bccdc.med.ubc.ca/geem/portal.html>. It includes OAuth2 login, and the ability of users to view and customize a variety of draft specifications we have created for the genomic epidemiology space. (A previous version which doesn't incorporate the Django framework is at<http://genepio.org/geem>.) 
 
 ___________
 

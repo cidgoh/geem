@@ -6,7 +6,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action, api_view
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import render
@@ -56,7 +56,15 @@ def resource_summary_form(request):
 
 @api_view(['POST'])
 def get_uploaded_validation_data(request):
-    """TODO:..."""
+    """Output data from uploaded validation file in string format.
+
+    Should only be called by front-end method ``update_grid``.
+
+    :param rest_framework.request.Request request: Front-end request
+        containing uploaded file
+    :returns: Response containing file data in string format
+    :rtype: rest_framework.response.Response
+    """
     uploaded_file = request.FILES['file']
     uploaded_file_str = uploaded_file.read()
     return Response(uploaded_file_str, status=status.HTTP_200_OK)

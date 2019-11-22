@@ -16,7 +16,7 @@ submission for example.
 
 * View details of our overal project aim, description, and implementation on 
   the [Wiki](https://github.com/GenEpiO/geem/wiki/) site.
-* A working prototype of the portal is available at <https://watson.bccdc.med.ubc.ca/geem/portal.html>. It includes OAuth2 login, and the ability of users to view and customize a variety of draft specifications we have created for the genomic epidemiology space. (A previous version which doesn't incorporate the Django framework is at<http://genepio.org/geem>.) 
+* A working prototype of the portal is available at <https://watson.bccdc.med.ubc.ca/geem/portal.html>. It includes OAuth2 login, and the ability of users to view and customize a variety of draft specifications we have created for the genomic epidemiology space. (An older partially-functioning version which doesn't incorporate the Django framework is at <http://genepio.org/geem>.) 
 
 ___________
 

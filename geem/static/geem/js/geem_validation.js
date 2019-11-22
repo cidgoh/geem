@@ -9,19 +9,15 @@
  * TODO: Instead of using mock data, retrieve data from cart
  */
 function get_grid_options() {
+	// const form_specs
 	const column_defs = [
 		{headerName: 'Test Column One', field: 'test_column_one'},
 		{headerName: 'Test Column Two', field: 'test_column_two'},
 	];
 
-	const row_data = [
-		{test_column_one: 'foo', test_column_two: 'bar'},
-		{test_column_one: 'bar', test_column_two: 'foo'},
-	];
-
 	return {
 		columnDefs: column_defs,
-		rowData: row_data,
+		rowData: [],
 	};
 }
 

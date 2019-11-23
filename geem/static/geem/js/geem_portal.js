@@ -362,7 +362,7 @@ function render_entity_detail(ontologyId) {
 		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
 
 	// ENTITY_ID - hyperlinked to tab/popup
-	var itemHTML = '<li><span class="infoLabel">ontology id:</span><a href="' + entityId + '" target="_blank">' + entity['id'] + '</a></li>\n'
+	var itemHTML = '<li><span class="infoLabel">ontology id:</span><a href="' + entity['id'] + '" target="_blank">' + entity['id'] + '</a></li>\n'
 
 	// UI_LABEL if available
 	if ('ui_label' in entity)

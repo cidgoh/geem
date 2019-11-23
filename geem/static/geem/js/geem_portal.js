@@ -608,7 +608,31 @@ function init_specification_tab() {
 }
 
 function init_validation_tab() {
-
+	$(document).ready(function () {
+		const grid_options = get_grid_options();
+		create_grid(grid_options);
+		$('#validation_download').click(function () {
+			grid_options.api.exportDataAsCsv()
+		});
+		$('#validation_upload').change(function () {
+			const file = $('#validation_upload').prop('files')[0]
+			const data = new FormData();
+			data.append('file', file);
+			$.ajax({
+				type: 'POST',
+				url: 'get_uploaded_validation_data',
+				data: data,
+				processData: false,
+				contentType: false,
+				success: function (data) {
+					update_grid(grid_options, data)
+				},
+				error: function (_, text_status, error_thrown) {
+					alert(text_status + ': ' + error_thrown)
+				}
+			})
+		})
+	});
 }
 
 /******************************** UTILITY FUNCTIONS *************************/

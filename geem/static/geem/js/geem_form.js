@@ -1210,7 +1210,6 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 		derender_entity_form(); // Only for geem_portal.js
 		reset_specification_tab();
 		top.focusEntityId = null;
-		$('a[href$="panelContent"]').click();
 		console.log("Couldn't find " + entityId) // No work to do here
 		return false
 	}

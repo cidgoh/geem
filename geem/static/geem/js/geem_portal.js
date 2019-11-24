@@ -65,10 +65,8 @@ $( document ).ready(function($) {
 	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
 	// Initializes Zurb Foundation settings (but not foundation itself)
 
-	$(document).foundation()
+	$(document).foundation({abide : top.settings})
 	
-	//$(document).foundation('abide')
-
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
 		check_entity_id_change(resource_callback, render_entity_form)
@@ -98,18 +96,22 @@ function resource_callback(resource) {
 function render_entity_form() {
 
 	$('#specificationSourceInfoBox').hide()
-	//$('#content').removeClass('disabled')
 
 	// Providing form_callback to add shopping cart to form items.
 	top.form = new OntologyForm('#mainForm', top.resource.contents, top.formSettings, portal_entity_form_callback) 
 
 	top.form.render_entity(top.focusEntityId)
 
-	$(document).foundation()
-
-	//$('#mainForm').foundation('abide','events');
-	// See init_form_tab() for validation, submit setup.
-
+	// Wire submit button to show GEEM example form submit contents in popup.
+	top.form.formDomId
+		.bind('valid.fndtn.abide,formvalid.zf.abide', function (e) {
+	    	set_modal_download(get_data_specification('form_submission.json'));
+		})
+		.bind('submit', function (e) {
+	    	// Otherwise if URL is like form.html#ONTOLOGY:ID it will reload with a 
+	    	// ? like "form.html?#ONTOLOGY:ID" thus shortcutting set_modal_download()
+	    	return false;
+	  	});
 }
 
 
@@ -549,48 +551,6 @@ function init_browse_tab() {
 
 function init_form_tab() {
 
-	/* Wire form's submit button to show GEEM example form submit contents in popup.*/
-	$('#mainForm').on('click', '.buttonFormSubmit', function (e) {  
-		e.preventDefault();
-		$('#mainForm').foundation("validateForm")
-		set_modal_download(get_data_specification('form_submission.json'))
-		return false
-	})
-
-	// Form validation triggers constructed once, not every time its rendered
-	$('#mainForm').on('forminvalid.zf.abide,invalid,invalid.fndtn.abide', function(e) {
-		e.preventDefault();
-		console.log("invalid trigger"); 
-		alert("invalid trigger")
-	});
-	$('#mainForm').on('valid,valid.fndtn.abide', function(e) {
-		e.preventDefault();
-		console.log("valid trigger"); 
-		alert("valid trigger")
-	});
-	$('#mainForm').on('submit', function(e) {
-		//e.preventDefault();
-		console.log("submit triggered");
-		// NOW VALIDATE
-		$('#mainForm').foundation("validateForm")
-	});
-
-	$(document).bind('invalid.zf.abide',function(e) {
-  		console.log("Sorry, "+e.target.id+" is not valid");
-	});
-	// to submit via ajax, add the 2 bindings below.  
-	/*
-	$(document)
-	.bind("submit", function(e) {
-	  e.preventDefault();
-	  console.log("submit intercepted");
-	  $('#mainForm').foundation("validateForm")
-	})
-	.bind("formvalid.zf.abide", function(e,$form) {
-	  // ajax submit
-	});
-	*/
-
 	// In form display area, when "toggle specification details" is on,
 	// provides hover view of item's ontology details
 	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)
@@ -622,7 +582,6 @@ function init_form_tab() {
 		top.formSettings.minimalForm = $(this).is(':checked')
 		top.form.render_entity()
 	})
-
 
 }
 

@@ -20,7 +20,7 @@ Updated: May 28, 2018
 */
 
 // These fields are merged into select options synonyms="..." for searching.
-synonymFields = ['hasSynonym', 'hasExactSynonym', 'hasNarrowSynonym', 'hasAlternativeTerm']
+synonymFields = ['hasSynonym', 'hasBroadSynonym', 'hasExactSynonym', 'hasNarrowSynonym', 'hasAlternativeTerm']
 
 function OntologyForm(domId, resource, settings, callback) {
 	/*
@@ -96,7 +96,23 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		 	// Reinitialize form since deleted above. FUTURE: use reInit()
 		 	// Critical for establishing type-as-you-go validation; Foundation 5.5.3
-			$(document).foundation('abide', 'reflow');
+		 	// ISSUE: Portal.html doesn't do type-as-you-go; probably other <form> elements messing it up.
+
+		 	self.formDomId.foundation('abide', 'reflow') // Makes validate as you go, but no form tabs work.
+		 	self.formDomId.foundation({abide : top.settings}) // Makes tabs work, but no validate as you go
+
+			self.formDomId
+			  .bind('invalid.fndtn.abide,invalid.zf.abide', function (e) { // the .zf is foundation 6 class
+			  	e.preventDefault();
+			  	console.log('invalid!');
+			    //var invalid_fields = $(this).find('[data-invalid]');
+			  })
+			  .bind('valid.fndtn.abide,formvalid.zf.abide', function (e) {
+			  	//e.preventDefault();
+			    console.log('valid!');
+			    // ajax submit
+			  });
+
 
 			// Setup of this class enables callback function to be supplied.
 			// Make event?
@@ -213,7 +229,7 @@ function OntologyForm(domId, resource, settings, callback) {
 					// If new content has any select inputs, set them up
 					initialize_select_inputs(new_element)
 					initialize_date_inputs(new_element) 
-					new_element.foundation()
+					new_element.foundation({abide : top.settings})
 
 		 			if (self.settings.minimalForm) set_minimal_form(new_element) 
 
@@ -489,7 +505,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			// Size of float/double depends on precision sought, see
 			// https://stackoverflow.com/questions/872544/what-range-of-numbers-can-be-represented-in-a-16-32-and-64-bit-ieee-754-syste
 			case 'xmls:float':  
-				html += render_number(entity, labelHTML, 'float', - Math.pow(2, 23), Math.pow(2, 23) - 1 ); break;
+				html += render_number(entity, labelHTML, 'float'); break; //, - Math.pow(2, 23), Math.pow(2, 23) - 1 
 
 			case 'xmls:double': 
 				html += render_number(entity, labelHTML, 'double', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER); break;
@@ -623,11 +639,10 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	render_button = function(text, button_id) {
 		// Not an ontolog-driven specification.
+		// Note only one button per button_id should be rendered.
 		return [
 			'<div class="text-center">\n'
-		,	'	<button id="', button_id, '" class="formButton button small ', button_id, '"">'
-		,			text
-		,		'</button>\n'
+		,	`	<button id="${button_id}" class="formButton button small ${button_id}">${text}</button>\n`
 		,	'</div>\n'
 		].join('')
 	}
@@ -703,11 +718,12 @@ function OntologyForm(domId, resource, settings, callback) {
 		
 		INPUT: 
 			type: integer|decimal|double|float
-
+			
 		*/
+
+
 		if (type == 'integer') {
 			var stepAttr = ' step="1"'
-			var typeAttr = ' type="number"' // foundation zurb does css on this.
 		}
 		else {
 			if (entity.minValue) {
@@ -719,8 +735,6 @@ function OntologyForm(domId, resource, settings, callback) {
 			}
 			else // kludgy default
 				var stepAttr = ' step="0.0001"'
-
-			var typeAttr = ' type="number"'
 		}
 
 		html = [
@@ -729,14 +743,14 @@ function OntologyForm(domId, resource, settings, callback) {
 			,	'<div class="large-4 columns">'
 	 		,'		<input class="input-group-field ' + entity.id + '"'
 	 		,		render_attr_unique_id(entity)
-	 		,		' data-ontology-id="' + entity.domId + '"'
-	 		,		typeAttr
+	 		,		` data-ontology-id="${entity.domId}"`
+	 		,		' type="number"' // foundation zurb does css on type=number; but not on "integer"
 			,		stepAttr
 			,		entity.disabled
 			,		render_attr_numeric(entity, minInclusive, maxInclusive)
-			,		' placeholder="' + type + '"'
-			,		' pattern="' + type + '"'
-			,		' data-validator="min_max"'
+			,		` placeholder="${type}"`
+			,		` pattern="${type}"`
+			,		` data-abide-validator="min_max ${type}"`
 			,	' />\n'
 			,	'</div>\n'
     		,	render_units(entity)
@@ -1013,7 +1027,7 @@ function OntologyForm(domId, resource, settings, callback) {
 
 	render_help = function(entity) {
 		// Only entities that have been initialized have 'help' attribute.
-		var html = '<small class="error">This needs valid input</small>'
+		var html = `<small class="error" data-form-error-for="${entity.id}">This needs valid input</small>`
 		if (entity.help)
 			html += '<span data-tooltip class="has-tip float-right" data-disable-hover="false" data-click-open="true" data-width="250" title="' + entity.help + '"> <i class="fi-info blue"></i></span>'		
 		return html
@@ -1193,29 +1207,32 @@ function OntologyForm(domId, resource, settings, callback) {
 }
 
 
-function check_entity_id_change(resource_callback = null, entity_callback = null, entityId = null) {
-	/* If given entity id, or one given in browser URL is different from the
-	current top.focusEntityId, then a) see if its available in top
+function check_entity_id_change(resource_callback = null, entity_callback = null) {
+	/* If entity id given in browser URL is different from the
+	current top.focusEntityId, then a) see if its available in top resource
 	specification, and if so, switch, and if not, load appropriate resource
 	and then switch to it.
+	INPUT
+		resource_callback: Only needed if interface needs to show updated resource
+		entity_callback: the form renderer to apply to given entityId
 	*/
+	var entityId = null;
+	if (location.hash.length != 0 && location.hash.indexOf(':') != -1)
+		// Set entity id to be first item in path of entities. #x/y/z -> x
+		entityId = location.hash.substr(1).split('/',1)[0]
 
-	if (entityId == null)
-		if (location.hash.length > 0 && location.hash.indexOf(':') != -1)
-			// Set entity id to be first item in path of entities. #x/y/z -> x
-			entityId = document.location.hash.substr(1).split('/',1)[0]
-
-
-	if (!entityId && top.derender_entity_form) {
-		derender_entity_form(); // Only for geem_portal.js
-		reset_specification_tab();
+	if (!entityId) {
 		top.focusEntityId = null;
-		$('a[href$="panelContent"]').click();
 		console.log("Couldn't find " + entityId) // No work to do here
+		if (!top.derender_entity_form) {
+			derender_entity_form(); // Only for geem_portal.js
+			reset_specification_tab();
+			$('a[href$="panelContent"]').click();
+		}
 		return false
 	}
 
-	if (top.focusEntityId && entityId == top.focusEntityId)	{
+	if (top.focusEntityId && entityId === top.focusEntityId)	{
 		console.log("Already have " + entityId) // No work to do here
 		return false
 	}
@@ -1244,8 +1261,9 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 	// At this point a change in entity_id has occured, so check current
 	// resource and then render form.
 	if (top.resource.contents && entityId in top.resource.contents.specifications) {
-		top.focusEntityId = entityId
-		entity_callback()
+		top.focusEntityId = entityId;
+		if (entity_callback)
+			entity_callback()
 		return true
 	}
 
@@ -1255,10 +1273,10 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 
 // Implementing a static method for default zurb Foundation settings:
 OntologyForm.init_foundation_settings = function() {
-	//Foundation.Abide.defaults.live_validate = true; // DOESN'T WORK IN foundation 5.5.3???
 
 	top.settings = {
     	live_validate: true, // validate the form as you go
+    	validate_on: 'on_input', // CRITICAL, see undocumented: https://github.com/foundation/foundation-sites/issues/5978
     	validate_on_blur: true, // validate whenever you focus/blur on an input field
 		focus_on_invalid: true, // automatically bring the focus to an invalid input field
 		error_labels: true, // labels with a for="inputId" will recieve an `error` class
@@ -1269,10 +1287,10 @@ OntologyForm.init_foundation_settings = function() {
 			alpha: /^[a-zA-Z]+$/,
 			alpha_numeric: /^[a-zA-Z0-9]+$/,
 			title: /^[a-zA-Z0-9 ]+$/,
-			integer: /^[-+]?(0|[1-9]\d*)$/,
+			integer: /^[-+]?(0|[1-9][0-9]*)$/,
 			number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
 			decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-			float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+			//float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?(e\d+)?$/, //validator below takes care of this.
 			//latitudeD:
 			//longitudeD:
 			 
@@ -1293,22 +1311,39 @@ OntologyForm.init_foundation_settings = function() {
 		    month_day_year : /(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/
 		},
 		validators: {
-			'min_max': function($el,required,parent) {
-				var test = true
-				if ($el.attr('min'))
-					test = test && (parseFloat($el.val()) >= parseFloat($el.attr('min')) )
-				if ($el.attr('max'))
-					test = test && (parseFloat($el.val()) <= parseFloat($el.attr('max')) )
+			'integer': function( el, required, parent) {
+				const value = $(el).val()
+				if (value == '') return !required
+				return value == parseInt(value)
+			},
+			'double': function( el, required, parent) {
+				const value = $(el).val()
+				if (value == '') return !required
+				return value == parseInt(value)
+			},
+			'decimal': function( el, required, parent) {
+				const value = $(el).val()
+				if (value == '') return !required
+				return value.indexOf('e') ==-1;
+			},
+			'float': function( el, required, parent) {
+				const value = $(el).val();
+				if (value == '') return !required;
+				return parseFloat(value) == value;
+			},
+			'min_max': function( el, required, parent) {
+				const value = $(el).val()
+				if (value == '') return !required
+				var test = true;
+				if ( $(el).attr('min'))
+					test = test && (parseFloat(value) >= parseFloat( $(el).attr('min')) );
+				if ( $(el).attr('max'))
+					test = test && (parseFloat(value) <= parseFloat( $(el).attr('max')) );
 
-				return test
+				return test 
 			}
 		}
   	}
-	//$(document).foundation({abide : {live_validate: true})
-
-	// Only Zurb 5.5.3 
-	$(document).foundation({abide : top.settings})
-
 
 }
 

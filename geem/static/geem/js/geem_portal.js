@@ -324,13 +324,27 @@ function render_display_context(event) {
 	dropdown menu that shows given item	as well as any parent items that link
 	to it via "has member" and "has part" and "is a" relations. Parents can be
 	navigated to.
+
+	Issue: currently sometimes entity ids don't have recognized prefix, so 
+	instead have full URL.  It is difficult to split up a path that contains
+	this: [ontology:id]/[http://a.b/stuff/ontology:id]
+	We make the assumption that if a full http entity ID happens it is at the
+	end of a path, which should work ok.  Can phase this code out when all
+	entities have recognized prefix.
 	*/
 
 	var thisDiv = $(this).parents('[data-ontology-id]').first()
 	var ontologyPath = thisDiv.attr('data-ontology-id')
 
-	var pathDivider = ontologyPath.lastIndexOf('/')
-	var ontologyId = (pathDivider != -1) ? ontologyPath.substr(pathDivider+1) : ontologyPath 	
+	var ontologyId = ontologyPath 
+	var pathDivider = ontologyPath.lastIndexOf('http')
+	if (pathDivider != -1) // Here last item 
+		ontologyId = ontologyPath.substr(pathDivider)
+	else {
+		pathDivider = ontologyPath.lastIndexOf('/')
+		if (pathDivider != -1)
+			ontologyId = ontologyPath.substr(pathDivider+1)
+	}
 
 	if ($(this).is('.fi-magnifying-glass')) {
 		$('#displayContext').html(render_entity_detail(ontologyId) )
@@ -353,32 +367,51 @@ function render_entity_detail(ontologyId) {
 	entity, skipping path context of its context in encompassing form.
 	*/
 	var entity = get_entity(ontologyId)
-	var entityIdParts = entity['id'].split(':')
-	var idPrefix = entityIdParts[0]
-	if (idPrefix in top.resource.contents['@context']) {
-		entity_url = top.resource.contents['@context'][idPrefix] + entityIdParts[1]
+	if (entity) {
+		var entityIdParts = entity['id'].split(':')
+		var idPrefix = entityIdParts[0]
+		if (idPrefix in top.resource.contents['@context']) {
+			// Provide term's full namespace URL
+			entity_URL = top.resource.contents['@context'][idPrefix] + entityIdParts[1]
+		}
+		else // Alternately use ontology lookup service to resolve term
+			entity_URL = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
 	}
-	else
-		entity_url = top.ONTOLOGY_LOOKUP_SERVICE_URL + entity['id']
+	else {
+		// Case where we don't have a lookup on @context prefix for this
+		entity_URL = top.ONTOLOGY_LOOKUP_SERVICE_URL + ontologyId
+	}
 
 	// ENTITY_ID - hyperlinked to tab/popup
-	var itemHTML = '<li><span class="infoLabel">ontology id:</span><a href="' + entityId + '" target="_blank">' + entity['id'] + '</a></li>\n'
+	var itemHTML = `<ul><li><span class="infoLabel">ontology id: </span><a href="${entity_URL}" target="_blank">${ontologyId}</a></li>\n`
+
+	if (!entity) return itemHTML + '</ul>'
 
 	// UI_LABEL if available
-	if ('ui_label' in entity)
-		itemHTML += '<li><span class="infoLabel">UI label:</span> ' + entity.ui_label + '</li>\n'
+	if (entity.ui_label)
+		itemHTML += `<li><span class="infoLabel">UI label: </span>${entity.ui_label}</li>\n`
+
+	// TRANSITIONAL uiLabel
+	if (entity.uiLabel)
+		itemHTML += `<li><span class="infoLabel">UI label: </span>${entity.uiLabel}</li>\n`
 
 	// UI_DEFINITION if available
-	if ('ui_definition' in entity)
-		itemHTML += '<li><span class="infoLabel">UI definition:</span> <i>' + entity.ui_definition + '</i></li>\n'
+	if (entity.ui_definition)
+		itemHTML += `<li><span class="infoLabel">UI definition: </span><i>${entity.ui_definition}</i></li>\n`
 
-	// LABEL - from original ontology
-	itemHTML += '<li><span class="infoLabel">ontology label:</span> ' + entity.label + '</li>\n'
+	// TRANSITIONAL UI_DEFINITION if available
+	if (entity.uiDefinition)
+		itemHTML += `<li><span class="infoLabel">UI definition: </span><i>${entity.uiDefinition}</i></li>\n`
+
+	if (entity.label)
+		// LABEL - from original ontology
+		itemHTML += `<li><span class="infoLabel">ontology label: </span>${entity.label}</li>\n`
 
 	// DEFINITION - from original ontology
 	if (entity.definition)
-		itemHTML += '<li><span class="infoLabel">ontology definition:</span> <i>' + entity.definition + '</i></li>\n'
+		itemHTML += `<li><span class="infoLabel">ontology definition: </span><i>${entity.definition}</i></li>\n`
 	
+	// Show other things like dbXref, and link them
 	for (ptr in RENDER_PROPERTIES) {
 		var item = RENDER_PROPERTIES[ptr]
 		if (item in entity) {
@@ -391,9 +424,7 @@ function render_entity_detail(ontologyId) {
 		}
 	}
 
-
-	// Enable mouseover display of above.
-	itemHTML = 	[labelURL, itemHTML].join('\n')
+	itemHTML += '</ul>'
 
 	return itemHTML
 }

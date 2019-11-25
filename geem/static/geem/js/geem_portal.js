@@ -174,10 +174,6 @@ function render_resource_menu_init() {
 	Otherwise display any top-level model.
 	*/
 
-	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-	//$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
-	//$('#panelEntities').html('<ul class="vertical menu drilldown" data-drilldown id="entityMenu"></ul>')
-
 	var entities = {}
 	var root_id = 'OBI:0000658' //"data representation model" 
 	var html = ''

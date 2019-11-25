@@ -330,3 +330,9 @@ form .row .row {margin:0 0 5px 0 !important;}
 label[for='validation_upload'] {
 	text-transform: none;
 }
+
+
+.error input, .error textarea, .error select {
+    /* margin-bottom: 0; Overrides what Foundation is doing.  Foundation expects <span .error> to be at bottom of field input */
+    margin-bottom:1rem;
+ }

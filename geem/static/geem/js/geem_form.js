@@ -98,13 +98,13 @@ function OntologyForm(domId, resource, settings, callback) {
 		 	// Critical for establishing type-as-you-go validation; Foundation 5.5.3
 		 	// ISSUE: Portal.html doesn't do type-as-you-go; probably other <form> elements messing it up.
 
-		 	self.formDomId.foundation('abide', 'reflow') // Makes validate as you go, but no form tabs work.
 		 	self.formDomId.foundation({abide : top.settings}) // Makes tabs work, but no validate as you go
+		 	self.formDomId.foundation('abide', 'reflow') // Makes validate as you go, but no form tabs work.
 
 			self.formDomId
 			  .bind('invalid.fndtn.abide,invalid.zf.abide', function (e) { // the .zf is foundation 6 class
 			  	e.preventDefault();
-			  	console.log('invalid!');
+			  	console.log('Invalid form, see field highlights!');
 			    //var invalid_fields = $(this).find('[data-invalid]');
 			  })
 			  .bind('valid.fndtn.abide,formvalid.zf.abide', function (e) {
@@ -741,20 +741,19 @@ function OntologyForm(domId, resource, settings, callback) {
 			,'<div class="row collapse">\n'
 			,	labelHTML,
 			,	'<div class="large-4 columns">'
-	 		,'		<input class="input-group-field ' + entity.id + '"'
+	 		,`		<input class="input-group-field ${entity.id}"`
 	 		,		render_attr_unique_id(entity)
 	 		,		` data-ontology-id="${entity.domId}"`
-	 		,		' type="number"' // foundation zurb does css on type=number; but not on "integer"
+	 		,		' type="text"' // foundation zurb does css on type=number; but not on "integer"
 			,		stepAttr
 			,		entity.disabled
 			,		render_attr_numeric(entity, minInclusive, maxInclusive)
-			,		` placeholder="${type}"`
-			,		` pattern="${type}"`
-			,		` data-abide-validator="min_max ${type}"`
-			,	' />\n'
-			,	'</div>\n'
-    		,	render_units(entity)
-			,'</div>\n'
+			,		` placeholder="${type}"
+					pattern="${type}"
+					data-abide-validator="min_max ${type}" />\n
+				</div>\n
+    			${render_units(entity)}
+			</div>\n`
 		].join('')
 
 		return get_field_wrapper(entity, html)
@@ -1289,8 +1288,8 @@ OntologyForm.init_foundation_settings = function() {
 			title: /^[a-zA-Z0-9 ]+$/,
 			integer: /^[-+]?(0|[1-9][0-9]*)$/,
 			number:  /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-			decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
-			//float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?(e\d+)?$/, //validator below takes care of this.
+			//decimal: /^[-+]?(0|[1-9]\d*)(\.\d+)?$/,
+			float:   /^[-+]?(0|[1-9]\d*)(\.\d+)?(e\d+)?$/, //validator below takes care of this.
 			//latitudeD:
 			//longitudeD:
 			 
@@ -1311,28 +1310,37 @@ OntologyForm.init_foundation_settings = function() {
 		    month_day_year : /(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/
 		},
 		validators: {
+			/* DANGER: jQuery parses field content according to field type.
+			"23.433.2" gets interpreted as "" for decimal number field. 
+			So we can't use $(el).val(). Must use el.value to get field's
+			real contents.
+			*/
 			'integer': function( el, required, parent) {
-				const value = $(el).val()
+				const value = el.value.toString();
 				if (value == '') return !required
 				return value == parseInt(value)
 			},
 			'double': function( el, required, parent) {
-				const value = $(el).val()
+				const value = el.value.toString();
 				if (value == '') return !required
 				return value == parseInt(value)
 			},
 			'decimal': function( el, required, parent) {
-				const value = $(el).val()
-				if (value == '') return !required
-				return value.indexOf('e') ==-1;
+				const value = el.value.toString();
+				if (value == '') return !required;
+				if (value.indexOf('e') !=-1) return false;
+				//console.log(parseFloat(el.value), value);
+				return parseFloat(el.value) == value;
+
 			},
 			'float': function( el, required, parent) {
-				const value = $(el).val();
+				const value = el.value.toString();
 				if (value == '') return !required;
-				return parseFloat(value) == value;
+				//console.log(parseFloat(el.value), value);
+				return parseFloat(el.value) == value;
 			},
 			'min_max': function( el, required, parent) {
-				const value = $(el).val()
+				const value = el.value;
 				if (value == '') return !required
 				var test = true;
 				if ( $(el).attr('min'))

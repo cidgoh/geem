@@ -19,7 +19,7 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 
 /* Resource tabs */
 #resourceTabs {border:1px solid silver; margin-top:10px;}
-#resourceTabs > li.tab-title a {padding:.3rem 1rem !important;}
+#resourceTabs > li.tab-title > a {padding:.3rem 1rem !important;}
 #resourceTabsContent {
 	height:500px; 
 	overflow-y:scroll; 
@@ -123,7 +123,7 @@ div.package {border-top:1px dotted silver; padding-top:.5rem;}
 	font-size:.9rem;}
 
 
-label > i.fi-magnifying-glass {font-size:1.1rem; cursor:pointer; color:lightblue}
+label > i.fi-magnifying-glass {font-size:1.1rem; cursor:pointer; color:lightblue; margin-right:4px;}
 i.fi-marker {color:green; cursor:pointer;}
 i.fi-marker.large {font-size: 1.1rem;}
 
@@ -198,7 +198,7 @@ a.input-group-label {font-size:.9em;}
 
 #package-tabs .tabs-title > a {padding:.5rem;font-size:.9rem;}
 
-.tabs-title>a { padding: .75rem 1.5rem; font-size:.9rem; } 
+.tabs-title > a { padding: .75rem 1.5rem; font-size:.9rem; } 
 /* Foundation tabs are big for tablet/mobile touch but this is only a PC app for now so made them smaller padding. */
 
 /* Trick to superimpose dropdown content link over existing hourglass or arrow */
@@ -215,10 +215,18 @@ a.input-group-label {font-size:.9em;}
 	padding:10px;
 	background-color:LemonChiffon ;
 	overflow-x:hidden;
+	cursor:default;
+}
+#displayContext li {cursor:default}
 
+#displayContext a { /* Override foundation <a> block */
+	display:inline-block;
+	padding:0;
+	margin:0;
+	color:blue;
 }
 i.fi-shopping-cart.option {position:absolute;right:10px;margin-top:-30px;} 
-i.fi-info {cursor:pointer;}r
+i.fi-info {cursor:pointer;}
 
 li.group-result {display:none;}
 

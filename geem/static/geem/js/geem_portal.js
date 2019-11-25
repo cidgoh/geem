@@ -325,7 +325,7 @@ function render_display_context(event) {
 	to it via "has member" and "has part" and "is a" relations. Parents can be
 	navigated to.
 
-	Issue: currently sometimes entity ids don't have recognized prefix, so 
+	Issue: currently sometimes entity ids don't have recognized prefix, so
 	instead have full URL.  It is difficult to split up a path that contains
 	this: [ontology:id]/[http://a.b/stuff/ontology:id]
 	We make the assumption that if a full http entity ID happens it is at the
@@ -336,9 +336,9 @@ function render_display_context(event) {
 	var thisDiv = $(this).parents('[data-ontology-id]').first()
 	var ontologyPath = thisDiv.attr('data-ontology-id')
 
-	var ontologyId = ontologyPath 
+	var ontologyId = ontologyPath
 	var pathDivider = ontologyPath.lastIndexOf('http')
-	if (pathDivider != -1) // Here last item 
+	if (pathDivider != -1) // Here last item
 		ontologyId = ontologyPath.substr(pathDivider)
 	else {
 		pathDivider = ontologyPath.lastIndexOf('/')
@@ -358,6 +358,26 @@ function render_display_context(event) {
 		.css('left', (iconPosition.left) + 'px')
 		.css('top', (iconPosition.top) + 'px')
 
+}
+
+function split_path(path) {
+
+}
+
+function get_label(entity) {
+	// Label listed an entity's features label overrides ui_label
+	if (entity.features && entity.features.label)
+		//return entity.features.label.value
+		return entity.features.label.value
+
+	if (entity.ui_label)
+		return entity.ui_label
+
+	//TRANSITIONAL:
+	if (entity.uiLabel)
+		return entity.uiLabel
+
+	return entity.label
 }
 
 
@@ -424,7 +444,10 @@ function render_entity_detail(ontologyId) {
 		}
 	}
 
-	itemHTML += '</ul>'
+	itemHTML += `</ul>`
+
+	// Enable mouseover display of above.
+	//itemHTML = 	[entity_URL, itemHTML].join('\n')
 
 	return itemHTML
 }

@@ -82,6 +82,9 @@ form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.
 div.field-wrapper.include > div.columns > div.row > i.fi-shopping-cart {color:green}
 div.field-wrapper.exclude > div.columns > div.row > i.fi-shopping-cart {color:red}
 
+/* main form legend */
+#formControls i.fi-shopping-cart.include {color:green}
+#formControls i.fi-shopping-cart.exclude {color:red}
 
 a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#2199e8;cursor:pointer;}
 #searchResults {clear:both;}

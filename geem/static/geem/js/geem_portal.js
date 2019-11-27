@@ -1,7 +1,7 @@
 /********************** Ontology Entity Mart Prototype ************************
 
-	This script provides the engine for displaying OBOFoundry.org compatible 
-	ontology .owl files that have been marked up according to the Genomic
+	This script provides the engine for displaying ontology .owl file and user 
+	package specifications that have been marked up according to the Genomic
 	Epidemiology Entity Mart (GEEM) coding system (annotations and a few 
 	relations), allowing one to search and browse any data representation model
 	items therein, and related numeric, categorical and textual datums.
@@ -9,14 +9,13 @@
 	This code supports a portal.html page for selecting a given ontology, 
 	navigating through its various GEEM annotated specs, enabling the user to
 	view html forms and tabular/json etc. specifications, and create their own 
-	downloadable packages
+	downloadable packages.
 
 	As well a form.html page is available for focusing on a particular spec.
 
-    Author: Damion Dooley
+    Author: Damion Dooley, Ivan Gill
 	Project: genepio.org/geem
-	Updated: July 13, 2018
-	
+
 */
 
 /*********** ALL THE SETUP ***************************************************/
@@ -28,12 +27,22 @@ formSettings = {}
 form = {}
 cart = []
 
-ROOT_ID = 'OBI:0000658' //"data representation model" 
+// OBI data representation model class.
+ROOT_ID = 'OBI:0000658'
+
+/**
+ * List of GEEM specific classes under 'data representation model'
+ * All user packages should include these three classes for organizational purposes.
+ *   NCIT_C103180 - Data Standard
+ *   GENEPIO_0000106 - Draft Data Standard
+ *   GENEPIO_0001342 - Data Standard Component
+*/
 ROOT_SPECIFICATION_IDS = ['NCIT:C103180','GENEPIO:0000106','GENEPIO:0001342']
 
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+
 // Hardcode properties to show in entity detail modal dialog.
-RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
+RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasBroadSynonym','hasExactSynonym','hasNarrowSynonym']
 
 $( document ).ready(function($) {
 	
@@ -65,9 +74,8 @@ $( document ).ready(function($) {
 	init_validation_tab()
 
 
+	// Initializes Zurb Foundation according to GEEM settings
 	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
-	// Initializes Zurb Foundation settings (but not foundation itself)
-
 	$(document).foundation({abide : top.settings})
 	
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
@@ -80,25 +88,18 @@ $( document ).ready(function($) {
 
 });
 
-
+/**
+ * This function is triggered after a fetch for a particular resource by id.
+*/
 function resource_callback(resource) {
-	/* This function is triggered after a fetch for a particular resource by id.
 
-	*/
-	
 	$('#resourceTabs').removeClass('disabled')
 	//$('#resourceTabContent').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
-	// Prepare browsable top-level list of ontology items
 	render_resource_form()
+	// Prepare browsable top-level list of ontology items
 	render_resource_menu_init('#entityMenu')
-	// Add jquery control to toggle menu, begining with hidden menu
-	$('#entityMenu > li ').find('ul').hide();
-	$('#entityMenu').off().on('click', 'li', function (event) {
-		event.stopPropagation();
-		$(this).toggleClass('open').children('ul').toggle('fast','linear');
-		$(this).siblings().removeClass('open').find('ul:visible').toggle('fast','linear');
-	})
+
 }
 
 
@@ -129,7 +130,7 @@ function render_entity_form() {
  */
 function derender_entity_form() {
 	$('#mainForm').empty();
-	$('#formControls').empty();
+	//$('#formControls').hide(); // Need form controls for full exploration of a form
 	$('#specificationSourceInfoBox').show();
 }
 
@@ -173,122 +174,105 @@ function portal_entity_form_callback(form) {
 
 /********************* Resource Entity Tree Menu Display *******************/
 
+/** 
+ * Prepare browsable top-level list of ontology items
+ * For all ontologies and user packages, shows OBI "data representation model" 
+ * classes that GEEM uses (ROOT_SPECIFICATION_IDS), as well as any top-level
+ * items users may have that are not set as subclasses of above.
+ *
+ * @param {string} domId - id of ul menu element to initialize.
+*/
 function render_resource_menu_init(domId) {
-	/* Prepare browsable top-level list of ontology items
-	Provide context of form to populate. Passes form_callback, name of 
-	function in this module for OntologyForm to return to when complete.
 
-	If loaded resource has a "data representation model" then display kids.
-	Usually this means its an ontology.
-	Otherwise display any top-level model.
+	let html = render_data_standard_menu(ROOT_SPECIFICATION_IDS, 'ontology-spec')
+
+	/* For all items in specifications that don't fall under above data 
+	   standard classes, add root ancestor to stack. If parent can be added,
+	   remove child. Then render stack based on items.
 	*/
-
-
-	let html = '';
-
-	/* Begin with display of any available entities under  'data representation model' if any
-		NCIT_C103180 - Data Standard
-		GENEPIO_0000106 - Draft Data Standard
-		GENEPIO_0001342 - Data Standard Component
-	*/
-	for (const entity_id of ROOT_SPECIFICATION_IDS) {
-		html += render_resource_accordion(entity_id)
-	}
-
-	/*
-	// Otherwise, if ontology, search for all top-level models.
-	if (top.resource.ontology) {
-		// Search for any top level model
-		for (const entity_id in specifications) {
-			const entity = specifications[entity_id];
-			// If a model, and not subordinate to some other model
-			if (entity.datatype === 'model' && (!('parent' in entity) || !(entity['parent']
-				in specifications))) {
-				entities[entity_id] = []
-			}
-		}
-	}
-	*/
-
-	/* If it is a user package, for all items in specifications, add parent to stack.
-	If parent can be added, remove child. Then render stack based on items.
-	Take out top level standard classes above as they have already been done.
-	*/
-	if (!top.resource.ontology) {
+	if (!top.resource.ontology && top.resource.contents && top.resource.contents.specifications) {
 		
-		let entities = {};
-		let specifications;
-
-		if (top.resource.contents && top.resource.contents.specifications) {
-			specifications = top.resource.contents.specifications
-		}
-
+		let entities = [];
+		let specifications = top.resource.contents.specifications;
 
 		for (const entity_id in specifications) {
 			const entity = specifications[entity_id];
 
 			let parents = [];
 			if (entity.parent) {
-				parents.push(entity.parent)
+				parents.push(entity.parent);
 			}
 			if (entity.otherParent) {
-				parents = parents.concat(entity.otherParent)
+				parents = parents.concat(entity.otherParent);
 			}
 			if (entity.member_of) {
-				parents = parents.concat(entity.member_of)
+				parents = parents.concat(entity.member_of);
 			}
 
+			// Winnow parents list down to those that have key in specifications
 			const specified_parents = parents.filter(parent => parent in specifications);
 
-			if (!specified_parents.length) entities[entity_id] = []
+			// If entity is top level, i.e. no viable parents, add it to menu
+			if (specified_parents.length == 0) {
+				entities.push(entity_id);
+			}
 		}
 
-		for (const entity_id in entities) {
-			console.log(entity_id)
-			html += render_resource_menu(entity_id)
-		}
+		html += render_data_standard_menu(entities, 'user-spec')
 
 	}
 
 	if (html == '') 
 		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
 
-	$(domId).html(html)
+	$(domId).html(html);
+
+	// Add jquery control to toggle menu, begining with hidden menu
+	$(domId).children('li').find('ul').hide();
+	$(domId).off().on('click', 'li', function (event) {
+		event.stopPropagation();
+		$(this).toggleClass('open').children('ul').toggle('fast','linear');
+		$(this).siblings().removeClass('open').find('ul:visible').toggle('fast','linear');
+	})
 
 }
 
 /**
- * Render top-level item (accordion), and underlying hierarchic menu
- * @param {string} entity_id - ID of top-level item
- * @param {boolean} ontology - Whether top-level item comes from an
- * 	ontology or not
+ * Render top-level ROOT_SPECIFICATION_IDS items and underlying hierarchic menu
+ * @param {boolean} grouping - add li.grouping class to item for styling.
  * @returns {string} HTML to be rendered
  */
-function render_resource_accordion(entity_id) {
+function render_data_standard_menu(entity_ids, css_class=null) {
 
-	const entity = top.resource.contents.specifications[entity_id];
+	let html = '';
 
-	if (!entity)
-		return ''
-
-	return `
-		<li role="menuitem" class="grouped">
-			<a href="#${entity.id}">${get_label(entity)}</a>
-			<ul class="side-nav" id="menu_${entity.id}" role="navigation">
-				${render_resource_menu(entity.id)}
-			</ul>
-		</li>
-	`;
+	for (const entity_id of entity_ids) {
+		const entity = top.resource.contents.specifications[entity_id];
+		if (entity) {
+			let child_icon = '';
+			let menu_content = render_resource_menu(entity.id);
+			if (menu_content)
+				child_icon = '<i class="fi-play"></i>';
+			let css_class2 = css_class ? ` class="${css_class}"` : '';
+			html += 
+				`<li role="menuitem"${css_class2}>
+					${child_icon}<a href="#${entity.id}">${get_label(entity)}</a>
+					<ul class="side-nav" id="menu_${entity.id}" role="navigation">
+						${menu_content}
+					</ul>
+				</li>
+			`;
+		}
+	}
+	return html;
 }
 
 
 /**
- * Recursively render subordinates under top-level items in browse-tab.
- * @param {Object} entity - Top-level item
+ * Recursively render subordinates under given item in browse-tab.
+ * @param {string} entity_id - a specification item.
  * @param {number} depth - Accumulator used in recursion to render
  * 	subordinates with appropriate indentation
- * @param {boolean} ontology - Whether top-level item comes from an
- * 	ontology or not
  * @returns {string} HTML to be rendered
  */
 function render_resource_menu(entity_id, depth=0) {
@@ -300,7 +284,7 @@ function render_resource_menu(entity_id, depth=0) {
 	let html = '';
 	let subordinate_ids = [];
 
-	// Only list item if it has components or models
+	// List item if it has components or models
 	if ('models' in entity) 
 		subordinate_ids = Object.keys(entity.models)
 
@@ -325,7 +309,6 @@ function render_resource_menu(entity_id, depth=0) {
 			}
 
 			let child_html = null;
-			//let icon = '';
 			let label = get_label(child);
 			let prefix = '';
 			let children = '';
@@ -337,24 +320,22 @@ function render_resource_menu(entity_id, depth=0) {
 
 			child_html = render_resource_menu(child.id, depth + 1);
 			if (child_html) {
-				children = ' children'
-				child_icon = '<i class="fi-play"></i>'
-				child_html = `<ul class="side-nav" id="${child.id}" role="navigation">${child_html}</ul>`
-				//icon = ` <a href="#${child.id}" class="view"><i class="fi-magnifying-glass"></i></a>`
+				children = ' children';
+				child_icon = '<i class="fi-play"></i>';
+				child_html = `<ul class="side-nav" role="navigation">${child_html}</ul>`;
 			}
 
 			if (componentless) {
-				//icon = '';
 				prefix = 'menu_';
 				if (!child_html)
-					continue
+					continue;
 			}
 			else {
-				linkable = ' linkable'
+				linkable = ' linkable';
 			}
 
 			html += `
-				<li data-ontology-id="${child.id}" role="menuitem" class="${linkable}${children}">
+				<li role="menuitem" class="${linkable}${children}">
 					${child_icon}<a href="#${prefix}${child.id}">${label}</a>
 					${child_html}
 				</li>
@@ -496,6 +477,10 @@ function render_entity_relations(ontologyId) {
 }
 
 function render_relation_link(relation, entity) {
+
+	if (!entity)
+		return ''
+
 	// Used in search results
 	// Usually but not always there are links.  Performance boost if we drop this test.
 	var links = ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)

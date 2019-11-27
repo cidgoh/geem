@@ -88,7 +88,7 @@ function OntologyForm(domId, resource, settings, callback) {
 			initialize_date_inputs(self.formDomId)
 		 	initialize_select_inputs(self.formDomId) 
 
-		 	// Load an existing data record
+		 	// FUTURE: Load an existing data record
 		 	//loadFormData()
 
 		 	if (self.settings.minimalForm) 

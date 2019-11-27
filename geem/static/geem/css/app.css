@@ -348,17 +348,26 @@ ul.side-nav a.view {
 ul#entityMenu.side-nav {margin:0;padding:0;}
 ul#entityMenu.side-nav li {clear:both; text-transform: capitalize; }
 ul#entityMenu.side-nav li:not(.linkable) > a {color:black !important; }
-ul#entityMenu.side-nav li.children > i.fi-play {
+ul#entityMenu.side-nav i.fi-play {
 	float:right;
 	font-size:1.3rem;
 	color:#008CBA;
-	margin:0.2rem 0.5rem;
+	margin:0.2rem 1.5rem 0.2rem 0.5rem;
 }
-ul#entityMenu.side-nav li.children.open > i.fi-play {transform: rotate(90deg)}
+ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
+
 #panelEntities > ul {padding:0}
-#panelEntities > ul > li.grouped > a {
+
+/* Specification organized under ontology data representation model class */
+#panelEntities > ul > li.ontology-spec > a {
 	font-size:1.2rem;
 	background-color:#E8E8E8;
+} 
+/* User package top-level specification */ 
+#panelEntities > ul > li.user-spec > a {
+	border:1px solid #008CBA;
+	border-radius: 7px;
+	margin:0.7rem;
 } 
 /* #panelEntities > ul > li > a + ul {visibility:hidden;} */
 

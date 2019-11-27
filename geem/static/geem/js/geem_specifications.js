@@ -931,9 +931,6 @@ function get_specification_form_data(domId) {
 	$.each($(domId).find("input:not(.button), select, .field-wrapper.array, .field-wrapper.array > .inputBlock"), function(i,item) {
 
 		var focus = obj
-		// NOTE: if one doesn't convert the field value to a string
-		// right away, then 
-		var value = $(item).val().toString() // Note: multi-select list returned as array
 		var id = $(item).attr('data-ontology-id')
 		if (!id) {
 			// inputBlock is associated with parent id
@@ -947,6 +944,9 @@ function get_specification_form_data(domId) {
 				var path = [id]
 			else
 				var path = id.split('/')
+
+			// Get existing value (or array of values, in case of multi-select <select>)
+			var value = $(item).val() ? $(item).val().toString() : null
 
 			// Possibility of more than one record (via "Add Record" button)
 			// should signal ARRAY of underlings. ANY TIME a path element has

@@ -345,8 +345,19 @@ ul.side-nav a.view {
 	/* background-color:transparent !important; */
 }
 
-#entityMenu li.active {color:red;background-color:silver !important};
-#panelEntities > ul.side-nav {padding:0 !important;}
-#panelEntities > ul > li >a {font-size:1.2rem;border-bottom:2px solid blue;background-color:silver;}
-
+ul#entityMenu.side-nav {margin:0;padding:0;}
+ul#entityMenu.side-nav li {clear:both; text-transform: capitalize; }
+ul#entityMenu.side-nav li.children > i.fi-play {
+	float:right;
+	font-size:1.3rem;
+	color:#008CBA;
+	margin:0.2rem 0.5rem;
+}
+ul#entityMenu.side-nav li.children.open > i.fi-play {transform: rotate(90deg)}
+#panelEntities > ul {padding:0}
+#panelEntities > ul > li > a {
+	font-size:1.2rem;
+	background-color:#E8E8E8;
+} 
+/* #panelEntities > ul > li > a + ul {visibility:hidden;} */
 

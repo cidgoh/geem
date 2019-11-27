@@ -91,7 +91,13 @@ function resource_callback(resource) {
 	// Prepare browsable top-level list of ontology items
 	render_resource_form()
 	render_resource_menu_init('#entityMenu')
-
+	// Add jquery control to toggle menu, begining with hidden menu
+	$('#entityMenu > li ').find('ul').hide();
+	$('#entityMenu').on('click', 'li', function (event) {
+		event.stopPropagation();
+		$(this).toggleClass('open').children('ul').toggle('fast','linear');
+		$(this).siblings().removeClass('open').find('ul:visible').toggle('fast','linear');
+	})
 }
 
 
@@ -204,7 +210,7 @@ function render_resource_menu_init(domId) {
 	}
 	
 	// Otherwise, its a user package.  Search for all ancestors of given entity.
-	else {
+	if (!top.resource.ontology) {
 		for (const entity_id in specifications) {
 			const entity = specifications[entity_id];
 
@@ -260,10 +266,10 @@ function render_resource_accordion(entity_id, ontology) {
 */
 
 	return `
-		<li role="menuitem">
+		<li role="menuitem" >
 			<a href="#${entity.id}">${get_label(entity)}</a>
-			<ul class="side-nav" id="menu_${entity.id}" role="navigation"> <!--  class="accordion " data-accordion  -->
-				${subordinates_html} <!-- side-nav  data-submenu-toggle="true" -->
+			<ul class="side-nav" id="menu_${entity.id}" role="navigation">
+				${subordinates_html}
 			</ul>
 		</li>
 	`;
@@ -306,24 +312,39 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 					+ ' is a parent of itself and so is not re-rendered');
 				return ''
 			}
-
-			if (! (child.models || child.components)) {
+			let componentless = !child.components || child.components.length == 0;
+			if (!child.models && componentless) {
 				continue
 			}
 
-			let child_html = '';
+			let child_html = null;
 			let icon = '';
 			let label = get_label(child);
-			if (child.models) {
-				normalized_id = entity.id.replace(':','_');
-				child_html = render_resource_menu(child, depth + 1, ontology);
-				icon = ` <a href="#${normalized_id}" class="view"><i class="fi-magnifying-glass"></i></a>`
+			let prefix = '';
+			let children = '';
+			let child_icon = '';
+			// If an item doesn't have components, then its link should just pertain to opening menu.
+			normalized_id = entity.id.replace(':','_');
+
+			child_html = render_resource_menu(child, depth + 1, ontology);
+			if (child_html) {
+				children = 'class="children" '
+				child_icon = '<i class="fi-play"></i>'
+				child_html = `<ul class="side-nav" id="${child.id}" role="navigation">${child_html}</ul>`
+				icon = ` <a href="#${child.id}" class="view"><i class="fi-magnifying-glass"></i></a>`
+			}
+
+			if (componentless) {
+				icon = '';
+				prefix = 'menu_';
+				if (!child_html)
+					continue
 			}
 
 			html += `
-				<li class="active" data-ontology-id="${normalized_id}" role="menuitem">
-					${icon}<a href="#${child.id}">${label}</a>
-					<ul class="side-nav" id="menu_${child.id}" role="navigation">${child_html}</ul> <!-- class="accordion"  data-accordion  class="menu vertical nested" -->
+				<li data-ontology-id="${child.id}" role="menuitem" ${children}>
+					${child_icon}${icon}<a href="#${prefix}${child.id}">${label}</a>
+					${child_html}
 				</li>
 			`;
 		}

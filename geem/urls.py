@@ -33,4 +33,5 @@ urlpatterns = [
     path('accounts/login', auth_views.LoginView.as_view(template_name='geem/login.html'), name='login'),
     path('accounts/logout', auth_views.LogoutView.as_view(next_page=reverse_lazy('portal')), name='logout'),
 
+    path('get_uploaded_validation_data', views.get_uploaded_validation_data)
 ]

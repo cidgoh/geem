@@ -15,6 +15,11 @@
 
     <script src="{% static "geem/js/vendor-5.5.3/modernizr.js" %}"></script>
 
+    {#AgGrid#}
+    <script src="https://unpkg.com/@ag-grid-community/all-modules/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@ag-grid-community/all-modules/dist/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css">
+
   </head>
   <body>
     <div class="row" style="background-color:#2199e8;color:white">
@@ -143,16 +148,16 @@
         <div id="formEntityLabel"></div>
 
         <ul id="content-tabs" class="tabs" data-tab>
-          <li class="tab-title small"><a href="#panelContent">Form View</a></li>
+          <li class="tab-title small active"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <!-- <li class="tab-title small"><a href="#panelValidation">Validator</a></li> -->
+          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
         </ul>
 
-        <div id="tabsContent" class="tab-content" aria-hidden="true">
+        <div id="tabsContent" class="tabs-content">
 
           <!-- ************************* FORM VIEW ******************* -->
-          <div class="content" id="panelContent" aria-hidden="true">
+          <div class="content active" id="panelContent">
 
             <form id="mainForm" data-abide="ajax" novalidate><!-- novalidate prevents HTML5 validation -->
             </form> 
@@ -194,7 +199,7 @@
           </div><!-- end panel content -->
 
           <!-- ******************* DATA SPECIFICATION **************** -->
-          <div class="content" id="panelDataSpecification" aria-hidden="true">
+          <div class="content" id="panelDataSpecification">
 
             <div class="row collapse">
               <div class="large-9 columns">
@@ -242,16 +247,25 @@
           </div>
 
           <!-- ******************* VALIDATION **************** -->
-          <div class="content" id="panelValidation" aria-hidden="true">
+          <div class="content" id="panelValidation">
 
-            <div id="helpValidation" class="infoBox">
-              Coming soon - Validate tabular data according to ontology specification
+            <div class="row">
+              <div class="small-6 columns">
+                <label for="validation_upload" class="button">Upload (.csv)</label>
+                <input type="file" id="validation_upload" class="show-for-sr">
+              </div>
+              <div class="small-6 columns">
+                <button id="validation_download">Download (.csv)</button>
+              </div>
             </div>
+
+            <div id="validation_grid" class="ag-theme-balham"></div>
+
           </div>
 
 
         <!-- ******************* DISCUSSION **************** -->
-        <div class="content" id="panelDiscuss" aria-hidden="true">
+        <div class="content" id="panelDiscuss">
           
           <div class="infoBox">
             <p>Discussion about a selected ontology term occurs here. One can select a term by
@@ -310,6 +324,7 @@
     <script src="{% static "geem/js/geem_resource.js" %}"></script>
     <script src="{% static "geem/js/geem_form.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>
+    <script src="{% static "geem/js/geem_validation.js" %}"></script>
     <script src="{% static "geem/js/geem_cart.js" %}"></script>
     <script src="{% static "geem/js/geem_search.js" %}"></script>
     <script src="{% static "geem/js/geem_lookup.js" %}"></script>

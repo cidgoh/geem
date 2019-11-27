@@ -3,7 +3,7 @@ import json
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope, OAuth2Authentication
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
@@ -50,7 +50,25 @@ def modal_lookup(request):
     return render(request, 'geem/templates/modal_lookup.html', context={})
 
 def resource_summary_form(request):
+
     return render(request, 'geem/templates/resource_summary_form.html', context={})
+
+
+@api_view(['POST'])
+def get_uploaded_validation_data(request):
+    """Output data from uploaded validation file in string format.
+
+    Should only be called by front-end method ``update_grid``.
+
+    :param rest_framework.request.Request request: Front-end request
+        containing uploaded file
+    :returns: Response containing file data in string format
+    :rtype: rest_framework.response.Response
+    """
+    uploaded_file = request.FILES['file']
+    uploaded_file_str = uploaded_file.read()
+    return Response(uploaded_file_str, status=status.HTTP_200_OK)
+
 
 class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin): # mixins.UpdateModelMixin, 
     """

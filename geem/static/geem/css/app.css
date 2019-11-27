@@ -11,7 +11,7 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 #resourceForm .columns {padding-right:0!important}
 
 
-#formControls {padding-left:20px;}
+#formControls {padding:20px; border-top:1px solid silver;}
 #panelContent.disabled ul#content-tabs, #panelContent.disabled #tabsContent {display:none;}
 
 /* TABS */
@@ -347,6 +347,7 @@ ul.side-nav a.view {
 
 ul#entityMenu.side-nav {margin:0;padding:0;}
 ul#entityMenu.side-nav li {clear:both; text-transform: capitalize; }
+ul#entityMenu.side-nav li:not(.linkable) > a {color:black !important; }
 ul#entityMenu.side-nav li.children > i.fi-play {
 	float:right;
 	font-size:1.3rem;
@@ -355,7 +356,7 @@ ul#entityMenu.side-nav li.children > i.fi-play {
 }
 ul#entityMenu.side-nav li.children.open > i.fi-play {transform: rotate(90deg)}
 #panelEntities > ul {padding:0}
-#panelEntities > ul > li > a {
+#panelEntities > ul > li.grouped > a {
 	font-size:1.2rem;
 	background-color:#E8E8E8;
 } 

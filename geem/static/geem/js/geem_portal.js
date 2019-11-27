@@ -29,6 +29,7 @@ form = {}
 cart = []
 
 ROOT_ID = 'OBI:0000658' //"data representation model" 
+ROOT_SPECIFICATION_IDS = ['NCIT:C103180','GENEPIO:0000106','GENEPIO:0001342']
 
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
 // Hardcode properties to show in entity detail modal dialog.
@@ -93,7 +94,7 @@ function resource_callback(resource) {
 	render_resource_menu_init('#entityMenu')
 	// Add jquery control to toggle menu, begining with hidden menu
 	$('#entityMenu > li ').find('ul').hide();
-	$('#entityMenu').on('click', 'li', function (event) {
+	$('#entityMenu').off().on('click', 'li', function (event) {
 		event.stopPropagation();
 		$(this).toggleClass('open').children('ul').toggle('fast','linear');
 		$(this).siblings().removeClass('open').find('ul:visible').toggle('fast','linear');
@@ -182,22 +183,21 @@ function render_resource_menu_init(domId) {
 	Otherwise display any top-level model.
 	*/
 
-	var entities = {}
 
-	var html = ''
+	let html = '';
 
-	let specifications;
-	if (top.resource.contents && top.resource.contents.specifications) {
-		specifications = top.resource.contents.specifications
+	/* Begin with display of any available entities under  'data representation model' if any
+		NCIT_C103180 - Data Standard
+		GENEPIO_0000106 - Draft Data Standard
+		GENEPIO_0001342 - Data Standard Component
+	*/
+	for (const entity_id of ROOT_SPECIFICATION_IDS) {
+		html += render_resource_accordion(entity_id)
 	}
 
-	// Begin with all models (children) under 'data representation model' if any
-	if (ROOT_ID in specifications) {
-		entities = top.resource.contents.specifications[ROOT_ID].models
-	}
-
+	/*
 	// Otherwise, if ontology, search for all top-level models.
-	else if (top.resource.ontology) {
+	if (top.resource.ontology) {
 		// Search for any top level model
 		for (const entity_id in specifications) {
 			const entity = specifications[entity_id];
@@ -208,9 +208,22 @@ function render_resource_menu_init(domId) {
 			}
 		}
 	}
-	
-	// Otherwise, its a user package.  Search for all ancestors of given entity.
+	*/
+
+	/* If it is a user package, for all items in specifications, add parent to stack.
+	If parent can be added, remove child. Then render stack based on items.
+	Take out top level standard classes above as they have already been done.
+	*/
 	if (!top.resource.ontology) {
+		
+		let entities = {};
+		let specifications;
+
+		if (top.resource.contents && top.resource.contents.specifications) {
+			specifications = top.resource.contents.specifications
+		}
+
+
 		for (const entity_id in specifications) {
 			const entity = specifications[entity_id];
 
@@ -229,10 +242,12 @@ function render_resource_menu_init(domId) {
 
 			if (!specified_parents.length) entities[entity_id] = []
 		}
-	}
 
-	for (const entity_id in entities) {
-		html += render_resource_accordion(entity_id, top.resource.ontology)
+		for (const entity_id in entities) {
+			console.log(entity_id)
+			html += render_resource_menu(entity_id)
+		}
+
 	}
 
 	if (html == '') 
@@ -242,7 +257,6 @@ function render_resource_menu_init(domId) {
 
 }
 
-
 /**
  * Render top-level item (accordion), and underlying hierarchic menu
  * @param {string} entity_id - ID of top-level item
@@ -250,26 +264,18 @@ function render_resource_menu_init(domId) {
  * 	ontology or not
  * @returns {string} HTML to be rendered
  */
-function render_resource_accordion(entity_id, ontology) {
+function render_resource_accordion(entity_id) {
+
 	const entity = top.resource.contents.specifications[entity_id];
-	const normalized_id = entity.id.replace(':','_');
 
-	const subordinates_html = render_resource_menu(entity, undefined, ontology);
-
-	// If there are no subordinates, accordion must direct to its
-	// own page.
-/*	if (subordinates_html === '') {
-		$('#entityMenu').on('click', `[href=#menu_${normalized_id}]`, function () {
-			window.location.hash = entity.id
-		});
-	}
-*/
+	if (!entity)
+		return ''
 
 	return `
-		<li role="menuitem" >
+		<li role="menuitem" class="grouped">
 			<a href="#${entity.id}">${get_label(entity)}</a>
 			<ul class="side-nav" id="menu_${entity.id}" role="navigation">
-				${subordinates_html}
+				${render_resource_menu(entity.id)}
 			</ul>
 		</li>
 	`;
@@ -285,18 +291,20 @@ function render_resource_accordion(entity_id, ontology) {
  * 	ontology or not
  * @returns {string} HTML to be rendered
  */
-function render_resource_menu(entity=null, depth=0, ontology) {
-	let html = '';
+function render_resource_menu(entity_id, depth=0) {
 
+	const entity = top.resource.contents.specifications[entity_id];
+	if (!entity)
+		return '';
+
+	let html = '';
 	let subordinate_ids = [];
-	if (ontology) {
-		// Only list item if it has components or models
-		if ('models' in entity) 
-			subordinate_ids = Object.keys(entity.models)
-	} 
-	else {
-		if ('models' in entity) 
-			subordinate_ids = Object.keys(entity.models);
+
+	// Only list item if it has components or models
+	if ('models' in entity) 
+		subordinate_ids = Object.keys(entity.models)
+
+	if (!top.resource.ontology) {
 		if ('components' in entity) {
 			subordinate_ids = subordinate_ids.concat(Object.keys(entity.components))
 		}
@@ -308,8 +316,7 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 		if (child) {
 			// Infinite loop possible
 			if ('parent' in child && child.parent.id === entity.id) {
-				console.log('Node: ' + entity.id
-					+ ' is a parent of itself and so is not re-rendered');
+				console.log('Node: ' + entity.id + ' is a parent of itself and so is not re-rendered');
 				return ''
 			}
 			let componentless = !child.components || child.components.length == 0;
@@ -318,32 +325,37 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 			}
 
 			let child_html = null;
-			let icon = '';
+			//let icon = '';
 			let label = get_label(child);
 			let prefix = '';
 			let children = '';
 			let child_icon = '';
+			let linkable = '';
+
 			// If an item doesn't have components, then its link should just pertain to opening menu.
 			normalized_id = entity.id.replace(':','_');
 
-			child_html = render_resource_menu(child, depth + 1, ontology);
+			child_html = render_resource_menu(child.id, depth + 1);
 			if (child_html) {
-				children = 'class="children" '
+				children = ' children'
 				child_icon = '<i class="fi-play"></i>'
 				child_html = `<ul class="side-nav" id="${child.id}" role="navigation">${child_html}</ul>`
-				icon = ` <a href="#${child.id}" class="view"><i class="fi-magnifying-glass"></i></a>`
+				//icon = ` <a href="#${child.id}" class="view"><i class="fi-magnifying-glass"></i></a>`
 			}
 
 			if (componentless) {
-				icon = '';
+				//icon = '';
 				prefix = 'menu_';
 				if (!child_html)
 					continue
 			}
+			else {
+				linkable = ' linkable'
+			}
 
 			html += `
-				<li data-ontology-id="${child.id}" role="menuitem" ${children}>
-					${child_icon}${icon}<a href="#${prefix}${child.id}">${label}</a>
+				<li data-ontology-id="${child.id}" role="menuitem" class="${linkable}${children}">
+					${child_icon}<a href="#${prefix}${child.id}">${label}</a>
 					${child_html}
 				</li>
 			`;

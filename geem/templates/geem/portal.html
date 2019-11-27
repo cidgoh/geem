@@ -68,14 +68,14 @@
 
           <!-- ******************* ENTITY MENU ********************* -->
           <div class="content" id="panelEntities"> 
-            <ul class="accordion" data-accordion id="entityMenu" ></ul> <!-- data-deep-link data-multi-open="true" -->
-            <!-- <ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul> -->
+            <!-- ul class="accordion" id="entityMenu" data-accordion ></ul -->
+            <ul class="side-nav" id="entityMenu" ></ul>
           </div>
 
           <!-- ************************ SEARCH ********************* -->
           <div class="content" id="panelSearch">
 
-            <form data-abide="" novalidate="novalidate" lpformnum="2">
+            <form><!--  lpformnum="2" data-abide="" novalidate="novalidate"  -->
               <input id="searchField" type="text" placeholder="Search for a term (3 characters or more)">
               <div class="input-group">
                <div class="switch tiny" style="float:left;margin-right:10px;margin-top:5px">
@@ -154,7 +154,8 @@
           <!-- ************************* FORM VIEW ******************* -->
           <div class="content" id="panelContent" aria-hidden="true">
 
-            <form id="mainForm" data-abide ></form> <!-- ="ajax" ; novalidate prevents HTML5 validation -->
+            <form id="mainForm" data-abide="ajax" novalidate><!-- novalidate prevents HTML5 validation -->
+            </form> 
 
             <!-- ************************* FORM CONTROLS ******************* -->
             <div id="formControls">
@@ -299,7 +300,8 @@
 
     <script src="{% static "geem/js/vendor-5.5.3/jquery.js" %}"></script>
     <script src="{% static "geem/js/foundation-5.5.3/foundation.min.js" %}"></script>
-
+    <!--<script src="{% static "geem/js/foundation-5.5.3/foundation.abide.js" %}"></script>  Already in foundation.min -->
+    <script src="{% static "geem/js/foundation-5.5.3/foundation.accordionMenu.js" %}"></script>
     <script src="{% static "geem/js/vendor/foundation-datepicker.min.js" %}"></script>
     <script src="{% static "geem/js/vendor/what-input.js" %}"></script>
     <script src="{% static "geem/js/vendor/js-yaml.min.js" %}"></script> 

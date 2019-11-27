@@ -11,6 +11,8 @@ $( document ).ready(function($) {
 
   OntologyForm.init_foundation_settings()
 
+  $(document).foundation({abide : top.settings})
+
   api = new GeemAPI()
 
   // Bring in shared templates
@@ -31,13 +33,13 @@ $( document ).ready(function($) {
   // GEEM focuses on entities by way of a URL with hash #[entityId]
   // A change in browser URL #[ontologyID] will load new form
   // AS LONG AS #[ontologyID] contains a ":" - a very specific format
-  // for now. 
-  $(window).on('hashchange', check_entity_id_change(render_standalone_form) );
+  // for now.
+  //FOR SOME REASON $(window).bind(...) or $(window).on(...) don't work
+  //$(window).on('hashchange', check_entity_id_change(null, render_standalone_form) );
 
-  $(document).foundation()
-
-  // ISSUE: sometimes we need this... but not always?
-  //check_entity_id_change(render_standalone_form)
+  window.onhashchange = function() {check_entity_id_change(null, render_standalone_form)}
+  // On first visit, if there's ALREADY a #ONTOLOGY:ID hash in URL then render that form.
+  check_entity_id_change(null, render_standalone_form)
 
 });
 
@@ -46,25 +48,28 @@ $( document ).ready(function($) {
 function render_standalone_form() {
 
   // No form callback currently needed
-  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings) 
-  top.form.render_entity(top.focusEntityId, form_standalone_callback)
-  render_section_menu()
+  top.form = new OntologyForm("#mainForm", top.resource, top.formSettings);
+  top.form.render_entity(top.focusEntityId, form_standalone_callback);
+  top.form.formDomId.bind('valid.fndtn.abide,formvalid.zf.abide', function (e) {
+      // Valid form submit triggers display of user's sample data entry.
+      set_modal_download(get_data_specification('form_submission.json'));
+  });
+  top.form.formDomId.bind('submit', function (e) {
+      // Otherwise if URL is like form.html#ONTOLOGY:ID it will reload with a 
+      // ? like "form.html?#ONTOLOGY:ID" thus shortcutting set_modal_download()
+      return false;
+  });
+
+  render_section_menu();
 
   // Clear any previous specification menu selection.
-  $('#specificationType')[0].selectedIndex = 0
-
-  $('#buttonFormSubmit').on('click', function () {
-
-    // VALIDATE!!!!!
-
-    // Submit button on form triggers download of user's sample data entry.
-    set_modal_download(get_data_specification('form_submission.json'))
-  })
+  $('#specificationType')[0].selectedIndex = 0;
 
 }
 
 function form_standalone_callback(form){
-  const entity = get_form_specification_component(form.entityId)
+  // Slip form definition into new leading paragraph
+  const entity = get_form_specification_component(form.entityId);
   $('#mainForm > div.field-wrapper > label')
     .attr('id','formEntityLabel')
     .after('<p>' + (entity.definition  || '') + '</p>') 

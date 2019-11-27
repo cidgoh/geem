@@ -925,13 +925,15 @@ function get_specification_form_data(domId) {
 	   	organized by hierarchy of ontology ids as they appear in 
 	   	input id attribute (separated by forward slashes)
 	*/
-	var obj = {}
+	var obj = {} // Empty object that will store form data.
 
 	// Provides linear list of inputs from top to bottom of form
 	$.each($(domId).find("input:not(.button), select, .field-wrapper.array, .field-wrapper.array > .inputBlock"), function(i,item) {
 
 		var focus = obj
-		var value = $(item).val() // Note: multi-select list returned as array
+		// NOTE: if one doesn't convert the field value to a string
+		// right away, then 
+		var value = $(item).val().toString() // Note: multi-select list returned as array
 		var id = $(item).attr('data-ontology-id')
 		if (!id) {
 			// inputBlock is associated with parent id
@@ -956,14 +958,12 @@ function get_specification_form_data(domId) {
 				if (ptr == path.length-1) {
 					// Set up array to catch multiple records
 					if ($(item).is('.field-wrapper.array')) {
-						//console.log('created array for', item_id)
 						focus[item_id] = []
 						continue
 					}
 					// input blocks gather their inputs.
 					// ASSUMES focus .array established/found by parent
 					if ($(item).is('.inputBlock')) {
-						//console.log('added input block object for', item_id)
 						focus[item_id].push({})
 						continue
 					}

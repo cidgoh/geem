@@ -1224,12 +1224,14 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 
 	if (!entityId) {
 		top.focusEntityId = null;
+
 		//console.log("Couldn't find " + entityId) // No work to do here
 		if (top.derender_entity_form) {
 			derender_entity_form(); // Only for geem_portal.js
 			reset_specification_tab();
 			$('a[href$="panelContent"]').click();
 		}
+
 		return false
 	}
 

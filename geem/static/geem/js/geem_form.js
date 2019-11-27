@@ -96,8 +96,10 @@ function OntologyForm(domId, resource, settings, callback) {
 
 		 	// Reinitialize form since deleted above. FUTURE: use reInit()
 		 	// Critical for establishing type-as-you-go validation; Foundation 5.5.3
-		 	// ISSUE: Portal.html doesn't do type-as-you-go; probably other <form> elements messing it up.
 
+		 	// For some reason this line needs to be run on new form if it 
+		 	// hasn't been accessed through menu? for portal to do label hover and 
+		 	// type as you go validation???
 		 	self.formDomId.foundation({abide : top.settings}) // Makes tabs work, but no validate as you go
 		 	self.formDomId.foundation('abide', 'reflow') // Makes validate as you go, but no form tabs work.
 

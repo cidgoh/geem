@@ -1,7 +1,7 @@
 /********************** Ontology Entity Mart Prototype ************************
 
-	This script provides the engine for displaying OBOFoundry.org compatible 
-	ontology .owl files that have been marked up according to the Genomic
+	This script provides the engine for displaying ontology .owl file and user 
+	package specifications that have been marked up according to the Genomic
 	Epidemiology Entity Mart (GEEM) coding system (annotations and a few 
 	relations), allowing one to search and browse any data representation model
 	items therein, and related numeric, categorical and textual datums.
@@ -9,14 +9,13 @@
 	This code supports a portal.html page for selecting a given ontology, 
 	navigating through its various GEEM annotated specs, enabling the user to
 	view html forms and tabular/json etc. specifications, and create their own 
-	downloadable packages
+	downloadable packages.
 
 	As well a form.html page is available for focusing on a particular spec.
 
-    Author: Damion Dooley
+    Author: Damion Dooley, Ivan Gill
 	Project: genepio.org/geem
-	Updated: July 13, 2018
-	
+
 */
 
 /*********** ALL THE SETUP ***************************************************/
@@ -28,9 +27,22 @@ formSettings = {}
 form = {}
 cart = []
 
+// OBI data representation model class.
+ROOT_ID = 'OBI:0000658'
+
+/**
+ * List of GEEM specific classes under 'data representation model'
+ * All user packages should include these three classes for organizational purposes.
+ *   NCIT_C103180 - Data Standard
+ *   GENEPIO_0000106 - Draft Data Standard
+ *   GENEPIO_0001342 - Data Standard Component
+*/
+ROOT_SPECIFICATION_IDS = ['NCIT:C103180','GENEPIO:0000106','GENEPIO:0001342']
+
 ONTOLOGY_LOOKUP_SERVICE_URL = 'https://www.ebi.ac.uk/ols/search?q='
+
 // Hardcode properties to show in entity detail modal dialog.
-RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasExactSynonym','hasNarrowSynonym']
+RENDER_PROPERTIES = ['hasDbXref','hasSynonym','hasBroadSynonym','hasExactSynonym','hasNarrowSynonym']
 
 $( document ).ready(function($) {
 	
@@ -62,13 +74,10 @@ $( document ).ready(function($) {
 	init_validation_tab()
 
 
+	// Initializes Zurb Foundation according to GEEM settings
 	// See configuration: https://foundation.zurb.com/sites/docs/v/5.5.3/javascript.html
-	// Initializes Zurb Foundation settings (but not foundation itself)
-
-	$(document).foundation()
+	$(document).foundation({abide : top.settings})
 	
-	//$(document).foundation('abide')
-
 	// GEEM focuses on entities by way of a URL with hash #[entityId]
 	$(window).on('hashchange', function() {
 		check_entity_id_change(resource_callback, render_entity_form)
@@ -79,18 +88,17 @@ $( document ).ready(function($) {
 
 });
 
-
+/**
+ * This function is triggered after a fetch for a particular resource by id.
+*/
 function resource_callback(resource) {
-	/* This function is triggered after a fetch for a particular resource by id.
 
-	*/
-	
 	$('#resourceTabs').removeClass('disabled')
 	//$('#resourceTabContent').show() //, #panelLibrary - don't include this or display="block" confounds tab programming
 	$('#specificationSummaryTabLink').click() // Shows tab that has resource form
-	// Prepare browsable top-level list of ontology items
 	render_resource_form()
-	render_resource_menu_init()
+	// Prepare browsable top-level list of ontology items
+	render_resource_menu_init('#entityMenu')
 
 }
 
@@ -98,18 +106,22 @@ function resource_callback(resource) {
 function render_entity_form() {
 
 	$('#specificationSourceInfoBox').hide()
-	//$('#content').removeClass('disabled')
 
 	// Providing form_callback to add shopping cart to form items.
 	top.form = new OntologyForm('#mainForm', top.resource.contents, top.formSettings, portal_entity_form_callback) 
 
 	top.form.render_entity(top.focusEntityId)
 
-	$(document).foundation()
-
-	//$('#mainForm').foundation('abide','events');
-	// See init_form_tab() for validation, submit setup.
-
+	// Wire submit button to show GEEM example form submit contents in popup.
+	top.form.formDomId
+		.bind('valid.fndtn.abide,formvalid.zf.abide', function (e) {
+	    	set_modal_download(get_data_specification('form_submission.json'));
+		})
+		.bind('submit', function (e) {
+	    	// Otherwise if URL is like form.html#ONTOLOGY:ID it will reload with a 
+	    	// ? like "form.html?#ONTOLOGY:ID" thus shortcutting set_modal_download()
+	    	return false;
+	  	});
 }
 
 
@@ -118,7 +130,7 @@ function render_entity_form() {
  */
 function derender_entity_form() {
 	$('#mainForm').empty();
-	$('#formControls').empty();
+	//$('#formControls').hide(); // Need form controls for full exploration of a form
 	$('#specificationSourceInfoBox').show();
 }
 
@@ -162,128 +174,121 @@ function portal_entity_form_callback(form) {
 
 /********************* Resource Entity Tree Menu Display *******************/
 
-function render_resource_menu_init() {
-	/* Prepare browsable top-level list of ontology items
-	Provide context of form to populate. Passes form_callback, name of 
-	function in this module for OntologyForm to return to when complete.
+/** 
+ * Prepare browsable top-level list of ontology items
+ * For all ontologies and user packages, shows OBI "data representation model" 
+ * classes that GEEM uses (ROOT_SPECIFICATION_IDS), as well as any top-level
+ * items users may have that are not set as subclasses of above.
+ *
+ * @param {string} domId - id of ul menu element to initialize.
+*/
+function render_resource_menu_init(domId) {
 
-	If loaded resource has a "data representation model" then display kids.
-	Usually this means its an ontology.
-	Otherwise display any top-level model.
+	let html = render_data_standard_menu(ROOT_SPECIFICATION_IDS, 'ontology-spec')
+
+	/* For all items in specifications that don't fall under above data 
+	   standard classes, add root ancestor to stack. If parent can be added,
+	   remove child. Then render stack based on items.
 	*/
+	if (!top.resource.ontology && top.resource.contents && top.resource.contents.specifications) {
+		
+		let entities = [];
+		let specifications = top.resource.contents.specifications;
 
-	//Have to reinsert this or reload doesn't fire up menu (zurb issue?)
-	//$('#panelEntities').html('<ul class="vertical menu" id="entityMenu" data-accordion-menu data-deep-link data-multi-open="true"></ul>')
-	//$('#panelEntities').html('<ul class="vertical menu drilldown" data-drilldown id="entityMenu"></ul>')
-
-	var entities = {}
-	var root_id = 'OBI:0000658' //"data representation model" 
-	var html = ''
-
-	let specifications;
-	if (top.resource.contents && top.resource.contents.specifications) {
-		specifications = top.resource.contents.specifications
-	}
-
-	if (root_id in specifications) {
-		entities = top.resource.contents.specifications[root_id].models
-	}
-	// Ontology
-	else if (top.resource.ontology) {
-		// Search for any top level model
-		for (const entity_id in specifications) {
-			const entity = specifications[entity_id];
-			// If a model, and not subordinate to some other model
-			if (entity.datatype === 'model' && (!('parent' in entity) || !(entity['parent']
-				in specifications))) {
-				entities[entity_id] = []
-			}
-		}
-	}
-	// Not an ontology
-	else {
 		for (const entity_id in specifications) {
 			const entity = specifications[entity_id];
 
 			let parents = [];
-			if ('parent' in entity) {
-				parents.push(entity.parent)
+			if (entity.parent) {
+				parents.push(entity.parent);
 			}
-			if ('otherParent' in entity) {
-				parents = parents.concat(entity.otherParent)
+			if (entity.otherParent) {
+				parents = parents.concat(entity.otherParent);
 			}
-			if ('member_of' in entity) {
-				parents = parents.concat(entity.member_of)
+			if (entity.member_of) {
+				parents = parents.concat(entity.member_of);
 			}
 
+			// Winnow parents list down to those that have key in specifications
 			const specified_parents = parents.filter(parent => parent in specifications);
 
-			if (!specified_parents.length) entities[entity_id] = []
+			// If entity is top level, i.e. no viable parents, add it to menu
+			if (specified_parents.length == 0) {
+				entities.push(entity_id);
+			}
 		}
-	}
 
-	for (const entity_id in entities) {
-		html += render_resource_accordion(entity_id, top.resource.ontology)
+		html += render_data_standard_menu(entities, 'user-spec')
+
 	}
 
 	if (html == '') 
 		html = '<div class="infoBox">This resource does not contain any specifications.</div>'
 
-	$("#entityMenu").html(html)
+	$(domId).html(html);
+
+	// Add jquery control to toggle menu, begining with hidden menu
+	$(domId).children('li').find('ul').hide();
+	$(domId).off().on('click', 'li', function (event) {
+		event.stopPropagation();
+		$(this).toggleClass('open').children('ul').toggle('fast','linear');
+		$(this).siblings().removeClass('open').find('ul:visible').toggle('fast','linear');
+	})
 
 }
 
-
 /**
- * Render top-level item (accordion), and underlying hierarchic menu
- * @param {string} entity_id - ID of top-level item
- * @param {boolean} ontology - Whether top-level item comes from an
- * 	ontology or not
+ * Render top-level ROOT_SPECIFICATION_IDS items and underlying hierarchic menu
+ * @param {boolean} grouping - add li.grouping class to item for styling.
  * @returns {string} HTML to be rendered
  */
-function render_resource_accordion(entity_id, ontology) {
-	const entity = top.resource.contents.specifications[entity_id];
-	const normalized_id = entity.id.replace(':','_');
+function render_data_standard_menu(entity_ids, css_class=null) {
 
-	const subordinates_html = render_resource_menu(entity, undefined, ontology);
-
-	// If there are no subordinates, accordion must direct to its
-	// own page.
-	if (subordinates_html === '') {
-		$('#entityMenu').on('click', `[href=#menu_${normalized_id}]`, function () {
-			window.location.hash = entity.id
-		});
-	}
-
-	return `
-		<li class="accordion-navigation small">
-			<a href="#menu_${normalized_id}">${get_label(entity)}</a>
-			<div id="menu_${normalized_id}" class="content">
-				<ul class="side-nav">${subordinates_html}</ul>
-			</div>
-		</li>
-	`;
-}
-
-
-/**
- * Recursively render subordinates under top-level items in browse-tab.
- * @param {Object} entity - Top-level item
- * @param {number} depth - Accumulator used in recursion to render
- * 	subordinates with appropriate indentation
- * @param {boolean} ontology - Whether top-level item comes from an
- * 	ontology or not
- * @returns {string} HTML to be rendered
- */
-function render_resource_menu(entity=null, depth=0, ontology) {
 	let html = '';
 
+	for (const entity_id of entity_ids) {
+		const entity = top.resource.contents.specifications[entity_id];
+		if (entity) {
+			let child_icon = '';
+			let menu_content = render_resource_menu(entity.id);
+			if (menu_content)
+				child_icon = '<i class="fi-play"></i>';
+			let css_class2 = css_class ? ` class="${css_class}"` : '';
+			html += 
+				`<li role="menuitem"${css_class2}>
+					${child_icon}<a href="#${entity.id}">${get_label(entity)}</a>
+					<ul class="side-nav" id="menu_${entity.id}" role="navigation">
+						${menu_content}
+					</ul>
+				</li>
+			`;
+		}
+	}
+	return html;
+}
+
+
+/**
+ * Recursively render subordinates under given item in browse-tab.
+ * @param {string} entity_id - a specification item.
+ * @param {number} depth - Accumulator used in recursion to render
+ * 	subordinates with appropriate indentation
+ * @returns {string} HTML to be rendered
+ */
+function render_resource_menu(entity_id, depth=0) {
+
+	const entity = top.resource.contents.specifications[entity_id];
+	if (!entity)
+		return '';
+
+	let html = '';
 	let subordinate_ids = [];
-	if (ontology) {
-		// Only list item if it has components or models
-		if ('models' in entity) subordinate_ids = Object.keys(entity.models)
-	} else {
-		if ('models' in entity) subordinate_ids = Object.keys(entity.models);
+
+	// List item if it has components or models
+	if ('models' in entity) 
+		subordinate_ids = Object.keys(entity.models)
+
+	if (!top.resource.ontology) {
 		if ('components' in entity) {
 			subordinate_ids = subordinate_ids.concat(Object.keys(entity.components))
 		}
@@ -295,22 +300,44 @@ function render_resource_menu(entity=null, depth=0, ontology) {
 		if (child) {
 			// Infinite loop possible
 			if ('parent' in child && child.parent.id === entity.id) {
-				console.log('Node: ' + entity.id
-					+ ' is a parent of itself and so is not re-rendered');
+				console.log('Node: ' + entity.id + ' is a parent of itself and so is not re-rendered');
 				return ''
 			}
+			let componentless = !child.components || child.components.length == 0;
+			if (!child.models && componentless) {
+				continue
+			}
 
-			let child_html = '';
+			let child_html = null;
 			let label = get_label(child);
-			if ('models' in child) {
-				child_html = render_resource_menu(child, depth + 1, ontology);
-				label += ' <i class="fi-magnifying-glass"></i>'
+			let prefix = '';
+			let children = '';
+			let child_icon = '';
+			let linkable = '';
+
+			// If an item doesn't have components, then its link should just pertain to opening menu.
+			normalized_id = entity.id.replace(':','_');
+
+			child_html = render_resource_menu(child.id, depth + 1);
+			if (child_html) {
+				children = ' children';
+				child_icon = '<i class="fi-play"></i>';
+				child_html = `<ul class="side-nav" role="navigation">${child_html}</ul>`;
+			}
+
+			if (componentless) {
+				prefix = 'menu_';
+				if (!child_html)
+					continue;
+			}
+			else {
+				linkable = ' linkable';
 			}
 
 			html += `
-				<li class="cart-item" data-ontology-id="${child.id}">
-					<a href="#${child.id}">${label}</a>
-					<ul class="side-nav">${child_html}</ul>
+				<li role="menuitem" class="${linkable}${children}">
+					${child_icon}<a href="#${prefix}${child.id}">${label}</a>
+					${child_html}
 				</li>
 			`;
 		}
@@ -473,6 +500,10 @@ function render_entity_relations(ontologyId) {
 }
 
 function render_relation_link(relation, entity) {
+
+	if (!entity)
+		return ''
+
 	// Used in search results
 	// Usually but not always there are links.  Performance boost if we drop this test.
 	var links = ('parent' in entity || 'member_of' in entity || 'otherParent' in entity)
@@ -572,48 +603,6 @@ function init_browse_tab() {
 
 function init_form_tab() {
 
-	/* Wire form's submit button to show GEEM example form submit contents in popup.*/
-	$('#mainForm').on('click', '.buttonFormSubmit', function (e) {  
-		e.preventDefault();
-		$('#mainForm').foundation("validateForm")
-		set_modal_download(get_data_specification('form_submission.json'))
-		return false
-	})
-
-	// Form validation triggers constructed once, not every time its rendered
-	$('#mainForm').on('forminvalid.zf.abide,invalid,invalid.fndtn.abide', function(e) {
-		e.preventDefault();
-		console.log("invalid trigger"); 
-		alert("invalid trigger")
-	});
-	$('#mainForm').on('valid,valid.fndtn.abide', function(e) {
-		e.preventDefault();
-		console.log("valid trigger"); 
-		alert("valid trigger")
-	});
-	$('#mainForm').on('submit', function(e) {
-		//e.preventDefault();
-		console.log("submit triggered");
-		// NOW VALIDATE
-		$('#mainForm').foundation("validateForm")
-	});
-
-	$(document).bind('invalid.zf.abide',function(e) {
-  		console.log("Sorry, "+e.target.id+" is not valid");
-	});
-	// to submit via ajax, add the 2 bindings below.  
-	/*
-	$(document)
-	.bind("submit", function(e) {
-	  e.preventDefault();
-	  console.log("submit intercepted");
-	  $('#mainForm').foundation("validateForm")
-	})
-	.bind("formvalid.zf.abide", function(e,$form) {
-	  // ajax submit
-	});
-	*/
-
 	// In form display area, when "toggle specification details" is on,
 	// provides hover view of item's ontology details
 	$("#tabsContent").on('mouseenter', 'i.fi-magnifying-glass', render_display_context)
@@ -645,7 +634,6 @@ function init_form_tab() {
 		top.formSettings.minimalForm = $(this).is(':checked')
 		top.form.render_entity()
 	})
-
 
 }
 

@@ -11,7 +11,7 @@ div.field.required > label > div.input-group > input{border-left:3px solid orang
 #resourceForm .columns {padding-right:0!important}
 
 
-#formControls {padding-left:20px;}
+#formControls {padding:20px; border-top:1px solid silver;}
 #panelContent.disabled ul#content-tabs, #panelContent.disabled #tabsContent {display:none;}
 
 /* TABS */
@@ -82,6 +82,9 @@ form i.fi-shopping-cart {float:right; clear:left; color:lightgreen; font-size:1.
 div.field-wrapper.include > div.columns > div.row > i.fi-shopping-cart {color:green}
 div.field-wrapper.exclude > div.columns > div.row > i.fi-shopping-cart {color:red}
 
+/* main form legend */
+#formControls i.fi-shopping-cart.include {color:green}
+#formControls i.fi-shopping-cart.exclude {color:red}
 
 a.icon {font-size:1.5rem;float:right;margin-top:-5px;margin-left:20px;color:#2199e8;cursor:pointer;}
 #searchResults {clear:both;}
@@ -295,6 +298,7 @@ ul.disabled li a {opacity:0.3;}
 .removeInputElement {float:right;color:navy;cursor:pointer;background-color:lightblue;width:2rem;text-align:center;}
 
 label.error small.error {display:inline !important;margin-left:10px;}
+label.error > span.has-tip {color:red}
 
 #entityMenu ul {margin-top:0!important;padding-top:0;}
 #entityMenu ul > li > ul {margin-left:15px !important;padding:0;}
@@ -329,3 +333,44 @@ form .row .row {margin:0 0 5px 0 !important;}
 label[for='validation_upload'] {
 	text-transform: none;
 }
+
+
+.error input, .error textarea, .error select {
+    /* margin-bottom: 0; Overrides what Foundation is doing.  Foundation expects <span .error> to be at bottom of field input */
+    margin-bottom:1rem;
+ }
+
+/* Fix for foundation 5.5 lack of accordion menu */
+ul.side-nav a.view {
+	display:inline-block !important; 
+	font-size:1rem;
+	float:right;
+	/* background-color:transparent !important; */
+}
+
+ul#entityMenu.side-nav {margin:0;padding:0;}
+ul#entityMenu.side-nav li {clear:both; text-transform: capitalize; }
+ul#entityMenu.side-nav li:not(.linkable) > a {color:black !important; }
+ul#entityMenu.side-nav i.fi-play {
+	float:right;
+	font-size:1.3rem;
+	color:#008CBA;
+	margin:0.2rem 1.5rem 0.2rem 0.5rem;
+}
+ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
+
+#panelEntities > ul {padding:0}
+
+/* Specification organized under ontology data representation model class */
+#panelEntities > ul > li.ontology-spec > a {
+	font-size:1.2rem;
+	background-color:#E8E8E8;
+} 
+/* User package top-level specification */ 
+#panelEntities > ul > li.user-spec > a {
+	border:1px solid #008CBA;
+	border-radius: 7px;
+	margin:0.7rem;
+} 
+/* #panelEntities > ul > li > a + ul {visibility:hidden;} */
+

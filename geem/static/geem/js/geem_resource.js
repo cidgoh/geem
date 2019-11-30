@@ -105,14 +105,7 @@ function get_form_data(domId) {
 	ISSUE: 
 
 	*/
-	var data = {
-		'contents': {
-			'@context': 		{},
-			'specifications': 	{},
-			'metadata': 		{},
-			'customization':	{}
-		}
-	}
+	var data = {'contents': top.resource.contents}
 
 	domId.find('input,select,textarea').each(function() {
 		var field = $(this).attr('name')

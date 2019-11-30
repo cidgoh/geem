@@ -38,7 +38,7 @@ function update_grid(grid_options, data) {
 
 	const data_headers = data_matrix.shift();
 	const column_defs = data_headers.map(function (col) {
-		return {headerName: col, field: col}
+		return {headerName: col, field: col, editable: true}
 	});
 	grid_options.api.setColumnDefs(column_defs);
 

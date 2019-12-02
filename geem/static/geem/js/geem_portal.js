@@ -651,11 +651,16 @@ function init_specification_tab() {
 
 function init_validation_tab() {
 	$(document).ready(function () {
-		const grid_options = get_grid_options();
-		create_grid(grid_options);
+		const user_grid_options = create_grid_options();
+		create_user_grid(user_grid_options);
+
+		const ontology_grid_options = create_grid_options();
+		create_ontology_grid(ontology_grid_options)
+
 		$('#validation_download').click(function () {
-			grid_options.api.exportDataAsCsv()
+			user_grid_options.api.exportDataAsCsv()
 		});
+
 		$('#validation_upload').change(function () {
 			const file = $('#validation_upload').prop('files')[0]
 			const data = new FormData();
@@ -667,7 +672,7 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_grid(grid_options, data)
+					update_grid(user_grid_options, data)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)

@@ -326,9 +326,14 @@ span.postfix.units label {padding-left:5px;}
 form .row .row {margin:0 0 5px 0 !important;}
 
 /*AgGrid*/
-#validation_grid {
+#user_validation_grid {
 	height: 20em;
 	width: 100%;
+}
+#ontology_validation_grid {
+	height: 20em;
+	width: 100%;
+	margin-top: 1%;
 }
 label[for='validation_upload'] {
 	text-transform: none;
@@ -376,6 +381,7 @@ ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
 
 /* Quick fix for getting more working area.  Perhaps convert to modal in future */
 #panelValidation {
+	overflow: scroll;
 	position: absolute;
 	margin-left: -80%;
 	width: 180%;

@@ -85,7 +85,6 @@ $( document ).ready(function($) {
 
 	// If there's ALREADY a #ONTOLOGY:ID hash in URL then render that form.
 	check_entity_id_change(resource_callback, render_entity_form)
-
 });
 
 /**
@@ -122,6 +121,8 @@ function render_entity_form() {
 	    	// ? like "form.html?#ONTOLOGY:ID" thus shortcutting set_modal_download()
 	    	return false;
 	  	});
+
+	update_ontology_grid(top.ontology_grid_options)
 }
 
 
@@ -651,11 +652,11 @@ function init_specification_tab() {
 
 function init_validation_tab() {
 	$(document).ready(function () {
-		const user_grid_options = create_grid_options();
-		create_user_grid(user_grid_options);
+		top.user_grid_options = create_grid_options();
+		create_user_grid(top.user_grid_options);
 
-		const ontology_grid_options = create_grid_options();
-		create_ontology_grid(ontology_grid_options)
+		top.ontology_grid_options = create_grid_options();
+		create_ontology_grid(top.ontology_grid_options);
 
 		$('#validation_download').click(function () {
 			user_grid_options.api.exportDataAsCsv()
@@ -672,7 +673,7 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_grid(user_grid_options, data)
+					update_user_grid(user_grid_options, data)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)
@@ -681,6 +682,7 @@ function init_validation_tab() {
 		})
 	});
 }
+
 
 /******************************** UTILITY FUNCTIONS *************************/
 

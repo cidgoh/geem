@@ -58,7 +58,7 @@ def resource_summary_form(request):
 def get_uploaded_validation_data(request):
     """Output data from uploaded validation file in string format.
 
-    Should only be called by front-end method ``update_grid``.
+    Should only be called by front-end method ``update_user_grid``.
 
     :param rest_framework.request.Request request: Front-end request
         containing uploaded file

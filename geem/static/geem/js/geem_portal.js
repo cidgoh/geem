@@ -653,11 +653,20 @@ function init_validation_tab() {
 	$(document).ready(function () {
 		const grid_options = get_grid_options();
 		create_grid(grid_options);
+
+
 		$('#validation_download').click(function () {
 			grid_options.api.exportDataAsCsv()
 		});
 		$('#validation_upload').change(function () {
 			const file = $('#validation_upload').prop('files')[0]
+			const accepted_file_types =
+				new Set(['text/csv', 'text/tab-separated-values']);
+			if (!accepted_file_types.has(file.type)) {
+				alert('Uploads are limited to .csv and .tsv files')
+				return
+			}
+
 			const data = new FormData();
 			data.append('file', file);
 			$.ajax({

@@ -28,21 +28,16 @@ function create_grid(grid_options) {
 /**
  * Update the grid with new rows
  * @param {Object }grid_options - Grid options
- * @param {string} data - ``csv`` string representation of new grid rows
+ * @param {string} data - Matrix representation of new grid rows
  */
 function update_grid(grid_options, data) {
-	let data_matrix = data.split('\n');
-	data_matrix = data_matrix.map(function(csv_row) {
-		return csv_row.split(',')
-	});
-
-	const data_headers = data_matrix.shift();
+	const data_headers = data.shift();
 	const column_defs = data_headers.map(function (col) {
 		return {headerName: col, field: col, editable: true}
 	});
 	grid_options.api.setColumnDefs(column_defs);
 
-	const row_data = data_matrix.map(function (row) {
+	const row_data = data.map(function (row) {
 		const ret = {};
 
 		// The minimum function is used to prevent errors due

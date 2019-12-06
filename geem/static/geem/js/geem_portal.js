@@ -85,7 +85,6 @@ $( document ).ready(function($) {
 
 	// If there's ALREADY a #ONTOLOGY:ID hash in URL then render that form.
 	check_entity_id_change(resource_callback, render_entity_form)
-
 });
 
 /**
@@ -161,6 +160,9 @@ function portal_entity_form_callback(form) {
 		.html(get_label(entity) + ' &nbsp; <span class="medium">**(' + entity.id + ')</span>')
 	$('#mainForm > div.field-wrapper > label')
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
+
+	top.form.components = entity.components;
+	update_ontology_grid(top.ontology_grid_options);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -651,11 +653,16 @@ function init_specification_tab() {
 
 function init_validation_tab() {
 	$(document).ready(function () {
-		const grid_options = get_grid_options();
-		create_grid(grid_options);
+		top.user_grid_options = create_grid_options();
+		create_user_grid(top.user_grid_options);
+
+		top.ontology_grid_options = create_grid_options();
+		create_ontology_grid(top.ontology_grid_options);
+
 		$('#validation_download').click(function () {
-			grid_options.api.exportDataAsCsv()
+			user_grid_options.api.exportDataAsCsv()
 		});
+
 		$('#validation_upload').change(function () {
 			const file = $('#validation_upload').prop('files')[0]
 			const data = new FormData();
@@ -667,7 +674,7 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_grid(grid_options, data)
+					update_user_grid(user_grid_options, data)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)
@@ -676,6 +683,7 @@ function init_validation_tab() {
 		})
 	});
 }
+
 
 /******************************** UTILITY FUNCTIONS *************************/
 

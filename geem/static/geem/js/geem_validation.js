@@ -76,7 +76,7 @@ function update_user_grid(grid_options, data) {
  */
 function update_ontology_grid(grid_options) {
 	const column_defs = top.form.components.map(function(component) {
-		return {headerName: component.label, field: component.label}
+		return {headerName: component.label, field: component.id}
 	})
 	grid_options.api.setColumnDefs(column_defs)
 }

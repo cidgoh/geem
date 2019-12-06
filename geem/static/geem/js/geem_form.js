@@ -65,7 +65,6 @@ function OntologyForm(domId, resource, settings, callback) {
 			$('li[role="menuitem"][data-ontology-id="' + self.entityId + '"]').addClass('active')
 
 			var entity = get_form_specification_component(self.entityId)
-			top.form.components = entity.components
 			var form_html = render_form_specification(entity)
 
 			// "buttonFormSubmit" is id created for submit button, which other

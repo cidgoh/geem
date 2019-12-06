@@ -71,7 +71,7 @@ function update_user_grid(grid_options, data) {
 
 /**
  * Update ontology grid headers.
- * Must be called after a new form is rendered.
+ * Must be called in ``portal_entity_form_callback``.
  * @param grid_options - Ontology validation grid options
  */
 function update_ontology_grid(grid_options) {

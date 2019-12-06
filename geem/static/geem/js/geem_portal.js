@@ -121,8 +121,6 @@ function render_entity_form() {
 	    	// ? like "form.html?#ONTOLOGY:ID" thus shortcutting set_modal_download()
 	    	return false;
 	  	});
-
-	update_ontology_grid(top.ontology_grid_options)
 }
 
 
@@ -162,6 +160,9 @@ function portal_entity_form_callback(form) {
 		.html(get_label(entity) + ' &nbsp; <span class="medium">**(' + entity.id + ')</span>')
 	$('#mainForm > div.field-wrapper > label')
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
+
+	top.form.components = entity.components;
+	update_ontology_grid(top.ontology_grid_options);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')

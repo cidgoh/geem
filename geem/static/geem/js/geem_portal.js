@@ -660,15 +660,19 @@ function init_validation_tab() {
 		create_ontology_grid(top.ontology_grid_options);
 
 		$('#validation_download').click(function () {
-			user_grid_options.api.exportDataAsCsv()
+			const file = $('#validation_upload').prop('files')[0];
+
+			if (file) {
+				download_grid(top.user_grid_options, file.type)
+			}
 		});
 
 		$('#validation_upload').change(function () {
-			const file = $('#validation_upload').prop('files')[0]
+			const file = $('#validation_upload').prop('files')[0];
 			const accepted_file_types =
 				new Set(['text/csv', 'text/tab-separated-values']);
 			if (!accepted_file_types.has(file.type)) {
-				alert('Uploads are limited to .csv and .tsv files')
+				alert('Uploads are limited to .csv and .tsv files');
 				return
 			}
 

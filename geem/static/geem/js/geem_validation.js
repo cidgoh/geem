@@ -67,11 +67,44 @@ function update_user_grid(grid_options, data) {
 /**
  * Update ontology grid headers.
  * Must be called in ``portal_entity_form_callback``.
- * @param grid_options - Ontology validation grid options
+ * @param {Object} grid_options - Ontology validation grid options
  */
 function update_ontology_grid(grid_options) {
 	const column_defs = top.form.components.map(function(component) {
 		return {headerName: component.label, field: component.id}
-	})
+	});
 	grid_options.api.setColumnDefs(column_defs)
+}
+
+
+/**
+ * Download data from a grid instance.
+ * @param {Object} grid_options - Grid options of grid to download from
+ * @param {('text/csv'|'text/tab-separated-values')} file_type - MIME
+ * 	type of file to download
+ */
+function download_grid(grid_options, file_type) {
+	let data_str = grid_options.api.getDataAsCsv();
+	let file_name;
+
+	if (file_type === 'text/tab-separated-values') {
+		data_str = data_str.replace(/,/g, '\t');
+		file_name = 'export.tsv'
+	} else {
+		file_name = 'export.csv'
+	}
+
+	// https://stackoverflow.com/a/33542499/11472358
+	const blob = new Blob([data_str], {type: file_type});
+	if(window.navigator.msSaveOrOpenBlob) {
+		window.navigator.msSaveBlob(blob, file_name);
+	}
+	else{
+		var elem = window.document.createElement('a');
+		elem.href = window.URL.createObjectURL(blob);
+		elem.download = file_name;
+		document.body.appendChild(elem);
+		elem.click();
+		document.body.removeChild(elem);
+	}
 }

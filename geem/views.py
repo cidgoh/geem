@@ -1,3 +1,4 @@
+import csv
 import json
 
 from rest_framework import mixins
@@ -56,18 +57,50 @@ def resource_summary_form(request):
 
 @api_view(['POST'])
 def get_uploaded_validation_data(request):
-    """Output data from uploaded validation file in string format.
-
-    Should only be called by front-end method ``update_user_grid``.
+    """Output data from uploaded validation file in matrix format.
 
     :param rest_framework.request.Request request: Front-end request
         containing uploaded file
-    :returns: Response containing file data in string format
+    :returns: Response containing file data in matrix format
     :rtype: rest_framework.response.Response
     """
     uploaded_file = request.FILES['file']
     uploaded_file_str = uploaded_file.read()
-    return Response(uploaded_file_str, status=status.HTTP_200_OK)
+
+    if uploaded_file.content_type == 'text/csv':
+        uploaded_file_rows = uploaded_file_str.split(b'\n')
+        uploaded_file_matrix =\
+            list(map(lambda x: x.split(b','), uploaded_file_rows))
+        return Response(uploaded_file_matrix, status=status.HTTP_200_OK)
+    elif uploaded_file.content_type == 'text/tab-separated-values':
+        uploaded_file_rows = uploaded_file_str.split(b'\n')
+        uploaded_file_matrix =\
+            list(map(lambda x: x.split(b'\t'), uploaded_file_rows))
+        return Response(uploaded_file_matrix, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def csv_str_to_matrix(request):
+    """Convert a ``csv`` string into a matrix.
+
+    This is useful for converting data exported from ag-Grid
+    instances, which is in ``csv`` format by default.
+
+    :param rest_framework.request.Request request: Front-end request
+        containing ``csv`` string as ``csv_str`` attribute
+    :returns: Response containing data from ``csv`` string in matrix
+        format
+    :rtype: rest_framework.response.Response
+    """
+    csv_matrix = []
+    csv_str = request.data['csv_str']
+
+    for row in csv.reader(csv_str.split('\n')):
+        csv_matrix.append(row)
+
+    return Response(csv_matrix, status=status.HTTP_200_OK)
 
 
 class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin): # mixins.UpdateModelMixin, 

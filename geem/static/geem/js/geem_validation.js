@@ -39,21 +39,16 @@ function create_ontology_grid(grid_options) {
 /**
  * Update user validation grid with new rows
  * @param {Object } grid_options - User validation grid options
- * @param {string} data - ``csv`` string representation of new grid rows
+ * @param {string} data - Matrix representation of new grid rows
  */
 function update_user_grid(grid_options, data) {
-	let data_matrix = data.split('\n');
-	data_matrix = data_matrix.map(function(csv_row) {
-		return csv_row.split(',')
-	});
-
-	const data_headers = data_matrix.shift();
+	const data_headers = data.shift();
 	const column_defs = data_headers.map(function (col) {
 		return {headerName: col, field: col}
 	});
 	grid_options.api.setColumnDefs(column_defs);
 
-	const row_data = data_matrix.map(function (row) {
+	const row_data = data.map(function (row) {
 		const ret = {};
 
 		// The minimum function is used to prevent errors due
@@ -72,11 +67,66 @@ function update_user_grid(grid_options, data) {
 /**
  * Update ontology grid headers.
  * Must be called in ``portal_entity_form_callback``.
- * @param grid_options - Ontology validation grid options
+ * @param {Object} grid_options - Ontology validation grid options
  */
 function update_ontology_grid(grid_options) {
 	const column_defs = top.form.components.map(function(component) {
 		return {headerName: component.label, field: component.id}
-	})
+	});
 	grid_options.api.setColumnDefs(column_defs)
+}
+
+
+/**
+ * Download data from a grid instance.
+ * @param {Object} grid_options - Grid options of grid to download from
+ * @param {('text/csv'|'text/tab-separated-values')} file_type - MIME
+ * 	type of file to download
+ */
+function download_grid(grid_options, file_type) {
+	let csv_str = grid_options.api.getDataAsCsv();
+
+	if (file_type === 'text/tab-separated-values') {
+		$.ajax({
+			type: 'POST',
+			url: 'csv_str_to_matrix',
+			data: {'csv_str': csv_str},
+			success: function (data) {
+				let tsv_str = data.map(function(row) {
+					return row.join('\t')
+				});
+				tsv_str = tsv_str.join('\n');
+				download_str(tsv_str, 'export.tsv', file_type)
+			},
+			error: function (_, text_status, error_thrown) {
+				alert(text_status + ': ' + error_thrown)
+			}
+		});
+	} else {
+		download_str(csv_str, 'export.csv', file_type)
+	}
+}
+
+
+/**
+ * Download a file containing a specified string as content.
+ * @param {string} str - Content of downloaded file
+ * @param {string} file_name - Name of downloaded file; should include
+ * 	extension
+ * @param {string} file_type - MIME type of file to download
+ */
+function download_str(str, file_name, file_type) {
+	// https://stackoverflow.com/a/33542499/11472358
+	const blob = new Blob([str], {type: file_type});
+	if(window.navigator.msSaveOrOpenBlob) {
+		window.navigator.msSaveBlob(blob, file_name);
+	}
+	else{
+		var elem = window.document.createElement('a');
+		elem.href = window.URL.createObjectURL(blob);
+		elem.download = file_name;
+		document.body.appendChild(elem);
+		elem.click();
+		document.body.removeChild(elem);
+	}
 }

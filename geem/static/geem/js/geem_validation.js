@@ -84,18 +84,40 @@ function update_ontology_grid(grid_options) {
  * 	type of file to download
  */
 function download_grid(grid_options, file_type) {
-	let data_str = grid_options.api.getDataAsCsv();
-	let file_name;
+	let csv_str = grid_options.api.getDataAsCsv();
 
 	if (file_type === 'text/tab-separated-values') {
-		data_str = data_str.replace(/,/g, '\t');
-		file_name = 'export.tsv'
+		$.ajax({
+			type: 'POST',
+			url: 'csv_str_to_matrix',
+			data: {'csv_str': csv_str},
+			success: function (data) {
+				let tsv_str = data.map(function(row) {
+					return row.join('\t')
+				});
+				tsv_str = tsv_str.join('\n');
+				download_str(tsv_str, 'export.tsv', file_type)
+			},
+			error: function (_, text_status, error_thrown) {
+				alert(text_status + ': ' + error_thrown)
+			}
+		});
 	} else {
-		file_name = 'export.csv'
+		download_str(csv_str, 'export.csv', file_type)
 	}
+}
 
+
+/**
+ * Download a file containing a specified string as content.
+ * @param {string} str - Content of downloaded file
+ * @param {string} file_name - Name of downloaded file; should include
+ * 	extension
+ * @param {string} file_type - MIME type of file to download
+ */
+function download_str(str, file_name, file_type) {
 	// https://stackoverflow.com/a/33542499/11472358
-	const blob = new Blob([data_str], {type: file_type});
+	const blob = new Blob([str], {type: file_type});
 	if(window.navigator.msSaveOrOpenBlob) {
 		window.navigator.msSaveBlob(blob, file_name);
 	}

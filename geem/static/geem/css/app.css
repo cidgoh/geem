@@ -334,6 +334,7 @@ form .row .row {margin:0 0 5px 0 !important;}
 	height: 20em;
 	width: 100%;
 	margin-top: 1%;
+	display: none;
 }
 label[for='validation_upload'] {
 	text-transform: none;

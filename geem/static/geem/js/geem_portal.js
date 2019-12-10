@@ -162,7 +162,11 @@ function portal_entity_form_callback(form) {
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
 
 	top.form.components = entity.components;
-	update_ontology_grid(top.ontology_grid_options);
+	if (top.form.components.length) {
+		update_ontology_grid(top.ontology_grid_options);
+		$('#validation_info_box').hide();
+		$('#ontology_validation_grid').show()
+	}
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')

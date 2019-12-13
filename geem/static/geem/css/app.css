@@ -333,13 +333,16 @@ form .row .row {margin:0 0 5px 0 !important;}
 #ontology_validation_grid {
 	height: 20em;
 	width: 100%;
-	margin-top: 1%;
+}
+#ontology_validation_grid_box {
 	display: none;
+	margin-top: 2%;
 }
-label[for='validation_upload'] {
-	text-transform: none;
+.grid_buttons .button {
+	margin-top: 10%;
+	margin-left: 5%;
+	width: 100%;
 }
-
 
 .error input, .error textarea, .error select {
     /* margin-bottom: 0; Overrides what Foundation is doing.  Foundation expects <span .error> to be at bottom of field input */

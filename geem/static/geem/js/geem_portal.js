@@ -162,7 +162,11 @@ function portal_entity_form_callback(form) {
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
 
 	top.form.components = entity.components;
-	update_ontology_grid(top.ontology_grid_options);
+	if (top.form.components.length) {
+		update_ontology_grid(top.ontology_grid_options);
+		$('#validation_info_box').hide();
+		$('#ontology_validation_grid_box').show()
+	}
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -659,16 +663,16 @@ function init_validation_tab() {
 		top.ontology_grid_options = create_grid_options();
 		create_ontology_grid(top.ontology_grid_options);
 
-		$('#validation_download').click(function () {
-			const file = $('#validation_upload').prop('files')[0];
+		$('#user_validation_download').click(function () {
+			const file = $('#user_validation_upload').prop('files')[0];
 
 			if (file) {
 				download_grid(top.user_grid_options, file.type)
 			}
 		});
 
-		$('#validation_upload').change(function () {
-			const file = $('#validation_upload').prop('files')[0];
+		$('#user_validation_upload').change(function () {
+			const file = $('#user_validation_upload').prop('files')[0];
 			const accepted_file_types =
 				new Set(['text/csv', 'text/tab-separated-values']);
 			if (!accepted_file_types.has(file.type)) {

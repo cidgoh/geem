@@ -249,18 +249,44 @@
           <!-- ******************* VALIDATION **************** -->
           <div class="content" id="panelValidation">
 
-            <div class="row">
-              <div class="small-8 columns">
-                <label for="validation_upload" class="button">Upload</label>
-                <input type="file" id="validation_upload" class="show-for-sr">
-              </div>
-              <div class="small-4 columns text-right">
-                <button id="validation_download">Download</button>
+            <div id="user_validation_grid_box">
+              <div class="row">
+                <div class="small-2 columns grid_buttons">
+                  <div class="row">
+                    <label for="user_validation_upload" class="button">Upload</label>
+                    <input type="file" id="user_validation_upload" class="show-for-sr">
+                  </div>
+                  <div class="row">
+                    <button id="user_validation_download" class="button">Download</button>
+                  </div>
+                </div>
+                <div class="small-10 columns">
+                  <div id="user_validation_grid" class="ag-theme-balham"></div>
+                </div>
               </div>
             </div>
 
-            <div id="user_validation_grid" class="ag-theme-balham"></div>
-            <div id="ontology_validation_grid" class="ag-theme-balham-dark"></div>
+            <div class="infoBox" id="validation_info_box">
+              Select a specification from an ontology or user package resource
+              to validate your tabular data against.
+            </div>
+
+            <div id="ontology_validation_grid_box">
+              <div class="row">
+                <div class="small-2 columns grid_buttons">
+                  <div class="row">
+                    <label for="ontology_validation_upload" class="button">Upload</label>
+                    <input type="file" id="ontology_validation_upload" class="show-for-sr">
+                  </div>
+                  <div class="row">
+                    <button id="ontology_validation_download" class="button">Download</button>
+                  </div>
+                </div>
+                <div class="small-10 columns">
+                  <div id="ontology_validation_grid" class="ag-theme-balham"></div>
+                </div>
+              </div>
+            </div>
 
           </div>
 

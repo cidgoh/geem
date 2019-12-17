@@ -161,11 +161,22 @@ function portal_entity_form_callback(form) {
 	$('#mainForm > div.field-wrapper > label')
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
 
+	// Prepare validation tab
 	top.form.components = entity.components;
-	if (top.form.components.length) {
+	if (top.form.components !== undefined && top.form.components.length) {
 		update_ontology_grid(top.ontology_grid_options);
 		$('#validation_info_box').hide();
-		$('#ontology_validation_grid_box').show()
+		$('#ontology_validation_grid_box').show();
+		$('#mapping_box').show();
+		if (get_owner_status(top.resource)) {
+			$('#mapping_create').css('visibility', 'visible')
+		} else {
+			$('#mapping_create').css('visibility', 'hidden')
+		}
+	} else {
+		$('#validation_info_box').show();
+		$('#ontology_validation_grid_box').hide();
+		$('#mapping_box').hide()
 	}
 
 	// Content area functionality is blocked until form loaded

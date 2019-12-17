@@ -336,7 +336,16 @@ form .row .row {margin:0 0 5px 0 !important;}
 }
 #ontology_validation_grid_box {
 	display: none;
+}
+#mapping_box {
+	display: none;
 	margin-top: 2%;
+	margin-left: auto;
+	margin-right: auto;
+	width: 75%;
+}
+#mapping_create {
+	visibility: hidden;
 }
 .grid_buttons .button {
 	margin-top: 10%;

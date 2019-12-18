@@ -10,7 +10,7 @@
  * @param {Array<Object>} components: Ontology grid headers, with each
  * 	object containing a ``label`` and ``id`` attribute
  */
-function render_validation_resource_display(components) {
+function render_validation_ontology_view(components) {
 	update_ontology_grid(components, top.ontology_grid_options);
 	$('#validation_info_box').hide();
 	$('#ontology_validation_grid_box').show();
@@ -26,7 +26,7 @@ function render_validation_resource_display(components) {
 /**
  * Hide ontology grid and mapping information.
  */
-function derender_validation_resource_display() {
+function derender_validation_ontology_view() {
 	$('#ontology_validation_grid_box').hide();
 	$('#mapping_box').hide();
 	$('#validation_info_box').show();

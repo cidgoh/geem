@@ -699,6 +699,10 @@ function init_validation_tab() {
 					alert(text_status + ': ' + error_thrown)
 				}
 			})
+		});
+
+		$('#mapping_save').click(function() {
+			console.log('Hello world!')
 		})
 	});
 }

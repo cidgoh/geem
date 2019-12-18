@@ -274,7 +274,8 @@
             <div id="mapping_box">
               <div class="row">
                 <div class="small-2 small-offset-2 columns">
-                  <button id="mapping_create">Create</button>
+                  <button id="mapping_create"
+                          data-reveal-id="mapping_create_form">Create</button>
                 </div>
                 <div class="small-6 columns">
                   <select id="mapping_select"></select>
@@ -283,6 +284,13 @@
                   <button id="mapping_load">Load</button>
                 </div>
               </div>
+            </div>
+
+            <div id="mapping_create_form" class="reveal-modal" data-reveal>
+              Save the current one-to-one mapping of columns across grids.
+              <input class="input-group-field"type="text"
+                     placeholder="mapping name">
+              <button id="mapping_save" class="button">Save</button>
             </div>
 
             <div id="ontology_validation_grid_box">

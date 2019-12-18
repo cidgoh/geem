@@ -10,22 +10,26 @@
  * @param {Array<Object>} components: Ontology grid headers, with each
  * 	object containing a ``label`` and ``id`` attribute
  */
-function toggle_validation_resource_display(components) {
-	if (components.length) {
-		update_ontology_grid(components, top.ontology_grid_options);
-		$('#validation_info_box').hide();
-		$('#ontology_validation_grid_box').show();
-		$('#mapping_box').show();
-		if (get_owner_status(top.resource)) {
-			$('#mapping_create').css('visibility', 'visible')
-		} else {
-			$('#mapping_create').css('visibility', 'hidden')
-		}
+function render_validation_resource_display(components) {
+	update_ontology_grid(components, top.ontology_grid_options);
+	$('#validation_info_box').hide();
+	$('#ontology_validation_grid_box').show();
+	$('#mapping_box').show();
+	if (get_owner_status(top.resource)) {
+		$('#mapping_create').css('visibility', 'visible')
 	} else {
-		$('#validation_info_box').show();
-		$('#ontology_validation_grid_box').hide();
-		$('#mapping_box').hide()
+		$('#mapping_create').css('visibility', 'hidden')
 	}
+}
+
+
+/**
+ * Hide ontology grid and mapping information.
+ */
+function derender_validation_resource_display() {
+	$('#ontology_validation_grid_box').hide();
+	$('#mapping_box').hide();
+	$('#validation_info_box').show();
 }
 
 

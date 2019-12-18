@@ -170,7 +170,7 @@ function portal_entity_form_callback(form) {
 		// top-level item itself is a component.
 		components = [{'label': entity.label, 'id': entity.id}]
 	}
-	toggle_validation_resource_display(components);
+	render_validation_resource_display(components);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')

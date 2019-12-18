@@ -4,6 +4,32 @@
 
 
 /**
+ * Display ontology grid and mapping information.
+ * Must be called after a resource is selected, in
+ * ``portal_entity_form_callback``.
+ * @param {Array<Object>} components: Ontology grid headers, with each
+ * 	object containing a ``label`` and ``id`` attribute
+ */
+function toggle_validation_resource_display(components) {
+	if (components.length) {
+		update_ontology_grid(components, top.ontology_grid_options);
+		$('#validation_info_box').hide();
+		$('#ontology_validation_grid_box').show();
+		$('#mapping_box').show();
+		if (get_owner_status(top.resource)) {
+			$('#mapping_create').css('visibility', 'visible')
+		} else {
+			$('#mapping_create').css('visibility', 'hidden')
+		}
+	} else {
+		$('#validation_info_box').show();
+		$('#ontology_validation_grid_box').hide();
+		$('#mapping_box').hide()
+	}
+}
+
+
+/**
  * Create grid options object for creating grid instances.
  * @returns {Object} Grid options object
  */
@@ -67,10 +93,12 @@ function update_user_grid(grid_options, data) {
 /**
  * Update ontology grid headers.
  * Must be called in ``portal_entity_form_callback``.
+ * @param {Array<Object>} components: Ontology grid headers, with each
+ * 	object containing a ``label`` and ``id`` attribute
  * @param {Object} grid_options - Ontology validation grid options
  */
-function update_ontology_grid(grid_options) {
-	const column_defs = top.form.components.map(function(component) {
+function update_ontology_grid(components, grid_options) {
+	const column_defs = components.map(function(component) {
 		return {headerName: component.label, field: component.id}
 	});
 	grid_options.api.setColumnDefs(column_defs)

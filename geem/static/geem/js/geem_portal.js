@@ -161,23 +161,16 @@ function portal_entity_form_callback(form) {
 	$('#mainForm > div.field-wrapper > label')
 		.html(get_definition(entity) || '<span class="small float-right">(select all)</span>')
 
-	// Prepare validation tab
-	top.form.components = entity.components;
-	if (top.form.components !== undefined && top.form.components.length) {
-		update_ontology_grid(top.ontology_grid_options);
-		$('#validation_info_box').hide();
-		$('#ontology_validation_grid_box').show();
-		$('#mapping_box').show();
-		if (get_owner_status(top.resource)) {
-			$('#mapping_create').css('visibility', 'visible')
-		} else {
-			$('#mapping_create').css('visibility', 'hidden')
-		}
+	// Set up ontology view in validation tab
+	let components;
+	if (entity.hasOwnProperty('components')) {
+		components = entity.components
 	} else {
-		$('#validation_info_box').show();
-		$('#ontology_validation_grid_box').hide();
-		$('#mapping_box').hide()
+		// If the form has no defined components, than the
+		// top-level item itself is a component.
+		components = [{'label': entity.label, 'id': entity.id}]
 	}
+	toggle_validation_resource_display(components);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -700,7 +693,7 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_user_grid(user_grid_options, data)
+					update_user_grid(top.user_grid_options, data)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)

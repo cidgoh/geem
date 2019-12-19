@@ -355,6 +355,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return Response(response_data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], url_path='add_mapping')
+    def add_mapping_to_package(self, request, pk):
+        """TODO:..."""
+        user_packages = self._get_resource_queryset(request)
+        target_package = user_packages.filter(pk=pk)
+
+        if target_package.count() != 1:
+            return Response('Invalid package queried while adding mapping',
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        utils.create_mapping(request.POST['mapping_name'], pk)
+        return Response('Mapping added', status=status.HTTP_200_OK)
+
     def create(self, request, pk=None):
 
         form = PackageForm(request.POST or None) #or request.data

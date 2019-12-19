@@ -702,7 +702,20 @@ function init_validation_tab() {
 		});
 
 		$('#mapping_save').click(function() {
-			console.log('Hello world!')
+			const mapping_name_input = $('#mapping_name_input').val();
+			// TODO: check if mapping name input already
+			//	exists and confirm overwrite
+			$.ajax({
+				type: 'POST',
+				url: API_RESOURCES_URL + top.resource.id + '/add_mapping/',
+				data: {'mapping_name': mapping_name_input},
+				success: function(data) {
+					$('#mapping_create_form').foundation('reveal', 'close')
+				},
+				error: function (jqxhr, _, error_thrown) {
+					alert(error_thrown + ': ' + jqxhr.responseText)
+				}
+			})
 		})
 	});
 }

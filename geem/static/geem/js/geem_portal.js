@@ -701,7 +701,7 @@ function init_validation_tab() {
 			})
 		});
 
-		$('#mapping_save').click(function() {
+		$('#mapping_create_confirm').click(function() {
 			const mapping_name_input = $('#mapping_name_input').val();
 			// TODO: check if mapping name input already
 			//	exists and confirm overwrite

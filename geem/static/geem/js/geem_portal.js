@@ -705,6 +705,7 @@ function init_validation_tab() {
 			const mapping_name_input = $('#mapping_name_input').val();
 			// TODO: check if mapping name input already
 			//	exists and confirm overwrite
+			if (mapping_name_input === '') return;
 			$.ajax({
 				type: 'POST',
 				url: API_RESOURCES_URL + top.resource.id + '/add_mapping/',

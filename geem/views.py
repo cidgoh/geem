@@ -12,6 +12,8 @@ from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import render
 from oauth2_provider.models import Application
+from django.db import connection
+from psycopg2.extras import Json as PsqlJsonAdapter
 
 from geem.models import Package
 from geem.forms import PackageForm
@@ -357,7 +359,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
     @action(detail=True, methods=['post'], url_path='add_mapping')
     def add_mapping_to_package(self, request, pk):
-        """TODO:..."""
+        """Add mapping to a package.
+
+        This method is only meant to be called by
+        ``geem_validation.create_mapping``.
+
+        :param request: ``POST.data`` member is a ``json`` string
+            containing information on mapping to create
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to add mapping to
+        :type pk: str
+        :returns: Response with success or failure message
+        :rtype: rest_framework.response.Response
+        """
         user_packages = self._get_resource_queryset(request)
         target_package = user_packages.filter(pk=pk)
 
@@ -365,7 +379,22 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response('Invalid package queried while adding mapping',
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        utils.create_mapping(request.POST['mapping_name'], pk)
+        request_data = json.loads(request.POST['data'])
+
+        field_orders = {
+            'user_field_order': request_data['user_field_order'],
+            'ontology_field_order': request_data['ontology_field_order']
+        }
+        field_orders = PsqlJsonAdapter(field_orders)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation queries used below.
+            cursor.execute("update geem_package set contents=(jsonb_set("
+                           "contents, '{mappings, %s}', jsonb %s)) where id=%s"
+                           % (request_data['mapping_name'], field_orders, pk))
+
         return Response('Mapping added', status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):

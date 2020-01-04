@@ -74,7 +74,7 @@ function create_ontology_grid(grid_options) {
 function update_user_grid(grid_options, data) {
 	const data_headers = data.shift();
 	const column_defs = data_headers.map(function (col) {
-		return {headerName: col, field: col}
+		return {headerName: col.trim(), field: col.trim()}
 	});
 	grid_options.api.setColumnDefs(column_defs);
 
@@ -85,7 +85,7 @@ function update_user_grid(grid_options, data) {
 		// to incomplete or overflowing rows.
 		for (let i = 0; i < Math.min(column_defs.length, row.length); i++) {
 			const col = column_defs[i]['field'];
-			ret[col] = row[i]
+			ret[col] = row[i].trim()
 		}
 
 		return ret
@@ -161,4 +161,37 @@ function download_str(str, file_name, file_type) {
 		elem.click();
 		document.body.removeChild(elem);
 	}
+}
+
+
+/**
+ * Create a mapping for a specified package.
+ * Mapping refers to the a specific order of user and ontology grid
+ * headers for a package.
+ * @param {string} mapping_name - Name of mapping to store in package
+ * @param {Array<string>} user_field_order - User column fields in
+ * 	specific order
+ * @param {Array<string>} ontology_field_order - Ontology column
+ * 	fields in specific order
+ * @param {string} resource_id - Id of package to store mapping in
+ */
+function create_mapping(mapping_name, user_field_order, ontology_field_order,
+			resource_id) {
+	const data = JSON.stringify({
+		'mapping_name': mapping_name,
+		'user_field_order': user_field_order,
+		'ontology_field_order': ontology_field_order
+	});
+
+	$.ajax({
+		type: 'POST',
+		url: API_RESOURCES_URL + resource_id + '/add_mapping/',
+		data: {'data': data},
+		success: function(data) {
+			$('#mapping_create_form').foundation('reveal', 'close')
+		},
+		error: function (jqxhr, _, error_thrown) {
+			alert(error_thrown + ': ' + jqxhr.responseText)
+		}
+	})
 }

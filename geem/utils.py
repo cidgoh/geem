@@ -255,14 +255,3 @@ def add_cart_item_to_package(cart_item_id, cart_item_package, target_package):
                                                 target_package))
 
     return ret
-
-
-def create_mapping(mapping_name, package_id):
-    """TODO: ..."""
-    # Connect to the default database service
-    with connection.cursor() as cursor:
-        # See https://stackoverflow.com/a/23500670 for details on
-        # creation queries used below.
-        cursor.execute("update geem_package set contents=(jsonb_set("
-                       "contents, '{mappings, %s}', jsonb '{\"%s\": [], \"%s\": []}')) where"
-                       " id=%s" % (mapping_name, 'user_field_order', 'ontology_field_order', package_id))

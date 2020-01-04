@@ -703,20 +703,18 @@ function init_validation_tab() {
 
 		$('#mapping_create_confirm').click(function() {
 			const mapping_name_input = $('#mapping_name_input').val();
-			// TODO: check if mapping name input already
-			//	exists and confirm overwrite
 			if (mapping_name_input === '') return;
-			$.ajax({
-				type: 'POST',
-				url: API_RESOURCES_URL + top.resource.id + '/add_mapping/',
-				data: {'mapping_name': mapping_name_input},
-				success: function(data) {
-					$('#mapping_create_form').foundation('reveal', 'close')
-				},
-				error: function (jqxhr, _, error_thrown) {
-					alert(error_thrown + ': ' + jqxhr.responseText)
-				}
-			})
+
+			let user_field_order =
+				top.user_grid_options.columnApi.getAllGridColumns();
+			user_field_order = user_field_order.map(x => x.getColDef().field);
+
+			let ontology_field_order =
+				top.ontology_grid_options.columnApi.getAllGridColumns();
+			ontology_field_order = ontology_field_order.map(x => x.getColDef().field);
+
+			create_mapping(mapping_name_input, user_field_order, ontology_field_order,
+				top.resource.id)
 		})
 	});
 }

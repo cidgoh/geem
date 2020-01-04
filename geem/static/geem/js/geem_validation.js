@@ -14,6 +14,8 @@ function render_validation_ontology_view(components) {
 	update_ontology_grid(components, top.ontology_grid_options);
 	$('#validation_info_box').hide();
 	$('#ontology_validation_grid_box').show();
+
+	render_mapping_options(top.resource.id);
 	$('#mapping_box').show();
 	if (get_owner_status(top.resource)) {
 		$('#mapping_create').css('visibility', 'visible')
@@ -188,10 +190,37 @@ function create_mapping(mapping_name, user_field_order, ontology_field_order,
 		url: API_RESOURCES_URL + resource_id + '/add_mapping/',
 		data: {'data': data},
 		success: function(data) {
+			$('#mapping_select').empty();
+			render_mapping_options(resource_id);
 			$('#mapping_create_form').foundation('reveal', 'close')
 		},
 		error: function (jqxhr, _, error_thrown) {
 			alert(error_thrown + ': ' + jqxhr.responseText)
+		}
+	})
+}
+
+
+/**
+ * Render a list of mapping options when a resource is selected.
+ * Should only be called by ``render_validation_ontology_view``.
+ * @param {string} resource_id - Id of resource to list mappings for.
+ */
+function render_mapping_options(resource_id) {
+	$.ajax({
+		type: 'GET',
+		url: API_RESOURCES_URL + resource_id + '/get_mappings/',
+		success: function(mappings) {
+			for (const mapping in mappings) {
+				if (mappings.hasOwnProperty(mapping)) {
+					const opt = $('<option></option>').text(mapping);
+					$('#mapping_select').append(opt)
+				}
+			}
+		},
+		error: function (jqxhr, _, error_thrown) {
+			console.error('Failed to load mappings: ' + jqxhr.responseText + ' ('
+				+ error_thrown + ')')
 		}
 	})
 }

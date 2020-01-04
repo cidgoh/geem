@@ -357,6 +357,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return Response(response_data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['get'], url_path='get_mappings')
+    def get_mappings(self, request, pk):
+        """TODO:..."""
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        if queryset.count() != 1:
+            return Response('Please query an appropriate package',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        mappings = queryset.values_list('contents__mappings', flat=True)[0]
+        return Response(mappings, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['post'], url_path='add_mapping')
     def add_mapping_to_package(self, request, pk):
         """Add mapping to a package.

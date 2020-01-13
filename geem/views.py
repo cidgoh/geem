@@ -359,7 +359,15 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
     @action(detail=True, methods=['get'], url_path='get_mappings')
     def get_mappings(self, request, pk):
-        """TODO:..."""
+        """Get mappings from a package.
+
+        :param request: Front-end request metadata
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to get mapping from
+        :type pk: str
+        :returns: All package mappings, or appropriate error message
+        :rtype: rest_framework.response.Response
+        """
         queryset = self._get_resource_queryset(request)
         queryset = queryset.filter(pk=pk)
 

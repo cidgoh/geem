@@ -31,6 +31,7 @@ function render_validation_ontology_view(components) {
 function derender_validation_ontology_view() {
 	$('#ontology_validation_grid_box').hide();
 	$('#mapping_box').hide();
+	$('#no_mappings_warning').hide();
 	$('#validation_info_box').show();
 }
 
@@ -211,10 +212,14 @@ function render_mapping_options(resource_id) {
 		type: 'GET',
 		url: API_RESOURCES_URL + resource_id + '/get_mappings/',
 		success: function(mappings) {
-			for (const mapping in mappings) {
-				if (mappings.hasOwnProperty(mapping)) {
-					const opt = $('<option></option>').text(mapping);
-					$('#mapping_select').append(opt)
+			if ($.isEmptyObject(mappings)) {
+				$('#no_mappings_warning').show();
+			} else {
+				for (const mapping in mappings) {
+					if (mappings.hasOwnProperty(mapping)) {
+						const opt = $('<option></option>').text(mapping);
+						$('#mapping_select').append(opt)
+					}
 				}
 			}
 		},

@@ -344,6 +344,11 @@ form .row .row {margin:0 0 5px 0 !important;}
 	margin-right: auto;
 	width: 75%;
 }
+#no_mappings_warning {
+	display: none;
+	text-align: center;
+	color: red;
+}
 #mapping_create {
 	visibility: hidden;
 }

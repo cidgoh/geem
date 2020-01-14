@@ -715,6 +715,11 @@ function init_validation_tab() {
 
 			create_mapping(mapping_name_input, user_field_order, ontology_field_order,
 				top.resource.id)
+		});
+
+		$('#mapping_load').click(function () {
+			const mapping_name = $('#mapping_select').val();
+			load_mapping(top.resource.id, mapping_name)
 		})
 	});
 }

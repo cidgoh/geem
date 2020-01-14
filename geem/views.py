@@ -357,15 +357,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='get_mappings')
-    def get_mappings(self, request, pk):
-        """Get mappings from a package.
+    @action(detail=True, methods=['get'],
+            url_path='get_mappings(?:/(?P<mapping_name>.+))?')
+    def get_mappings(self, request, pk, mapping_name=None):
+        """Get one or all mappings from a package.
 
         :param request: Front-end request metadata
         :type request: rest_framework.request.Request
         :param pk: ID of package to get mapping from
         :type pk: str
-        :returns: All package mappings, or appropriate error message
+        :param mapping_name: Name of mapping, if returning a specific
+            mapping
+        :returns: One or all package mappings, or appropriate error
+            message
         :rtype: rest_framework.response.Response
         """
         queryset = self._get_resource_queryset(request)
@@ -375,8 +379,17 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
             return Response('Please query an appropriate package',
                             status=status.HTTP_400_BAD_REQUEST)
 
-        mappings = queryset.values_list('contents__mappings', flat=True)[0]
-        return Response(mappings, status=status.HTTP_200_OK)
+        if mapping_name:
+            query = 'contents__mappings__' + mapping_name
+            response_data = queryset.values_list(query, flat=True)[0]
+            if not response_data:
+                return Response('Please query an appropriate mapping',
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            query = 'contents__mappings'
+            response_data = queryset.values_list(query, flat=True)[0]
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='add_mapping')
     def add_mapping_to_package(self, request, pk):

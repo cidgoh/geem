@@ -224,3 +224,19 @@ function render_mapping_options(resource_id) {
 		}
 	})
 }
+
+
+function load_mapping(resource_id, mapping_name) {
+	$.ajax({
+		type: 'GET',
+		url: API_RESOURCES_URL + resource_id + '/get_mappings/' + mapping_name + '/',
+		success: function(mapping) {
+			// TODO: what now?
+			console.log(mapping)
+		},
+		error: function (jqxhr, _, error_thrown) {
+			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('
+				+ error_thrown + ')')
+		}
+	})
+}

@@ -32,6 +32,8 @@ function derender_validation_ontology_view() {
 	$('#ontology_validation_grid_box').hide();
 	$('#mapping_box').hide();
 	$('#no_mappings_warning').hide();
+	$('#non_matching_mapping_warning').hide();
+	$('#mapping_select').empty();
 	$('#validation_info_box').show();
 }
 
@@ -230,12 +232,26 @@ function render_mapping_options(resource_id) {
 	})
 }
 
-
+/**
+ * TODO: ...
+ * @param resource_id
+ * @param mapping_name
+ */
 function load_mapping(resource_id, mapping_name) {
 	$.ajax({
 		type: 'GET',
 		url: API_RESOURCES_URL + resource_id + '/get_mappings/' + mapping_name + '/',
 		success: function(mapping) {
+			// Check if user submitted data has the same
+			// fields as the mapping's user fields.
+			let user_fields = top.user_grid_options.columnApi.getAllGridColumns();
+			user_fields = user_fields.map(x => x.getColDef().field).sort().join();
+			const mapping_user_fields = mapping.user_field_order.sort().join();
+			if (user_fields !== mapping_user_fields) {
+				$('#non_matching_mapping_warning').show()
+			} else {
+				$('#non_matching_mapping_warning').hide()
+			}
 			// TODO: what now?
 			console.log(mapping)
 		},

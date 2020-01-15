@@ -26,7 +26,7 @@ function render_validation_ontology_view(components) {
 
 
 /**
- * Hide ontology grid and mapping information.
+ * Clear, hide ontology grid and mapping information.
  */
 function derender_validation_ontology_view() {
 	$('#ontology_validation_grid_box').hide();
@@ -35,6 +35,8 @@ function derender_validation_ontology_view() {
 	$('#non_matching_mapping_warning').hide();
 	$('#mapping_select').empty();
 	$('#validation_info_box').show();
+	top.ontology_grid_options.api.setRowData([]);
+	top.ontology_grid_options.api.setColumnDefs();
 }
 
 
@@ -63,7 +65,7 @@ function create_user_grid(grid_options) {
 
 /**
  * Create the ontology validation grid.
- * @param {Object} grid_options - Ontology validation grid objects
+ * @param {Object} grid_options - Ontology validation grid options
  */
 function create_ontology_grid(grid_options) {
 	const grid_div = document.querySelector('#ontology_validation_grid');
@@ -74,7 +76,7 @@ function create_ontology_grid(grid_options) {
 /**
  * Update user validation grid with new rows
  * @param {Object } grid_options - User validation grid options
- * @param {string} data - Matrix representation of new grid rows
+ * @param {Array<Array>} data - Matrix representation of new grid rows
  */
 function update_user_grid(grid_options, data) {
 	const data_headers = data.shift();
@@ -110,7 +112,7 @@ function update_ontology_grid(components, grid_options) {
 	const column_defs = components.map(function(component) {
 		return {headerName: component.label, field: component.id}
 	});
-	grid_options.api.setColumnDefs(column_defs)
+	grid_options.api.setColumnDefs(column_defs);
 }
 
 
@@ -206,7 +208,6 @@ function create_mapping(mapping_name, user_field_order, ontology_field_order,
 
 /**
  * Render a list of mapping options when a resource is selected.
- * Should only be called by ``render_validation_ontology_view``.
  * @param {string} resource_id - Id of resource to list mappings for.
  */
 function render_mapping_options(resource_id) {
@@ -217,6 +218,7 @@ function render_mapping_options(resource_id) {
 			if ($.isEmptyObject(mappings)) {
 				$('#no_mappings_warning').show();
 			} else {
+				$('#no_mappings_warning').hide();
 				for (const mapping in mappings) {
 					if (mappings.hasOwnProperty(mapping)) {
 						const opt = $('<option></option>').text(mapping);
@@ -233,9 +235,9 @@ function render_mapping_options(resource_id) {
 }
 
 /**
- * TODO: ...
- * @param resource_id
- * @param mapping_name
+ * Align the user and ontology grid headers to a mapping.
+ * @param {string} resource_id - Id of resource to get mapping from.
+ * @param {string} mapping_name - Name of mapping in resource.
  */
 function load_mapping(resource_id, mapping_name) {
 	$.ajax({
@@ -252,8 +254,16 @@ function load_mapping(resource_id, mapping_name) {
 			} else {
 				$('#non_matching_mapping_warning').hide()
 			}
-			// TODO: what now?
-			console.log(mapping)
+
+			// Move columns to match mapping
+			top.user_grid_options.columnApi.moveColumns(
+				mapping.user_field_order,
+				0
+			);
+			top.ontology_grid_options.columnApi.moveColumns(
+				mapping.ontology_field_order,
+				0
+			)
 		},
 		error: function (jqxhr, _, error_thrown) {
 			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('

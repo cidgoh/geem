@@ -1230,6 +1230,10 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			derender_entity_form(); // Only for geem_portal.js
 			reset_specification_tab();
 			$('a[href$="panelContent"]').click();
+		}
+
+		// Derender ontology view, if one exists
+		if (top.ontology_grid_options) {
 			derender_validation_ontology_view()
 		}
 

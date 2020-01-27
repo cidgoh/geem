@@ -720,7 +720,57 @@ function init_validation_tab() {
 		$('#mapping_load').click(function () {
 			const mapping_name = $('#mapping_select').val();
 			load_mapping(top.resource.id, mapping_name)
-		})
+		});
+
+		// Allow users to drag and drop columns to link
+		// columns for mappings, prior to actually creating
+		// mappings.
+		top.dragged_user_col = undefined;
+		top.dragged_onto_col = undefined;
+		top.dropped_user_col = undefined;
+		top.dropped_onto_col = undefined;
+		$('#user_validation_grid')
+			.mousedown(function (e) {
+				top.dragged_user_col =
+					$(e.target).closest('[col-id]').attr('col-id');
+			})
+			.mouseenter(function (e) {
+				if (top.dropped_onto_col) {
+					const receiving_user_col =
+						$(e.target).closest('[col-id]').attr('col-id');
+					top.dropped_onto_col = undefined
+				}
+			});
+		$('#ontology_validation_grid')
+			.mousedown(function (e) {
+				top.dragged_onto_col =
+					$(e.target).closest('[col-id]').attr('col-id');
+			})
+			.mouseenter(function (e) {
+				if (top.dropped_user_col) {
+					const receiving_onto_col =
+						$(e.target).closest('[col-id]').attr('col-id');
+					top.dropped_user_col = undefined
+				}
+			});
+		$(document)
+			.mouseup(function (e) {
+				if (top.dragged_user_col) {
+					top.dropped_user_col = top.dragged_user_col;
+					top.dragged_user_col = undefined
+				} else if (top.dragged_onto_col) {
+					top.dropped_onto_col = top.dragged_onto_col;
+					top.dragged_onto_col = undefined
+				}
+			})
+			.mousemove(function (e) {
+				if (top.dropped_user_col) {
+					top.dropped_user_col = undefined
+				}
+				if (top.dropped_onto_col) {
+					top.dropped_onto_col = undefined
+				}
+			})
 	});
 }
 

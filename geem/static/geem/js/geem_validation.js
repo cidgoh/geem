@@ -48,7 +48,8 @@ function create_grid_options() {
 	return {
 		columnDefs: [],
 		rowData: [],
-		defaultColDef: {editable: true}
+		defaultColDef: {editable: true},
+		suppressDragLeaveHidesColumns: true
 	};
 }
 

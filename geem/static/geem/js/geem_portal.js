@@ -728,22 +728,33 @@ function init_validation_tab() {
 		top.dragged_col = undefined;
 		top.user_grid_options.api.addEventListener('dragStarted', function() {
 			const cols = top.user_grid_options.columnApi.getAllColumns();
-			top.dragged_col = cols.filter(x => x['moving'])[0]['colId']
+			top.dragged_col = cols.filter(x => x['moving'])[0]['colId'];
+
+			const onto_cols = $('#ontology_validation_grid .ag-header-cell');
+			onto_cols.addClass('drag_drop_grid_hover')
 		});
 		top.ontology_grid_options.api.addEventListener('dragStarted', function() {
 			const cols = top.ontology_grid_options.columnApi.getAllColumns();
-			top.dragged_col = cols.filter(x => x['moving'])[0]['colId']
+			top.dragged_col = cols.filter(x => x['moving'])[0]['colId'];
+
+			const user_cols = $('#user_validation_grid .ag-header-cell');
+			user_cols.addClass('drag_drop_grid_hover')
 		});
 		top.user_grid_options.api.addEventListener('dragStopped', function() {
 			const receiving_onto_col_header =
 				$('#ontology_validation_grid .ag-header-cell.ag-column-hover');
-			const receiving_onto_col = receiving_onto_col_header.attr('col-id')
+
+			const onto_cols = $('#ontology_validation_grid .ag-header-cell');
+			onto_cols.removeClass('drag_drop_grid_hover')
 		});
 		top.ontology_grid_options.api.addEventListener('dragStopped', function() {
 			const receiving_onto_col_header =
 				$('#user_validation_grid .ag-header-cell.ag-column-hover');
-			const receiving_onto_col = receiving_onto_col_header.attr('col-id')
-		})
+			const receiving_onto_col = receiving_onto_col_header.attr('col-id');
+
+			const user_cols = $('#user_validation_grid .ag-header-cell');
+			user_cols.removeClass('drag_drop_grid_hover');
+		});
 	});
 }
 

@@ -178,7 +178,33 @@ function download_str(str, file_name, file_type) {
  * @param onto_col
  */
 function link_grid_cols(user_col, onto_col) {
-	return
+	// user_col already mapped to >= 1 onto cols
+	if (user_col in top.linked_user_cols) {
+		// user_col already mapped to onto_col
+		if (top.linked_user_cols[user_col].includes(onto_col)) {
+			return;
+		// user_col not mapped to onto_col yet
+		} else {
+			top.linked_user_cols[user_col].push(onto_col)
+		}
+	// user_col not mapped to anything yet
+	} else {
+		top.linked_user_cols[user_col] = [onto_col];
+	}
+
+	// onto_col was already mapped to another user col
+	if (onto_col in top.linked_onto_cols) {
+		const old_user_col = top.linked_onto_cols[onto_col];
+		// Remove onto_col from old mapping
+		top.linked_user_cols[old_user_col] =
+			top.linked_user_cols[old_user_col].filter(x => x !== onto_col);
+		// onto_col was old_user_col's only mapping
+		if (!top.linked_user_cols[old_user_col].length) {
+			delete top.linked_user_cols[old_user_col]
+		}
+	}
+
+	top.linked_onto_cols[onto_col] = user_col
 }
 
 

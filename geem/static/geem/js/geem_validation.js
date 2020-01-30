@@ -173,6 +173,16 @@ function download_str(str, file_name, file_type) {
 
 
 /**
+ * TODO: ...
+ * @param user_col
+ * @param onto_col
+ */
+function link_grid_cols(user_col, onto_col) {
+	return
+}
+
+
+/**
  * Create a mapping for a specified package.
  * Mapping refers to the a specific order of user and ontology grid
  * headers for a package.

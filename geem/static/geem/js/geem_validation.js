@@ -227,15 +227,27 @@ function map_grid_cols(user_col, onto_col) {
  */
 function get_next_mapping_color() {
 	const colors = [
-		'#F08080',
-		'#90EE90',
-		'#ADD8E6',
-		'#F0E68C',
-		'#FF7F50',
-		'#DDA0DD',
-		'#D2B48C',
-		'#8FBC8B',
-		'#B0C4DE'
+		'#ff6666',
+		'#FF8766',
+		'#FFA866',
+		'#ffc966',
+		'#FFDB66',
+		'#FFED66',
+		'#ffff66',
+		'#CCE566',
+		'#99CC66',
+		'#66b266',
+		'#669999',
+		'#667FCC',
+		'#6666ff',
+		'#7566E6',
+		'#8466CD',
+		'#9366b4',
+		'#B380C9',
+		'#D49ADF',
+		'#f4b4f4',
+		'#F89AC5',
+		'#FB8095'
 	];
 
 	const ret = colors[top.next_mapped_col_color];

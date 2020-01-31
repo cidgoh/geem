@@ -173,9 +173,13 @@ function download_str(str, file_name, file_type) {
 
 
 /**
- * TODO: ...
- * @param user_col
- * @param onto_col
+ * Map a column from the user grid to a column from the ontology grid.
+ * Should be called when a user drags and drops a column from one grid
+ * onto the other. Mapping modifies ``top.mapped_user_cols`` and
+ * ``top.mapped_onto_cols``. This function also color-coordinates the
+ * headers of mapped grids.
+ * @param {string} user_col - ``col-id`` of user grid column
+ * @param {string} onto_col - ``col-id`` of ontology grid column
  */
 function map_grid_cols(user_col, onto_col) {
 	const user_col_header = $(`.ag-header-cell[col-id='${user_col}']`);
@@ -223,29 +227,34 @@ function map_grid_cols(user_col, onto_col) {
 
 
 /**
- * TODO: ...
+ * Return the next color specified by ``top.next_mapped_color``.
+ * ``top.next_mapped_color`` specifies an index from 0 to 19. Calling
+ * this function increments ``top.next_mapped_color`` appropriately.
+ * Thus, sequential calls to this function will not yield the same
+ * color.
+ * @returns {string} Hex code
  */
 function get_next_mapping_color() {
 	const colors = [
-		'#ff6666',
+		'#FF6666',
 		'#FF8766',
 		'#FFA866',
-		'#ffc966',
+		'#FFC966',
 		'#FFDB66',
 		'#FFED66',
-		'#ffff66',
+		'#FFFF66',
 		'#CCE566',
 		'#99CC66',
-		'#66b266',
+		'#66B266',
 		'#669999',
 		'#667FCC',
-		'#6666ff',
+		'#6666FF',
 		'#7566E6',
 		'#8466CD',
-		'#9366b4',
+		'#9366B4',
 		'#B380C9',
 		'#D49ADF',
-		'#f4b4f4',
+		'#F4B4F4',
 		'#F89AC5',
 		'#FB8095'
 	];

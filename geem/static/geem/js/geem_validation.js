@@ -270,21 +270,25 @@ function get_next_mapping_color() {
 
 /**
  * Create a mapping for a specified package.
- * Mapping refers to the a specific order of user and ontology grid
- * headers for a package.
+ * Mapping refers to user-ontology grid column pairings, as well as
+ * the a specific order of user and ontology grid headers for a
+ * package.
  * @param {string} mapping_name - Name of mapping to store in package
  * @param {Array<string>} user_field_order - User column fields in
  * 	specific order
  * @param {Array<string>} ontology_field_order - Ontology column
  * 	fields in specific order
+ * @param {Object<string, Array<string>>} mapped_user_cols - User grid
+ * 	fields, and the ontology grid fields they are paired with
  * @param {string} resource_id - Id of package to store mapping in
  */
 function create_mapping(mapping_name, user_field_order, ontology_field_order,
-			resource_id) {
+			mapped_user_cols, resource_id) {
 	const data = JSON.stringify({
 		'mapping_name': mapping_name,
 		'user_field_order': user_field_order,
-		'ontology_field_order': ontology_field_order
+		'ontology_field_order': ontology_field_order,
+		'mapped_user_cols': mapped_user_cols,
 	});
 
 	$.ajax({

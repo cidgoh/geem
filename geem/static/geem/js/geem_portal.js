@@ -761,7 +761,7 @@ function init_validation_tab() {
 			ontology_field_order = ontology_field_order.map(x => x.getColDef().field);
 
 			create_mapping(mapping_name_input, user_field_order, ontology_field_order,
-				top.resource.id)
+				top.mapped_user_cols, top.resource.id)
 		});
 
 		$('#mapping_load').click(function () {

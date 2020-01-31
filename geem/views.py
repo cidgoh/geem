@@ -417,7 +417,8 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
 
         field_orders = {
             'user_field_order': request_data['user_field_order'],
-            'ontology_field_order': request_data['ontology_field_order']
+            'ontology_field_order': request_data['ontology_field_order'],
+            'mapped_user_cols': request_data['mapped_user_cols']
         }
         field_orders = PsqlJsonAdapter(field_orders)
 

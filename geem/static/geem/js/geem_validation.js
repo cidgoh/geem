@@ -18,9 +18,9 @@ function render_validation_ontology_view(components) {
 	render_mapping_options(top.resource.id);
 	$('#mapping_box').show();
 	if (get_owner_status(top.resource)) {
-		$('#mapping_create').css('visibility', 'visible')
+		$('#mapping_save').css('visibility', 'visible')
 	} else {
-		$('#mapping_create').css('visibility', 'hidden')
+		$('#mapping_save').css('visibility', 'hidden')
 	}
 }
 
@@ -273,7 +273,7 @@ function create_mapping(mapping_name, user_field_order, ontology_field_order,
 		success: function(data) {
 			$('#mapping_select').empty();
 			render_mapping_options(resource_id);
-			$('#mapping_create_form').foundation('reveal', 'close')
+			$('#mapping_save_form').foundation('reveal', 'close')
 		},
 		error: function (jqxhr, _, error_thrown) {
 			alert(error_thrown + ': ' + jqxhr.responseText)

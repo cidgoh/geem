@@ -749,7 +749,7 @@ function init_validation_tab() {
 			user_cols.removeClass('drag_drop_grid_hover');
 		});
 
-		$('#mapping_create_confirm').click(function() {
+		$('#mapping_save_confirm').click(function() {
 			const mapping_name_input = $('#mapping_name_input').val();
 			if (mapping_name_input === '') return;
 

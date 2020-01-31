@@ -25,7 +25,8 @@
                 "description": ""
             },
             "specifications": {},
-            "customization": {}
+            "customization": {},
+            "mappings": {}
         }
     }
 }

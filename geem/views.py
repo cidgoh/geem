@@ -12,6 +12,8 @@ from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import render
 from oauth2_provider.models import Application
+from django.db import connection
+from psycopg2.extras import Json as PsqlJsonAdapter
 
 from geem.models import Package
 from geem.forms import PackageForm
@@ -354,6 +356,81 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                 )
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'],
+            url_path='get_mappings(?:/(?P<mapping_name>.+))?')
+    def get_mappings(self, request, pk, mapping_name=None):
+        """Get one or all mappings from a package.
+
+        :param request: Front-end request metadata
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to get mapping from
+        :type pk: str
+        :param mapping_name: Name of mapping, if returning a specific
+            mapping
+        :returns: One or all package mappings, or appropriate error
+            message
+        :rtype: rest_framework.response.Response
+        """
+        queryset = self._get_resource_queryset(request)
+        queryset = queryset.filter(pk=pk)
+
+        if queryset.count() != 1:
+            return Response('Please query an appropriate package',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if mapping_name:
+            query = 'contents__mappings__' + mapping_name
+            response_data = queryset.values_list(query, flat=True)[0]
+            if not response_data:
+                return Response('Please query an appropriate mapping',
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            query = 'contents__mappings'
+            response_data = queryset.values_list(query, flat=True)[0]
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='add_mapping')
+    def add_mapping_to_package(self, request, pk):
+        """Add mapping to a package.
+
+        This method is only meant to be called by
+        ``geem_validation.create_mapping``.
+
+        :param request: ``POST.data`` member is a ``json`` string
+            containing information on mapping to create
+        :type request: rest_framework.request.Request
+        :param pk: ID of package to add mapping to
+        :type pk: str
+        :returns: Response with success or failure message
+        :rtype: rest_framework.response.Response
+        """
+        user_packages = self._get_resource_queryset(request)
+        target_package = user_packages.filter(pk=pk)
+
+        if target_package.count() != 1:
+            return Response('Invalid package queried while adding mapping',
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        request_data = json.loads(request.POST['data'])
+
+        field_orders = {
+            'user_field_order': request_data['user_field_order'],
+            'ontology_field_order': request_data['ontology_field_order'],
+            'mapped_user_cols': request_data['mapped_user_cols']
+        }
+        field_orders = PsqlJsonAdapter(field_orders)
+
+        # Connect to the default database service
+        with connection.cursor() as cursor:
+            # See https://stackoverflow.com/a/23500670 for details on
+            # creation queries used below.
+            cursor.execute("update geem_package set contents=(jsonb_set("
+                           "contents, '{mappings, %s}', jsonb %s)) where id=%s"
+                           % (request_data['mapping_name'], field_orders, pk))
+
+        return Response('Mapping added', status=status.HTTP_200_OK)
 
     def create(self, request, pk=None):
 

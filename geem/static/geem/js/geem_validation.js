@@ -336,7 +336,9 @@ function render_mapping_options(resource_id) {
 }
 
 /**
- * Align the user and ontology grid headers to a mapping.
+ * Load a package's mapping onto the user and ontology grid.
+ * This entails populating ``top.mapped_user_cols`` appropriately, and
+ * aligning the grid headers in a specified order.
  * @param {string} resource_id - Id of resource to get mapping from.
  * @param {string} mapping_name - Name of mapping in resource.
  */
@@ -364,7 +366,18 @@ function load_mapping(resource_id, mapping_name) {
 			top.ontology_grid_options.columnApi.moveColumns(
 				mapping.ontology_field_order,
 				0
-			)
+			);
+
+			// Populate ``top.mapped_user_cols``
+			top.mapped_user_cols = {};
+			top.mapped_onto_cols = {};
+			top.next_mapped_col_color = 0;
+			$('.ag-header-cell').css('background-color', '');
+			for (const user_col of Object.keys(mapping.mapped_user_cols)) {
+				for (const onto_col of mapping.mapped_user_cols[user_col]) {
+					map_grid_cols(user_col, onto_col)
+				}
+			}
 		},
 		error: function (jqxhr, _, error_thrown) {
 			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('

@@ -706,6 +706,8 @@ function init_validation_tab() {
 		// Only used to make the construction of
 		// ``top.linked_user_cols`` easier.
 		top.linked_onto_cols = {};
+		// Color-coordinate linked cols
+		top.next_linked_col_color = 0;
 
 		// Map columns by linking them via drag/drop, and then
 		// naming/creating a mapping.

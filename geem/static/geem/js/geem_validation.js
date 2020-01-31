@@ -177,25 +177,25 @@ function download_str(str, file_name, file_type) {
  * @param user_col
  * @param onto_col
  */
-function link_grid_cols(user_col, onto_col) {
+function map_grid_cols(user_col, onto_col) {
 	const user_col_header = $(`.ag-header-cell[col-id='${user_col}']`);
 	const onto_col_header = $(`.ag-header-cell[col-id='${onto_col}']`);
 
 	// user_col already mapped to >= 1 onto cols
-	if (user_col in top.linked_user_cols) {
+	if (user_col in top.mapped_user_cols) {
 		// user_col already mapped to onto_col
-		if (top.linked_user_cols[user_col].includes(onto_col)) {
+		if (top.mapped_user_cols[user_col].includes(onto_col)) {
 			return;
 		// user_col not mapped to onto_col yet
 		} else {
-			top.linked_user_cols[user_col].push(onto_col);
+			top.mapped_user_cols[user_col].push(onto_col);
 
 			const user_col_header_color = user_col_header.css('background-color');
 			onto_col_header.css('background-color', user_col_header_color)
 		}
 	// user_col not mapped to anything yet
 	} else {
-		top.linked_user_cols[user_col] = [onto_col];
+		top.mapped_user_cols[user_col] = [onto_col];
 
 		const next_color = get_next_mapping_color();
 		user_col_header.css('background-color', next_color);
@@ -203,22 +203,22 @@ function link_grid_cols(user_col, onto_col) {
 	}
 
 	// onto_col was already mapped to another user col
-	if (onto_col in top.linked_onto_cols) {
-		const old_user_col = top.linked_onto_cols[onto_col];
+	if (onto_col in top.mapped_onto_cols) {
+		const old_user_col = top.mapped_onto_cols[onto_col];
 
 		// Remove onto_col from old mapping
-		top.linked_user_cols[old_user_col] =
-			top.linked_user_cols[old_user_col].filter(x => x !== onto_col);
+		top.mapped_user_cols[old_user_col] =
+			top.mapped_user_cols[old_user_col].filter(x => x !== onto_col);
 		// onto_col was old_user_col's only mapping
-		if (!top.linked_user_cols[old_user_col].length) {
-			delete top.linked_user_cols[old_user_col];
+		if (!top.mapped_user_cols[old_user_col].length) {
+			delete top.mapped_user_cols[old_user_col];
 
 			const old_user_col_header = $(`.ag-header-cell[col-id='${old_user_col}']`);
 			old_user_col_header.css('background-color', '')
 		}
 	}
 
-	top.linked_onto_cols[onto_col] = user_col
+	top.mapped_onto_cols[onto_col] = user_col
 }
 
 
@@ -238,10 +238,10 @@ function get_next_mapping_color() {
 		'#B0C4DE'
 	];
 
-	const ret = colors[top.next_linked_col_color];
+	const ret = colors[top.next_mapped_col_color];
 
-	top.next_linked_col_color += 1;
-	top.next_linked_col_color %= 9;
+	top.next_mapped_col_color += 1;
+	top.next_mapped_col_color %= 9;
 
 	return ret
 }

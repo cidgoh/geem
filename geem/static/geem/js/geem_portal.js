@@ -701,16 +701,15 @@ function init_validation_tab() {
 			})
 		});
 
-		// Will be stored in saved mappings
-		top.linked_user_cols = {};
-		// Only used to make the construction of
-		// ``top.linked_user_cols`` easier.
-		top.linked_onto_cols = {};
-		// Color-coordinate linked cols
-		top.next_linked_col_color = 0;
+		// Actual data stored on server
+		top.mapped_user_cols = {};
+		// Used to more easily construct
+		// ``top.mapped_user_cols``.
+		top.mapped_onto_cols = {};
+		// Color-coordinate mapped cols
+		top.next_mapped_col_color = 0;
 
-		// Map columns by linking them via drag/drop, and then
-		// naming/creating a mapping.
+		// Map columns by drag/drop
 		top.dragged_col = undefined;
 		top.user_grid_options.api.addEventListener('dragStarted', function() {
 			const cols = top.user_grid_options.columnApi.getAllColumns();
@@ -731,7 +730,7 @@ function init_validation_tab() {
 				$('#ontology_validation_grid .ag-header-cell.ag-column-hover');
 			const receiving_onto_col = receiving_onto_col_header.attr('col-id');
 			if (receiving_onto_col) {
-				link_grid_cols(top.dragged_col, receiving_onto_col)
+				map_grid_cols(top.dragged_col, receiving_onto_col)
 			}
 
 			const onto_cols = $('#ontology_validation_grid .ag-header-cell');
@@ -742,7 +741,7 @@ function init_validation_tab() {
 				$('#user_validation_grid .ag-header-cell.ag-column-hover');
 			const receiving_user_col = receiving_user_col_header.attr('col-id');
 			if (receiving_user_col) {
-				link_grid_cols(receiving_user_col, top.dragged_col);
+				map_grid_cols(receiving_user_col, top.dragged_col);
 			}
 
 			const user_cols = $('#user_validation_grid .ag-header-cell');

@@ -72,6 +72,7 @@ $( document ).ready(function($) {
 	init_specification_tab()
 	// init_discuss_tab()
 	init_validation_tab()
+	init_mapping_tab()
 
 
 	// Initializes Zurb Foundation according to GEEM settings
@@ -768,6 +769,17 @@ function init_validation_tab() {
 			const mapping_name = $('#mapping_select').val();
 			load_mapping(top.resource.id, mapping_name)
 		})
+	});
+}
+
+
+function init_mapping_tab() {
+	$('.draggable_spec_field').draggable({revert: true});
+	$('.droppable_spec_field').droppable({
+		accept: '.draggable_spec_field',
+		drop: function (_, ui) {
+			$(this).append($(ui.draggable))
+		}
 	});
 }
 

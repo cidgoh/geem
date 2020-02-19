@@ -364,6 +364,22 @@ form .row .row {margin:0 0 5px 0 !important;}
 	background-color: #008CBA;
 }
 
+.draggable_spec_field:hover {
+	cursor: pointer;
+}
+.draggable_spec_field .label {
+	font-size: large;
+	margin: 1%;
+	display: inline-block;
+}
+#user_spec_field_pairs > .row {
+	border-style: solid;
+	margin: 1%;
+}
+.droppable_spec_field {
+	border-left-style: dashed;
+}
+
 .error input, .error textarea, .error select {
     /* margin-bottom: 0; Overrides what Foundation is doing.  Foundation expects <span .error> to be at bottom of field input */
     margin-bottom:1rem;

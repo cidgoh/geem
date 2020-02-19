@@ -328,9 +328,36 @@
 
 
         <!-- ******************* MAPPING **************** -->
-        <div class="content" id="panelMapping">
-        Hello world!
-        </div>
+          <div class="content" id="panelMapping">
+            <div class="row">
+              <div class="small-7 small-offset-1 columns"
+                   id="user_spec_field_pairs">
+                <div class="row">
+                  <div class="small-6 columns">ham</div>
+                  <div class="small-6 columns droppable_spec_field">spam</div>
+                </div>
+                <div class="row">
+                  <div class="small-6 columns">ham</div>
+                  <div class="small-6 columns droppable_spec_field">spam</div>
+                </div>
+                <div class="row">
+                  <div class="small-6 columns">ham</div>
+                  <div class="small-6 columns droppable_spec_field">spam</div>
+                </div>
+              </div>
+              <div class="small-4 columns">
+                <div class="row draggable_spec_field">
+                  <div class="label">foo</div>
+                </div>
+                <div class="row draggable_spec_field">
+                  <div class="label">bar</div>
+                </div>
+                <div class="row draggable_spec_field">
+                  <div class="label">baz</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
         <!-- ******************* DISCUSSION **************** -->
@@ -389,6 +416,9 @@
     <script src="{% static "geem/js/vendor/what-input.js" %}"></script>
     <script src="{% static "geem/js/vendor/js-yaml.min.js" %}"></script> 
     <script src="{% static "geem/js/chosen/chosen.jquery.min.js" %}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
 
     <script src="{% static "geem/js/geem_resource.js" %}"></script>
     <script src="{% static "geem/js/geem_form.js" %}"></script>

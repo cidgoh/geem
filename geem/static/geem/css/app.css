@@ -364,6 +364,10 @@ form .row .row {margin:0 0 5px 0 !important;}
 	background-color: #008CBA;
 }
 
+.user_spec_field_label {
+	font-size: large;
+	margin: 1%;
+}
 .draggable_spec_field:hover {
 	cursor: pointer;
 }
@@ -376,8 +380,9 @@ form .row .row {margin:0 0 5px 0 !important;}
 	border-style: solid;
 	margin: 1%;
 }
-.droppable_spec_field {
+.droppable_spec_field_box {
 	border-left-style: dashed;
+	min-height: 1.5em;
 }
 
 .error input, .error textarea, .error select {

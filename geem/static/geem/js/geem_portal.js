@@ -774,13 +774,14 @@ function init_validation_tab() {
 
 
 function init_mapping_tab() {
-	$('.draggable_spec_field').draggable({revert: true});
-	$('.droppable_spec_field').droppable({
-		accept: '.draggable_spec_field',
-		drop: function (_, ui) {
-			$(this).append($(ui.draggable))
-		}
+	$('#draggable_spec_fields').sortable({
+		revert: true,
+		connectWith: '.droppable_spec_field_box'
 	});
+	$('.droppable_spec_field_box').sortable({
+		revert: true,
+		connectWith: '.droppable_spec_field_box, #draggable_spec_fields'
+	})
 }
 
 

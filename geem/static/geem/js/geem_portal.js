@@ -174,7 +174,7 @@ function portal_entity_form_callback(form) {
 	render_validation_ontology_view(components);
 
 	// Set up mapping view in mapping tab
-	render_mapping_view();
+	render_mapping_options();
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -697,7 +697,8 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_user_grid(top.user_grid_options, data)
+					update_user_grid(top.user_grid_options, data);
+					update_user_field_labels(top.user_grid_options)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)

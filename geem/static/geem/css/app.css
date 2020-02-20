@@ -364,8 +364,14 @@ form .row .row {margin:0 0 5px 0 !important;}
 #mapping_save {
 	visibility: hidden;
 }
+#mapping_save_select {
+	display: none;
+}
+#mapping_info_box {
+	display: none;
+}
 
-.user_spec_field_label {
+.user_field_label {
 	font-size: large;
 	margin: 1%;
 }

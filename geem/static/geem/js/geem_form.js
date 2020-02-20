@@ -1238,7 +1238,7 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 		}
 
 		// Derender mapping view
-		derender_mapping_view();
+		derender_mapping_options();
 
 		return false
 	}

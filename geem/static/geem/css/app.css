@@ -371,10 +371,6 @@ form .row .row {margin:0 0 5px 0 !important;}
 	display: none;
 }
 
-.user_field_label {
-	font-size: large;
-	margin: 1%;
-}
 .draggable_spec_field:hover {
 	cursor: pointer;
 }
@@ -382,6 +378,11 @@ form .row .row {margin:0 0 5px 0 !important;}
 	font-size: large;
 	margin: 1%;
 	display: inline-block;
+}
+
+.user_field_label {
+	font-size: large;
+	margin: 1%;
 }
 #user_spec_field_pairs > .row {
 	border-style: solid;

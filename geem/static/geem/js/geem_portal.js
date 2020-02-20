@@ -173,8 +173,8 @@ function portal_entity_form_callback(form) {
 	}
 	render_validation_ontology_view(components);
 
-	// Set up mapping view in mapping tab
-	render_mapping_options();
+	// Set up ontology view in mapping tab
+	render_mapping_ontology_view();
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')

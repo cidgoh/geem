@@ -1237,6 +1237,9 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			derender_validation_ontology_view()
 		}
 
+		// Derender mapping view
+		derender_mapping_view();
+
 		return false
 	}
 

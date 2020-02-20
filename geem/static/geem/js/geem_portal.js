@@ -173,6 +173,9 @@ function portal_entity_form_callback(form) {
 	}
 	render_validation_ontology_view(components);
 
+	// Set up mapping view in mapping tab
+	render_mapping_view();
+
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
 	// When render_entity is called, activate its (form) tab

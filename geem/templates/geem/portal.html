@@ -329,7 +329,13 @@
 
         <!-- ******************* MAPPING **************** -->
           <div class="content" id="panelMapping">
-            <div class="row">
+
+            <div class="infoBox" id="mapping_info_box">
+              Select a specification from an ontology or user package resource
+              to validate your tabular data against.
+            </div>
+
+            <div class="row" id="mapping_view">
               <div class="small-7 small-offset-1 columns"
                    id="user_spec_field_pairs">
                 <div class="row">
@@ -374,6 +380,7 @@
                 </div>
               </div>
             </div>
+
           </div>
 
 
@@ -441,6 +448,7 @@
     <script src="{% static "geem/js/geem_form.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>
     <script src="{% static "geem/js/geem_validation.js" %}"></script>
+    <script src="{% static "geem/js/geem_mapping.js" %}"></script>
     <script src="{% static "geem/js/geem_cart.js" %}"></script>
     <script src="{% static "geem/js/geem_search.js" %}"></script>
     <script src="{% static "geem/js/geem_lookup.js" %}"></script>

@@ -284,18 +284,18 @@
                   the correct file?
                 </div>
               </div>
-              <div class="row">
-                <div class="small-2 small-offset-2 columns">
-                  <button id="mapping_save"
-                          data-reveal-id="mapping_save_form">Save</button>
-                </div>
-                <div class="small-6 columns">
-                  <select id="mapping_select"></select>
-                </div>
-                <div class="small-2 columns">
-                  <button id="mapping_load">Load</button>
-                </div>
-              </div>
+{#              <div class="row">#}
+{#                <div class="small-2 small-offset-2 columns">#}
+{#                  <button id="mapping_save"#}
+{#                          data-reveal-id="mapping_save_form">Save</button>#}
+{#                </div>#}
+{#                <div class="small-6 columns">#}
+{#                  <select id="mapping_select"></select>#}
+{#                </div>#}
+{#                <div class="small-2 columns">#}
+{#                  <button id="mapping_load">Load</button>#}
+{#                </div>#}
+{#              </div>#}
             </div>
 
             <div id="mapping_save_form" class="reveal-modal" data-reveal>
@@ -335,7 +335,17 @@
               to validate your tabular data against.
             </div>
 
-            <div class="row" id="mapping_view">
+            <div class="row" id="mapping_save_select">
+              <div class="small-4 small-offset-1 columns">
+                <select id="mapping_select"></select>
+              </div>
+              <div class="small-2 columns end">
+                <button id="mapping_save"
+                        data-reveal-id="mapping_save_form">Save</button>
+              </div>
+            </div>
+
+            <div class="row" id="mapping_drag_drop">
               <div class="small-7 small-offset-1 columns"
                    id="user_spec_field_pairs">
                 <div class="row">

@@ -349,9 +349,6 @@ form .row .row {margin:0 0 5px 0 !important;}
 	text-align: center;
 	color: red;
 }
-#mapping_save {
-	visibility: hidden;
-}
 .grid_buttons .button {
 	margin-top: 10%;
 	margin-left: 5%;
@@ -362,6 +359,10 @@ form .row .row {margin:0 0 5px 0 !important;}
 }
 .drag_drop_grid_hover:hover {
 	background-color: #008CBA;
+}
+
+#mapping_save {
+	visibility: hidden;
 }
 
 .user_spec_field_label {

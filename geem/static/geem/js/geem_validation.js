@@ -17,11 +17,11 @@ function render_validation_ontology_view(components) {
 
 	render_mapping_options(top.resource.id);
 	$('#mapping_box').show();
-	if (get_owner_status(top.resource)) {
-		$('#mapping_save').css('visibility', 'visible')
-	} else {
-		$('#mapping_save').css('visibility', 'hidden')
-	}
+	// if (get_owner_status(top.resource)) {
+	// 	$('#mapping_save').css('visibility', 'visible')
+	// } else {
+	// 	$('#mapping_save').css('visibility', 'hidden')
+	// }
 }
 
 

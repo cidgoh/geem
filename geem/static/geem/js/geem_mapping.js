@@ -15,7 +15,7 @@ function render_mapping_ontology_view() {
 		$('#mapping_save').css('visibility', 'hidden')
 	}
 
-	update_draggable_spec_fields(top.ontology_grid_options)
+	update_spec_field_labels(top.ontology_grid_options)
 }
 
 
@@ -26,7 +26,7 @@ function derender_mapping_ontology_view() {
 	$('#mapping_save_select').hide();
 	$('#mapping_info_box').show();
 
-	$('#draggable_spec_fields').empty()
+	$('#unmapped_spec_field_labels').empty()
 }
 
 
@@ -35,21 +35,21 @@ function derender_mapping_ontology_view() {
  * @param user_grid_options
  */
 function update_user_field_labels(user_grid_options) {
-	$('#user_spec_field_pairs').empty();
+	$('#mapped_user_spec_field_containers').empty();
 
 	const user_col_defs = user_grid_options.columnApi.getAllColumns().map(x => x.colDef);
 
 	user_col_defs.forEach(function (col_def) {
 		const headerName = col_def.headerName;
 		const field = col_def.field;
-		$('#user_spec_field_pairs').append(`
-			<div class="row">
-				<div class="small-6 columns">
+		$('#mapped_user_spec_field_containers').append(`
+			<div class="row mapped_user_spec_field_container">
+				<div class="small-6 columns user_field_container">
 					<div class="user_field_label label" data-field="${field}">
 						${headerName}
 					</div>
 				</div>
-				<div class="small-6 columns droppable_spec_field_box"></div>
+				<div class="small-6 columns spec_field_container"></div>
 			</div>
 		`)
 	});
@@ -63,16 +63,16 @@ function update_user_field_labels(user_grid_options) {
  * TODO: document function
  * @param ontology_grid_options
  */
-function update_draggable_spec_fields(ontology_grid_options) {
-	$('#draggable_spec_fields').empty();
+function update_spec_field_labels(ontology_grid_options) {
+	$('#unmapped_spec_field_labels').empty();
 
 	const onto_col_defs = ontology_grid_options.columnApi.getAllColumns().map(x => x.colDef);
 
 	onto_col_defs.forEach(function (col_def) {
 		const headerName = col_def.headerName;
 		const field = col_def.field;
-		$('#draggable_spec_fields').append(`
-			<div class="row draggable_spec_field" data-field="${field}">
+		$('#unmapped_spec_field_labels').append(`
+			<div class="row spec_field_label" data-field="${field}">
                   		<div class="label">${headerName}</div>
                 	</div>
 		`)

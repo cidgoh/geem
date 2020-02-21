@@ -778,13 +778,13 @@ function init_validation_tab() {
 
 
 function init_mapping_tab() {
-	$('#draggable_spec_fields').sortable({
+	$('#unmapped_spec_field_labels').sortable({
 		revert: true,
-		connectWith: '.droppable_spec_field_box'
+		connectWith: '.spec_field_container'
 	});
-	$('.droppable_spec_field_box').sortable({
+	$('.spec_field_container').sortable({
 		revert: true,
-		connectWith: '.droppable_spec_field_box, #draggable_spec_fields'
+		connectWith: '.spec_field_container, #unmapped_spec_field_labels'
 	})
 }
 

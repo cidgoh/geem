@@ -371,8 +371,12 @@ form .row .row {margin:0 0 5px 0 !important;}
 	display: none;
 }
 
-.spec_field_label:hover {
+.user_field_label:hover, .spec_field_label:hover {
 	cursor: pointer;
+}
+.user_field_label {
+	font-size: large;
+	margin: 1%;
 }
 .spec_field_label .label {
 	font-size: large;
@@ -380,17 +384,15 @@ form .row .row {margin:0 0 5px 0 !important;}
 	display: inline-block;
 }
 
-.user_field_label {
-	font-size: large;
-	margin: 1%;
-}
 .mapped_user_spec_field_container {
 	border-style: solid;
 	margin: 1% !important;
 }
+.user_field_container, .spec_field_container {
+	min-height: 1.5em;
+}
 .spec_field_container {
 	border-left-style: dashed;
-	min-height: 1.5em;
 }
 
 .error input, .error textarea, .error select {

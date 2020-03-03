@@ -699,6 +699,8 @@ function init_validation_tab() {
 				success: function (data) {
 					update_user_grid(top.user_grid_options, data);
 					update_user_field_labels(top.user_grid_options)
+					// Reset spec labels
+					update_spec_field_labels(top.ontology_grid_options)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)

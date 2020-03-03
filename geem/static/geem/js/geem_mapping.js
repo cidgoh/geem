@@ -64,7 +64,7 @@ function update_user_field_labels(user_grid_options) {
  * @param ontology_grid_options
  */
 function update_spec_field_labels(ontology_grid_options) {
-	$('#unmapped_spec_field_labels').empty();
+	$('.spec_field_label').remove();
 
 	const onto_col_defs = ontology_grid_options.columnApi.getAllColumns().map(x => x.colDef);
 

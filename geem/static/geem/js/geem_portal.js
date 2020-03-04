@@ -787,6 +787,38 @@ function init_mapping_tab() {
 	$('.spec_field_container').sortable({
 		revert: true,
 		connectWith: '.spec_field_container, #unmapped_spec_field_labels'
+	});
+
+	$('.user_field_container').sortable({
+		connectWith: '.user_field_container',
+		placeholder: 'hidden_placeholder',
+		over: function (_, ui) {
+			const drag_container = ui.item.parent();
+			const drop_container = $(this);
+			if (drag_container[0] !== drop_container[0]) {
+				// Send the label in the droppable to
+				// where the draggable was.
+				const drop_label =
+					drop_container.children().not('.ui-sortable-placeholder');
+				drop_label.appendTo(drag_container)
+			}
+		},
+		out: function (_, ui) {
+			const drag_container = ui.item.parent();
+			const drop_container = $(this);
+			if (drag_container[0] !== drop_container[0]) {
+				// Send the original label in the
+				// droppable back.
+				const drop_label =
+					drag_container.children().not('.ui-sortable-helper');
+				drop_label.appendTo(drop_container)
+			}
+		},
+		receive: function (_, ui) {
+			if ($(this).children().length > 1) {
+				$(ui.sender).sortable('cancel')
+			}
+		}
 	})
 }
 

@@ -394,6 +394,9 @@ form .row .row {margin:0 0 5px 0 !important;}
 .spec_field_container {
 	border-left-style: dashed;
 }
+.hidden_place_holder {
+	display: none;
+}
 
 .error input, .error textarea, .error select {
     /* margin-bottom: 0; Overrides what Foundation is doing.  Foundation expects <span .error> to be at bottom of field input */

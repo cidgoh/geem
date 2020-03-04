@@ -78,3 +78,29 @@ function update_spec_field_labels(ontology_grid_options) {
 		`)
 	})
 }
+
+
+/**
+ * TODO: document function
+ */
+function get_current_mapping() {
+	const user_field_order = [];
+	const mapped_user_spec_fields = {};
+
+	$('.mapped_user_spec_field_container').each(function() {
+		const user_field = $(this).find('.user_field_label').data('field');
+
+		user_field_order.push(user_field);
+		mapped_user_spec_fields[user_field] = [];
+
+		$(this).find('.spec_field_label').each(function () {
+			const spec_field = $(this).data('field');
+			mapped_user_spec_fields[user_field].push(spec_field)
+		});
+	});
+
+	return {
+		'user_field_order': user_field_order,
+		'mapped_user_spec_fields': mapped_user_spec_fields
+	}
+}

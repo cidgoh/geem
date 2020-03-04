@@ -755,21 +755,21 @@ function init_validation_tab() {
 			user_cols.removeClass('drag_drop_grid_hover');
 		});
 
-		$('#mapping_save_confirm').click(function() {
-			const mapping_name_input = $('#mapping_name_input').val();
-			if (mapping_name_input === '') return;
-
-			let user_field_order =
-				top.user_grid_options.columnApi.getAllGridColumns();
-			user_field_order = user_field_order.map(x => x.getColDef().field);
-
-			let ontology_field_order =
-				top.ontology_grid_options.columnApi.getAllGridColumns();
-			ontology_field_order = ontology_field_order.map(x => x.getColDef().field);
-
-			create_mapping(mapping_name_input, user_field_order, ontology_field_order,
-				top.mapped_user_cols, top.resource.id)
-		});
+		// $('#mapping_save_confirm').click(function() {
+		// 	const mapping_name_input = $('#mapping_name_input').val();
+		// 	if (mapping_name_input === '') return;
+		//
+		// 	let user_field_order =
+		// 		top.user_grid_options.columnApi.getAllGridColumns();
+		// 	user_field_order = user_field_order.map(x => x.getColDef().field);
+		//
+		// 	let ontology_field_order =
+		// 		top.ontology_grid_options.columnApi.getAllGridColumns();
+		// 	ontology_field_order = ontology_field_order.map(x => x.getColDef().field);
+		//
+		// 	create_mapping(mapping_name_input, user_field_order, ontology_field_order,
+		// 		top.mapped_user_cols, top.resource.id)
+		// });
 
 		$('#mapping_load').click(function () {
 			const mapping_name = $('#mapping_select').val();
@@ -819,7 +819,15 @@ function init_mapping_tab() {
 				$(ui.sender).sortable('cancel')
 			}
 		}
-	})
+	});
+
+	$('#mapping_save_confirm').click(function() {
+		const mapping_name_input = $('#mapping_name_input').val();
+		if (mapping_name_input === '') return;
+
+		const current_mapping = get_current_mapping();
+		return
+	});
 }
 
 

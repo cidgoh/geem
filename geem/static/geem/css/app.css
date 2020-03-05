@@ -373,6 +373,7 @@ form .row .row {margin:0 0 5px 0 !important;}
 
 .user_field_label:hover, .spec_field_label:hover {
 	cursor: pointer;
+	user-select: none;
 }
 .user_field_label {
 	font-size: large;

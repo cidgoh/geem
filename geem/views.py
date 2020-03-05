@@ -396,7 +396,7 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
         """Add mapping to a package.
 
         This method is only meant to be called by
-        ``geem_validation.create_mapping``.
+        ``geem_validation.save_mapping``.
 
         :param request: ``POST.data`` member is a ``json`` string
             containing information on mapping to create
@@ -414,21 +414,19 @@ class ResourceViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin, mixins.Des
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         request_data = json.loads(request.POST['data'])
-
-        field_orders = {
-            'user_field_order': request_data['user_field_order'],
-            'ontology_field_order': request_data['ontology_field_order'],
-            'mapped_user_cols': request_data['mapped_user_cols']
-        }
-        field_orders = PsqlJsonAdapter(field_orders)
+        mapping_name = request_data['mapping_name']
+        mapping = PsqlJsonAdapter(request_data['mapping'])
 
         # Connect to the default database service
         with connection.cursor() as cursor:
             # See https://stackoverflow.com/a/23500670 for details on
             # creation queries used below.
-            cursor.execute("update geem_package set contents=(jsonb_set("
-                           "contents, '{mappings, %s}', jsonb %s)) where id=%s"
-                           % (request_data['mapping_name'], field_orders, pk))
+            creation_query = (
+                "update geem_package set contents="
+                "(jsonb_set(contents, '{mappings, %s}', jsonb %s)) where id=%s"
+            )
+            creation_query = creation_query % (mapping_name, mapping, pk)
+            cursor.execute(creation_query)
 
         return Response('Mapping added', status=status.HTTP_200_OK)
 

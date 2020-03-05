@@ -780,53 +780,13 @@ function init_validation_tab() {
 
 
 function init_mapping_tab() {
-	$('#unmapped_spec_field_labels').sortable({
-		revert: true,
-		connectWith: '.spec_field_container'
-	});
-	$('.spec_field_container').sortable({
-		revert: true,
-		connectWith: '.spec_field_container, #unmapped_spec_field_labels'
-	});
+	$('#mapping_save_confirm').click(function(e) {
+		e.stopPropagation();
+		const mapping_name = $('#mapping_name_input').val();
+		if (mapping_name === '') return;
 
-	$('.user_field_container').sortable({
-		connectWith: '.user_field_container',
-		placeholder: 'hidden_placeholder',
-		over: function (_, ui) {
-			const drag_container = ui.item.parent();
-			const drop_container = $(this);
-			if (drag_container[0] !== drop_container[0]) {
-				// Send the label in the droppable to
-				// where the draggable was.
-				const drop_label =
-					drop_container.children().not('.ui-sortable-placeholder');
-				drop_label.appendTo(drag_container)
-			}
-		},
-		out: function (_, ui) {
-			const drag_container = ui.item.parent();
-			const drop_container = $(this);
-			if (drag_container[0] !== drop_container[0]) {
-				// Send the original label in the
-				// droppable back.
-				const drop_label =
-					drag_container.children().not('.ui-sortable-helper');
-				drop_label.appendTo(drop_container)
-			}
-		},
-		receive: function (_, ui) {
-			if ($(this).children().length > 1) {
-				$(ui.sender).sortable('cancel')
-			}
-		}
-	});
-
-	$('#mapping_save_confirm').click(function() {
-		const mapping_name_input = $('#mapping_name_input').val();
-		if (mapping_name_input === '') return;
-
-		const current_mapping = get_current_mapping();
-		return
+		const mapping = get_current_mapping();
+		save_mapping(mapping_name, mapping, top.resource.id)
 	});
 }
 

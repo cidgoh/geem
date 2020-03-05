@@ -54,8 +54,38 @@ function update_user_field_labels(user_grid_options) {
 		`)
 	});
 
-	// Need to connect new sortable divs
-	init_mapping_tab()
+	// Make user field labels draggable and droppable
+	$('.user_field_container').sortable({
+		connectWith: '.user_field_container',
+		placeholder: 'hidden_placeholder',
+		over: function (_, ui) {
+			const drag_container = ui.item.parent();
+			const drop_container = $(this);
+			if (drag_container[0] !== drop_container[0]) {
+				// Send the label in the droppable to
+				// where the draggable was.
+				const drop_label =
+					drop_container.children().not('.ui-sortable-placeholder');
+				drop_label.appendTo(drag_container)
+			}
+		},
+		out: function (_, ui) {
+			const drag_container = ui.item.parent();
+			const drop_container = $(this);
+			if (drag_container[0] !== drop_container[0]) {
+				// Send the original label in the
+				// droppable back.
+				const drop_label =
+					drag_container.children().not('.ui-sortable-helper');
+				drop_label.appendTo(drop_container)
+			}
+		},
+		receive: function (_, ui) {
+			if ($(this).children().length > 1) {
+				$(ui.sender).sortable('cancel')
+			}
+		}
+	})
 }
 
 
@@ -76,7 +106,17 @@ function update_spec_field_labels(ontology_grid_options) {
                   		<div class="label">${headerName}</div>
                 	</div>
 		`)
-	})
+	});
+
+	// Make spec field labels draggable and roppable
+	$('#unmapped_spec_field_labels').sortable({
+		revert: true,
+		connectWith: '.spec_field_container'
+	});
+	$('.spec_field_container').sortable({
+		revert: true,
+		connectWith: '.spec_field_container, #unmapped_spec_field_labels'
+	});
 }
 
 
@@ -103,4 +143,26 @@ function get_current_mapping() {
 		'user_field_order': user_field_order,
 		'mapped_user_spec_fields': mapped_user_spec_fields
 	}
+}
+
+/**
+ * TODO: document function
+ */
+function save_mapping(mapping_name, mapping, resource_id) {
+	const data = JSON.stringify({
+		'mapping_name': mapping_name,
+		'mapping': mapping,
+	});
+
+	$.ajax({
+		type: 'POST',
+		url: API_RESOURCES_URL + resource_id + '/add_mapping/',
+		data: {'data': data},
+		success: function(data) {
+			$('#mapping_save_form').foundation('reveal', 'close')
+		},
+		error: function (jqxhr, _, error_thrown) {
+			alert(error_thrown + ': ' + jqxhr.responseText)
+		}
+	})
 }

@@ -179,6 +179,10 @@ function render_mapping_options(resource_id) {
 		type: 'GET',
 		url: API_RESOURCES_URL + resource_id + '/get_mappings/',
 		success: function(mappings) {
+			let placeholder = $('<option disabled selected></option>');
+			placeholder = placeholder.text('Select a mapping');
+			$('#mapping_select').append(placeholder)
+
 			for (const mapping in mappings) {
 				if (mappings.hasOwnProperty(mapping)) {
 					let opt = $('<option></option>').text(mapping);

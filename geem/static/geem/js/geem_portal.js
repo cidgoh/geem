@@ -771,10 +771,10 @@ function init_validation_tab() {
 		// 		top.mapped_user_cols, top.resource.id)
 		// });
 
-		$('#mapping_load').click(function () {
-			const mapping_name = $('#mapping_select').val();
-			load_mapping(top.resource.id, mapping_name)
-		})
+		// $('#mapping_load').click(function () {
+		// 	const mapping_name = $('#mapping_select').val();
+		// 	load_mapping(top.resource.id, mapping_name)
+		// })
 	});
 }
 
@@ -788,6 +788,11 @@ function init_mapping_tab() {
 		const mapping = get_current_mapping();
 		save_mapping(mapping_name, mapping, top.resource.id)
 	});
+
+	$('#mapping_select').change(function () {
+		const mapping_name = $(this).val();
+		load_mapping(mapping_name, top.resource.id)
+	})
 }
 
 

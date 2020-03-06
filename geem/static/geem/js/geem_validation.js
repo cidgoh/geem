@@ -307,53 +307,53 @@ function create_mapping(mapping_name, user_field_order, ontology_field_order,
 }
 
 
-/**
- * Load a package's mapping onto the user and ontology grid.
- * This entails populating ``top.mapped_user_cols`` appropriately, and
- * aligning the grid headers in a specified order.
- * @param {string} resource_id - Id of resource to get mapping from.
- * @param {string} mapping_name - Name of mapping in resource.
- */
-function load_mapping(resource_id, mapping_name) {
-	$.ajax({
-		type: 'GET',
-		url: API_RESOURCES_URL + resource_id + '/get_mappings/' + mapping_name + '/',
-		success: function(mapping) {
-			// Check if user submitted data has the same
-			// fields as the mapping's user fields.
-			let user_fields = top.user_grid_options.columnApi.getAllGridColumns();
-			user_fields = user_fields.map(x => x.getColDef().field).sort().join();
-			const mapping_user_fields = mapping.user_field_order.sort().join();
-			if (user_fields !== mapping_user_fields) {
-				$('#non_matching_mapping_warning').show()
-			} else {
-				$('#non_matching_mapping_warning').hide()
-			}
-
-			// Move columns to match mapping
-			top.user_grid_options.columnApi.moveColumns(
-				mapping.user_field_order,
-				0
-			);
-			top.ontology_grid_options.columnApi.moveColumns(
-				mapping.ontology_field_order,
-				0
-			);
-
-			// Populate ``top.mapped_user_cols``
-			top.mapped_user_cols = {};
-			top.mapped_onto_cols = {};
-			top.next_mapped_col_color = 0;
-			$('.ag-header-cell').css('background-color', '');
-			for (const user_col of Object.keys(mapping.mapped_user_cols)) {
-				for (const onto_col of mapping.mapped_user_cols[user_col]) {
-					map_grid_cols(user_col, onto_col)
-				}
-			}
-		},
-		error: function (jqxhr, _, error_thrown) {
-			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('
-				+ error_thrown + ')')
-		}
-	})
-}
+// /**
+//  * Load a package's mapping onto the user and ontology grid.
+//  * This entails populating ``top.mapped_user_cols`` appropriately, and
+//  * aligning the grid headers in a specified order.
+//  * @param {string} resource_id - Id of resource to get mapping from.
+//  * @param {string} mapping_name - Name of mapping in resource.
+//  */
+// function load_mapping(resource_id, mapping_name) {
+// 	$.ajax({
+// 		type: 'GET',
+// 		url: API_RESOURCES_URL + resource_id + '/get_mappings/' + mapping_name + '/',
+// 		success: function(mapping) {
+// 			// Check if user submitted data has the same
+// 			// fields as the mapping's user fields.
+// 			let user_fields = top.user_grid_options.columnApi.getAllGridColumns();
+// 			user_fields = user_fields.map(x => x.getColDef().field).sort().join();
+// 			const mapping_user_fields = mapping.user_field_order.sort().join();
+// 			if (user_fields !== mapping_user_fields) {
+// 				$('#non_matching_mapping_warning').show()
+// 			} else {
+// 				$('#non_matching_mapping_warning').hide()
+// 			}
+//
+// 			// Move columns to match mapping
+// 			top.user_grid_options.columnApi.moveColumns(
+// 				mapping.user_field_order,
+// 				0
+// 			);
+// 			top.ontology_grid_options.columnApi.moveColumns(
+// 				mapping.ontology_field_order,
+// 				0
+// 			);
+//
+// 			// Populate ``top.mapped_user_cols``
+// 			top.mapped_user_cols = {};
+// 			top.mapped_onto_cols = {};
+// 			top.next_mapped_col_color = 0;
+// 			$('.ag-header-cell').css('background-color', '');
+// 			for (const user_col of Object.keys(mapping.mapped_user_cols)) {
+// 				for (const onto_col of mapping.mapped_user_cols[user_col]) {
+// 					map_grid_cols(user_col, onto_col)
+// 				}
+// 			}
+// 		},
+// 		error: function (jqxhr, _, error_thrown) {
+// 			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('
+// 				+ error_thrown + ')')
+// 		}
+// 	})
+// }

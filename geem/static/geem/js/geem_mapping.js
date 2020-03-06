@@ -171,6 +171,55 @@ function save_mapping(mapping_name, mapping, resource_id) {
 
 
 /**
+ * TODO: document function
+ */
+function load_mapping(mapping_name, resource_id) {
+	$.ajax({
+		type: 'GET',
+		url: API_RESOURCES_URL + resource_id + '/get_mappings/' + mapping_name + '/',
+		success: function(mapping) {
+			// Clear current mappings
+			$('.spec_field_label').each(function () {
+				$(this).detach().appendTo('#unmapped_spec_field_labels')
+			});
+
+			// Iterate over user fields in order
+			for (let i=0; i<mapping.user_field_order.length; i++) {
+				const user_field = mapping.user_field_order[i];
+
+				// Move user field's container to
+				// bottom.
+				let query = `.user_field_label[data-field='${user_field}']`;
+				const user_field_label = $(query);
+				query = '.mapped_user_spec_field_container';
+				const user_spec_field_container = user_field_label.parents(query);
+				query = '#mapped_user_spec_field_containers';
+				user_spec_field_container.detach().appendTo(query);
+
+				// Map appropriate spec fields to user
+				// field.
+				const spec_fields = mapping.mapped_user_spec_fields[user_field];
+				for (let j=0; j<spec_fields.length; j++) {
+					const spec_field = spec_fields[j];
+					query = `.spec_field_label[data-field='${spec_field}']`;
+					const spec_field_label = $(query);
+					query = '.spec_field_container';
+					const spec_field_container =
+						user_spec_field_container.children(query);
+
+					spec_field_label.detach().appendTo(spec_field_container)
+				}
+			}
+		},
+		error: function (jqxhr, _, error_thrown) {
+			console.error('Failed to load mapping: ' + jqxhr.responseText + ' ('
+				+ error_thrown + ')')
+		}
+	})
+}
+
+
+/**
  * Render a list of mapping options when a resource is selected.
  * @param {string} resource_id - Id of resource to list mappings for.
  */
@@ -179,13 +228,15 @@ function render_mapping_options(resource_id) {
 		type: 'GET',
 		url: API_RESOURCES_URL + resource_id + '/get_mappings/',
 		success: function(mappings) {
+			$('#mapping_select').empty();
 			let placeholder = $('<option disabled selected></option>');
 			placeholder = placeholder.text('Select a mapping');
-			$('#mapping_select').append(placeholder)
+			$('#mapping_select').append(placeholder);
 
 			for (const mapping in mappings) {
 				if (mappings.hasOwnProperty(mapping)) {
 					let opt = $('<option></option>').text(mapping);
+					opt = opt.val(mapping);
 					$('#mapping_select').append(opt)
 				}
 			}

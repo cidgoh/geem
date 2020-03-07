@@ -175,6 +175,7 @@ function portal_entity_form_callback(form) {
 
 	// Set up ontology view in mapping tab
 	render_mapping_ontology_view();
+	update_spec_field_labels(top.ontology_grid_options);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -698,7 +699,7 @@ function init_validation_tab() {
 				contentType: false,
 				success: function (data) {
 					update_user_grid(top.user_grid_options, data);
-					update_user_field_labels(top.user_grid_options)
+					update_user_field_labels(top.user_grid_options);
 					// Reset spec labels
 					update_spec_field_labels(top.ontology_grid_options)
 				},

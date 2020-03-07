@@ -1,10 +1,17 @@
 /**
  * @file Functions used by mapping tab.
+ *
+ * @typedef {Object} mapping
+ * 	Connects user and validation grid headers.
+ * @property {Array.<string>} user_field_order
+ * 	Order of user headers.
+ * @property {Object.<string, Array.<string>>} mapped_user_spec_fields
+ * 	One-to-many mapping of user to validation grid headers.
  */
 
 
 /**
- * TODO: document function
+ * Render divs used for loading and saving mappings.
  */
 function render_mapping_ontology_view() {
 	$('#mapping_info_box').hide();
@@ -15,13 +22,12 @@ function render_mapping_ontology_view() {
 		$('#mapping_save').css('visibility', 'hidden')
 	}
 
-	update_spec_field_labels(top.ontology_grid_options);
 	render_mapping_options(top.resource.id)
 }
 
 
 /**
- * TODO: document function
+ * Derender divs used for loading and saving mappings.
  */
 function derender_mapping_ontology_view() {
 	$('#mapping_save_select').hide();
@@ -32,8 +38,9 @@ function derender_mapping_ontology_view() {
 
 
 /**
- * TODO: document function
- * @param user_grid_options
+ * Render draggable user field labels.
+ * @param {Object} user_grid_options
+ * 	User validation grid options
  */
 function update_user_field_labels(user_grid_options) {
 	$('#mapped_user_spec_field_containers').empty();
@@ -91,8 +98,9 @@ function update_user_field_labels(user_grid_options) {
 
 
 /**
- * TODO: document function
- * @param ontology_grid_options
+ * Render draggable spec field labels.
+ * @param {Object} ontology_grid_options
+ * 	Ontology validation grid options
  */
 function update_spec_field_labels(ontology_grid_options) {
 	$('.spec_field_label').remove();
@@ -122,7 +130,8 @@ function update_spec_field_labels(ontology_grid_options) {
 
 
 /**
- * TODO: document function
+ * Get mapping object representing arrangement of labels on screen.
+ * @returns {mapping}
  */
 function get_current_mapping() {
 	const user_field_order = [];
@@ -147,7 +156,13 @@ function get_current_mapping() {
 }
 
 /**
- * TODO: document function
+ * Save mapping to server.
+ * @param {string} mapping_name
+ * 	Name of mapping
+ * @param {mapping} mapping
+ * 	Mapping object
+ * @param {number} resource_id
+ * 	Resource to save mapping to
  */
 function save_mapping(mapping_name, mapping, resource_id) {
 	const data = JSON.stringify({
@@ -171,7 +186,12 @@ function save_mapping(mapping_name, mapping, resource_id) {
 
 
 /**
- * TODO: document function
+ * Load mapping from server.
+ * This re-arranges the labels in the mapping tab.
+ * @param {string} mapping_name
+ * 	Name of mapping to load
+ * @param {number} resource_id
+ * 	Resource containing mapping to load
  */
 function load_mapping(mapping_name, resource_id) {
 	$.ajax({
@@ -221,7 +241,8 @@ function load_mapping(mapping_name, resource_id) {
 
 /**
  * Render a list of mapping options when a resource is selected.
- * @param {string} resource_id - Id of resource to list mappings for.
+ * @param {string} resource_id
+ * 	Id of resource to list mappings for.
  */
 function render_mapping_options(resource_id) {
 	$.ajax({

@@ -335,30 +335,13 @@ form .row .row {margin:0 0 5px 0 !important;}
 	width: 100%;
 }
 #ontology_validation_grid_box {
-	display: none;
-}
-#mapping_box {
-	display: none;
 	margin-top: 2%;
-	margin-left: auto;
-	margin-right: auto;
-	width: 75%;
-}
-#no_mappings_warning, #non_matching_mapping_warning {
 	display: none;
-	text-align: center;
-	color: red;
 }
 .grid_buttons .button {
 	margin-top: 10%;
 	margin-left: 5%;
 	width: 100%;
-}
-.ag-dnd-ghost {
-	pointer-events: none;
-}
-.drag_drop_grid_hover:hover {
-	background-color: #008CBA;
 }
 
 #mapping_save {

@@ -67,6 +67,8 @@ function update_user_field_labels(user_grid_options) {
 		connectWith: '.user_field_container',
 		placeholder: 'hidden_placeholder',
 		over: function (_, ui) {
+			$(this).css('background-color', 'lightyellow');
+
 			const drag_container = ui.item.parent();
 			const drop_container = $(this);
 			if (drag_container[0] !== drop_container[0]) {
@@ -78,6 +80,8 @@ function update_user_field_labels(user_grid_options) {
 			}
 		},
 		out: function (_, ui) {
+			$(this).css('background-color', '');
+
 			const drag_container = ui.item.parent();
 			const drop_container = $(this);
 			if (drag_container[0] !== drop_container[0]) {
@@ -125,9 +129,11 @@ function update_spec_field_labels(ontology_grid_options) {
 	$('.spec_field_container').sortable({
 		connectWith: '.spec_field_container, #unmapped_spec_field_labels',
 		over: function () {
+			$(this).css('background-color', 'lightyellow');
 			in_sortable = true
 		},
 		out: function () {
+			$(this).css('background-color', '');
 			in_sortable = false
 		},
 		beforeStop: function (_, ui) {

@@ -112,7 +112,7 @@ function update_spec_field_labels(ontology_grid_options) {
 		const field = col_def.field;
 		$('#unmapped_spec_field_labels').append(`
 			<div class="row spec_field_label" data-field="${field}">
-                  		<div class="label">${headerName}</div>
+                  		<div class="secondary label">${headerName}</div>
                 	</div>
 		`)
 	});

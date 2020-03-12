@@ -722,10 +722,18 @@ function init_mapping_tab() {
 		save_mapping(mapping_name, mapping, top.resource.id)
 	});
 
-	$('#mapping_select').change(function () {
-		const mapping_name = $(this).val();
-		load_mapping(mapping_name, top.resource.id)
-	})
+	$('#mapping_select')
+		.focus(function () {
+			// This bit of code allows user to re-select
+			// mappings, which can be useful if you want
+			// remove any changes.
+			$("#mapping_select")[0].selectedIndex = 0;
+			$(this).blur()
+		})
+		.change(function () {
+			const mapping_name = $(this).val();
+			load_mapping(mapping_name, top.resource.id)
+		})
 }
 
 

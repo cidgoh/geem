@@ -138,10 +138,32 @@ function update_spec_field_labels(ontology_grid_options) {
 		},
 		beforeStop: function (_, ui) {
 			if (!in_sortable) {
-				ui.item.appendTo($('#unmapped_spec_field_labels'))
+				ui.item.appendTo($('#unmapped_spec_field_labels'));
+				_equalize_user_spec_field_containers($(this))
 			}
+		},
+		receive: function () {
+			_equalize_user_spec_field_containers($(this))
+		},
+		remove: function () {
+			_equalize_user_spec_field_containers($(this))
 		}
 	});
+}
+
+
+/**
+ * Make the user and spec field containers in a row the same height.
+ * @param {Array<HTMLDivElement>} spec_field_container
+ * @private
+ */
+function _equalize_user_spec_field_containers(spec_field_container) {
+	const user_field_container = spec_field_container.siblings('.user_field_container');
+	if (spec_field_container.children().length) {
+		user_field_container.height(spec_field_container.height());
+	} else {
+		user_field_container.height()
+	}
 }
 
 

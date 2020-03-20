@@ -121,9 +121,11 @@ function update_spec_field_labels(ontology_grid_options) {
 		`)
 	});
 
-	// Make spec field labels draggable and roppable
+	// Make spec field labels draggable and droppable
 	$('#unmapped_spec_field_labels').sortable({
-		connectWith: '.spec_field_container'
+		connectWith: '.spec_field_container',
+		helper: 'clone',
+		appendTo: '#panelMapping'
 	});
 	let in_sortable;
 	$('.spec_field_container').sortable({

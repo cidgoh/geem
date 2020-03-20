@@ -713,6 +713,8 @@ function init_validation_tab() {
 
 
 function init_mapping_tab() {
+	$('#panelMapping').foundation({reveal: {multiple_opened: true}});
+
 	$('#mapping_save_confirm').click(function(e) {
 		e.stopPropagation();
 		const mapping_name = $('#mapping_name_input').val();

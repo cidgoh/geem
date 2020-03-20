@@ -378,13 +378,10 @@ form .row .row {margin:0 0 5px 0 !important;}
 	margin: 1% !important;
 }
 .user_field_container, .spec_field_container {
-	min-height: 1.5em;
+	min-height: 2em;
 }
 .spec_field_container {
 	border-left-style: dashed;
-}
-.hidden_place_holder {
-	display: none;
 }
 
 .error input, .error textarea, .error select {

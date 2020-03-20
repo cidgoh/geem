@@ -141,13 +141,9 @@ function update_spec_field_labels(ontology_grid_options) {
 		beforeStop: function (_, ui) {
 			if (!in_sortable) {
 				ui.item.appendTo($('#unmapped_spec_field_labels'));
-				_equalize_user_spec_field_containers($(this))
 			}
 		},
-		receive: function () {
-			_equalize_user_spec_field_containers($(this))
-		},
-		remove: function () {
+		stop: function () {
 			_equalize_user_spec_field_containers($(this))
 		}
 	});
@@ -164,7 +160,7 @@ function _equalize_user_spec_field_containers(spec_field_container) {
 	if (spec_field_container.children().length) {
 		user_field_container.height(spec_field_container.height());
 	} else {
-		user_field_container.height()
+		user_field_container.height('auto')
 	}
 }
 
@@ -241,6 +237,11 @@ function load_mapping(mapping_name, resource_id) {
 			// Clear current mappings
 			$('.spec_field_label').each(function () {
 				$(this).detach().appendTo('#unmapped_spec_field_labels')
+			});
+
+			// Resize containers
+			$('.spec_field_container').each(function () {
+				_equalize_user_spec_field_containers($(this))
 			});
 
 			// Iterate over user fields in order

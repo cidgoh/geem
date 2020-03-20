@@ -355,8 +355,9 @@ form .row .row {margin:0 0 5px 0 !important;}
 }
 
 #unmapped_spec_field_labels {
-	height: 10em;
+	height: 12em;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .user_field_label:hover, .spec_field_label:hover {

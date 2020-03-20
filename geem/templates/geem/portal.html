@@ -151,8 +151,8 @@
           <li class="tab-title small active"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
           <li class="tab-title small"><a href="#panelMapping">Mapping</a></li>
+          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
         </ul>
 
         <div id="tabsContent" class="tabs-content">
@@ -247,6 +247,48 @@
 
           </div>
 
+
+        <!-- ******************* MAPPING **************** -->
+          <div class="content" id="panelMapping">
+
+            <div class="infoBox" id="mapping_info_box">
+              Select a specification from an ontology or user package resource
+              to validate your tabular data against.
+            </div>
+
+            <div class="row" id="mapping_save_select">
+              <div class="small-4 small-offset-2 columns">
+                <select id="mapping_select"></select>
+              </div>
+              <div class="small-2 columns end">
+                <button id="mapping_save"
+                        data-reveal-id="mapping_save_form">Save</button>
+              </div>
+            </div>
+
+            <div id="mapping_save_form" class="reveal-modal" data-reveal>
+              Save the current one-to-one mapping of columns across grids.
+              <input id="mapping_name_input" class="input-group-field"
+                     type="text" placeholder="mapping name">
+              <button id="mapping_save_confirm" class="button">Confirm</button>
+            </div>
+
+            <div class="row">
+              <div class="small-3 small-offset-2 columns"><h3>USER</h3></div>
+              <div class="small-3 columns end"><h3>SPEC</h3></div>
+            </div>
+
+            <div class="row" id="mapping_drag_drop">
+              <div class="small-7 small-offset-1 columns"
+                   id="mapped_user_spec_field_containers">
+              </div>
+              <div class="small-4 columns" id="unmapped_spec_field_labels">
+              </div>
+            </div>
+
+          </div>
+
+
           <!-- ******************* VALIDATION **************** -->
           <div class="content" id="panelValidation">
 
@@ -286,47 +328,6 @@
                 <div class="small-10 columns">
                   <div id="ontology_validation_grid" class="ag-theme-balham"></div>
                 </div>
-              </div>
-            </div>
-
-          </div>
-
-
-        <!-- ******************* MAPPING **************** -->
-          <div class="content" id="panelMapping">
-
-            <div class="infoBox" id="mapping_info_box">
-              Select a specification from an ontology or user package resource
-              to validate your tabular data against.
-            </div>
-
-            <div class="row" id="mapping_save_select">
-              <div class="small-4 small-offset-2 columns">
-                <select id="mapping_select"></select>
-              </div>
-              <div class="small-2 columns end">
-                <button id="mapping_save"
-                        data-reveal-id="mapping_save_form">Save</button>
-              </div>
-            </div>
-
-            <div id="mapping_save_form" class="reveal-modal" data-reveal>
-              Save the current one-to-one mapping of columns across grids.
-              <input id="mapping_name_input" class="input-group-field"
-                     type="text" placeholder="mapping name">
-              <button id="mapping_save_confirm" class="button">Confirm</button>
-            </div>
-
-            <div class="row">
-              <div class="small-3 small-offset-2 columns"><h3>USER</h3></div>
-              <div class="small-3 columns end"><h3>SPEC</h3></div>
-            </div>
-
-            <div class="row" id="mapping_drag_drop">
-              <div class="small-7 small-offset-1 columns"
-                   id="mapped_user_spec_field_containers">
-              </div>
-              <div class="small-4 columns" id="unmapped_spec_field_labels">
               </div>
             </div>
 

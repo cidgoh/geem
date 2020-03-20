@@ -421,14 +421,12 @@ ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
 } 
 /* #panelEntities > ul > li > a + ul {visibility:hidden;} */
 
-/* Quick fix for getting more working area.  Perhaps convert to modal in future */
 #panelValidation, #panelMapping {
 	overflow: scroll;
 	position: absolute;
-	margin-left: -80%;
 	width: 180%;
 	background-color: silver;
 	border: 2px solid blue;
-	border-radius: 1rem;
 	padding: 1rem;
-	height:530px;}
+	height:530px;
+}

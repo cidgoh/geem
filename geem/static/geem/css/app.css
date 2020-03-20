@@ -354,6 +354,11 @@ form .row .row {margin:0 0 5px 0 !important;}
 	display: none;
 }
 
+#unmapped_spec_field_labels {
+	overflow: auto;
+	height: 10em;
+}
+
 .user_field_label:hover, .spec_field_label:hover {
 	cursor: pointer;
 	user-select: none;
@@ -422,7 +427,7 @@ ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
 /* #panelEntities > ul > li > a + ul {visibility:hidden;} */
 
 #panelValidation, #panelMapping {
-	overflow: scroll;
+	overflow: auto;
 	position: absolute;
 	width: 180%;
 	background-color: silver;

@@ -372,6 +372,7 @@ form .row .row {margin:0 0 5px 0 !important;}
 	font-size: large;
 	margin: 1%;
 	display: inline-block;
+	white-space: normal;
 }
 
 .mapped_user_spec_field_container {

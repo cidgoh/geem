@@ -335,33 +335,55 @@ form .row .row {margin:0 0 5px 0 !important;}
 	width: 100%;
 }
 #ontology_validation_grid_box {
-	display: none;
-}
-#mapping_box {
-	display: none;
 	margin-top: 2%;
-	margin-left: auto;
-	margin-right: auto;
-	width: 75%;
-}
-#no_mappings_warning, #non_matching_mapping_warning {
 	display: none;
-	text-align: center;
-	color: red;
-}
-#mapping_save {
-	visibility: hidden;
 }
 .grid_buttons .button {
 	margin-top: 10%;
 	margin-left: 5%;
 	width: 100%;
 }
-.ag-dnd-ghost {
-	pointer-events: none;
+
+#mapping_save {
+	visibility: hidden;
 }
-.drag_drop_grid_hover:hover {
-	background-color: #008CBA;
+#mapping_save_select {
+	display: none;
+}
+#mapping_info_box {
+	display: none;
+}
+
+#mapped_user_spec_field_containers, #unmapped_spec_field_labels {
+	border-style: dashed;
+	height: 22em;
+	overflow-y: auto;
+	overflow-x: hidden;}
+
+.user_field_label:hover, .spec_field_label:hover {
+	cursor: pointer;
+	user-select: none;
+}
+.user_field_label {
+	font-size: large;
+	margin: 1%;
+}
+.spec_field_label .label {
+	font-size: large;
+	margin: 1%;
+	display: inline-block;
+	white-space: normal;
+}
+
+.mapped_user_spec_field_container {
+	border-style: solid;
+	margin: 1% !important;
+}
+.user_field_container, .spec_field_container {
+	min-height: 2em;
+}
+.spec_field_container {
+	border-left-style: dashed;
 }
 
 .error input, .error textarea, .error select {
@@ -403,14 +425,15 @@ ul#entityMenu.side-nav li.open > i.fi-play {transform: rotate(90deg)}
 } 
 /* #panelEntities > ul > li > a + ul {visibility:hidden;} */
 
-/* Quick fix for getting more working area.  Perhaps convert to modal in future */
-#panelValidation {
-	overflow: scroll;
+#panelValidation, #panelMapping {
 	position: absolute;
-	margin-left: -80%;
 	width: 180%;
 	background-color: silver;
 	border: 2px solid blue;
-	border-radius: 1rem;
 	padding: 1rem;
-	height:530px;}
+	height:530px;
+}
+
+#panelValidation {
+	overflow: auto;
+}

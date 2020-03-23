@@ -151,7 +151,8 @@
           <li class="tab-title small active"><a href="#panelContent">Form View</a></li>
           <li class="tab-title small"><a href="#panelDataSpecification">Specification</a></li>
           <!-- <li class="tabs-title"><a href="#panelDiscuss">Discuss</a></li> -->
-          <li class="tab-title small"><a href="#panelValidation">Validator</a></li>
+          <li class="tab-title small"><a href="#" data-reveal-id="panelMapping">Mapping</a></li>
+          <li class="tab-title small"><a href="#" data-reveal-id="panelValidation">Validator</a></li>
         </ul>
 
         <div id="tabsContent" class="tabs-content">
@@ -246,8 +247,57 @@
 
           </div>
 
+
+        <!-- ******************* MAPPING **************** -->
+          <div class="reveal-modal" id="panelMapping" data-reveal>
+
+            <div class="infoBox" id="mapping_info_box">
+              Select a specification from an ontology or user package resource
+              to validate your tabular data against.
+            </div>
+
+            <div class="row" id="mapping_save_select">
+              <div class="small-4 small-offset-2 columns">
+                <select id="mapping_select"></select>
+              </div>
+              <div class="small-2 columns end">
+                <button id="mapping_save"
+                        data-reveal-id="mapping_save_form">Save</button>
+              </div>
+            </div>
+
+            <div id="mapping_save_form" class="reveal-modal" data-reveal>
+              Save the current one-to-one mapping of columns across grids.
+              <input id="mapping_name_input" class="input-group-field"
+                     type="text" placeholder="mapping name">
+              <button id="mapping_save_confirm" class="button">Confirm</button>
+            </div>
+
+            <div class="row">
+              <div class="small-3 small-offset-1 columns">
+                <h5>User data field</h5>
+              </div>
+              <div class="small-3 columns">
+                <h5>Mapping</h5>
+              </div>
+              <div class="small-4 columns">
+                <h5>Specification</h5>
+              </div>
+            </div>
+
+            <div class="row" id="mapping_drag_drop">
+              <div class="small-7 columns"
+                   id="mapped_user_spec_field_containers">
+              </div>
+              <div class="small-4 columns" id="unmapped_spec_field_labels">
+              </div>
+            </div>
+
+          </div>
+
+
           <!-- ******************* VALIDATION **************** -->
-          <div class="content" id="panelValidation">
+          <div class="reveal-modal" id="panelValidation" data-reveal>
 
             <div id="user_validation_grid_box">
               <div class="row">
@@ -269,41 +319,6 @@
             <div class="infoBox" id="validation_info_box">
               Select a specification from an ontology or user package resource
               to validate your tabular data against.
-            </div>
-
-            <div id="mapping_box">
-              <div class="row" id="no_mappings_warning">
-                <div class="small-10 small-offset-2 columns">
-                  No mappings found.
-                </div>
-              </div>
-              <div class="row" id="non_matching_mapping_warning">
-                <div class="small-10 small-offset-2 columns">
-                  Mapping does not match user-submitted data. Did you upload
-                  the correct file?
-                </div>
-              </div>
-              <div class="row">
-                <div class="small-2 small-offset-2 columns">
-                  <button id="mapping_save"
-                          data-reveal-id="mapping_save_form">Save</button>
-                </div>
-                <div class="small-6 columns">
-                  <select id="mapping_select"></select>
-                </div>
-                <div class="small-2 columns">
-                  <button id="mapping_load">Load</button>
-                </div>
-              </div>
-            </div>
-
-            <div id="mapping_save_form" class="reveal-modal" data-reveal>
-              Save the current one-to-one mapping of columns across grids.
-              <input id="mapping_name_input" class="input-group-field"
-                     type="text" placeholder="mapping name">
-              <button id="mapping_save_confirm" class="button">
-                Confirm
-              </button>
             </div>
 
             <div id="ontology_validation_grid_box">
@@ -328,7 +343,7 @@
 
         <!-- ******************* DISCUSSION **************** -->
         <div class="content" id="panelDiscuss">
-          
+
           <div class="infoBox">
             <p>Discussion about a selected ontology term occurs here. One can select a term by
             browsing or searching, or from the shopping cart.</p>
@@ -382,11 +397,15 @@
     <script src="{% static "geem/js/vendor/what-input.js" %}"></script>
     <script src="{% static "geem/js/vendor/js-yaml.min.js" %}"></script> 
     <script src="{% static "geem/js/chosen/chosen.jquery.min.js" %}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
 
     <script src="{% static "geem/js/geem_resource.js" %}"></script>
     <script src="{% static "geem/js/geem_form.js" %}"></script>
     <script src="{% static "geem/js/geem_specifications.js" %}"></script>
     <script src="{% static "geem/js/geem_validation.js" %}"></script>
+    <script src="{% static "geem/js/geem_mapping.js" %}"></script>
     <script src="{% static "geem/js/geem_cart.js" %}"></script>
     <script src="{% static "geem/js/geem_search.js" %}"></script>
     <script src="{% static "geem/js/geem_lookup.js" %}"></script>

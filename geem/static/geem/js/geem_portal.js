@@ -72,6 +72,7 @@ $( document ).ready(function($) {
 	init_specification_tab()
 	// init_discuss_tab()
 	init_validation_tab()
+	init_mapping_tab()
 
 
 	// Initializes Zurb Foundation according to GEEM settings
@@ -171,6 +172,10 @@ function portal_entity_form_callback(form) {
 		components = [{'label': entity.label, 'id': entity.id}]
 	}
 	render_validation_ontology_view(components);
+
+	// Set up ontology view in mapping tab
+	render_mapping_ontology_view();
+	update_spec_field_labels(top.ontology_grid_options);
 
 	// Content area functionality is blocked until form loaded
 	//$('#content').removeClass('disabled')
@@ -693,82 +698,44 @@ function init_validation_tab() {
 				processData: false,
 				contentType: false,
 				success: function (data) {
-					update_user_grid(top.user_grid_options, data)
+					update_user_grid(top.user_grid_options, data);
+					update_user_field_labels(top.user_grid_options);
+					// Reset spec labels
+					update_spec_field_labels(top.ontology_grid_options)
 				},
 				error: function (_, text_status, error_thrown) {
 					alert(text_status + ': ' + error_thrown)
 				}
 			})
-		});
-
-		// Actual data stored on server
-		top.mapped_user_cols = {};
-		// Used to more easily construct
-		// ``top.mapped_user_cols``.
-		top.mapped_onto_cols = {};
-		// Color-coordinate mapped cols
-		top.next_mapped_col_color = 0;
-
-		// Map columns by drag/drop
-		top.dragged_col = undefined;
-		top.user_grid_options.api.addEventListener('dragStarted', function() {
-			const cols = top.user_grid_options.columnApi.getAllColumns();
-			top.dragged_col = cols.filter(x => x['moving'])[0]['colId'];
-
-			const onto_cols = $('#ontology_validation_grid .ag-header-cell');
-			onto_cols.addClass('drag_drop_grid_hover')
-		});
-		top.ontology_grid_options.api.addEventListener('dragStarted', function() {
-			const cols = top.ontology_grid_options.columnApi.getAllColumns();
-			top.dragged_col = cols.filter(x => x['moving'])[0]['colId'];
-
-			const user_cols = $('#user_validation_grid .ag-header-cell');
-			user_cols.addClass('drag_drop_grid_hover')
-		});
-		top.user_grid_options.api.addEventListener('dragStopped', function() {
-			const receiving_onto_col_header =
-				$('#ontology_validation_grid .ag-header-cell.ag-column-hover');
-			const receiving_onto_col = receiving_onto_col_header.attr('col-id');
-			if (receiving_onto_col) {
-				map_grid_cols(top.dragged_col, receiving_onto_col)
-			}
-
-			const onto_cols = $('#ontology_validation_grid .ag-header-cell');
-			onto_cols.removeClass('drag_drop_grid_hover')
-		});
-		top.ontology_grid_options.api.addEventListener('dragStopped', function() {
-			const receiving_user_col_header =
-				$('#user_validation_grid .ag-header-cell.ag-column-hover');
-			const receiving_user_col = receiving_user_col_header.attr('col-id');
-			if (receiving_user_col) {
-				map_grid_cols(receiving_user_col, top.dragged_col);
-			}
-
-			const user_cols = $('#user_validation_grid .ag-header-cell');
-			user_cols.removeClass('drag_drop_grid_hover');
-		});
-
-		$('#mapping_save_confirm').click(function() {
-			const mapping_name_input = $('#mapping_name_input').val();
-			if (mapping_name_input === '') return;
-
-			let user_field_order =
-				top.user_grid_options.columnApi.getAllGridColumns();
-			user_field_order = user_field_order.map(x => x.getColDef().field);
-
-			let ontology_field_order =
-				top.ontology_grid_options.columnApi.getAllGridColumns();
-			ontology_field_order = ontology_field_order.map(x => x.getColDef().field);
-
-			create_mapping(mapping_name_input, user_field_order, ontology_field_order,
-				top.mapped_user_cols, top.resource.id)
-		});
-
-		$('#mapping_load').click(function () {
-			const mapping_name = $('#mapping_select').val();
-			load_mapping(top.resource.id, mapping_name)
 		})
+	})
+}
+
+
+function init_mapping_tab() {
+	$('#panelMapping').foundation({reveal: {multiple_opened: true}});
+
+	$('#mapping_save_confirm').click(function(e) {
+		e.stopPropagation();
+		const mapping_name = $('#mapping_name_input').val();
+		if (mapping_name === '') return;
+
+		const mapping = get_current_mapping();
+		save_mapping(mapping_name, mapping, top.resource.id)
 	});
+
+	$('#mapping_select')
+		.focus(function () {
+			// This bit of code allows user to re-select
+			// mappings, which can be useful if you want
+			// remove any changes.
+			$("#mapping_select")[0].selectedIndex = 0;
+			$(this).blur()
+		})
+		.change(function () {
+			const mapping_name = $(this).val();
+			load_mapping(mapping_name, top.resource.id)
+		})
 }
 
 

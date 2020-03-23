@@ -1232,9 +1232,10 @@ function check_entity_id_change(resource_callback = null, entity_callback = null
 			$('a[href$="panelContent"]').click();
 		}
 
-		// Derender ontology view, if one exists
+		// Derender ontology views, if one exists
 		if (top.ontology_grid_options) {
-			derender_validation_ontology_view()
+			derender_validation_ontology_view();
+			derender_mapping_ontology_view()
 		}
 
 		return false

@@ -62,42 +62,8 @@ function update_user_field_labels(user_grid_options) {
 		`)
 	});
 
-	// Make user field labels draggable and droppable
-	$('.user_field_container').sortable({
-		connectWith: '.user_field_container',
-		placeholder: 'hidden_placeholder',
-		over: function (_, ui) {
-			$(this).css('background-color', 'lightyellow');
-
-			const drag_container = ui.item.parent();
-			const drop_container = $(this);
-			if (drag_container[0] !== drop_container[0]) {
-				// Send the label in the droppable to
-				// where the draggable was.
-				const drop_label =
-					drop_container.children().not('.ui-sortable-placeholder');
-				drop_label.appendTo(drag_container)
-			}
-		},
-		out: function (_, ui) {
-			$(this).css('background-color', '');
-
-			const drag_container = ui.item.parent();
-			const drop_container = $(this);
-			if (drag_container[0] !== drop_container[0]) {
-				// Send the original label in the
-				// droppable back.
-				const drop_label =
-					drag_container.children().not('.ui-sortable-helper');
-				drop_label.appendTo(drop_container)
-			}
-		},
-		receive: function (_, ui) {
-			if ($(this).children().length > 1) {
-				$(ui.sender).sortable('cancel')
-			}
-		}
-	})
+	// Make user field label **rows** sortable
+	$('#mapped_user_spec_field_containers').sortable()
 }
 
 

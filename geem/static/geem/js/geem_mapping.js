@@ -130,6 +130,8 @@ function update_spec_field_labels(ontology_grid_options) {
 	let in_sortable;
 	$('.spec_field_container').sortable({
 		connectWith: '.spec_field_container, #unmapped_spec_field_labels',
+		helper: 'clone',
+		appendTo: '#panelMapping',
 		over: function () {
 			$(this).css('background-color', 'lightyellow');
 			in_sortable = true

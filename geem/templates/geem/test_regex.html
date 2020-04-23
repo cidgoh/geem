@@ -1,0 +1,153 @@
+<html>
+<head>
+  <title>Bi-directional data conversion</title>
+
+  <style type="text/css">
+    .panel {border-bottom:1px dotted blue;
+      width:40%;}
+    span.field_type {
+      display:inline-block;
+      min-width:130px;
+      background:#EEE;
+      padding:5px;
+      font-size:12px;
+    }
+    input {width:100%;}
+    select {max-width:300px;}
+
+    table {border:1px dotted blue;
+      padding:10px;
+      margin:auto;
+      max-width:700px;}
+    td {vertical-align:top;}
+
+    span.field_error {color:red;font-size:12px;}
+    .validation_box {vertical-align:top}
+    .validation_box > div {
+      margin:10px 0;
+      background-color:#F8F8F8;
+      border-top:1px solid red;
+      height:50px;
+      padding:10px;
+      word-wrap: break-word;
+      overflow-y:scroll;}
+
+    .conversion_box {
+      margin:0;
+      background-color:#F8F8F8;
+      padding:10px;
+    }
+    .recognition_box {margin:10px 0;
+      background-color:#F8F8F8;
+      height:85px;overflow-y:scroll;padding:0 10px;font-size:12px;}
+    .control {padding:10px;text-align:center;background-color:#F8F8F8;}
+  </style>
+
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif;">
+
+  <h1 style="text-align:center;margin:30px auto">Bi-directional data conversion</h1>
+
+  <table>
+    <tr>
+      <th></th>
+      <th class="panel">User Data</th>
+      <th style="border-bottom:1px dotted blue;"></th>
+      <th class="panel">Specification</th>
+    </tr>
+    <tr>
+      <td>Field type</td>
+      <td>
+        <select id="user_field_type" onchange="javascript:validate('user');convert();validate('spec')">
+          <option value="">Select field type</option>
+        </select>
+      </td>
+      <td class="control" rowspan="3">
+        convert<br/>
+        <button>&lt;</button>
+        <button onclick="javascript:convert()">&gt;</button>
+      </td>
+      <td>
+        <select id="spec_field_type" onchange="javascript:convert();validate('spec')">      
+          <option value="">Select field type</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Input</td>
+      <td><input id="user_field_input" onkeyup="javascript:recognize('user');validate('user');convert();validate('spec')"/></td>
+      <td><input id="spec_field_input" onkeyup="javascript:validate('spec');"></td>
+    </tr>
+
+    <tr>
+      <td>Unit</td>
+      <td><select id="user_field_unit"></select></td>
+      <td><select id="spec_field_unit" multiple="multiple"></select></td>
+    </tr>
+
+    <tr>
+      <td><br/>Validation</td>
+      <td class="validation_box"><div id="user_validation"></div></td>
+      <td></td>
+      <td class="validation_box"><div id="spec_validation"></div></td>
+    </tr>  
+    <tr>
+      <td style="padding:10px 0;">Conversion</td>
+      <td colspan="3">
+        <div id="conversion" class="conversion_box"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>Recognition</td>
+      <td colspan="3">
+        (type in user data value to start):
+        <div id="message" class="recognition_box"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>Notes</td>
+      <td colspan="3">
+        <ul>
+          <li>Field types are organized by group.  Conversions between fields within a group involve mapping items at the same position or "index" in each field type's list of values (given as an array or function).</li>
+          <li>The primitive "integer > integer" can convert across groups.</li>
+          <li>A multi-component field can be <b>parsed</b> into its parts, each of which can be captured in a corresponding converted field if present. A parsing delivers substrings that can be used by other conversions.</li>
+          <li>Multiple fields can be <b>synthesized</b> into a single converted field like "date - iso 8601".  A synthesis concatenates substrings from associated source fields by name.  Source fields are ordered so a synthesis can draw on respective fields to fill parts?.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Issues/Bugs:</td>
+      <td colspan="3">
+        <ul>
+          <li>1970-01-17T11:23:43.423Z -> MM, but not to M or any of the other ones.
+          <li>1/1/2034 can't have YYYY parse into c20YY.  Rule to express {YYYY} parse into 20{YY}</li>
+          <li>Unix date conversion to mm/dd/yyyy looses a day+? UTC? Time zone?</li>
+          <li>Doesn't include all <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat" target="_blank">date formats</a>.</li>
+          <li> regex matching of parameters that can match nothing, e.g. {integer} -> {sign}{integer}</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+<script src="conversion_units.js"></script>
+<script src="conversion_code.js"></script>
+<script src="conversion_fields.js"></script>
+
+<script>
+
+  field_type_index = {};
+  field_type_parse = {};
+  init_field_type();
+
+  // Render form elements
+  field_type("user_field_type");
+  field_type("spec_field_type");
+  field_unit("user_field_unit");
+  field_unit("spec_field_unit");  
+
+</script>
+
+</html>

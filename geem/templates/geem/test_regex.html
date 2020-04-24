@@ -12,13 +12,13 @@
       padding:5px;
       font-size:12px;
     }
-    input {width:100%;}
+    input[type=text] {width:100%;}
     select {max-width:300px;}
 
     table {border:1px dotted blue;
       padding:10px;
       margin:auto;
-      max-width:700px;}
+      max-width:800px;}
     td {vertical-align:top;}
 
     span.field_error {color:red;font-size:12px;}
@@ -76,28 +76,33 @@
 
     <tr>
       <td>Input</td>
-      <td><input id="user_field_input" onkeyup="javascript:recognize('user');validate('user');convert();validate('spec')"/></td>
-      <td><input id="spec_field_input" onkeyup="javascript:validate('spec');"></td>
+      <td>
+        <input id="user_field_input" type="text" onkeyup="javascript:recognize('user');validate('user');convert();validate('spec')"/>
+      </td>
+      <td><input id="spec_field_input" type="text" onkeyup="javascript:validate('spec');"></td>
     </tr>
 
     <tr>
       <td>Unit</td>
-      <td><select id="user_field_unit"></select></td>
+      <td>
+        <select id="user_field_unit"></select><br/>
+        <input type="checkbox" disabled="disabled" />Parse unit from input (coming soon)
+      </td>
       <td><select id="spec_field_unit" multiple="multiple"></select></td>
     </tr>
 
-    <tr>
-      <td><br/>Validation</td>
-      <td class="validation_box"><div id="user_validation"></div></td>
-      <td></td>
-      <td class="validation_box"><div id="spec_validation"></div></td>
-    </tr>  
     <tr>
       <td style="padding:10px 0;">Conversion</td>
       <td colspan="3">
         <div id="conversion" class="conversion_box"></div>
       </td>
     </tr>
+    <tr>
+      <td><br/>Validation</td>
+      <td class="validation_box"><div id="user_validation"></div></td>
+      <td></td>
+      <td class="validation_box"><div id="spec_validation"></div></td>
+    </tr>  
     <tr>
       <td>Recognition</td>
       <td colspan="3">
@@ -137,9 +142,9 @@
 <script src="conversion_fields.js"></script>
 
 <script>
-
-  field_type_index = {};
-  field_type_parse = {};
+  field_type_map = {}; // Mapping of field group to field object IF it has a map
+  field_type_index = {}; // Mapping of field name to field object
+  field_type_parse = {}; // Mapping of field name to its regex parse.
   init_field_type();
 
   // Render form elements

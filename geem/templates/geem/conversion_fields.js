@@ -70,66 +70,103 @@ lang = {
     YY: {
       label: 'year - 2 digit',
       parse: '(?<YY>\\d\\d)',
-      synth: {'{c19YY}':null, '{c20YY}':null},
-      unit:'UO:0000036'
-      //YY is ambiguous re. Gregorian calendar, so no mapping.
+      synth: ['{c19YY}', '{c20YY}'],
+      unit:'UO:0000036',
+      group: 'integer',
+      map: function (param){return map_integer(param, 0, 99, true)}
+      //YY is ambiguous re. Gregorian calendar, so map only to integer directly.
     },
     'c19YY': {
       label: '19yy',
       parse: '(?<c19YY>\\d\\d)',
-      synth: {'{YY}':null},
+      synth: ['{YY}','19{YY}'],
       unit:'UO:0000036',
-      map: function (param){return map_integer(param, 1900, 1999, true)}
+      map: function (param, lookup){
+        if (lookup)
+          return map_integer(param-1900, 0, 99, true)
+        return map_integer(1900+param, 1900, 1999) // conversion to YYYY index
+      }
     },
     'c20YY': {
       label: "20YY",
       parse: '(?<c20YY>\\d\\d)',
-      synth: {'{YY}':null},
+      synth: ['{YY}','20{YY}'],
       unit:'UO:0000036',
-      map: function (param){return map_integer(param, 2000, 2099, true)}
+      map: function (param, lookup){
+        if (lookup)
+          return map_integer(param-2000, 0, 99, true)
+        return map_integer(2000+param, 2000, 2099) // conversion to YYYY index
+      }
     }
   },
-  hour: {
+  time: {
     hh: {
       label: 'hour - 24 hh',
+      group: 'hour',
       parse: '(?<hh>[01]\\d|20|21|22|23)',
       unit: 'UO:0000032',
       map: function (param){return map_integer(param, 0, 23, true)},
     },
     h: {
       label: 'hour - 24 h',
+      group: 'hour',
       parse: '(?<hh>[0-9]|1\\d|20|21|22|23)',
       unit: 'UO:0000032',
-      map: function (param){return map_integer(param, 0, 23, true)},
-    }
-  },
-  minute: {
+      map: function (param){return map_integer(param, 0, 23)},
+    },
+    h12ap: {
+      label: 'hour - 12 a/p',
+      group: 'hour',
+      parse: '(?<h12>[0-9]|10|11|12)[ ]?(?<a_p>a|p|am|pm)', //case insensitive
+      unit: 'UO:0000032',
+      map: function (param, lookup){
+        // SADLY - param isn't dictionary - it doesn't include <a_p>. Fix in future?
+        // 0-23 -> x a/p
+        if (lookup) { 
+          return (param < 12) ? param + 'a' : (param-12) +'p';
+        }
+        // x a/p -> 0-23
+        param_int = parseInt(param)
+
+        if (param.indexOf('p')>0 || param.indexOf('P')>0) // CASE SENSITIVE!
+          return map_integer(param_int+12, 12, 23)
+        return map_integer(param_int, 0, 11)
+      }
+    },
+    m_int: {
+      label: 'minute integer',
+      synth: ['{int}'],
+      unit: 'UO:0000031',
+      map: function (param){return map_integer(param, 0, null)},
+    },
     mm: {
       label: 'minute - mm',
       parse: '(?<mm>[0-5]\\d)',
       unit: 'UO:0000031',
       map: function (param){return map_integer(param, 0, 59, true)},
-    }
-  },
-  second: {
+    },
+    s_int: {
+      label: 'second integer',
+      parse: '{int}',
+      unit: 'UO:0000010',
+      map: function (param){return map_integer(param, 0, null)},
+    },
     ss: {
       label: 'second - ss',
       parse: '(?<ss>[0-5]\\d)',
       unit: 'UO:0000010',
       map: function (param){return map_integer(param, 0, 59, true)},
-    }
-  },
-  millisecond: {
+    },
     ms_int: {
       label: 'millisecond integer',
-      synth: {'{int}':null},
+      synth: ['{int}'],
       unit: 'UO:0000028', // millisecond
-      map: function (param){return map_integer(param, 0, 999, true)},
+      map: function (param){return map_integer(param, 0, null)},
     },
     ms: {
       label: 'millisecond as fraction',
       parse: '(?<ms>\\.\\d\\d\\d)',
-      synth: {'{fraction}':null},
+      synth: ['{fraction}'],
       unit: 'UO:0000010', // second
       map: function (param){return map_integer(param, 0, 999, true)},
     },
@@ -148,12 +185,11 @@ lang = {
     },
     date_iso_8601: {
       label: 'date (ISO 8601)',
-      synth: {'{YYYY}-{MM}-{DD}':null},
+      synth: ['{YYYY}-{MM}-{DD}'],
       map: function(param, lookup) { 
         // unix time map -> ISO
         if (lookup) {
-          let date = new Date();
-          date.setTime(param);
+          let date = new Date(param*1000);
           return date.toISOString().split('T')[0];
         }
         // ISO -> unix time map
@@ -162,27 +198,30 @@ lang = {
     },
     datetime_iso_8601: { // Like above, but NO SPLIT ON T.
       label: 'datetime (ISO 8601)',
-      synth: {'{YYYY}-{MM}-{DD}T{hh}:{mm}:{ss}{ms}{TZD}':null},
+      synth: ['{YYYY}-{MM}-{DD}T{hh}:{mm}:{ss}{ms}{TZD}'],
+      // Flag indicates source dictionary should include this decomposition
+      // if a mapping is requested.
+      decompose:true, 
       map: function(param, lookup) {
         // unix time -> ISO Full date
         if (lookup) { 
-          let date = new Date();
-          date.setTime(param);
+          let date = new Date(param*1000);
           return date.toISOString(); 
         }
         // ISO Full date -> unix time
+        console.log("ISO -> unix", param, String(Date.parse(param) ));
         return String(Date.parse(param)) 
       }
     },
     M_D_YYYY: {
       label: 'M/D/YYYY (US format)',
-      synth: {'{M}/{D}/{YYYY}':null},
-      map: function(param, lookup) {return date_time_map(param, lookup, 'en-US')}
+      synth: ['{M}/{D}/{YYYY}'],
+      map: function(param, lookup) {return date_time_map(param, lookup, 'en-US','M_D_YYYY')}
     },
     D_M_YYYY: {
       label: 'D/M/YYYY (GB format)',
-      synth: {'{D}/{M}/{YYYY}':null},
-      map: function(param, lookup) {return date_time_map(param, lookup, 'en-GB')}
+      synth: ['{D}/{M}/{YYYY}'],
+      map: function(param, lookup) {return date_time_map(param, lookup, 'en-GB','D_M_YYYY')}
     }
   },
   sign: {
@@ -200,26 +239,36 @@ lang = {
     },
     signed_int: {
       label: 'integer - signed',
-      synth: {'{sign}{int}':null},
-      dict: {'sign':''}, // provides default component values
+      synth: ['{sign}{int}'],
+      default: {'sign':''}, // provides default component values
       // Map accepts negative range (not default which is 0 to infinity)
       map: function (param){return map_integer(param, null, null)}
-    }
+    },
+    natural: {
+      label: 'natural',
+      parse: '(?<natural>[1-9]\\d*)',
+      // Special mapping function accomodates ANY integer range > 0.
+      map: function (param, lookup){
+        if (lookup)
+          return map_integer(parseInt(param) + 1, 1, null);
+        return map_integer(parseInt(param) -1, 0, null);
+      }
+    },
   },
   decimal: {
     decimal: {
       label: 'decimal',
-      synth: {'{sign}{int}{fraction}':null},
+      synth: ['{sign}{int}{fraction}'],
       map: function (param){return param}
     }
   },
   fraction: {
     fraction: {
       label: 'fraction',
-      parse: '(?<fraction>0?\.\\d+)'
+      parse: '(?<fraction>0?\\.\\d+)'
       //map: function (param){return param}
     }
-  }
+  },
   boolean: {
     boolean_10: {
       label: "boolean 1/0",
@@ -249,15 +298,15 @@ lang = {
   }
 }
 
-function date_time_map(param, lookup, language) {
-  // linux time -> US M/D/YYYY date
+function date_time_map(param, lookup, language, format) {
+  // e.g. linux time -> US M/D/YYYY date
   if (lookup) {
-    let date = new Date();
-    date.setTime(param); // UTC? Not sure why it comes short a day
+    let date = new Date(param*1000);
+    //date.setTime(param); // UTC? Not sure why it comes short a day
     return new Intl.DateTimeFormat(language).format(date)
   }
-  // US M/D/YYYY date -> linux time
-  let dict = param.match(lang.date.M_D_YYYY.parse).groups;
-  let date = new Date(lang.date.M_D_YYYY.synth.supplant(dict)); 
+  // e.g. US M/D/YYYY date -> linux time
+  let dict = param.match(lang.date[format].parse).groups;
+  let date = new Date(lang.date[format].synth[0].supplant(dict)); 
   return String(date.getTime() / 1000);
 }

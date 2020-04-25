@@ -24,6 +24,7 @@
     span.field_error {color:red;font-size:12px;}
     .validation_box {vertical-align:top}
     .validation_box > div {
+      max-width:300px;
       margin:10px 0;
       background-color:#F8F8F8;
       border-top:1px solid red;
@@ -118,6 +119,7 @@
           <li>The primitive "integer > integer" can convert across groups.</li>
           <li>A multi-component field can be <b>parsed</b> into its parts, each of which can be captured in a corresponding converted field if present. A parsing delivers substrings that can be used by other conversions.</li>
           <li>Multiple fields can be <b>synthesized</b> into a single converted field like "date - iso 8601".  A synthesis concatenates substrings from associated source fields by name.  Source fields are ordered so a synthesis can draw on respective fields to fill parts?.</li>
+          <li>A target field can specify a set of defaults to swap in if matching to a source field that may not have them. E.g. "signed_int.default: {'sign':''},</li>
         </ul>
       </td>
     </tr>
@@ -125,10 +127,8 @@
       <td>Issues/Bugs:</td>
       <td colspan="3">
         <ul>
-          <li>1970-01-17T11:23:43.423Z -> MM, but not to M or any of the other ones.
-          <li>1/1/2034 can't have YYYY parse into c20YY.  Rule to express {YYYY} parse into 20{YY}</li>
-          <li>Unix date conversion to mm/dd/yyyy looses a day+? UTC? Time zone?</li>
-          <li>Doesn't include all <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat" target="_blank">date formats</a>.</li>
+          <li>D/M/YYYY not converting to M/D/YYYY.  field.detail parse being applied to source.</li>
+          <li>Unix date conversion to M/DD/YYYY looses a day+? UTC? Time zone?</li>
           <li> regex matching of parameters that can match nothing, e.g. {integer} -> {sign}{integer}</li>
         </ul>
       </td>
@@ -140,11 +140,14 @@
 <script src="conversion_units.js"></script>
 <script src="conversion_code.js"></script>
 <script src="conversion_fields.js"></script>
+<script src="conversion_html_helper.js"></script>
 
 <script>
-  field_type_map = {}; // Mapping of field group to field object IF it has a map
-  field_type_index = {}; // Mapping of field name to field object
-  field_type_parse = {}; // Mapping of field name to its regex parse.
+  // Mapping of field name to field object
+  field_index = {}; 
+  // Mapping of field group to field if it has a map
+  //field_equivalence.[field_group_name][field_name] = field.decompose;
+  field_equivalence = {}; 
   init_field_type();
 
   // Render form elements

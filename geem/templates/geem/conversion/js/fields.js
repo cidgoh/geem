@@ -199,13 +199,14 @@ lang = {
     datetime_iso_8601: { // Like above, but NO SPLIT ON T.
       label: 'datetime (ISO 8601)',
       synth: ['{YYYY}-{MM}-{DD}T{hh}:{mm}:{ss}{ms}{TZD}'],
-      // Flag indicates source dictionary should include this decomposition
+      // "decompose" flag indicates source dictionary should include this decomposition
       // if a mapping is requested.
       decompose:true, 
       map: function(param, lookup) {
         // unix time -> ISO Full date
         if (lookup) { 
           let date = new Date(param*1000);
+          console.log(date.toISOString())
           return date.toISOString(); 
         }
         // ISO Full date -> unix time
@@ -296,17 +297,4 @@ lang = {
       parse: '(?<missing>missing)'
     }
   }
-}
-
-function date_time_map(param, lookup, language, format) {
-  // e.g. linux time -> US M/D/YYYY date
-  if (lookup) {
-    let date = new Date(param*1000);
-    //date.setTime(param); // UTC? Not sure why it comes short a day
-    return new Intl.DateTimeFormat(language).format(date)
-  }
-  // e.g. US M/D/YYYY date -> linux time
-  let dict = param.match(lang.date[format].parse).groups;
-  let date = new Date(lang.date[format].synth[0].supplant(dict)); 
-  return String(date.getTime() / 1000);
 }

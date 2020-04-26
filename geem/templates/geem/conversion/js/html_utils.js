@@ -9,7 +9,7 @@ function get_field_type(select_domId) {
 /* Populate a select input displaying groups of field type
   :param str domId: id of dom HTML select input
 */
-function field_type(domId) {
+function render_field_type(domId) {
 
   let select = document.getElementById(domId);
 
@@ -29,7 +29,7 @@ function field_type(domId) {
 /* Populate unit menu displaying groups of units
   :param str domId: id of dom HTML select input
 */
-function field_unit(domId) {
+function render_field_unit(domId) {
 
   let select = document.getElementById(domId);
   let option = document.createElement('optgroup');
@@ -41,27 +41,28 @@ function field_unit(domId) {
       option = document.createElement('optgroup');
       option.label = section.label;
       select.appendChild(option);
-      field_unit_item(option, section)
+      render_unit_item(option, section)
     }
     else
-      field_unit_item(select, section)
+      render_unit_item(select, section)
   }
 }
 
 // ISSUE: HTML optgroup spec is broken. Only 1 level deep allowed.
-function field_unit_item(group, item, depth=0) {
+function render_unit_item(group, item, depth=0) {
   if (item.children) {
     if (depth > 0) {
       let option = make_option(group, item, depth)
       option.disabled = "disabled";
     }
     for (let [item2_uri, item2] of Object.entries(item.children)) { 
-      field_unit_item(group, item2, depth + 1)
+      render_unit_item(group, item2, depth + 1)
     }
   }
   else 
     make_option(group, item, depth)
 }
+
 
 function make_option(group, item, depth=0) {
   let option = document.createElement('option');
@@ -79,4 +80,9 @@ function escapeHTML(s) {
             .replace(/>/g, '&gt;');
 }
 
+function select_update(field_id) {
+  let control = document.getElementById('user_field_type');
+  control.value = field_id;
+  control.onchange();
 
+}

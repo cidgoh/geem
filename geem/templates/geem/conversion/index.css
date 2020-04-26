@@ -1,0 +1,68 @@
+body {font-family: Arial, Helvetica, sans-serif}
+
+h1 {text-align:center;
+  margin:30px auto}
+
+.panel {border-bottom:1px dotted blue;
+  width:40%;}
+
+span.field_type {
+  display:inline-block;
+  min-width:130px;
+  background:#EEE;
+  padding:5px;
+  font-size:12px;
+}
+
+span.field_type.recognize {
+  cursor:pointer;
+  color:blue;
+}
+
+input[type=text] {width:100%;}
+select {max-width:300px;}
+
+table {border:1px dotted blue;
+  padding:10px;
+  margin:auto;
+  max-width:800px;}
+td {vertical-align:top;}
+
+span.field_error {color:red;font-size:12px;}
+.validation_box {vertical-align:top}
+.validation_box > div {
+  max-width:300px;
+  margin:10px 0;
+  background-color:#F8F8F8;
+  border-top:1px solid red;
+  height:50px;
+  padding:10px;
+  word-wrap: break-word;
+  overflow-y:scroll;}
+
+.conversion_box {
+  margin:0;
+  background-color:#F8F8F8;
+  padding:10px;
+}
+.recognition_box {margin:10px 0;
+  background-color:#F8F8F8;
+  height:85px;overflow-y:scroll;padding:0 10px;font-size:12px;}
+.control {padding:10px;text-align:center;background-color:#F8F8F8;}
+
+.test_suite_wrapper {
+  height: 200px; 
+  overflow-y:scroll;
+  border:1px solid silver
+}
+
+table#test_suite {
+  width:100%;
+  border:1px solid silver;
+  padding:0;
+  font-size:.8rem;
+
+}
+table#test_suite tbody tr:first-child td {border-top:1px solid gray;  text-align:right;}
+table#test_suite tbody tr td {text-align:right;}
+table#test_suite tr th {}

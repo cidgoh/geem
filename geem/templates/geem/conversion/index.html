@@ -1,18 +1,18 @@
 <html>
   <head>
     <title>Bi-directional data conversion</title>
-    <link rel="stylesheet" href="conversion.css"></link>
+    <link rel="stylesheet" href="index.css"></link>
   </head>
 
-  <body style="font-family: Arial, Helvetica, sans-serif;">
+  <body>
 
-    <h1 style="text-align:center;margin:30px auto">Bi-directional data conversion</h1>
+    <h1>Bi-directional data conversion</h1>
 
     <table>
       <tr>
         <th></th>
         <th class="panel">User Data</th>
-        <th style="border-bottom:1px dotted blue;"></th>
+        <th></th>
         <th class="panel">Specification</th>
       </tr>
       <tr>
@@ -52,7 +52,7 @@
       </tr>
 
       <tr>
-        <td style="padding:10px 0;">Conversion</td>
+        <td>Conversion</td>
         <td colspan="3">
           <div id="conversion" class="conversion_box"></div>
         </td>
@@ -73,7 +73,7 @@
       <tr>
         <td>Test Suite</td>
         <td colspan="3">
-          <div style="height: 200px; overflow-y:scroll;border:1px solid silver">
+          <div class="test_suite_wrapper">
 
 <table id="test_suite">
   <tr>
@@ -135,10 +135,11 @@
 
   </body>
 
-<script src="conversion_units.js"></script>
-<script src="conversion_code.js"></script>
-<script src="conversion_fields.js"></script>
-<script src="conversion_html_helper.js"></script>
+<script src="js/app.js"></script>
+<script src="js/units.js"></script>
+<script src="js/fields.js"></script>
+<script src="js/html_utils.js"></script>
+<script src="js/test_suite.js"></script>
 
 <script>
   // Mapping of field name to field object
@@ -147,13 +148,13 @@
   //field_equivalence.[field_group_name][field_name] = field.decompose;
   field_equivalence = {}; 
   init_field_type();
-  test_suite();
+  get_test_suite();
 
   // Render form elements
-  field_type("user_field_type");
-  field_type("spec_field_type");
-  field_unit("user_field_unit");
-  field_unit("spec_field_unit");  
+  render_field_type("user_field_type");
+  render_field_type("spec_field_type");
+  render_field_unit("user_field_unit");
+  render_field_unit("spec_field_unit");  
 
 </script>
 

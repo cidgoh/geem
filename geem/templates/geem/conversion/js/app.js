@@ -49,6 +49,8 @@ function init_field_type() {
     // POSSIBLY ADD FLAG TO field to indicate whether mapping should be 'int' or 'natural'
     equivalence_dict['natural'] = null;
   }
+  // special case for dates.  Allow for all others?  negative days?
+  //field_equivalence['integer']['unix_date'] = null;
 
   /* 2nd pass: For a field type that is missing a parse, or has a parse 
   temporarily set to a synth expression that can be decomposed further, do
@@ -67,7 +69,6 @@ function init_field_type() {
         field.parse = field.synth[0].supplant(field_parse_index);
         field_parse_index[field_id] = field.parse;
       }
-
     }
   }
 
@@ -88,7 +89,7 @@ function recognize(input_source) {
     for (let [field_name, field] of Object.entries(section)) { 
       let result = input_field.value.match(field.parse)
       if (result)
-        text += `<span class="field_type">${field.label}</span> ${escapeHTML(field.parse)}<br/>`
+        text += `<span class="field_type recognize" onclick="javascript:select_update('${field.id}')">${field.label}</span> ${escapeHTML(field.parse)}<br/>`
 
     }
   }
@@ -128,30 +129,28 @@ function validate(input_source) {
   }
 
   document.getElementById(input_source + "_validation").innerHTML = message;
-
   return result;
 }
 // Purpose is to find an equivalent expression (as a list) 
 // Prime tumbler with onel element, the target field type id.
 // Issue: map would find just one match in input.
 
+ 
+function convert(source_prefix = 'user', target_prefix = 'spec') {
 
-function convert(source='user', target='spec') {
-
-  let source_field_type = get_field_type(source +'_field_type');
-  let target_field_type = get_field_type(target + '_field_type');
-  let source_value = document.getElementById(source +'_field_input').value;
-  let target_field_Dom = document.getElementById(target + '_field_input');
-  let message = 'Ok!';
+  let source = get_field_type(source_prefix +'_field_type');
+  let target = get_field_type(target_prefix + '_field_type');
+  let source_value = document.getElementById(source_prefix +'_field_input').value;
+  let target_Dom = document.getElementById(target_prefix + '_field_input');
   let messageDom = document.getElementById('conversion');
 
-  if (!source_field_type || !target_field_type) {
+  if (!source || !target) {
     messageDom.innerHTML = 'Please ensure user data and specification field types have been selected';
     return false;
   }
 
   // We accept the granularity of source input components as present in source_dict
-  let source_parse_result = source_value.match(source_field_type.parse);
+  let source_parse_result = source_value.match(source.parse);
   if (source_parse_result) 
     source_dict = source_parse_result.groups;
   else {
@@ -161,12 +160,12 @@ function convert(source='user', target='spec') {
 
   // Allow target default components to be added to source component 
   // dictionary.  They are superceded by any source matched components.
-  if (target_field_type.default)
-    source_dict = {...target_field_type.default,...source_dict};
+  if (target.default)
+    source_dict = {...target.default,...source_dict};
 
   // Ensure whole parse available by id too.
   // e.g. unix_date in source dict {sign:-,int:2342,...,unix_date:-2342}
-  source_dict[source_field_type.id] = source_parse_result[0];
+  source_dict[source.id] = source_parse_result[0];
 
   // If a source field is in a mapping group, and one of that group's members
   // mentions field.detail = true, add its parse to the source field mapping 
@@ -175,12 +174,12 @@ function convert(source='user', target='spec') {
 
   // This is a bit of a hack? Why not do this for every source component that 
   // could be decomposed too?
-  if (source_field_type.map && (source_field_type.group in field_equivalence)) {
+  if (source.map && (source.group in field_equivalence)) {
     //FIND field type in map set that has .detail == true: 
-    for (let [detail_id, detail] of Object.entries(field_equivalence[source_field_type.group])) {
+    for (let [detail_id, detail] of Object.entries(field_equivalence[source.group])) {
       if (detail == true) {
         // Add detail_id field's parse of source value to to source_dict
-        mapped_value = field_map(source_field_type.id, source_dict[source_field_type.id], detail_id);
+        mapped_value = field_map(source.id, source_dict[source.id], detail_id);
         detail_dict = mapped_value.match(field_index[detail_id].parse);
         source_dict = {...source_dict,...detail_dict.groups};
       }
@@ -189,80 +188,67 @@ function convert(source='user', target='spec') {
 
   console.log('Parsed source:', source_dict);
 
-  /* We need the synthesis parts of a field type in ADVANCE of applying 
-   .parse() (that might not match and populate dict) since we first have to
-   carry out a search to find compatible components by mapping/transformation.
-  */
+  // The simple case:
+  if (source == target) {
+    // Need defaults at all? null differences?
+    target_Dom.value = source_value; 
+    messageDom.innerHTML = "Field match!";
+    return
+  }
+
+  console.log("Field mismatch!");
 
   /* Default mapping assumes target field type will occur in source dict. This
   will be typical of mapping between fields in datasets defined by pure 
   ontology specs.
-   e.g. mapping = {'{date_iso_8601}':'{date_iso_8601}'}
+   e.g. mapping = {'{date_iso_8601}':'date_iso_8601':null }'}
+   e.g. mapping = {'{M}/{D}/{YYYY}:'M':null,'D':null,'YYYY':null }'}
+   e.g. target {'{signed_int}': {…}} issue this won't get accessed as unix_date????
   */
   let synth = '{'+target.id+'}';
-  let mapping = {[synth]: target.id}; 
-  message = '';
+  if (target.synth)
+    synth = target.synth[0];  // LATER EXPLORE MULTIPLE SYNTH POSSIBILITIES
 
-  // The simple case:
-  if (source_field_type == target_field_type) {
-    message += "Field type match";
-  }
+  let mapping = {[synth]: {} };
+  let components = synth.match(/{([^{}]*)}/g);
+  for (let ptr in components) {
+    var item = components[ptr]
+    var field_id = item.substr(1, item.length - 2); //strips off {}.
+    mapping[synth][field_id] = null;
 
-  else {
-    console.log("Field type mismatch.")
     // Q: is target a mapping of source?
-    map_set = field_equivalence[target_field_type.group];
-    if (map_set && target.id in map_set) {
+    var field = field_index[field_id];
+    let map_set = field_equivalence[field.group];
+    if (map_set && field.map) { // A field may be in a group but not have a map.
+      
+      //console.log("equivalency for "+field_id,":", map_set);
 
-      console.log("equivalency for "+target.id,":", map_set)
-      for (let [key, map_val] of Object.entries(map_set)) { 
-        if (key in source_dict) {
-          mapping = {[synth]: key}
-          break;
+      for (let [mapped_id, map_val] of Object.entries(map_set)) { 
+        if (mapped_id in source_dict) {
+          // We found a mapping that is present in source parse.  Use it. 
+          field_value = field_map(mapped_id, source_dict[mapped_id], field_id)
+          mapping[synth][field_id] = field_value;
+          //mapping[synth][field_id] = mapped_id;
+          break; // Shouldn't need/have multiple mappings per group.
         }
       }
     }
- 
-  }
-  console.log("source parse", source_dict)
-  console.log("Mapping raw:", mapping)
-
-  let source_index = null;
-
-  // IMPLEMENT MAPPING VIEW:
-  for (let [synth, field_id] of Object.entries(mapping)) {
-    // Handle case {{fraction}: "fraction"}: substitution leads to ...
-
-    // If a field has a map
-    if (field_index[field_id].map) {
-      if (field_id in source_dict) {
-        // E.g. {{month_abbr}: "MM"} -> {{month_abbr}: "jan"} by way of equivalence
-        // Issue: {{M_D_YYYY}: "D_M_YYYY"} -> {{M_D_YYYY}: "1/2/1923"}
-        //{M: "2", D: "1", YYYY: "1923", M_D_YYYY: "2/1/1923", MM: "02", …}
-        field_value = field_map(target.id, source_dict[field_id], field_id)
-        field_value2 = 
-        mapping[synth] = {[field_id]: field_value};
-        //mapping[synth] = field_value;
-      }
-    }
-    
   }
 
-  console.log("Mapping substitute", mapping)
+  //console.log("source parse", source_dict)
+  //console.log("Target-to-source mapping:", mapping)
+  
+  // Apply and render mapping to target's synth expression.
+  target_Dom.value = synth.supplant(mapping[synth])
   messageDom.innerHTML = JSON.stringify(mapping, undefined, 4); 
-
-  return
+  return 
 }
-
 
 function field_map(source_id, value, target_id) {
   // ANY TWO FIELDS SHOULD ALWAYS BE CONVERTED VIA INT mapping, not directly
   // value, M_D_YYYY: "2/1/1923", MM: "02", …}
-  let source_type = field_index[source_id];
-  let source_index = get_map_index(source_type, value);
-
-  let target_type = field_index[target_id];
-  return get_map_value(target_type, source_index);
+  let source_index = get_map_index(field_index[source_id], value);
+  return get_map_value(field_index[target_id], source_index);
 }
 
 // Get index of value in given field type map
@@ -310,88 +296,18 @@ function map_integer(param, lower = 0, upper = null, padding = false) {
   return value;
 }
 
-
-
-
-
-
-
-
-function unused() {
-  let target_index = null;
-
-  if (source_field_type.map) {
-    source_index = get_map_index(source_field_type, source_field_value);
+/*
+referenced in js/fields.js
+*/
+function date_time_map(param, lookup, language, format) {
+  // e.g. linux time -> US M/D/YYYY date
+  if (lookup) {
+    let date = new Date(param*1000);
+    //date.setTime(param); // UTC? Not sure why it comes short a day
+    return new Intl.DateTimeFormat(language).format(date)
   }
-  if (target_field_type.map) {
-    target_index = get_map_index(source_field_type, source_field_value);
-  }
-
-  // Shortcut: if source and destination field types are identical. 
-  if (source_field_type == target_field_type) {
-    target_field.value = source_field_value
-    messageDom.innerHTML = "Same field type";
-    return target_field.value
-  }
-
-  // CASES:
-  // D: 1, M: 1, YYYY: 2034 --> DD , or MM, or YY.
-
-
-  // TESTING: Is target synth a compound term; if so add its synthesis.
-  // e.g. {signed_int} -> {sign}{int}
-  synth = target_field_type.synth.replace(/{([^{}]*)}/g,
-      function (originalstr, stringrepname) {
-          var r = field_index[stringrepname].synth;
-          return typeof r === 'string' ? r : originalstr;
-      }
-  );
-
-
-  for (let ptr in synths) {
-    // Do string substitution on given synthesis expression according to source dict.
-    value = synths[ptr].supplant(source_dict);
-    // A substitution has occured and no substitutions remain.
-    if (value != synths[ptr]) { //  && value.indexOf('{') == -1
-      target_field.value = value;
-      messageDom.innerHTML = "Synthesis";
-      return target_field.value
-    }
-    // dictionary on input side 
-    // but are more than one "{}{}" taken care of on target side?
-  } 
-
-  // Shortcut: if source and destination field types are in same group. 
-  if (source_field_type.group == target_field_type.group) {
-
-    //If both have map, then map FROM parsed value to value
-    if (source_field_type.map && target_field_type.map) {
-      target_field.value = get_map_value(target_field_type, source_index)
-      messageDom.innerHTML = "Mapped";
-      return target_field.value
-    }
-  }
-
-  // Allow conversion from map field index to integer
-  if (source_index && target_field_type.label == 'integer'){
-    target_field.value = source_index;
-    messageDom.innerHTML = "Map value index to integer";
-    return target_field.value
-  }
-
-  // Allow conversion from integer as index to map field value
-  if (target_index && source_field_type.label == 'integer'){
-    target_field.value = get_map_value(target_field_type, source_field_value);
-    messageDom.innerHTML = "Integer to map value";
-    return target_field.value
-  }
-  messageDom.innerHTML = "No conversion done!";
-  return false;
-
-
-  let synth = []
-  for (let [ptr, item] in target_field_type.synth.match(/{([^{}]*)}/g))
-    synth.push(item.substr(1,item.length-2)); //strips off {}.
-
-
+  // e.g. US M/D/YYYY date -> linux time
+  let dict = param.match(lang.date[format].parse).groups;
+  let date = new Date(lang.date[format].synth[0].supplant(dict)); 
+  return String(date.getTime() / 1000);
 }

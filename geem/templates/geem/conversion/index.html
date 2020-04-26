@@ -18,17 +18,16 @@
       <tr>
         <td>Field type</td>
         <td>
-          <select id="user_field_type" onchange="javascript:validate('user');convert();validate('spec')">
+          <select id="user_field_type" onchange="javascript:validate('user');convert_formfield();validate('spec')">
             <option value="">Select field type</option>
           </select>
         </td>
         <td class="control" rowspan="3">
           convert<br/>
-          <button>&lt;</button>
-          <button onclick="javascript:convert()">&gt;</button>
+          <button onclick="javascript:convert_formfield()">&gt;</button>
         </td>
         <td>
-          <select id="spec_field_type" onchange="javascript:convert();validate('spec')">      
+          <select id="spec_field_type" onchange="javascript:convert_formfield();validate('spec')">      
             <option value="">Select field type</option>
           </select>
         </td>
@@ -37,7 +36,7 @@
       <tr>
         <td>Input</td>
         <td>
-          <input id="user_field_input" type="text" onkeyup="javascript:recognize('user');validate('user');convert();validate('spec')" value="" />
+          <input id="user_field_input" type="text" onkeyup="javascript:recognize('user');validate('user');convert_formfield();validate('spec')" value="" />
         </td>
         <td><input id="spec_field_input" type="text" onkeyup="javascript:validate('spec');"></td>
       </tr>
@@ -46,7 +45,7 @@
         <td>Unit</td>
         <td>
           <select id="user_field_unit"></select><br/>
-          <input type="checkbox" disabled="disabled" />Parse unit from input (coming soon)
+          <input type="checkbox" disabled="disabled" /><span style="color:gray">Parse unit from input (coming soon)</span>
         </td>
         <td><select id="spec_field_unit" multiple="multiple"></select></td>
       </tr>
@@ -74,38 +73,17 @@
         <td>Test Suite</td>
         <td colspan="3">
           <div class="test_suite_wrapper">
-
-<table id="test_suite">
-  <tr>
-    <th style="width:60px"></th>
-    <th style="width:100px">unit</th>
-    <th style="width:150px">field</th>
-    <th style="width:150px">value1</th>
-    <th style="width:150px">value2</th>
-    <th style="width:150px">value3</th>
-  </tr>
-  <tbody>
-    <tr> <td>user</td>  <td></td> <td>M_D_YYYY</td>  <td>1/1/1970</td>  <td>1/3/1995</td> <td>12/31/2001</td> </tr>
-    <tr> <td>spec</td>  <td></td> <td>D_M_YYYY</td>  <td>1/1/1970</td>  <td>3/1/1995</td> <td>31/12/2001</td> </tr>
-    <tr> <td>round</td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
-  </tbody>
-  <tbody>
-    <tr> <td>user</td>  <td></td> <td>M_D_YYYY </td> <td>1/1/1970</td> <td>1/3/1995</td> <td>12/31/2001</td> </tr>
-    <tr> <td>spec</td>  <td></td> <td>unix_date</td> <td>       0</td> <td>789091200</td> <td>1009756801</td></tr>
-    <tr> <td>round</td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
-  </tbody>
-  <tbody>
-    <tr> <td>user</td>  <td></td> <td>date_iso_8601</td> <td>1970-01-01</td> <td>1995-01-03</td> <td>12/31/2001</td> </tr>
-    <tr> <td>spec</td>  <td></td> <td>unix_date    </td> <td>         0</td> <td>789091200</td> <td>1009756800</td> </tr>
-    <tr> <td>round</td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
-  </tbody>
-  <tbody>
-    <tr> <td>spec</td>  <td></td> <td>unix_date    </td> <td>         0</td> <td>789091200</td> <td>1009756801</td> </tr>
-    <tr> <td>user</td>  <td></td> <td>datetime_iso_8601</td> <td>1970-01-01T00:00:00.000Z</td> <td>2020-04-26T17:02:58+00:00</td> <td>2001-12-31T00:00:01+00:00</td> </tr>
-    <tr> <td>round</td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
-  </tbody>
-</table>
-
+            <table id="test_suite">
+              <tr>
+                <th style="width:45px"></th>
+                <th style="width:120px">field</th>
+                <th style="width:150px">test 1</th>
+                <th style="width:150px">test 2</th>
+                <th style="width:150px">test 3</th>
+                <th style="width:150px">test 4</th>
+                <th style="width:80px">unit</th>
+              </tr>
+            </table>
           </div>
         </td>
       </tr>
@@ -148,7 +126,7 @@
   //field_equivalence.[field_group_name][field_name] = field.decompose;
   field_equivalence = {}; 
   init_field_type();
-  get_test_suite();
+  render_test_suite();
 
   // Render form elements
   render_field_type("user_field_type");

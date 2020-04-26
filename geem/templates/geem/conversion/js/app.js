@@ -131,30 +131,32 @@ function validate(input_source) {
   document.getElementById(input_source + "_validation").innerHTML = message;
   return result;
 }
-// Purpose is to find an equivalent expression (as a list) 
-// Prime tumbler with onel element, the target field type id.
-// Issue: map would find just one match in input.
 
- 
-function convert(source_prefix = 'user', target_prefix = 'spec') {
+/*
 
-  let source = get_field_type(source_prefix +'_field_type');
-  let target = get_field_type(target_prefix + '_field_type');
-  let source_value = document.getElementById(source_prefix +'_field_input').value;
-  let target_Dom = document.getElementById(target_prefix + '_field_input');
+:param boolean show: display messages.
+*/
+function convert(source_id, source_value, target_id, show=false) {
+
+  let source = field_index[source_id];
+  let target = field_index[target_id];
   let messageDom = document.getElementById('conversion');
+  let source_parse_result = null;
 
   if (!source || !target) {
-    messageDom.innerHTML = 'Please ensure user data and specification field types have been selected';
+    if (show)
+      messageDom.innerHTML = 'Please ensure user data and specification field types have been selected';
     return false;
   }
 
   // We accept the granularity of source input components as present in source_dict
-  let source_parse_result = source_value.match(source.parse);
+
+  source_parse_result = source_value.match(source.parse);
   if (source_parse_result) 
     source_dict = source_parse_result.groups;
   else {
-    messageDom.innerHTML = 'Source is invalid';
+    if (show)
+      messageDom.innerHTML = 'Source is invalid';
     return false;
   }
 
@@ -181,22 +183,26 @@ function convert(source_prefix = 'user', target_prefix = 'spec') {
         // Add detail_id field's parse of source value to to source_dict
         mapped_value = field_map(source.id, source_dict[source.id], detail_id);
         detail_dict = mapped_value.match(field_index[detail_id].parse);
-        source_dict = {...source_dict,...detail_dict.groups};
+        if (detail_dict) {
+          source_dict = {...source_dict,...detail_dict.groups};
+        }
       }
     }
   }
 
-  console.log('Parsed source:', source_dict);
+  if (show)
+    console.log('Parsed source:', source_dict);
 
   // The simple case:
   if (source == target) {
     // Need defaults at all? null differences?
-    target_Dom.value = source_value; 
-    messageDom.innerHTML = "Field match!";
-    return
+    if (show) 
+      messageDom.innerHTML = "Field match!";
+    return source_value;
   }
 
-  console.log("Field mismatch!");
+  if (show)
+    console.log("Field mismatch!");
 
   /* Default mapping assumes target field type will occur in source dict. This
   will be typical of mapping between fields in datasets defined by pure 
@@ -237,11 +243,12 @@ function convert(source_prefix = 'user', target_prefix = 'spec') {
 
   //console.log("source parse", source_dict)
   //console.log("Target-to-source mapping:", mapping)
-  
+
   // Apply and render mapping to target's synth expression.
-  target_Dom.value = synth.supplant(mapping[synth])
-  messageDom.innerHTML = JSON.stringify(mapping, undefined, 4); 
-  return 
+  if (show)
+    messageDom.innerHTML = JSON.stringify(mapping, undefined, 4); 
+
+  return synth.supplant(mapping[synth])
 }
 
 function field_map(source_id, value, target_id) {

@@ -19,6 +19,9 @@ span.field_type.recognize {
   color:blue;
 }
 
+span.error, td.error {color:red}
+span.ok, td.ok {color:green}
+
 input[type=text] {width:100%;}
 select {max-width:300px;}
 
@@ -66,3 +69,5 @@ table#test_suite {
 table#test_suite tbody tr:first-child td {border-top:1px solid gray;  text-align:right;}
 table#test_suite tbody tr td {text-align:right;}
 table#test_suite tr th {}
+table#test_suite td.clickable {cursor:pointer;}
+table#test_suite td.clickable:hover {background-color:lightBlue;}

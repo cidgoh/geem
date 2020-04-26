@@ -122,7 +122,8 @@ lang = {
       map: function (param, lookup){
         // SADLY - param isn't dictionary - it doesn't include <a_p>. Fix in future?
         // 0-23 -> x a/p
-        if (lookup) { 
+        if (lookup) {
+          param = parseInt(param);
           return (param < 12) ? param + 'a' : (param-12) +'p';
         }
         // x a/p -> 0-23
@@ -205,9 +206,10 @@ lang = {
       map: function(param, lookup) {
         // unix time -> ISO Full date
         if (lookup) { 
+          if (isNaN(param))
+            return param;
           let date = new Date(param*1000);
-          console.log(date.toISOString())
-          return date.toISOString(); 
+          return date.toISOString();      
         }
         // ISO Full date -> unix time
         console.log("ISO -> unix", param, String(Date.parse(param) ));

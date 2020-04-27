@@ -13,11 +13,11 @@ function convert_formfield(source_prefix = 'user', target_prefix = 'spec') {
 
 function get_field_type(select_domId) {
   let select = document.getElementById(select_domId);
-  let option = select.options[select.selectedIndex]
-  if (option in field_index)
-    return field_index[option.value];
-  else
-    return false
+  let option = select.value //[select.selectedIndex];
+  if (select.selectedIndex != -1 && select.value in field_index)
+    return field_index[select.value];
+
+  return false
 }
 
 

@@ -28,6 +28,9 @@ function init_field_type() {
         field.group = section_id;
       field.id = field_id;
       if (field.map) {
+        // [integer] group gets all fields
+        field_equivalence['integer'][field_id] = null;
+
         // If this field has a map, add field to map index by parent group
         if (!field_equivalence[field.group])
           field_equivalence[field.group] = {};
@@ -178,16 +181,13 @@ function convert(source_id, source_value, target_id, show=false) {
   let components = synth.match(/{([^{}]*)}/g);
   for (let ptr in components) {
     var item = components[ptr]
-    var field_id = item.substr(1, item.length - 2); //strips off {}.
-    mapping[synth][field_id] = null;
+    var field_id = item.substr(1, item.length - 2); //strips off {} from e.g. {int}.
+    mapping[synth][field_id] = null; // give it an empty mapping to start.
 
     // Q: is target a mapping of source?
     var field = field_index[field_id];
     let map_set = field_equivalence[field.group];
     if (map_set && field.map) { // A field may be in a group but not have a map.
-      
-      //console.log("equivalency for "+field_id,":", map_set);
-
       for (let [mapped_id, map_val] of Object.entries(map_set)) { 
         if (mapped_id in source_dict) {
           // We found a mapping that is present in source parse.  Use it. 
@@ -198,6 +198,12 @@ function convert(source_id, source_value, target_id, show=false) {
         }
       }
     }
+    else {
+      // Here a field type has no map, but should have a key in source dict.
+      if (source_dict[field_id]) {
+        mapping[synth][field_id] = source_dict[field_id];
+      }
+    }
   }
 
   //console.log("source parse", source_dict)
@@ -206,7 +212,7 @@ function convert(source_id, source_value, target_id, show=false) {
   // Apply and render mapping to target's synth expression.
   if (show)
     messageDom.innerHTML = JSON.stringify(mapping, undefined, 4); 
-
+  console.log(synth, mapping[synth]) // i.e. the mapping key synth dictionary
   return synth.supplant(mapping[synth])
 }
 
@@ -244,16 +250,19 @@ behavour is that integers range from 0 to infinity.
   :return: Validated string conversion of integer
   :rtype: str
 */
-function map_integer(param, lower = 0, upper = null, padding = false) {
+function map_integer(param, lowerlim = 0, upper = null, padding = false) {
+
   let value = parseInt(param);
-  if (lower !== null)
-    if (value < lower) 
-      return NaN;
-    if (lower === 0)
+  if (lowerlim !== null) {
+    if (value < lowerlim) {
+      return false;
+    }
+    if (lowerlim === 0)
       value = Math.abs(value); // drops leading "+" if any
+  }
   if (upper !== null)
-    if (value > upper) 
-      return NaN;
+    if (value > upper)
+      return false;
 
   value = String(value);
   if (padding && upper) {
@@ -267,6 +276,8 @@ en-US and en-UK.
 
 Called in js/fields.js by D_M_YYYY (en-GB) and M_D_YYYY (en-US)
 
+ISSUE: 3/1/1995 D/M/YYYY - british style
+
 If called for index:
 :param string A date string in GB or US
 :rtype integer
@@ -279,11 +290,19 @@ function date_time_map(param, lookup, language, format) {
   // e.g. linux time -> US M/D/YYYY date
   if (lookup) {
     let date = new Date(param*1000);
-    //date.setTime(param); // UTC? Not sure why it comes short a day
-    return new Intl.DateTimeFormat(language).format(date)
+    let options = {timeZone:'UTC'}
+    return new Intl.DateTimeFormat(language, options).format(date)
   }
   // e.g. US M/D/YYYY date -> linux time
+  // Issue: new Date() can't handle GB formatted dates.
+  if (language == 'en-GB') { //
+    var synth = '{M}/{D}/{YYYY}';
+  }
+  else
+    var synth = lang.date[format].synth[0];
+
   let dict = param.match(lang.date[format].parse).groups;
-  let date = new Date(lang.date[format].synth[0].supplant(dict)); 
-  return String(date.getTime() / 1000);
+  var date = new Date(synth.supplant(dict)); 
+  //Date above doesn't have timezone so created date ASSUMED to be local to computer
+  return String((date.getTime() - date.getTimezoneOffset()*60*1000) / 1000); // 
 }

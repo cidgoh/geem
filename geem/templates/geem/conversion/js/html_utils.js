@@ -222,7 +222,13 @@ function render_test_suite() {
             }
           }
           else {
-            test.spec.error[i] = `<br/><span class="error">${output}</span>`;
+            // Error by intention, so 
+            if (test.spec.values && test.spec.values[i] == 'false') {
+              test.spec.class[i] = 'ok';
+              test.spec.error[i] = `<br/><span class="invalid">${output}</span>`;
+            }
+            else
+              test.spec.error[i] = `<br/><span class="error">${output}</span>`;
           }
         }
       }

@@ -64,7 +64,8 @@ lang = {
       // We locate possibly compound products with the resultant field type.
       //synth: ['{YYYY}', '19{c19YY}', '20{c20YY}'],
       unit: 'UO:0000036',
-      map: function (param){return map_integer(param, 0, 9999, true)}
+      map: function (param){
+        return map_integer(param, 0, 9999, true)}
     },
     // If historically we don't know what millenia this is in, and it doesn't matter for analysis, we can just "pass it through".  Synth dict should report non-deterministic mappings. 
     YY: {
@@ -72,30 +73,33 @@ lang = {
       parse: '(?<YY>\\d\\d)',
       synth: ['{c19YY}', '{c20YY}'],
       unit:'UO:0000036',
-      group: 'integer',
-      map: function (param){return map_integer(param, 0, 99, true)}
+      map: function (param){
+        return map_integer(param, 0, 99, true)}
       //YY is ambiguous re. Gregorian calendar, so map only to integer directly.
     },
-    'c19YY': {
-      label: '19yy',
+    c19YY: {
+      label: 'YY of 19YY',
       parse: '(?<c19YY>\\d\\d)',
-      synth: ['{YY}','19{YY}'],
+      //synth: ['{YY}'], // if you do this then YY's map is used, bad!
       unit:'UO:0000036',
       map: function (param, lookup){
-        if (lookup)
-          return map_integer(param-1900, 0, 99, true)
-        return map_integer(1900+param, 1900, 1999) // conversion to YYYY index
+        if (lookup) {
+          // 1900 -> 0, 1901 -> 1 etc.
+          return map_integer(param-1900, 0, 99, true) // padded to 2 digits
+        }
+        // 0 -> 1900, 1 -> 1901
+        return map_integer(1900+parseInt(param), 1900, 1999) // conversion to YYYY index
       }
     },
-    'c20YY': {
-      label: "20YY",
+    c20YY: {
+      label: "YY of 20YY",
       parse: '(?<c20YY>\\d\\d)',
-      synth: ['{YY}','20{YY}'],
+      //synth: ['{YY}'], // 
       unit:'UO:0000036',
       map: function (param, lookup){
         if (lookup)
           return map_integer(param-2000, 0, 99, true)
-        return map_integer(2000+param, 2000, 2099) // conversion to YYYY index
+        return map_integer(2000+parseInt(param), 2000, 2099) // conversion to YYYY index
       }
     }
   },
@@ -153,14 +157,17 @@ lang = {
       synth: ['{int}'],
       unit: 'UO:0000010',
       group: 'second',
-      map: function (param){return map_integer(param, 0, null)},
+      map: function (param){ // NEVER ACCESSED BECAUSE {int} TAKES OVER!
+        console.log('second integer', param, map_integer(param, 0, null))
+        return map_integer(param, 0, null)},
     },
     ss: {
       label: 'second - ss',
       parse: '(?<ss>[0-5]\\d)',
       unit: 'UO:0000010',
       group: 'second',
-      map: function (param){return map_integer(param, 0, 59, true)},
+      map: function (param){
+        return map_integer(param, 0, 59, true)},
     },
     ms_int: {
       label: 'millisecond integer',
@@ -179,13 +186,11 @@ lang = {
       map: function (param, lookup){
         if (lookup) {
           // 0 -> .000 , 1 -> .001 etc.
-          console.log(param, parseInt(param))
-          return (parseInt(param) / 1000).toFixed(3).substr(1);
+          return (parseInt(param) / 1000).toFixed(3).substr(1); // trims off leading 0
         }
 
-        console.log("ms index:",param, map_integer(param, 0, 999, true))
         // .000 -> index = 0; .001 -> index = 1 etc.
-        return map_integer(param * 1000, 0, 999, true)
+        return map_integer(param * 1000, 0, 999, true);
       },
     },
   },
@@ -198,7 +203,9 @@ lang = {
   date: {
     unix_date: {
       label: 'date - unix',
-      synth: ['{signed_int}'],
+      //synth: ['{signed_int}'],
+      parse: '(?<unix_date>(-|\\+?)(0|[1-9]\\d*))',
+      //synth: ['{sign}{int}'],
       map: function (param){return param}
     },
     date_iso_8601: {
@@ -211,7 +218,7 @@ lang = {
           return date.toISOString().split('T')[0];
         }
         // ISO -> unix time map
-        return String(Date.parse(param))
+        return String(Date.parse(param)/1000)
       }
     },
     datetime_iso_8601: { // Like above, but NO SPLIT ON T.
@@ -229,8 +236,9 @@ lang = {
           return date.toISOString();      
         }
         // ISO Full date -> unix time
-        console.log("ISO -> unix", param, String(Date.parse(param) ));
-        return String(Date.parse(param)) 
+      
+       // console.log("ISO -> unix", param/1000, String(Date.parse(param/1000) ));
+        return String(Date.parse(param)/1000) 
       }
     },
     M_D_YYYY: {
@@ -252,10 +260,10 @@ lang = {
   },
   integer: {
     int: {
-      label: 'integer', // unsigned
+      label: 'int', // unsigned
       parse: '(?<int>(0|[1-9]\\d*))',
       // Special mapping function accomodates ANY integer range > 0.
-      map: map_integer
+       map: function (param){return map_integer(param, 0, null)}
     },
     signed_int: {
       label: 'integer - signed',

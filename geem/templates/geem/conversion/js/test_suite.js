@@ -48,7 +48,7 @@ test_suite = [
   spec:  {field: 'M', unit: '', values: ['false','1','12','false']}
   },
   {user: {field: 'YYYY', unit: '', values: ['0000','1900','1999','2000']},
-  spec:  {field: 'c19YY', unit: '', values: ['false','1900','1999','false']}
+  spec:  {field: 'c19YY', unit: '', values: ['false','00','99','false']}
   },
   {user: {field: 'c19YY', unit: '', values: ['0','00','45','101']},
   spec:  {field: 'YYYY', unit: '', values: ['false','1900','1945','false']}
@@ -90,14 +90,20 @@ test_suite = [
   {user: {field: 'M_D_YYYY', unit: '', values: ['1/1/1970','1/3/1995','12/31/2001','']},
   spec:  {field: 'D_M_YYYY', unit: '', values: ['1/1/1970','3/1/1995','31/12/2001','']}
   },
+
+  {user: {field: 'D_M_YYYY',  unit: '', values: ['1/1/1970','3/1/1995', '31/12/2001','']},
+  spec:  {field: 'unix_date', unit: '', values: ['0',       '789091200','1009756800','']}
+  },
+  
   {user: {field: 'M_D_YYYY',  unit: '', values: ['1/1/1970','1/3/1995', '12/31/2001','']},
   spec:  {field: 'unix_date', unit: '', values: ['0',       '789091200','1009756800','']}
   },
+
   {user: {field: 'date_iso_8601', unit: '', values: ['1970-01-01','1995-01-03','2001-12-31','']},
   spec:  {field: 'unix_date',     unit: '', values: ['0',         '789091200', '1009756800','']}
   },
   {user: {field: 'unix_date', unit: '', values: ['0', '789091200','1009756801','']}, //note extra second
-  spec:  {field: 'datetime_iso_8601', unit: '', values: ['1970-01-01T00:00:00.000Z','1995-01-03T00:00:00.000Z','2001-12-31T00:00:01+00:00','']}
+  spec:  {field: 'datetime_iso_8601', unit: '', values: ['1970-01-01T00:00:00.000Z','1995-01-03T00:00:00.000Z','2001-12-31T00:00:01.000Z','']}
   },
 
   {user: {field: 'boolean_10', unit: '', values: ['-1','0','1','2']},

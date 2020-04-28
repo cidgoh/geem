@@ -179,8 +179,11 @@ function render_test_suite() {
     let tbody = document.createElement('tbody');
     test.user.error = [];
     test.user.class = [];
+    if (!test.spec) 
+      test.spec = {field:'', unit:'', values:[]};
     test.spec.error = [];
     test.spec.class = [];
+
     if (!test.round)
       test.round = {values:[]};
     test.round.class = [];
@@ -194,7 +197,7 @@ function render_test_suite() {
         test.round.values[i] = '';
       test.round.class[i] = '';
 
-      if (test.user.values[i] && test.spec.values[i]) {
+      if (test.user.values[i]) {
         value = test.user.values[i];
 
         // Validate user field parse
@@ -202,7 +205,7 @@ function render_test_suite() {
         test.user.class[i] = (validation == null) ? 'invalid' : 'ok';
 
         // Try user -> spec conversion
-        if (test.spec.field) {
+        if (test.spec.values[i] && test.spec.field) {
           let output = convert(test.user.field, value, test.spec.field);
           //let spec_value = test.spec.values[i];
           if (test.spec.values[i].localeCompare(output) == 0) {
@@ -231,6 +234,8 @@ function render_test_suite() {
               test.spec.error[i] = `<br/><span class="error">${output}</span>`;
           }
         }
+        else
+          test.spec.values[i] = ''; // empty value for HTML rendering
       }
 
     };

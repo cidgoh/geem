@@ -186,22 +186,24 @@ function convert(source_id, source_value, target_id, show=false) {
 
     // Q: is target a mapping of source?
     var field = field_index[field_id];
-    let map_set = field_equivalence[field.group];
-    if (map_set && field.map) { // A field may be in a group but not have a map.
-      for (let [mapped_id, map_val] of Object.entries(map_set)) { 
-        if (mapped_id in source_dict) {
-          // We found a mapping that is present in source parse.  Use it. 
-          field_value = field_map(mapped_id, source_dict[mapped_id], field_id)
-          mapping[synth][field_id] = field_value;
-          //mapping[synth][field_id] = mapped_id;
-          break; // Shouldn't need/have multiple mappings per group.
-        }
-      }
+
+    // Here a field type has no map, but should have a key in source dict.
+    if (source_dict[field_id]) {
+      mapping[synth][field_id] = source_dict[field_id];
     }
     else {
-      // Here a field type has no map, but should have a key in source dict.
-      if (source_dict[field_id]) {
-        mapping[synth][field_id] = source_dict[field_id];
+
+      let map_set = field_equivalence[field.group];
+      if (map_set && field.map) { // A field may be in a group but not have a map.
+        for (let [mapped_id, map_val] of Object.entries(map_set)) { 
+          if (mapped_id in source_dict) {
+            // We found a mapping that is present in source parse.  Use it. 
+            field_value = field_map(mapped_id, source_dict[mapped_id], field_id)
+            mapping[synth][field_id] = field_value;
+            //mapping[synth][field_id] = mapped_id;
+            break; // Shouldn't need/have multiple mappings per group.
+          }
+        }
       }
     }
   }
@@ -210,9 +212,10 @@ function convert(source_id, source_value, target_id, show=false) {
   //console.log("Target-to-source mapping:", mapping)
 
   // Apply and render mapping to target's synth expression.
-  if (show)
+  if (show) {
     messageDom.innerHTML = JSON.stringify(mapping, undefined, 4); 
-  console.log(synth, mapping[synth]) // i.e. the mapping key synth dictionary
+    console.log(synth, mapping[synth]) // i.e. the mapping key synth dictionary
+  }
   return synth.supplant(mapping[synth])
 }
 

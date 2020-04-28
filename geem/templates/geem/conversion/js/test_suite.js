@@ -79,7 +79,7 @@ test_suite = [
   },
 
   {user: {field: 'TZD', unit: '', values: ['Z','+00:00','+23:59','+24:60']},
-  spec:  {field: 'TZD', unit: '', values: ['Z','+00:00','+23:59','false']}
+  //spec:  {field: 'TZD', unit: '', values: ['Z','+00:00','+23:59','false']}
   },
 
   {user: {field: 'M_D_YYYY', unit: '', values: ['1/1/1970','1/3/1995','12/31/2001','2001']},
@@ -102,8 +102,14 @@ test_suite = [
   {user: {field: 'date_iso_8601', unit: '', values: ['1970-01-01','1995-01-03','2001-12-31','']},
   spec:  {field: 'unix_date',     unit: '', values: ['0',         '789091200', '1009756800','']}
   },
+  
   {user: {field: 'unix_date', unit: '', values: ['0', '789091200','1009756801','']}, //note extra second
   spec:  {field: 'datetime_iso_8601', unit: '', values: ['1970-01-01T00:00:00.000Z','1995-01-03T00:00:00.000Z','2001-12-31T00:00:01.000Z','']}
+  },
+
+  {  user:  {field: 'datetime_iso_8601', unit: '', values: ['1970-01-01T00:00:00.000+00:00','1995-01-03T00:00:00.000+00:00', '2001-12-31T00:00:01.000+23:59', '2001-12-31T00:00:01.000+24:00']},
+    spec: {field: 'unix_date', unit: '', values: ['0', '789091200','1009670461','false']}
+
   },
 
   {user: {field: 'boolean_10', unit: '', values: ['-1','0','1','2']},

@@ -32,6 +32,7 @@ span.field_type.recognize {
 
 span.error, td.error {color:red}
 span.ok, td.ok {color:green}
+span.invalid, td.invalid {color:orange}
 
 input[type=text] {width:100%;}
 select {max-width:300px;}

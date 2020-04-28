@@ -6,7 +6,7 @@
 
   <body>
 
-    <h1>Bi-directional data conversion</h1>
+    <h1>Bi-directional data conversion v1.0</h1>
 
     <table>
       <tr>
@@ -18,16 +18,19 @@
       <tr>
         <td>Field type</td>
         <td>
-          <select id="user_field_type" onchange="javascript:validate('user');convert_formfield();validate('spec')">
+          <select id="user_field_type" onchange="javascript:validate_wrapper('user');convert_formfield();validate_wrapper('spec')">
             <option value="">Select field type</option>
           </select>
         </td>
         <td class="control" rowspan="3">
           convert<br/>
           <button onclick="javascript:convert_formfield()">&gt;</button>
+          <br/>
+          <br/>
+          <button onclick="javascript:flip_formfield()">flip</button>
         </td>
         <td>
-          <select id="spec_field_type" onchange="javascript:convert_formfield();validate('spec')">      
+          <select id="spec_field_type" onchange="javascript:convert_formfield();validate_wrapper('spec')">      
             <option value="">Select field type</option>
           </select>
         </td>
@@ -36,10 +39,10 @@
       <tr>
         <td>Input</td>
         <td>
-          <input id="user_field_input" type="text" onkeyup="javascript:recognize('user');validate('user');convert_formfield();validate('spec')" value="" />
+          <input id="user_field_input" type="text" onkeyup="javascript:recognize('user');validate_wrapper('user');convert_formfield();validate_wrapper('spec')" value="" />
         </td>
         <td>
-          <input id="spec_field_input" type="text" onkeyup="javascript:validate('spec');">
+          <input id="spec_field_input" type="text" onkeyup="javascript:validate_wrapper('spec');">
         </td>
       </tr>
 
@@ -87,6 +90,12 @@
               </tr>
             </table>
           </div>
+          Legend: &nbsp; 
+          <b style="color:green">green</b>: valid datum or result &nbsp; &nbsp; 
+          <b style="color:orange">orange</b>: invalid format &nbsp; &nbsp; 
+          <b style="color:red">red</b>: invalid conversion result
+          <br/>
+          <br/>
         </td>
       </tr>
       <tr>

@@ -10,6 +10,16 @@ function convert_formfield(source_prefix = 'user', target_prefix = 'spec') {
   }
 }
 
+function flip_formfield () {
+  let source_select = document.getElementById('user_field_type');
+  let source_input = document.getElementById('user_field_input');
+  let target_select = document.getElementById('spec_field_type');
+  let target_input = document.getElementById('spec_field_input');
+  // Flips both sets of values.
+  [source_select.value, target_select.value] = [target_select.value, source_select.value];
+  [source_input.value, target_input.value] = [target_input.value, source_input.value];
+  source_select.onchange();
+}
 
 function get_field_type(select_domId) {
   let select = document.getElementById(select_domId);
@@ -102,6 +112,63 @@ function select_update(field_id) {
 }
 
 
+/* List regular expressions that match given field content
+Link matching field type to user field type select list so users can switch to it.
+  :param str input_source: either 'user' or 'spec'
+
+*/
+function recognize(input_source) {
+  let input_field = document.getElementById(input_source + '_field_input')
+  var text = '';
+  for (let [section_name, section] of Object.entries(lang)) { 
+    for (let [field_name, field] of Object.entries(section)) { 
+      let result = input_field.value.match(field.parse)
+      if (result)
+        text += `<span class="field_type recognize" onclick="javascript:select_update('${field.id}')">${field.label}</span> ${escapeHTML(field.parse)}<br/>`
+
+    }
+  }
+
+  document.getElementById("message").innerHTML = text;
+
+}
+
+/* Validate a user or spec input field against its stated field type.
+
+  :param str input_source: either 'user' or 'spec'
+  :return whole matched regular expression
+  :rtype str
+*/
+function validate_wrapper(input_source) {
+
+  let field_id = document.getElementById(input_source + '_field_type').value;
+  let field_type = field_index[field_id];
+  let message = 'Select a field type to validate by it';
+
+  if (field_id) {
+    let text = null;
+    let input_field = document.getElementById(input_source + '_field_input');
+    let result = validate (field_id, input_field.value);
+
+    if (result) {
+      let params = [];
+      for (let [name, value] of Object.entries(result.groups))
+        params.push(`${name}: ${value}`);
+      text = params.join(', ');
+    }
+    else {
+
+      text = `<span class="field_error">${escapeHTML(field_type.parse)}</span><br/>`;
+    }
+
+    message = `<span class="field_type">${field_type.label}</span><br/>` + text;
+
+  }
+
+  document.getElementById(input_source + "_validation").innerHTML = message;
+}
+
+
 //Runs tests given in #test_suite table
 function render_test_suite() {
   let table = document.getElementById('test_suite');
@@ -114,8 +181,8 @@ function render_test_suite() {
     test.user.class = [];
     test.spec.error = [];
     test.spec.class = [];
-    test.round = {};
-    test.round.value = [];
+    if (!test.round)
+      test.round = {values:[]};
     test.round.class = [];
 
     for (i = 0; i <4; i++) {
@@ -123,13 +190,16 @@ function render_test_suite() {
       test.user.class[i] = '';
       test.spec.error[i] = '';
       test.spec.class[i] = '';
-      test.round.value[i] = '';
+      if (!test.round.values[i])
+        test.round.values[i] = '';
       test.round.class[i] = '';
 
       if (test.user.values[i] && test.spec.values[i]) {
         value = test.user.values[i];
 
         // Validate user field parse
+        validation = validate(test.user.field, value);
+        test.user.class[i] = (validation == null) ? 'invalid' : 'ok';
 
         // Try user -> spec conversion
         if (test.spec.field) {
@@ -139,15 +209,15 @@ function render_test_suite() {
             test.spec.class[i] = "ok";
 
             // Try spec -> user conversion
-            if (output !== false) {
+            if (output !== false && (test.round.values[i] != 'n/a' )) {
               let round = convert(test.spec.field, output, test.user.field);
               if (value.localeCompare(round) == 0) {
                 test.round.class[i] = "ok";
-                test.round.value[i] = '&#10004;';
+                test.round.values[i] = '&#10004;';
               }
               else {
                 test.round.class[i] = "error";
-                test.round.value[i] = round;
+                test.round.values[i] = round;
               }
             }
           }
@@ -185,10 +255,10 @@ function render_test_suite() {
       <tr>
         <td>round</td>
         <td></td>
-        <td class="${test.round.class[0]}">${test.round.value[0]}</td>
-        <td class="${test.round.class[1]}">${test.round.value[1]}</td>
-        <td class="${test.round.class[2]}">${test.round.value[2]}</td>
-        <td class="${test.round.class[3]}">${test.round.value[3]}</td>
+        <td class="${test.round.class[0]}">${test.round.values[0]}</td>
+        <td class="${test.round.class[1]}">${test.round.values[1]}</td>
+        <td class="${test.round.class[2]}">${test.round.values[2]}</td>
+        <td class="${test.round.class[3]}">${test.round.values[3]}</td>
         <td></td>        
       </tr>
     `;

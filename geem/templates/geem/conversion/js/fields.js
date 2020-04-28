@@ -110,7 +110,7 @@ lang = {
     h: {
       label: 'hour - 24 h',
       group: 'hour',
-      parse: '(?<hh>[0-9]|1\\d|20|21|22|23)',
+      parse: '(?<h>[0-9]|1\\d|20|21|22|23)',
       unit: 'UO:0000032',
       map: function (param){return map_integer(param, 0, 23)},
     },
@@ -138,44 +138,61 @@ lang = {
       label: 'minute integer',
       synth: ['{int}'],
       unit: 'UO:0000031',
+      group: 'minute',
       map: function (param){return map_integer(param, 0, null)},
     },
     mm: {
       label: 'minute - mm',
       parse: '(?<mm>[0-5]\\d)',
       unit: 'UO:0000031',
+      group: 'minute',
       map: function (param){return map_integer(param, 0, 59, true)},
     },
     s_int: {
       label: 'second integer',
-      parse: '{int}',
+      synth: ['{int}'],
       unit: 'UO:0000010',
+      group: 'second',
       map: function (param){return map_integer(param, 0, null)},
     },
     ss: {
       label: 'second - ss',
       parse: '(?<ss>[0-5]\\d)',
       unit: 'UO:0000010',
+      group: 'second',
       map: function (param){return map_integer(param, 0, 59, true)},
     },
     ms_int: {
       label: 'millisecond integer',
       synth: ['{int}'],
       unit: 'UO:0000028', // millisecond
+      group: 'millisecond',
       map: function (param){return map_integer(param, 0, null)},
     },
-    ms: {
+    ms_fraction: {
       label: 'millisecond as fraction',
-      parse: '(?<ms>\\.\\d\\d\\d)',
-      synth: ['{fraction}'],
+      //group: 'fraction',
+      parse: '(?<ms_fraction>\\.\\d\\d\\d)',
+      //synth: ['{fraction}'],        // ISSUE: If you add this, then its mapping function is used.
       unit: 'UO:0000010', // second
-      map: function (param){return map_integer(param, 0, 999, true)},
+      group: 'millisecond',
+      map: function (param, lookup){
+        if (lookup) {
+          // 0 -> .000 , 1 -> .001 etc.
+          console.log(param, parseInt(param))
+          return (parseInt(param) / 1000).toFixed(3).substr(1);
+        }
+
+        console.log("ms index:",param, map_integer(param, 0, 999, true))
+        // .000 -> index = 0; .001 -> index = 1 etc.
+        return map_integer(param * 1000, 0, 999, true)
+      },
     },
   },
   timezone: {
     TZD: {
       label: 'ISO TZD',
-      parse: '(?<TZD>Z|(\\+|-)\\d\\d:\\d\\d)' // Z stands for UTC
+      parse: '(?<TZD>Z|(\\+|-)[0-5][0-9]:[0-5][0-9])' // Z stands for UTC
     }
   },
   date: {
@@ -199,7 +216,7 @@ lang = {
     },
     datetime_iso_8601: { // Like above, but NO SPLIT ON T.
       label: 'datetime (ISO 8601)',
-      synth: ['{YYYY}-{MM}-{DD}T{hh}:{mm}:{ss}{ms}{TZD}'],
+      synth: ['{YYYY}-{MM}-{DD}T{hh}:{mm}:{ss}{ms_fraction}{TZD}'],
       // "decompose" flag indicates source dictionary should include this decomposition
       // if a mapping is requested.
       decompose:true, 
@@ -268,8 +285,8 @@ lang = {
   fraction: {
     fraction: {
       label: 'fraction',
-      parse: '(?<fraction>0?\\.\\d+)'
-      //map: function (param){return param}
+      parse: '(?<fraction>0?\\.\\d+)',
+      map: function (param){return param}
     }
   },
   boolean: {

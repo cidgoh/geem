@@ -31,7 +31,7 @@ function init_field_type() {
         // If this field has a map, add field to map index by parent group
         if (!field_equivalence[field.group])
           field_equivalence[field.group] = {};
-        field_equivalence[field.group][field_id] = field.decompose;
+        field_equivalence[field.group][field_id] = field.decompose || null; //field.decompose can be undefined
       }
       if (!field.synth) {
         field.synth = ['{' + field_id + '}'];
@@ -45,10 +45,12 @@ function init_field_type() {
   // Every field_equivalence set has "int" as member since generally int can
   // be used as an input index on any of them to fetch a value.
   for (let [group, equivalence_dict] of Object.entries(field_equivalence)) {
+    console.log(group);
     equivalence_dict['int'] = null;
     // POSSIBLY ADD FLAG TO field to indicate whether mapping should be 'int' or 'natural'
     equivalence_dict['natural'] = null;
   }
+  console.log(field_equivalence)
   // special case for dates.  Allow for all others?  negative days?
   //field_equivalence['integer']['unix_date'] = null;
 
@@ -79,57 +81,14 @@ function init_field_type() {
 }
 
 
-/* List regular expressions that match given field content
-  :param str input_source: either 'user' or 'spec'
-*/
-function recognize(input_source) {
-  let input_field = document.getElementById(input_source + '_field_input')
-  var text = '';
-  for (let [section_name, section] of Object.entries(lang)) { 
-    for (let [field_name, field] of Object.entries(section)) { 
-      let result = input_field.value.match(field.parse)
-      if (result)
-        text += `<span class="field_type recognize" onclick="javascript:select_update('${field.id}')">${field.label}</span> ${escapeHTML(field.parse)}<br/>`
-
-    }
-  }
-
-  document.getElementById("message").innerHTML = text;
-
-}
-
 /* Validate a user or spec input field against its stated field type.
 
-  :param str input_source: either 'user' or 'spec'
+  :param str field_id: key id of field type
   :return whole matched regular expression
-  :rtype str
+  :rtype regular expression object including .groups
 */
-function validate(input_source) {
-
-  let field_type = get_field_type(input_source + '_field_type');
-  let input_field = document.getElementById(input_source + '_field_input')
-  let result = null;
-  let message = 'Select a field type to validate by it';
-
-  if (field_type) {
-    result = input_field.value.match(field_type.parse);
-
-    let text = null;
-    if (result) {
-      let params = [];
-      for (let [name, value] of Object.entries(result.groups))
-        params.push(`${name}: ${value}`);
-      text = params.join(', ');
-    }
-    else
-      text = `<span class="field_error">${escapeHTML(field_type.parse)}</span><br/>`;
-
-    message = `<span class="field_type">${field_type.label}</span><br/>` + text;
-
-  }
-
-  document.getElementById(input_source + "_validation").innerHTML = message;
-  return result;
+function validate(field_id, value) {
+  return value.match(field_index[field_id].parse);
 }
 
 /*
@@ -303,8 +262,18 @@ function map_integer(param, lower = 0, upper = null, padding = false) {
   return value;
 }
 
-/*
-referenced in js/fields.js
+/* Bi-direction date field conversion according to various formats, e.g. 
+en-US and en-UK.
+
+Called in js/fields.js by D_M_YYYY (en-GB) and M_D_YYYY (en-US)
+
+If called for index:
+:param string A date string in GB or US
+:rtype integer
+
+If lookup call performed
+:rtype str 
+
 */
 function date_time_map(param, lookup, language, format) {
   // e.g. linux time -> US M/D/YYYY date

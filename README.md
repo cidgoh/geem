@@ -64,7 +64,7 @@ your `.auth` file as `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY` and
 
 ### Running a local server
 
-Build the local docker image.
+Build the local docker image. (This may generate an error on more recent Docker installs, in which case ignore).
 
 ```bash
 $ docker-compose --file local.yml --build

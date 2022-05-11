@@ -7,7 +7,7 @@ from geem import views as geem_views
 router = routers.DefaultRouter()
 # These are lisated at top level for /api/ call
 router.register('users', views.UserViewSet)
-router.register('resources', geem_views.ResourceViewSet, base_name="Package")
+router.register('resources', geem_views.ResourceViewSet, basename="Package")
 
 urlpatterns = [
     path('api/', include(router.urls)),
